@@ -2,8 +2,8 @@
 #include "gauss.c"
 
 //Declarations
-const valarray<uint8_t> oktypes = {1,2,101,102};
-const size_t I = 0, O = 1;
+const valarray<size_t> oktypes = {1u,2u,101u,102u};
+const size_t I = 0u, O = 1u;
 size_t L, dim, norm;
 double a;
 
@@ -49,15 +49,15 @@ struct arg_file  *a_fo = arg_filen("o","ofile","<file>",0,O,"output file (Y)");
 //Get options
 
 //Get o1.F
-if (a_ofmt->count==0) { o1.F = 147; }
+if (a_ofmt->count==0) { o1.F = 147u; }
 else if (a_ofmt->ival[0]<0) { cerr << progstr+": " << __LINE__ << errstr << "output file format must be nonnegative" << endl; return 1; }
 else if (a_ofmt->ival[0]>255) { cerr << progstr+": " << __LINE__ << errstr << "output file format must be < 256" << endl; return 1; }
-else { o1.F = uint8_t(a_ofmt->ival[0]); }
+else { o1.F = size_t(a_ofmt->ival[0]); }
 
 //Get o1.T
-if (a_otyp->count==0) { o1.T = 1; }
+if (a_otyp->count==0) { o1.T = 1u; }
 else if (a_otyp->ival[0]<1) { cerr << progstr+": " << __LINE__ << errstr << "data type must be positive int" << endl; return 1; }
-else { o1.T = uint8_t(a_otyp->ival[0]); }
+else { o1.T = size_t(a_otyp->ival[0]); }
 if ((o1.T==oktypes).sum()==0)
 {
     cerr << progstr+": " << __LINE__ << errstr << "output data type must be in " << "{";
@@ -66,7 +66,7 @@ if ((o1.T==oktypes).sum()==0)
 }
 
 //Get L
-if (a_wl->count==0) { L = 7; }
+if (a_wl->count==0) { L = 7u; }
 else if (a_wl->ival[0]<1) { cerr << progstr+": " << __LINE__ << errstr << "winlength must be a positive int" << endl; return 1; }
 else { L = size_t(a_wl->ival[0]); }
 
@@ -76,34 +76,35 @@ else if (a_a->dval[0]<=0.0) { cerr << progstr+": " << __LINE__ << errstr << "std
 else { a = a_a->dval[0]; }
 
 //Get dim
-if (a_d->count==0) { dim = 0; }
+if (a_d->count==0) { dim = 0u; }
 else if (a_d->ival[0]<0) { cerr << progstr+": " << __LINE__ << errstr << "dim must be nonnegative" << endl; return 1; }
 else { dim = size_t(a_d->ival[0]); }
-if (dim>3) { cerr << progstr+": " << __LINE__ << errstr << "dim must be in {0,1,2,3}" << endl; return 1; }
+if (dim>3u) { cerr << progstr+": " << __LINE__ << errstr << "dim must be in {0,1u,2u,3}" << endl; return 1; }
 
 //Get norm
-if (a_nrm->count==0) { norm = 0; }
+if (a_nrm->count==0) { norm = 0u; }
 else if (a_nrm->ival[0]<0) { cerr << progstr+": " << __LINE__ << errstr << "norm must be nonnegative" << endl; return 1; }
 else { norm = size_t(a_nrm->ival[0]); }
-if (norm>3) { cerr << progstr+": " << __LINE__ << errstr << "norm must be in {0,1,2,3}" << endl; return 1; }
+if (norm>3) { cerr << progstr+": " << __LINE__ << errstr << "norm must be in {0,1u,2u,3}" << endl; return 1; }
 
 //Checks
 
 //Set output header info
-o1.R = (dim==0) ? L : 1u;
-o1.C = (dim==1) ? L : 1u;
-o1.S = (dim==2) ? L : 1u;
-o1.H = (dim==3) ? L : 1u;
+o1.R = (dim==0u) ? L : 1u;
+o1.C = (dim==1u) ? L : 1u;
+o1.S = (dim==2u) ? L : 1u;
+o1.H = (dim==3u) ? L : 1u;
 
 //Other prep
 
 //Process
-if (o1.T==1)
+if (o1.T==1u)
 {
     float *Y;
     try { Y = new float[o1.N()]; }
     catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for output file (Y)" << endl; return 1; }
-    if (codee::gauss_s(Y,L,float(a),norm)) { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
+    if (codee::gauss_s(Y,L,float(a),norm))
+    { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
     if (wo1)
     {
         try { ofs1.write(reinterpret_cast<char*>(Y),o1.nbytes()); }
@@ -111,12 +112,13 @@ if (o1.T==1)
     }
     delete[] Y;
 }
-else if (o1.T==101)
+else if (o1.T==101u)
 {
     float *Y;
     try { Y = new float[2u*o1.N()]; }
     catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for output file (Y)" << endl; return 1; }
-    if (codee::gauss_c(Y,L,float(a),norm)) { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
+    if (codee::gauss_c(Y,L,float(a),norm))
+    { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
     if (wo1)
     {
         try { ofs1.write(reinterpret_cast<char*>(Y),o1.nbytes()); }

@@ -1,96 +1,129 @@
-//This takes the output of window_univar, and applies the 1D FFT to each row or col.
-//The input dim is which dim to take the 1D FFT along (0->along cols, 1->along rows).
-//The output Y is complex-valued.
-//For real-valued X, the size of Y must be FxC if dim==0, and RxF if dim==1, where F = nfft/2 + 1.
-//For complex-valued X, the size of Y must be nfftxC if dim==0, and Rxnfft if dim==1.
+//Does 1-D FFT (fast Fourier transform) of each vector in X along dim.
+//The output Y is complex-valued and has the same size as X,
+//except along dim, where Y has length Ly = nfft/2 + 1 for real-valued X,
+//and length Ly = nfft for complex-valued X.
+
+//If sc, then scales Y by sqrt(0.5/n) so that invertible with ifft.
 
 //I tried parallel versions with OpenMP, but much slower (have to make fftw_plan P times!).
 
 #include <stdio.h>
-#include <cblas.h>
 #include <fftw3.h>
+
+#ifndef M_SQRT1_2
+    #define M_SQRT1_2 0.707106781186547524401
+#endif
 
 #ifdef __cplusplus
 namespace codee {
 extern "C" {
 #endif
 
-int fft_s (float *Y, const float *X, const char iscolmajor, const int R, const int C, const size_t dim, const int nfft);
-int fft_d (double *Y, const double *X, const char iscolmajor, const int R, const int C, const size_t dim, const int nfft);
-int fft_c (float *Y, const float *X, const char iscolmajor, const int R, const int C, const size_t dim, const int nfft);
-int fft_z (double *Y, const double *X, const char iscolmajor, const int R, const int C, const size_t dim, const int nfft);
+int fft_s (float *Y, const float *X, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim, const size_t nfft, const char sc);
+int fft_d (double *Y, const double *X, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim, const size_t nfft, const char sc);
+int fft_c (float *Y, const float *X, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim, const size_t nfft, const char sc);
+int fft_z (double *Y, const double *X, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim, const size_t nfft, const char sc);
 
 
-int fft_s (float *Y, const float *X, const char iscolmajor, const int R, const int C, const size_t dim, const int nfft)
+int fft_s (float *Y, const float *X, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim, const size_t nfft, const char sc)
 {
-    const float z = 0.0f;
-    const int F = nfft/2 + 1;
-    int r, c;
-    float *X1;
-    fftwf_complex *Y1;
-    fftwf_plan plan;
-
-    //Checks
-    if (R<1) { fprintf(stderr,"error in fft_s: R (nrows X) must be positive\n"); return 1; }
-    if (C<1) { fprintf(stderr,"error in fft_s: C (ncols X) must be positive\n"); return 1; }
-    if (nfft<R && dim==0) { fprintf(stderr,"error in fft_s: nfft must be >= R (winlength)\n"); return 1; }
-    if (nfft<C && dim==1) { fprintf(stderr,"error in fft_s: nfft must be >= C (winlength)\n"); return 1; }
+    const size_t N = R*C*S*H;
+    const size_t Lx = (dim==0) ? R : (dim==1) ? C : (dim==2) ? S : H;
+    const size_t Ly = nfft/2 + 1;
+    if (nfft<Lx) { fprintf(stderr,"error in fft_s: nfft must be >= L (vec length)\n"); return 1; }
 
     //Initialize fftwf
-    X1 = fftwf_alloc_real((size_t)nfft);
-    Y1 = fftwf_alloc_complex((size_t)F);
-    plan = fftwf_plan_dft_r2c_1d(nfft,X1,Y1,FFTW_ESTIMATE);
+    float *X1, *Y1;
+    X1 = (float *)fftwf_malloc(nfft*sizeof(float));
+    Y1 = (float *)fftwf_malloc(2*Ly*sizeof(float));
+    fftwf_plan plan = fftwf_plan_dft_r2c_1d((int)nfft,X1,(fftwf_complex *)Y1,FFTW_ESTIMATE);
     if (!plan) { fprintf(stderr,"error in fft_s: problem creating fftw plan"); return 1; }
 
-    if (dim==0)
+    if (N==0) {}
+    else if (Lx==1 && Ly==1)
     {
-        cblas_scopy(nfft-R,&z,0,&X1[R],1); //zero-pad
-        if (iscolmajor)
+        if (sc)
         {
-            for (c=0; c<C; c++)
-            {
-                cblas_scopy(R,&X[c*R],1,&X1[0],1);
-                fftwf_execute(plan);
-                //cblas_scopy(2*F,&Y[2*c*F],1,(float *)&Y1[0],1);
-                cblas_ccopy(F,(float *)&Y1[0],1,&Y[2*c*F],1);
-            }
+            const float s = (float)M_SQRT1_2;
+            for (size_t n=0; n<N; ++n, ++X, ++Y) { *Y = *X * s; *++Y = 0.0f; }
         }
         else
         {
-            for (c=0; c<C; c++)
-            {
-                cblas_scopy(R,&X[c],C,&X1[0],1);
-                fftwf_execute(plan);
-                //cblas_scopy(F,(float *)&Y1[0],2,&Y[2*c],2*C); cblas_scopy(F,(float *)&Y1[1],2,&Y[2*c+1],2*C);
-                cblas_ccopy(F,(float *)&Y1[0],1,&Y[2*c],C);
-            }
+            for (size_t n=0; n<N; ++n, ++X, ++Y) { *Y = *X; *++Y = 0.0f; }
         }
     }
-    else if (dim==1)
+    else if (Lx==N)
     {
-        cblas_scopy(nfft-C,&z,0,&X1[C],1); //zero-pad
-        if (iscolmajor)
+        for (size_t l=0; l<Lx; ++l, ++X, ++X1) { *X1 = *X; }
+        for (size_t l=Lx; l<nfft; ++l, ++X1) { *X1 = 0.0f; }
+        X1 -= nfft;
+        fftwf_execute(plan);
+        if (sc)
         {
-            for (r=0; r<R; r++)
-            {
-                cblas_scopy(C,&X[r],R,&X1[0],1);
-                fftwf_execute(plan);
-                cblas_ccopy(F,(float *)&Y1[0],1,&Y[2*r],R);
-            }
+            const float s = (float)(1.0/sqrt(2*Lx));
+            for (size_t l=0; l<2*Ly; ++l, ++Y1, ++Y) { *Y = *Y1 * s; }
         }
         else
         {
-            for (r=0; r<R; r++)
-            {
-                cblas_scopy(C,&X[r*C],1,&X1[0],1);
-                fftwf_execute(plan);
-                cblas_ccopy(F,(float *)&Y1[0],1,&Y[2*r*F],1);
-            }
+            for (size_t l=0; l<2*Ly; ++l, ++Y1, ++Y) { *Y = *Y1; }
         }
+        Y1 -= 2*Ly;
     }
     else
     {
-        fprintf(stderr,"error in fft_s: dim must be 0 or 1.\n"); return 1;
+        const size_t K = (iscolmajor) ? ((dim==0) ? 1 : (dim==1) ? R : (dim==2) ? R*C : R*C*S) : ((dim==0) ? C*S*H : (dim==1) ? S*H : (dim==2) ? H : 1);
+        const size_t B = (iscolmajor && dim==0) ? C*S*H : K;
+        const size_t V = N/Lx, G = V/B;
+
+        if (K==1 && (G==1 || B==1))
+        {
+            for (size_t l=0; l<Lx; ++l, ++X, ++X1) { *X1 = *X; }
+            for (size_t l=Lx; l<nfft; ++l, ++X1) { *X1 = 0.0f; }
+            X1 -= nfft;
+            fftwf_execute(plan);
+            if (sc)
+            {
+                const float s = (float)(1.0/sqrt(2*Lx));
+                for (size_t l=0; l<2*Ly; ++l, ++Y1, ++Y) { *Y = *Y1 * s; }
+                Y1 -= 2*Ly;
+                for (size_t v=1; v<V; ++v, Y1-=2*Ly)
+                {
+                    for (size_t l=0; l<Lx; ++l, ++X, ++X1) { *X1 = *X; }
+                    X1 -= Lx;
+                    fftwf_execute(plan);
+                    for (size_t l=0; l<2*Ly; ++l, ++Y1, ++Y) { *Y = *Y1 * s; }
+                }
+            }
+            else
+            {
+                for (size_t l=0; l<2*Ly; ++l, ++Y1, ++Y) { *Y = *Y1; }
+                Y1 -= 2*Ly;
+                for (size_t v=1; v<V; ++v, Y1-=2*Ly)
+                {
+                    for (size_t l=0; l<Lx; ++l, ++X, ++X1) { *X1 = *X; }
+                    X1 -= Lx;
+                    fftwf_execute(plan);
+                    for (size_t l=0; l<2*Ly; ++l, ++Y1, ++Y) { *Y = *Y1; }
+                }
+            }
+        }
+        else
+        {
+            const float s = sc ? (float)(1.0/sqrt(2*Lx)) : 1.0f;
+            X1 += Lx;
+            for (size_t l=Lx; l<nfft; ++l, ++X1) { *X1 = 0.0f; }
+            X1 -= nfft;
+            for (size_t g=0; g<G; ++g, X+=B*(Lx-1), Y+=2*B*(Ly-1))
+            {
+                for (size_t b=0; b<B; ++b, X-=K*Lx-1, Y1-=2*Ly, Y-=2*K*Ly-2)
+                {
+                    for (size_t l=0; l<Lx; ++l, X+=K, ++X1) { *X1 = *X; }
+                    X1 -= Lx;
+                    fftwf_execute(plan);
+                    for (size_t l=0; l<Ly; ++l, ++Y1, Y+=2*K-1) { *Y = *Y1*s; *++Y = *++Y1*s; }
+                }
+            }
+        }
     }
     
     fftwf_destroy_plan(plan); fftwf_free(X1); fftwf_free(Y1);
@@ -98,147 +131,210 @@ int fft_s (float *Y, const float *X, const char iscolmajor, const int R, const i
 }
 
 
-int fft_d (double *Y, const double *X, const char iscolmajor, const int R, const int C, const size_t dim, const int nfft)
+int fft_d (double *Y, const double *X, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim, const size_t nfft, const char sc)
 {
-    const double z = 0.0;
-    const int F = nfft/2 + 1;
-    int r, c;
-    double *X1;
-    fftw_complex *Y1;
-    fftw_plan plan;
-
-    //Checks
-    if (R<1) { fprintf(stderr,"error in fft_d: R (nrows X) must be positive\n"); return 1; }
-    if (C<1) { fprintf(stderr,"error in fft_d: C (ncols X) must be positive\n"); return 1; }
-    if (nfft<R && dim==0) { fprintf(stderr,"error in fft_d: nfft must be >= R (winlength)\n"); return 1; }
-    if (nfft<C && dim==1) { fprintf(stderr,"error in fft_d: nfft must be >= C (winlength)\n"); return 1; }
+    const size_t N = R*C*S*H;
+    const size_t Lx = (dim==0) ? R : (dim==1) ? C : (dim==2) ? S : H;
+    const size_t Ly = nfft/2 + 1;
+    if (nfft<Lx) { fprintf(stderr,"error in fft_d: nfft must be >= L (vec length)\n"); return 1; }
 
     //Initialize fftw
-    X1 = fftw_alloc_real((size_t)nfft);
-    Y1 = fftw_alloc_complex((size_t)F);
-    plan = fftw_plan_dft_r2c_1d(nfft,X1,Y1,FFTW_ESTIMATE);
+    double *X1, *Y1;
+    X1 = (double *)fftw_malloc(nfft*sizeof(double));
+    Y1 = (double *)fftw_malloc(2*Ly*sizeof(double));
+    fftw_plan plan = fftw_plan_dft_r2c_1d((int)nfft,X1,(fftw_complex *)Y1,FFTW_ESTIMATE);
     if (!plan) { fprintf(stderr,"error in fft_d: problem creating fftw plan"); return 1; }
 
-    if (dim==0)
+    if (N==0) {}
+    else if (Lx==1 && Ly==1)
     {
-        cblas_dcopy(nfft-R,&z,0,&X1[R],1); //zero-pad
-        if (iscolmajor)
+        if (sc)
         {
-            for (c=0; c<C; c++)
-            {
-                cblas_dcopy(R,&X[c*R],1,&X1[0],1);
-                fftw_execute(plan);
-                cblas_zcopy(F,(double *)&Y1[0],1,&Y[2*c*F],1);
-            }
+            for (size_t n=0; n<N; ++n, ++X, ++Y) { *Y = *X * M_SQRT1_2; *++Y = 0.0; }
         }
         else
         {
-            for (c=0; c<C; c++)
-            {
-                cblas_dcopy(R,&X[c],C,&X1[0],1);
-                fftw_execute(plan);
-                cblas_zcopy(F,(double *)&Y1[0],1,&Y[2*c],C);
-            }
+            for (size_t n=0; n<N; ++n, ++X, ++Y) { *Y = *X; *++Y = 0.0; }
         }
     }
-    else if (dim==1)
+    else if (Lx==N)
     {
-        cblas_dcopy(nfft-C,&z,0,&X1[C],1); //zero-pad
-        if (iscolmajor)
+        for (size_t l=0; l<Lx; ++l, ++X, ++X1) { *X1 = *X; }
+        for (size_t l=Lx; l<nfft; ++l, ++X1) { *X1 = 0.0; }
+        X1 -= nfft;
+        fftw_execute(plan);
+        if (sc)
         {
-            for (r=0; r<R; r++)
-            {
-                cblas_dcopy(C,&X[r],R,&X1[0],1);
-                fftw_execute(plan);
-                cblas_zcopy(F,(double *)&Y1[0],1,&Y[2*r],R);
-            }
+            const double s = 1.0/sqrt(2*Lx);
+            for (size_t l=0; l<2*Ly; ++l, ++Y1, ++Y) { *Y = *Y1 * s; }
         }
         else
         {
-            for (r=0; r<R; r++)
-            {
-                cblas_dcopy(C,&X[r*C],1,&X1[0],1);
-                fftw_execute(plan);
-                cblas_zcopy(F,(double *)&Y1[0],1,&Y[2*r*F],1);
-            }
+            for (size_t l=0; l<2*Ly; ++l, ++Y1, ++Y) { *Y = *Y1; }
         }
+        Y1 -= 2*Ly;
     }
     else
     {
-        fprintf(stderr,"error in fft_d: dim must be 0 or 1.\n"); return 1;
-    }
+        const size_t K = (iscolmajor) ? ((dim==0) ? 1 : (dim==1) ? R : (dim==2) ? R*C : R*C*S) : ((dim==0) ? C*S*H : (dim==1) ? S*H : (dim==2) ? H : 1);
+        const size_t B = (iscolmajor && dim==0) ? C*S*H : K;
+        const size_t V = N/Lx, G = V/B;
 
+        if (K==1 && (G==1 || B==1))
+        {
+            for (size_t l=0; l<Lx; ++l, ++X, ++X1) { *X1 = *X; }
+            for (size_t l=Lx; l<nfft; ++l, ++X1) { *X1 = 0.0; }
+            X1 -= nfft;
+            fftw_execute(plan);
+            if (sc)
+            {
+                const double s = 1.0/sqrt(2*Lx);
+                for (size_t l=0; l<2*Ly; ++l, ++Y1, ++Y) { *Y = *Y1 * s; }
+                Y1 -= 2*Ly;
+                for (size_t v=1; v<V; ++v, Y1-=2*Ly)
+                {
+                    for (size_t l=0; l<Lx; ++l, ++X, ++X1) { *X1 = *X; }
+                    X1 -= Lx;
+                    fftw_execute(plan);
+                    for (size_t l=0; l<2*Ly; ++l, ++Y1, ++Y) { *Y = *Y1 * s; }
+                }
+            }
+            else
+            {
+                for (size_t l=0; l<2*Ly; ++l, ++Y1, ++Y) { *Y = *Y1; }
+                Y1 -= 2*Ly;
+                for (size_t v=1; v<V; ++v, Y1-=2*Ly)
+                {
+                    for (size_t l=0; l<Lx; ++l, ++X, ++X1) { *X1 = *X; }
+                    X1 -= Lx;
+                    fftw_execute(plan);
+                    for (size_t l=0; l<2*Ly; ++l, ++Y1, ++Y) { *Y = *Y1; }
+                }
+            }
+        }
+        else
+        {
+            const double s = sc ? 1.0/sqrt(2*Lx) : 1.0;
+            X1 += Lx;
+            for (size_t l=Lx; l<nfft; ++l, ++X1) { *X1 = 0.0; }
+            X1 -= nfft;
+            for (size_t g=0; g<G; ++g, X+=B*(Lx-1), Y+=2*B*(Ly-1))
+            {
+                for (size_t b=0; b<B; ++b, X-=K*Lx-1, Y1-=2*Ly, Y-=2*K*Ly-2)
+                {
+                    for (size_t l=0; l<Lx; ++l, X+=K, ++X1) { *X1 = *X; }
+                    X1 -= Lx;
+                    fftw_execute(plan);
+                    for (size_t l=0; l<Ly; ++l, ++Y1, Y+=2*K-1) { *Y = *Y1*s; *++Y = *++Y1*s; }
+                }
+            }
+        }
+    }
+    
     fftw_destroy_plan(plan); fftw_free(X1); fftw_free(Y1);
     return 0;
 }
 
 
-int fft_c (float *Y, const float *X, const char iscolmajor, const int R, const int C, const size_t dim, const int nfft)
+int fft_c (float *Y, const float *X, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim, const size_t nfft, const char sc)
 {
-    const float z[2] = {0.0f,0.0f};
-    int r, c;
-    fftwf_complex *X1, *Y1;
-    fftwf_plan plan;
-
-    //Checks
-    if (R<1) { fprintf(stderr,"error in fft_c: R (nrows X) must be positive\n"); return 1; }
-    if (C<1) { fprintf(stderr,"error in fft_c: C (ncols X) must be positive\n"); return 1; }
-    if (nfft<R && dim==0) { fprintf(stderr,"error in fft_c: nfft must be >= R (winlength)\n"); return 1; }
-    if (nfft<C && dim==1) { fprintf(stderr,"error in fft_c: nfft must be >= C (winlength)\n"); return 1; }
+    const size_t N = R*C*S*H;
+    const size_t Lx = (dim==0) ? R : (dim==1) ? C : (dim==2) ? S : H;
+    if (nfft<Lx) { fprintf(stderr,"error in fft_c: nfft must be >= L (vec length)\n"); return 1; }
 
     //Initialize fftwf
-    X1 = fftwf_alloc_complex((size_t)nfft);
-    Y1 = fftwf_alloc_complex((size_t)nfft);
-    plan = fftwf_plan_dft_1d(nfft,X1,Y1,FFTW_FORWARD,FFTW_ESTIMATE);
+    float *X1, *Y1;
+    X1 = (float *)fftwf_malloc(2*nfft*sizeof(float));
+    Y1 = (float *)fftwf_malloc(2*nfft*sizeof(float));
+    fftwf_plan plan = fftwf_plan_dft_1d((int)nfft,(fftwf_complex *)X1,(fftwf_complex *)Y1,FFTW_FORWARD,FFTW_ESTIMATE);
     if (!plan) { fprintf(stderr,"error in fft_c: problem creating fftw plan"); return 1; }
 
-    if (dim==0)
+    if (N==0) {}
+    else if (Lx==1 && nfft==1)
     {
-        cblas_ccopy(nfft-R,&z[0],0,(float *)&X1[R],1); //zero-pad
-        if (iscolmajor)
+        for (size_t n=0; n<2*N; ++n, ++X, ++Y) { *Y = *X; }
+        if (sc)
         {
-            for (c=0; c<C; c++)
-            {
-                cblas_ccopy(R,&X[2*c*R],1,(float *)&X1[0],1);
-                fftwf_execute(plan);
-                cblas_ccopy(nfft,(float *)&Y1[0],1,&Y[2*c*nfft],1);
-            }
+            const float s = (float)M_SQRT1_2;
+            for (size_t n=0; n<2*N; ++n, ++X, ++Y) { *Y = *X * s; }
         }
         else
         {
-            for (c=0; c<C; c++)
-            {
-                cblas_ccopy(R,&X[2*c],C,(float *)&X1[0],1);
-                fftwf_execute(plan);
-                cblas_ccopy(nfft,(float *)&Y1[0],1,&Y[2*c],C);
-            }
+            for (size_t n=0; n<2*N; ++n, ++X, ++Y) { *Y = *X; }
         }
     }
-    else if (dim==1)
+    else if (Lx==N)
     {
-        cblas_ccopy(nfft-C,&z[0],0,(float *)&X1[C],1);
-        if (iscolmajor)
+        for (size_t l=0; l<2*Lx; ++l, ++X, ++X1) { *X1 = *X; }
+        for (size_t l=2*Lx; l<2*nfft; ++l, ++X1) { *X1 = 0.0f; }
+        X1 -= 2*nfft;
+        fftwf_execute(plan);
+        if (sc)
         {
-            for (r=0; r<R; r++)
-            {
-                cblas_ccopy(C,&X[2*r],R,(float *)&X1[0],1);
-                fftwf_execute(plan);
-                cblas_ccopy(nfft,(float *)&Y1[0],1,&Y[2*r],R);
-            }
+            const float s = (float)(1.0/sqrt(2*Lx));
+            for (size_t l=0; l<2*nfft; ++l, ++Y1, ++Y) { *Y = *Y1 * s; }
         }
         else
         {
-            for (r=0; r<R; r++)
-            {
-                cblas_ccopy(C,&X[2*r*C],1,(float *)&X1[0],1);
-                fftwf_execute(plan);
-                cblas_ccopy(nfft,(float *)&Y1[0],1,&Y[2*r*nfft],1);
-            }
+            for (size_t l=0; l<2*nfft; ++l, ++Y1, ++Y) { *Y = *Y1; }
         }
+        Y1 -= 2*nfft;
     }
     else
     {
-        fprintf(stderr,"error in fft_c: dim must be 0 or 1.\n"); return 1;
+        const size_t K = (iscolmajor) ? ((dim==0) ? 1 : (dim==1) ? R : (dim==2) ? R*C : R*C*S) : ((dim==0) ? C*S*H : (dim==1) ? S*H : (dim==2) ? H : 1);
+        const size_t B = (iscolmajor && dim==0) ? C*S*H : K;
+        const size_t V = N/Lx, G = V/B;
+
+        if (K==1 && (G==1 || B==1))
+        {
+            for (size_t l=0; l<2*Lx; ++l, ++X, ++X1) { *X1 = *X; }
+            for (size_t l=2*Lx; l<2*nfft; ++l, ++X1) { *X1 = 0.0f; }
+            X1 -= 2*nfft;
+            fftwf_execute(plan);
+            if (sc)
+            {
+                const float s = (float)(1.0/sqrt(2*Lx));
+                for (size_t l=0; l<2*nfft; ++l, ++Y1, ++Y) { *Y = *Y1 * s; }
+                Y1 -= 2*nfft;
+                for (size_t v=1; v<V; ++v, Y1-=2*nfft)
+                {
+                    for (size_t l=0; l<2*Lx; ++l, ++X, ++X1) { *X1 = *X; }
+                    X1 -= 2*Lx;
+                    fftwf_execute(plan);
+                    for (size_t l=0; l<2*nfft; ++l, ++Y1, ++Y) { *Y = *Y1 * s; }
+                }
+            }
+            else
+            {
+                for (size_t l=0; l<2*nfft; ++l, ++Y1, ++Y) { *Y = *Y1; }
+                Y1 -= 2*nfft;
+                for (size_t v=1; v<V; ++v, Y1-=2*nfft)
+                {
+                    for (size_t l=0; l<2*Lx; ++l, ++X, ++X1) { *X1 = *X; }
+                    X1 -= 2*Lx;
+                    fftwf_execute(plan);
+                    for (size_t l=0; l<2*nfft; ++l, ++Y1, ++Y) { *Y = *Y1; }
+                }
+            }
+        }
+        else
+        {
+            const float s = sc ? (float)(1.0/sqrt(2*Lx)) : 1.0f;
+            X1 += 2*Lx;
+            for (size_t l=2*Lx; l<2*nfft; ++l, ++X1) { *X1 = 0.0f; }
+            X1 -= 2*nfft;
+            for (size_t g=0; g<G; ++g, X+=2*B*(Lx-1), Y+=2*B*(nfft-1))
+            {
+                for (size_t b=0; b<B; ++b, X-=2*K*Lx-1, Y-=2*K*nfft-1)
+                {
+                    for (size_t l=0; l<2*Lx; ++l, X+=2*K, ++X1) { *X1 = *X; }
+                    X1 -= 2*Lx;
+                    fftwf_execute(plan);
+                    for (size_t l=0; l<2*nfft; ++l, ++Y1, Y+=2*K) { *Y = *Y1 * s; }
+                }
+            }
+        }
     }
     
     fftwf_destroy_plan(plan); fftwf_free(X1); fftwf_free(Y1);
@@ -246,72 +342,105 @@ int fft_c (float *Y, const float *X, const char iscolmajor, const int R, const i
 }
 
 
-int fft_z (double *Y, const double *X, const char iscolmajor, const int R, const int C, const size_t dim, const int nfft)
+int fft_z (double *Y, const double *X, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim, const size_t nfft, const char sc)
 {
-    const double z[2] = {0.0,0.0};
-    int r, c;
-    fftw_complex *X1, *Y1;
-    fftw_plan plan;
-
-    //Checks
-    if (R<1) { fprintf(stderr,"error in fft_z: R (nrows X) must be positive\n"); return 1; }
-    if (C<1) { fprintf(stderr,"error in fft_z: C (ncols X) must be positive\n"); return 1; }
-    if (nfft<R && dim==0) { fprintf(stderr,"error in fft_z: nfft must be >= R (winlength)\n"); return 1; }
-    if (nfft<C && dim==1) { fprintf(stderr,"error in fft_z: nfft must be >= C (winlength)\n"); return 1; }
+    const size_t N = R*C*S*H;
+    const size_t Lx = (dim==0) ? R : (dim==1) ? C : (dim==2) ? S : H;
+    if (nfft<Lx) { fprintf(stderr,"error in fft_z: nfft must be >= L (vec length)\n"); return 1; }
 
     //Initialize fftw
-    X1 = fftw_alloc_complex((size_t)nfft);
-    Y1 = fftw_alloc_complex((size_t)nfft);
-    plan = fftw_plan_dft_1d(nfft,X1,Y1,FFTW_FORWARD,FFTW_ESTIMATE);
+    double *X1, *Y1;
+    X1 = (double *)fftw_malloc(2*nfft*sizeof(double));
+    Y1 = (double *)fftw_malloc(2*nfft*sizeof(double));
+    fftw_plan plan = fftw_plan_dft_1d((int)nfft,(fftw_complex *)X1,(fftw_complex *)Y1,FFTW_FORWARD,FFTW_ESTIMATE);
     if (!plan) { fprintf(stderr,"error in fft_z: problem creating fftw plan"); return 1; }
 
-    if (dim==0)
+    if (N==0) {}
+    else if (Lx==1 && nfft==1)
     {
-        cblas_zcopy(nfft-R,&z[0],0,(double *)&X1[R],1); //zero-pad
-        if (iscolmajor)
+        for (size_t n=0; n<2*N; ++n, ++X, ++Y) { *Y = *X; }
+        if (sc)
         {
-            for (c=0; c<C; c++)
-            {
-                cblas_zcopy(R,&X[2*c*R],1,(double *)&X1[0],1);
-                fftw_execute(plan);
-                cblas_zcopy(nfft,(double *)&Y1[0],1,&Y[2*c*nfft],1);
-            }
+            const double s = M_SQRT1_2;
+            for (size_t n=0; n<2*N; ++n, ++X, ++Y) { *Y = *X * s; }
         }
         else
         {
-            for (c=0; c<C; c++)
-            {
-                cblas_zcopy(R,&X[2*c],C,(double *)&X1[0],1);
-                fftw_execute(plan);
-                cblas_zcopy(nfft,(double *)&Y1[0],1,&Y[2*c],C);
-            }
+            for (size_t n=0; n<2*N; ++n, ++X, ++Y) { *Y = *X; }
         }
     }
-    else if (dim==1)
+    else if (Lx==N)
     {
-        cblas_zcopy(nfft-C,&z[0],0,(double *)&X1[C],1);
-        if (iscolmajor)
+        for (size_t l=0; l<2*Lx; ++l, ++X, ++X1) { *X1 = *X; }
+        for (size_t l=2*Lx; l<2*nfft; ++l, ++X1) { *X1 = 0.0; }
+        X1 -= 2*nfft;
+        fftw_execute(plan);
+        if (sc)
         {
-            for (r=0; r<R; r++)
-            {
-                cblas_zcopy(C,&X[2*r],R,(double *)&X1[0],1);
-                fftw_execute(plan);
-                cblas_zcopy(nfft,(double *)&Y1[0],1,&Y[2*r],R);
-            }
+            const double s = 1.0/sqrt(2*Lx);
+            for (size_t l=0; l<2*nfft; ++l, ++Y1, ++Y) { *Y = *Y1 * s; }
         }
         else
         {
-            for (r=0; r<R; r++)
-            {
-                cblas_zcopy(C,&X[2*r*C],1,(double *)&X1[0],1);
-                fftw_execute(plan);
-                cblas_zcopy(nfft,(double *)&Y1[0],1,&Y[2*r*nfft],1);
-            }
+            for (size_t l=0; l<2*nfft; ++l, ++Y1, ++Y) { *Y = *Y1; }
         }
+        Y1 -= 2*nfft;
     }
     else
     {
-        fprintf(stderr,"error in fft_z: dim must be 0 or 1.\n"); return 1;
+        const size_t K = (iscolmajor) ? ((dim==0) ? 1 : (dim==1) ? R : (dim==2) ? R*C : R*C*S) : ((dim==0) ? C*S*H : (dim==1) ? S*H : (dim==2) ? H : 1);
+        const size_t B = (iscolmajor && dim==0) ? C*S*H : K;
+        const size_t V = N/Lx, G = V/B;
+
+        if (K==1 && (G==1 || B==1))
+        {
+            for (size_t l=0; l<2*Lx; ++l, ++X, ++X1) { *X1 = *X; }
+            for (size_t l=2*Lx; l<2*nfft; ++l, ++X1) { *X1 = 0.0; }
+            X1 -= 2*nfft;
+            fftw_execute(plan);
+            if (sc)
+            {
+                const double s = 1.0/sqrt(2*Lx);
+                for (size_t l=0; l<2*nfft; ++l, ++Y1, ++Y) { *Y = *Y1 * s; }
+                Y1 -= 2*nfft;
+                for (size_t v=1; v<V; ++v, Y1-=2*nfft)
+                {
+                    for (size_t l=0; l<2*Lx; ++l, ++X, ++X1) { *X1 = *X; }
+                    X1 -= 2*Lx;
+                    fftw_execute(plan);
+                    for (size_t l=0; l<2*nfft; ++l, ++Y1, ++Y) { *Y = *Y1 * s; }
+                }
+            }
+            else
+            {
+                for (size_t l=0; l<2*nfft; ++l, ++Y1, ++Y) { *Y = *Y1; }
+                Y1 -= 2*nfft;
+                for (size_t v=1; v<V; ++v, Y1-=2*nfft)
+                {
+                    for (size_t l=0; l<2*Lx; ++l, ++X, ++X1) { *X1 = *X; }
+                    X1 -= 2*Lx;
+                    fftw_execute(plan);
+                    for (size_t l=0; l<2*nfft; ++l, ++Y1, ++Y) { *Y = *Y1; }
+                }
+            }
+        }
+        else
+        {
+            const double s = sc ? 1.0/sqrt(2*Lx) : 1.0;
+            X1 += 2*Lx;
+            for (size_t l=2*Lx; l<2*nfft; ++l, ++X1) { *X1 = 0.0; }
+            X1 -= 2*nfft;
+            for (size_t g=0; g<G; ++g, X+=2*B*(Lx-1), Y+=2*B*(nfft-1))
+            {
+                for (size_t b=0; b<B; ++b, X-=2*K*Lx-1, Y-=2*K*nfft-1)
+                {
+                    for (size_t l=0; l<2*Lx; ++l, X+=2*K, ++X1) { *X1 = *X; }
+                    X1 -= 2*Lx;
+                    fftw_execute(plan);
+                    for (size_t l=0; l<2*nfft; ++l, ++Y1, Y+=2*K) { *Y = *Y1 * s; }
+                }
+            }
+        }
     }
     
     fftw_destroy_plan(plan); fftw_free(X1); fftw_free(Y1);

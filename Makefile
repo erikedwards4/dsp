@@ -5,10 +5,10 @@
 #dsp is my own library of functions for digital signal processing (DSP) in C and C++.
 #This is the makefile for the C++ command-line tools.
 
-#This is meant primarily to support work in audio, speech, NNs, and some general time-series analysis.
+#This is meant primarily to support work in audio, speech, NNs, and some general time-series analyses.
 #Thus, not every possible DSP function is included.
-#Also, 2-D "DSP" (which is essentially image processing) is not included.
-#This is for multivariate 1-D signals (so, works with matrices, but usually along each row or column).
+#Also, 2-D DSP (which is essentially image processing) is not included.
+#This is for multivariate 1-D signals; it generally works with matrices along each row or column.
 
 SHELL=/bin/bash
 ss=../util/bin/srci2src
@@ -16,7 +16,7 @@ CC=clang++
 
 ifeq ($(CC),clang++)
 	STD=-std=c++11
-	WFLAG=-Weverything -Wno-c++98-compat -Wno-padded -Wno-old-style-cast -Wno-gnu-imaginary-constant
+	WFLAG=-Weverything -Wno-c++98-compat -Wno-old-style-cast -Wno-gnu-imaginary-constant
 else
 	STD=-std=gnu++14
 	WFLAG=-Wall -Wextra
@@ -24,41 +24,49 @@ endif
 
 INCLS=-Ic -I../util
 CFLAGS=$(WFLAG) $(STD) -O2 -ffast-math -march=native $(INCLS)
-#LIBS=-largtable2 -lopenblas -llapacke -llapack -lfftw3f -lfftw3 -lm
 
 
 All: all
-all: Dirs Math Basic Wins Clean
+all: Dirs Basic Filter Conv Transform Wins AR_Poly AC_LP Clean
 	rm -f 7 obj/*.o
 
 Dirs:
 	mkdir -pm 777 bin obj
 
 
-Basic: identity integrate fir mean0 stdev1 zscore abs square fft #fir iir
-identity: srci/identity.cpp c/identity.c
-	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2
-integrate: srci/integrate.cpp c/integrate.c
-	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lm
-fir: srci/fir.cpp c/fir.c
-	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lopenblas
+Basic: mean0 stdev1 zscore
 mean0: srci/mean0.cpp c/mean0.c
 	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lopenblas
 stdev1: srci/stdev1.cpp c/stdev1.c
 	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lopenblas -lm
 zscore: srci/zscore.cpp c/zscore.c
 	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lopenblas -lm
-abs: srci/abs.cpp c/abs.c
-	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lm
-square: srci/square.cpp c/square.c
-	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lm
-fft: srci/fft.cpp c/fft.c
-	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lopenblas -lfftw3f -lfftw3 -lm
-# fir: srci/fir.cpp c/fir.c
-# 	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lopenblas
-# iir: srci/iir.cpp c/iir.c
-# 	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lopenblas
 
+
+Filter: fir iir #filter filtfilt fftfilt medfilt integrate spencer
+integrate: srci/integrate.cpp c/integrate.c
+	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lm
+fir: srci/fir.cpp c/fir.c
+	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lopenblas -lm
+iir: srci/iir.cpp c/iir.c
+	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lm
+
+
+Transform: fft ifft dct idct dst idst hilbert
+fft: srci/fft.cpp c/fft.c
+	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lfftw3f -lfftw3
+ifft: srci/ifft.cpp c/ifft.c
+	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lfftw3f -lfftw3
+dct: srci/dct.cpp c/dct.c
+	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lfftw3f -lfftw3 -lm
+idct: srci/idct.cpp c/idct.c
+	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lfftw3f -lfftw3 -lm
+dst: srci/dst.cpp c/dst.c
+	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lfftw3f -lfftw3
+idst: srci/idst.cpp c/idst.c
+	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lfftw3f -lfftw3
+hilbert: srci/hilbert.cpp c/hilbert.c
+	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lfftw3f -lfftw3
 
 
 Wins: rectangular triangular bartlett hann hamming blackman blackmanharris flattop povey gauss tukey planck
@@ -86,7 +94,6 @@ tukey: srci/tukey.cpp c/tukey.c
 	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lm
 planck: srci/planck.cpp c/planck.c
 	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lm
-
 
 
 Freqs: convert_freqs get_cfs get_stft_freqs get_cfs_T #get_cns
@@ -118,7 +125,6 @@ fft_squared: srci/fft_squared.cpp c/fft_squared.c
 	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lopenblas -lfftw3f -lfftw3 -lm
 stft: srci/stft.cpp c/stft.c
 	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lopenblas -lfftw3f -lfftw3 -lm
-
 
 
 AR_Poly: poly2roots roots2poly poly2ar ar2poly ar2rc rc2ar poly2rc rc2poly ar2psd poly2psd
@@ -171,7 +177,6 @@ ac2cc: srci/ac2cc.cpp c/ac2cc.c
 	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lopenblas -lm
 ac2mvdr: srci/ac2mvdr.cpp c/ac2mvdr.c
 	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lopenblas -lfftw3f -lfftw3 -lm
-
 
 
 ZCs_LCs: zcs lcs mcs zcr lcr mcr zcr_windowed lcr_windowed mcr_windowed

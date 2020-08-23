@@ -2,8 +2,8 @@
 #include "poly2ar.c"
 
 //Declarations
-const valarray<uint8_t> oktypes = {1,2};
-const size_t I = 1, O = 1;
+const valarray<size_t> oktypes = {1u,2u};
+const size_t I = 1u, O = 1u;
 size_t dim;
 
 //Description
@@ -31,25 +31,25 @@ struct arg_file  *a_fo = arg_filen("o","ofile","<file>",0,O,"output file (Y)");
 //Get options
 
 //Get dim
-if (a_d->count==0) { dim = (i1.isvec() && i1.R==1u) ? 1 : 0; }
+if (a_d->count==0) { dim = (i1.isvec() && i1.R==1u) ? 1u : 0u; }
 else if (a_d->ival[0]<0) { cerr << progstr+": " << __LINE__ << errstr << "dim must be nonnegative" << endl; return 1; }
 else { dim = size_t(a_d->ival[0]); }
-if (dim>3) { cerr << progstr+": " << __LINE__ << errstr << "dim must be in {0,1,2,3}" << endl; return 1; }
+if (dim>3u) { cerr << progstr+": " << __LINE__ << errstr << "dim must be in {0,1u,2u,3}" << endl; return 1; }
 
 //Checks
 if (i1.isempty()) { cerr << progstr+": " << __LINE__ << errstr << "input (X) found to be empty" << endl; return 1; }
 
 //Set output header info
 o1.F = i1.F; o1.T = i1.T;
-o1.R = (dim==0) ? i1.R-1u : i1.R;
-o1.C = (dim==1) ? i1.C-1u : i1.C;
-o1.S = (dim==2) ? i1.S-1u : i1.S;
-o1.H = (dim==3) ? i1.H-1u : i1.H;
+o1.R = (dim==0u) ? i1.R-1u : i1.R;
+o1.C = (dim==1u) ? i1.C-1u : i1.C;
+o1.S = (dim==2u) ? i1.S-1u : i1.S;
+o1.H = (dim==3u) ? i1.H-1u : i1.H;
 
 //Other prep
 
 //Process
-if (i1.T==1)
+if (i1.T==1u)
 {
     float *X, *Y;
     try { X = new float[i1.N()]; }
@@ -69,7 +69,7 @@ if (i1.T==1)
 }
 
 //Finish
-// else if (i1.T==101)
+// else if (i1.T==101u)
 // {
 //     float *X, *Y;
 //     try { X = new float[2u*i1.N()]; }

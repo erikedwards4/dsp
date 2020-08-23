@@ -1,5 +1,6 @@
 //@author Erik Edwards
-//@date 2019-present
+//@date 2018-present
+//@license BSD 3-clause
 
 
 #include <iostream>
@@ -10,7 +11,7 @@
 #include <valarray>
 #include <unordered_map>
 #include <argtable2.h>
-#include "/home/erik/codee/util/cmli.hpp"
+#include "../util/cmli.hpp"
 #include "blackman.c"
 
 #ifdef I
@@ -28,8 +29,8 @@ int main(int argc, char *argv[])
     const string errstr = ": \033[1;31merror:\033[0m ";
     const string warstr = ": \033[1;35mwarning:\033[0m ";
     const string progstr(__FILE__,string(__FILE__).find_last_of("/")+1,strlen(__FILE__)-string(__FILE__).find_last_of("/")-5);
-    const valarray<uint8_t> oktypes = {1,2,101,102};
-    const size_t O = 1;
+    const valarray<size_t> oktypes = {1u,2u,101u,102u};
+    const size_t O = 1u;
     ofstream ofs1;
     int8_t stdo1, wo1;
     ioinfo o1;
@@ -98,15 +99,15 @@ int main(int argc, char *argv[])
     //Get options
 
     //Get o1.F
-    if (a_ofmt->count==0) { o1.F = 147; }
+    if (a_ofmt->count==0) { o1.F = 147u; }
     else if (a_ofmt->ival[0]<0) { cerr << progstr+": " << __LINE__ << errstr << "output file format must be nonnegative" << endl; return 1; }
     else if (a_ofmt->ival[0]>255) { cerr << progstr+": " << __LINE__ << errstr << "output file format must be < 256" << endl; return 1; }
-    else { o1.F = uint8_t(a_ofmt->ival[0]); }
+    else { o1.F = size_t(a_ofmt->ival[0]); }
 
     //Get o1.T
-    if (a_otyp->count==0) { o1.T = 1; }
+    if (a_otyp->count==0) { o1.T = 1u; }
     else if (a_otyp->ival[0]<1) { cerr << progstr+": " << __LINE__ << errstr << "data type must be positive int" << endl; return 1; }
-    else { o1.T = uint8_t(a_otyp->ival[0]); }
+    else { o1.T = size_t(a_otyp->ival[0]); }
     if ((o1.T==oktypes).sum()==0)
     {
         cerr << progstr+": " << __LINE__ << errstr << "output data type must be in " << "{";
@@ -115,31 +116,31 @@ int main(int argc, char *argv[])
     }
 
     //Get L
-    if (a_wl->count==0) { L = 7; }
+    if (a_wl->count==0) { L = 7u; }
     else if (a_wl->ival[0]<1) { cerr << progstr+": " << __LINE__ << errstr << "winlength must be a positive int" << endl; return 1; }
     else { L = size_t(a_wl->ival[0]); }
 
     //Get dim
-    if (a_d->count==0) { dim = 0; }
+    if (a_d->count==0) { dim = 0u; }
     else if (a_d->ival[0]<0) { cerr << progstr+": " << __LINE__ << errstr << "dim must be nonnegative" << endl; return 1; }
     else { dim = size_t(a_d->ival[0]); }
-    if (dim>3) { cerr << progstr+": " << __LINE__ << errstr << "dim must be in {0,1,2,3}" << endl; return 1; }
+    if (dim>3u) { cerr << progstr+": " << __LINE__ << errstr << "dim must be in {0,1u,2u,3}" << endl; return 1; }
 
     //Get norm
-    if (a_nrm->count==0) { norm = 0; }
+    if (a_nrm->count==0) { norm = 0u; }
     else if (a_nrm->ival[0]<0) { cerr << progstr+": " << __LINE__ << errstr << "norm must be nonnegative" << endl; return 1; }
     else { norm = size_t(a_nrm->ival[0]); }
-    if (norm>3) { cerr << progstr+": " << __LINE__ << errstr << "norm must be in {0,1,2,3}" << endl; return 1; }
+    if (norm>3) { cerr << progstr+": " << __LINE__ << errstr << "norm must be in {0,1u,2u,3}" << endl; return 1; }
 
     //Get exact
     exact = (a_ex->count>0);
 
 
     //Set output header info
-    o1.R = (dim==0) ? L : 1u;
-    o1.C = (dim==1) ? L : 1u;
-    o1.S = (dim==2) ? L : 1u;
-    o1.H = (dim==3) ? L : 1u;
+    o1.R = (dim==0u) ? L : 1u;
+    o1.C = (dim==1u) ? L : 1u;
+    o1.S = (dim==2u) ? L : 1u;
+    o1.H = (dim==3u) ? L : 1u;
 
 
     //Open output
@@ -158,12 +159,13 @@ int main(int argc, char *argv[])
 
 
     //Process
-    if (o1.T==1)
+    if (o1.T==1u)
     {
         float *Y;
         try { Y = new float[o1.N()]; }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for output file (Y)" << endl; return 1; }
-        if (codee::blackman_s(Y,L,exact,norm)) { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
+        if (codee::blackman_s(Y,L,exact,norm))
+        { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
         if (wo1)
         {
             try { ofs1.write(reinterpret_cast<char*>(Y),o1.nbytes()); }
@@ -176,7 +178,8 @@ int main(int argc, char *argv[])
         double *Y;
         try { Y = new double[o1.N()]; }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for output file (Y)" << endl; return 1; }
-        if (codee::blackman_d(Y,L,exact,norm)) { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
+        if (codee::blackman_d(Y,L,exact,norm))
+        { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
         if (wo1)
         {
             try { ofs1.write(reinterpret_cast<char*>(Y),o1.nbytes()); }
@@ -184,12 +187,13 @@ int main(int argc, char *argv[])
         }
         delete[] Y;
     }
-    else if (o1.T==101)
+    else if (o1.T==101u)
     {
         float *Y;
         try { Y = new float[2u*o1.N()]; }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for output file (Y)" << endl; return 1; }
-        if (codee::blackman_c(Y,L,exact,norm)) { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
+        if (codee::blackman_c(Y,L,exact,norm))
+        { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
         if (wo1)
         {
             try { ofs1.write(reinterpret_cast<char*>(Y),o1.nbytes()); }
@@ -197,12 +201,13 @@ int main(int argc, char *argv[])
         }
         delete[] Y;
     }
-    else if (o1.T==102)
+    else if (o1.T==102u)
     {
         double *Y;
         try { Y = new double[2u*o1.N()]; }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for output file (Y)" << endl; return 1; }
-        if (codee::blackman_z(Y,L,exact,norm)) { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
+        if (codee::blackman_z(Y,L,exact,norm))
+        { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
         if (wo1)
         {
             try { ofs1.write(reinterpret_cast<char*>(Y),o1.nbytes()); }

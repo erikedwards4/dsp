@@ -2,8 +2,8 @@
 #include "sig2ar_burg.c"
 
 //Declarations
-const valarray<uint8_t> oktypes = {1,2};
-const size_t I = 1, O = 2;
+const valarray<size_t> oktypes = {1u,2u};
+const size_t I = 1u, O = 2u;
 size_t dim, P;
 char m0;
 
@@ -39,7 +39,7 @@ struct arg_file  *a_fo = arg_filen("o","ofile","<file>",0,O,"output files (Y,V)"
 //Get options
 
 //Get dim
-if (a_d->count==0) { dim = (i1.R==1u) ? 1 : 0; }
+if (a_d->count==0) { dim = (i1.R==1u) ? 1u : 0u; }
 else if (a_d->ival[0]<0) { cerr << progstr+": " << __LINE__ << errstr << "dim must be nonnegative" << endl; return 1; }
 else { dim = size_t(a_d->ival[0]); }
 if (dim!=0 && dim!=1) { cerr << progstr+": " << __LINE__ << errstr << "dim must be 0 or 1" << endl; return 1; }
@@ -59,17 +59,17 @@ if (i1.isempty()) { cerr << progstr+": " << __LINE__ << errstr << "input (X) fou
 //Set output header info
 o1.F = o2.F = i1.F;
 o1.T = o2.T = i1.T;
-o1.R = (dim==0) ? uint32_t(P) : i1.R;
-o1.C = (dim==1) ? uint32_t(P) : i1.C;
-o2.R = (dim==0) ? 1u : i1.R;
-o2.C = (dim==1) ? 1u : i1.C;
+o1.R = (dim==0u) ? uint32_t(P) : i1.R;
+o1.C = (dim==1u) ? uint32_t(P) : i1.C;
+o2.R = (dim==0u) ? 1u : i1.R;
+o2.C = (dim==1u) ? 1u : i1.C;
 o1.S = o2.S = i1.S;
 o1.H = o2.H = i1.H;
 
 //Other prep
 
 //Process
-if (i1.T==1)
+if (i1.T==1u)
 {
     float *X, *Y, *V;
     try { X = new float[i1.N()]; }

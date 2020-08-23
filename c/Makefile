@@ -28,18 +28,17 @@ CFLAGS=$(WFLAG) $(STD) -O3 -march=native -fPIC
 
 
 All: all
-all: Math Clean
+all: Basic Filter Conv Transform Wins AR_Poly AC_LP Clean
 
 
-#Math: some useful math functions
-Math: Basic Conv
-
-
-Basic: identity integrate fir interp1q
-identity: identity.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
-integrate: integrate.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
-fir: fir.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+Basic: interp1q
 interp1q: interp1q.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+
+
+#Filter: FIR and IIR filters
+Filter: fir fir_tau iir iir_tau filter filter_tau filtfilt spencer
+fir: fir.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+iir: iir.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 
 
 #Conv: convolution
@@ -50,6 +49,18 @@ conv1d_fft: conv1d_fft.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 conv2d_fft: conv2d_fft.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 
 
+#Transform: common 1-D signal transforms
+Transforms: fft ifft dct idct dst idst hilbert
+fft: fft.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+ifft: ifft.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+dct: dct.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+idct: idct.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+dst: dst.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+idst: idst.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+hilbert: hilbert.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+
+
+#Wins: common 1-D windows
 Wins: rectangular triangular bartlett hann hamming blackman blackmanharris flattop povey gauss tukey planck
 rectangular: rectangular.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 triangular: triangular.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
