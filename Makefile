@@ -27,46 +27,11 @@ CFLAGS=$(WFLAG) $(STD) -O2 -ffast-math -march=native $(INCLS)
 
 
 All: all
-all: Dirs Basic Filter Conv Transform Wins AR_Poly AC_LP Clean
+all: Dirs Wins Interp Filter Conv Transform AR_Poly AC_LP Clean
 	rm -f 7 obj/*.o
 
 Dirs:
 	mkdir -pm 777 bin obj
-
-
-Basic: mean0 stdev1 zscore
-mean0: srci/mean0.cpp c/mean0.c
-	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lopenblas
-stdev1: srci/stdev1.cpp c/stdev1.c
-	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lopenblas -lm
-zscore: srci/zscore.cpp c/zscore.c
-	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lopenblas -lm
-
-
-Filter: fir iir #filter filtfilt fftfilt medfilt integrate spencer
-integrate: srci/integrate.cpp c/integrate.c
-	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lm
-fir: srci/fir.cpp c/fir.c
-	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lopenblas -lm
-iir: srci/iir.cpp c/iir.c
-	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lm
-
-
-Transform: fft ifft dct idct dst idst hilbert
-fft: srci/fft.cpp c/fft.c
-	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lfftw3f -lfftw3
-ifft: srci/ifft.cpp c/ifft.c
-	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lfftw3f -lfftw3
-dct: srci/dct.cpp c/dct.c
-	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lfftw3f -lfftw3 -lm
-idct: srci/idct.cpp c/idct.c
-	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lfftw3f -lfftw3 -lm
-dst: srci/dst.cpp c/dst.c
-	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lfftw3f -lfftw3
-idst: srci/idst.cpp c/idst.c
-	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lfftw3f -lfftw3
-hilbert: srci/hilbert.cpp c/hilbert.c
-	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lfftw3f -lfftw3
 
 
 Wins: rectangular triangular bartlett hann hamming blackman blackmanharris flattop povey gauss tukey planck
@@ -94,6 +59,38 @@ tukey: srci/tukey.cpp c/tukey.c
 	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lm
 planck: srci/planck.cpp c/planck.c
 	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lm
+
+
+Interp: #interp1q
+interp1q: srci/interp1q.cpp c/interp1q.c
+	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2
+
+
+Filter: fir iir #filter filtfilt fftfilt medfilt integrate spencer
+integrate: srci/integrate.cpp c/integrate.c
+	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lm
+fir: srci/fir.cpp c/fir.c
+	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lopenblas -lm
+iir: srci/iir.cpp c/iir.c
+	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lm
+
+
+Transform: fft ifft dct idct dst idst hilbert
+fft: srci/fft.cpp c/fft.c
+	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lfftw3f -lfftw3
+ifft: srci/ifft.cpp c/ifft.c
+	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lfftw3f -lfftw3
+dct: srci/dct.cpp c/dct.c
+	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lfftw3f -lfftw3 -lm
+idct: srci/idct.cpp c/idct.c
+	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lfftw3f -lfftw3 -lm
+dst: srci/dst.cpp c/dst.c
+	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lfftw3f -lfftw3
+idst: srci/idst.cpp c/idst.c
+	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lfftw3f -lfftw3
+hilbert: srci/hilbert.cpp c/hilbert.c
+	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lfftw3f -lfftw3
+
 
 
 Freqs: convert_freqs get_cfs get_stft_freqs get_cfs_T #get_cns
@@ -151,10 +148,6 @@ poly2psd: srci/poly2psd.cpp c/poly2psd.c
 
 
 AC_LP: autocorr autocorr_fft sig2ac sig2ac_fft ac2ar_levdurb ac2poly_levdurb sig2poly_levdurb sig2ar_levdurb sig2ar_burg sig2poly_burg ac2rc ac2cc ac2mvdr
-autocorr: srci/autocorr.cpp c/autocorr.c
-	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lopenblas
-autocorr_fft: srci/autocorr_fft.cpp c/autocorr_fft.c
-	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lopenblas -lfftw3f -lfftw3 -lm
 sig2ac: srci/sig2ac.cpp c/sig2ac.c
 	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lopenblas
 sig2ac_fft: srci/sig2ac_fft.cpp c/sig2ac_fft.c

@@ -27,6 +27,8 @@ int fft_z (double *Y, const double *X, const size_t R, const size_t C, const siz
 
 int fft_s (float *Y, const float *X, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim, const size_t nfft, const char sc)
 {
+    if (dim>3) { fprintf(stderr,"error in fft_s: dim must be in [0 3]\n"); return 1; }
+
     const size_t N = R*C*S*H;
     const size_t Lx = (dim==0) ? R : (dim==1) ? C : (dim==2) ? S : H;
     const size_t Ly = nfft/2 + 1;
@@ -133,6 +135,8 @@ int fft_s (float *Y, const float *X, const size_t R, const size_t C, const size_
 
 int fft_d (double *Y, const double *X, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim, const size_t nfft, const char sc)
 {
+    if (dim>3) { fprintf(stderr,"error in fft_d: dim must be in [0 3]\n"); return 1; }
+
     const size_t N = R*C*S*H;
     const size_t Lx = (dim==0) ? R : (dim==1) ? C : (dim==2) ? S : H;
     const size_t Ly = nfft/2 + 1;
@@ -238,6 +242,8 @@ int fft_d (double *Y, const double *X, const size_t R, const size_t C, const siz
 
 int fft_c (float *Y, const float *X, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim, const size_t nfft, const char sc)
 {
+    if (dim>3) { fprintf(stderr,"error in fft_c: dim must be in [0 3]\n"); return 1; }
+
     const size_t N = R*C*S*H;
     const size_t Lx = (dim==0) ? R : (dim==1) ? C : (dim==2) ? S : H;
     if (nfft<Lx) { fprintf(stderr,"error in fft_c: nfft must be >= L (vec length)\n"); return 1; }
@@ -344,6 +350,8 @@ int fft_c (float *Y, const float *X, const size_t R, const size_t C, const size_
 
 int fft_z (double *Y, const double *X, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim, const size_t nfft, const char sc)
 {
+    if (dim>3) { fprintf(stderr,"error in fft_z: dim must be in [0 3]\n"); return 1; }
+
     const size_t N = R*C*S*H;
     const size_t Lx = (dim==0) ? R : (dim==1) ? C : (dim==2) ? S : H;
     if (nfft<Lx) { fprintf(stderr,"error in fft_z: nfft must be >= L (vec length)\n"); return 1; }

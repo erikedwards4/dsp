@@ -27,6 +27,8 @@ int iir_inplace_z (double *X, double *A, const size_t R, const size_t C, const s
 
 int iir_s (float *Y, const float *X, float *A, const size_t R, const size_t C, const size_t S, const size_t H, const size_t Q, const char iscolmajor, const size_t dim)
 {
+    if (dim>3) { fprintf(stderr,"error in iir_s: dim must be in [0 3]\n"); return 1; }
+
     const size_t N = R*C*S*H;
     const size_t T = (dim==0) ? R : (dim==1) ? C : (dim==2) ? S : H;
 
@@ -104,6 +106,8 @@ int iir_s (float *Y, const float *X, float *A, const size_t R, const size_t C, c
 
 int iir_d (double *Y, const double *X, double *A, const size_t R, const size_t C, const size_t S, const size_t H, const size_t Q, const char iscolmajor, const size_t dim)
 {
+    if (dim>3) { fprintf(stderr,"error in iir_d: dim must be in [0 3]\n"); return 1; }
+
     const size_t N = R*C*S*H;
     const size_t T = (dim==0) ? R : (dim==1) ? C : (dim==2) ? S : H;
 
@@ -181,6 +185,8 @@ int iir_d (double *Y, const double *X, double *A, const size_t R, const size_t C
 
 int iir_c (float *Y, const float *X, float *A, const size_t R, const size_t C, const size_t S, const size_t H, const size_t Q, const char iscolmajor, const size_t dim)
 {
+    if (dim>3) { fprintf(stderr,"error in iir_c: dim must be in [0 3]\n"); return 1; }
+
     const size_t N = R*C*S*H;
     const size_t T = (dim==0) ? R : (dim==1) ? C : (dim==2) ? S : H;
     float ar, ai, yr, yi;
@@ -307,6 +313,8 @@ int iir_c (float *Y, const float *X, float *A, const size_t R, const size_t C, c
 
 int iir_z (double *Y, const double *X, double *A, const size_t R, const size_t C, const size_t S, const size_t H, const size_t Q, const char iscolmajor, const size_t dim)
 {
+    if (dim>3) { fprintf(stderr,"error in iir_z: dim must be in [0 3]\n"); return 1; }
+
     const size_t N = R*C*S*H;
     const size_t T = (dim==0) ? R : (dim==1) ? C : (dim==2) ? S : H;
     double ar, ai, yr, yi;

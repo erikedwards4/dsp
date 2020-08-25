@@ -28,15 +28,31 @@ CFLAGS=$(WFLAG) $(STD) -O3 -march=native -fPIC
 
 
 All: all
-all: Basic Filter Conv Transform Wins AR_Poly AC_LP Clean
+all: Wins Interp Filter Conv Transform AR_Poly AC_LP Clean
 
 
-Basic: interp1q
+#Wins: common 1-D windows
+Wins: rectangular triangular bartlett hann hamming blackman blackmanharris flattop povey gauss tukey planck
+rectangular: rectangular.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+triangular: triangular.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+bartlett: bartlett.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+hann: hann.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+hamming: hamming.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+blackman: blackman.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+blackmanharris: blackmanharris.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+flattop: flattop.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+povey: povey.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+gauss: gauss.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+tukey: tukey.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+planck: planck.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+
+
+Interp: #interp1q
 interp1q: interp1q.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 
 
 #Filter: FIR and IIR filters
-Filter: fir fir_tau iir iir_tau filter filter_tau filtfilt spencer
+Filter: fir iir #fir_tau iir_tau filter filter_tau filtfilt spencer
 fir: fir.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 iir: iir.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 
@@ -60,25 +76,9 @@ idst: idst.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 hilbert: hilbert.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 
 
-#Wins: common 1-D windows
-Wins: rectangular triangular bartlett hann hamming blackman blackmanharris flattop povey gauss tukey planck
-rectangular: rectangular.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
-triangular: triangular.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
-bartlett: bartlett.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
-hann: hann.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
-hamming: hamming.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
-blackman: blackman.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
-blackmanharris: blackmanharris.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
-flattop: flattop.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
-povey: povey.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
-gauss: gauss.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
-tukey: tukey.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
-planck: planck.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
-
-
-AR_Poly: roots poly poly2roots roots2poly ar2poly poly2ar ar2rc rc2ar poly2rc rc2poly ar2psd poly2psd
-roots: roots.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
-poly: poly.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+#AR_Poly: conversion between autoregressive (AR), polynomial, reflection coeff (RC)
+#and power spectral density (PSD) representations
+AR_Poly: poly2roots roots2poly ar2poly poly2ar ar2rc rc2ar poly2rc rc2poly ar2psd poly2psd
 poly2roots: poly2roots.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 roots2poly: roots2poly.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 ar2poly: ar2poly.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
@@ -91,9 +91,9 @@ ar2psd: ar2psd.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 poly2psd: poly2psd.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 
 
+#AC_LP: conversions involving autocorrelation (AC), linear prediction (LP), and related,
+#for example, ac2cc converts from AC to cepstral coeffs (CCs).
 AC_LP: autocorr autocorr_fft sig2ac sig2ac_fft ac2ar_levdurb ac2poly_levdurb sig2ar_levdurb sig2poly_levdurb sig2ar_burg sig2poly_burg ac2rc ac2cc ac2mvdr
-autocorr: autocorr.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
-autocorr_fft: autocorr_fft.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 sig2ac: sig2ac.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 sig2ac_fft: sig2ac_fft.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 ac2ar_levdurb: ac2ar_levdurb.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)

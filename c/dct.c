@@ -21,6 +21,8 @@ int dct_z (double *Y, const double *X, const size_t R, const size_t C, const siz
 
 int dct_s (float *Y, const float *X, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim, const size_t ndct, const char sc)
 {
+    if (dim>3) { fprintf(stderr,"error in dct_s: dim must be in [0 3]\n"); return 1; }
+
     const size_t N = R*C*S*H;
     const size_t L = (dim==0) ? R : (dim==1) ? C : (dim==2) ? S : H;
     if (ndct<L) { fprintf(stderr,"error in dct_s: ndct must be >= L (vec length)\n"); return 1; }
@@ -123,6 +125,8 @@ int dct_s (float *Y, const float *X, const size_t R, const size_t C, const size_
 
 int dct_d (double *Y, const double *X, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim, const size_t ndct, const char sc)
 {
+    if (dim>3) { fprintf(stderr,"error in dct_d: dim must be in [0 3]\n"); return 1; }
+
     const size_t N = R*C*S*H;
     const size_t L = (dim==0) ? R : (dim==1) ? C : (dim==2) ? S : H;
     if (ndct<L) { fprintf(stderr,"error in dct_d: ndct must be >= L (vec length)\n"); return 1; }
@@ -225,6 +229,8 @@ int dct_d (double *Y, const double *X, const size_t R, const size_t C, const siz
 
 int dct_c (float *Y, const float *X, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim, const size_t ndct, const char sc)
 {
+    if (dim>3) { fprintf(stderr,"error in dct_c: dim must be in [0 3]\n"); return 1; }
+
     const size_t N = R*C*S*H;
     const size_t L = (dim==0) ? R : (dim==1) ? C : (dim==2) ? S : H;
     if (ndct<L) { fprintf(stderr,"error in dct_c: ndct must be >= L (vec length)\n"); return 1; }
@@ -333,6 +339,8 @@ int dct_c (float *Y, const float *X, const size_t R, const size_t C, const size_
 
 int dct_z (double *Y, const double *X, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim, const size_t ndct, const char sc)
 {
+    if (dim>3) { fprintf(stderr,"error in dct_z: dim must be in [0 3]\n"); return 1; }
+
     const size_t N = R*C*S*H;
     const size_t L = (dim==0) ? R : (dim==1) ? C : (dim==2) ? S : H;
     if (ndct<L) { fprintf(stderr,"error in dct_z: ndct must be >= L (vec length)\n"); return 1; }

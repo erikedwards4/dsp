@@ -72,13 +72,13 @@ else { L = size_t(a_wl->ival[0]); }
 if (a_d->count==0) { dim = 0u; }
 else if (a_d->ival[0]<0) { cerr << progstr+": " << __LINE__ << errstr << "dim must be nonnegative" << endl; return 1; }
 else { dim = size_t(a_d->ival[0]); }
-if (dim>3u) { cerr << progstr+": " << __LINE__ << errstr << "dim must be in {0,1u,2u,3}" << endl; return 1; }
+if (dim>3u) { cerr << progstr+": " << __LINE__ << errstr << "dim must be in {0,1,2,3}" << endl; return 1; }
 
 //Get norm
 if (a_nrm->count==0) { norm = 0u; }
 else if (a_nrm->ival[0]<0) { cerr << progstr+": " << __LINE__ << errstr << "norm must be nonnegative" << endl; return 1; }
 else { norm = size_t(a_nrm->ival[0]); }
-if (norm>3) { cerr << progstr+": " << __LINE__ << errstr << "norm must be in {0,1u,2u,3}" << endl; return 1; }
+if (norm>3) { cerr << progstr+": " << __LINE__ << errstr << "norm must be in {0,1,2,3}" << endl; return 1; }
 
 //Get exact
 exact = (a_ex->count>0);

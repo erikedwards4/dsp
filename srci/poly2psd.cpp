@@ -32,10 +32,10 @@ struct arg_file  *a_fo = arg_filen("o","ofile","<file>",0,O,"output file (Y)");
 //Get options
 
 //Get dim
-if (a_d->count==0) { dim = (i1.R==1u) ? 1u : 0u; }
+if (a_d->count==0) { dim = i1.isrowvec() ? 1u : 0u; }
 else if (a_d->ival[0]<0) { cerr << progstr+": " << __LINE__ << errstr << "dim must be nonnegative" << endl; return 1; }
 else { dim = size_t(a_d->ival[0]); }
-if (dim!=0 && dim!=1) { cerr << progstr+": " << __LINE__ << errstr << "dim must be 0 or 1" << endl; return 1; }
+if (dim!=0u && dim!=1u) { cerr << progstr+": " << __LINE__ << errstr << "dim must be 0 or 1" << endl; return 1; }
 
 //Checks
 if (i2.T!=i3.T) { cerr << progstr+": " << __LINE__ << errstr << "inputs 2 and 3 must have the same data type" << endl; return 1; }
