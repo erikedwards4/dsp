@@ -2,8 +2,6 @@
 
 dsp: functions for DSP (digital signal processing)
 
-Erik Edwards (erik.edwards4@gmail.com)
-
 ================================================
 
 This is a set of C programs, and associated command-line tools in C++,
@@ -45,7 +43,7 @@ make
 ```
 
 Each C function can also be compiled separately; see c subdirectory Makefile for details.
-To make an archive library, do:
+To make an archive library:
 ```
 cd /opt/codee/dsp/c
 make libdsp.a CC=clang
@@ -61,6 +59,20 @@ For example:
 ```
 /opt/codee/dsp/bin/fir --help
 ```
+
+
+## List of functions
+All: Wins Interp Filter Conv Transform AR_Poly AC_LP  
+Wins: rectangular triangular bartlett hann hamming blackman blackmanharris flattop povey gauss tukey planck  
+Interp: interp1q  
+Transform: fft ifft dct idct dst idst hilbert  
+Filter: fir iir filter filtfilt fftfilt medfilt integrate spencer  
+AR_Poly: poly2roots roots2poly poly2ar ar2poly ar2rc rc2ar poly2rc rc2poly ar2psd poly2psd  
+AC_LP: sig2ac sig2ac_fft ac2ar_levdurb ac2poly_levdurb sig2poly_levdurb sig2ar_levdurb sig2ar_burg sig2poly_burg ac2rc ac2cc ac2mvdr  
+ZCs_LCs: zcs lcs mcs zcr lcr mcr zcr_windowed lcr_windowed mcr_windowed  
+Freqs: convert_freqs get_cfs get_stft_freqs get_cfs_T  
+Window: frame_univar apply_win window_univar  
+STFT: fft_hc hc_square fft_squared stft  
 
 
 ## Contributing

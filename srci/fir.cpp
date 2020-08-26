@@ -35,7 +35,7 @@ struct arg_file  *a_fo = arg_filen("o","ofile","<file>",0,O,"output file (Y)");
 //Get options
 
 //Get dim
-if (a_d->count==0) { dim = i1.isrowvec() ? 1u : 0u; }
+if (a_d->count==0) { dim = i1.isvec() ? i1.nonsingleton1() : 0u; }
 else if (a_d->ival[0]<0) { cerr << progstr+": " << __LINE__ << errstr << "dim must be nonnegative" << endl; return 1; }
 else { dim = size_t(a_d->ival[0]); }
 if (dim>3u) { cerr << progstr+": " << __LINE__ << errstr << "dim must be in {0,1,2,3}" << endl; return 1; }
