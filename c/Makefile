@@ -1,5 +1,5 @@
 #@author Erik Edwards
-#@date 2017-2020
+#@date 2017-present
 #@license BSD 3-clause
 
 #DSP is my own library of C functions for digital signal processing.
@@ -28,13 +28,30 @@ CFLAGS=$(WFLAG) $(STD) -O3 -march=native -fPIC
 
 
 All: all
-all: Dirs Wins Interp Filter Conv Transform AR_Poly AC_LP Clean
+all: Dirs Generate Wins Interp Filter Conv Transform AR_Poly AC_LP Clean
 
 Dirs:
 	mkdir -pm 777 obj
 
 
-#Wins: common 1-D windows
+#Generate: generate noise, simple waveforms, windows
+Generate: Noise Waves Wins
+
+#Noise: generate colored noise
+Noise: #white pink brown
+white: white.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+pink: pink.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+brown: brown.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+
+#Waves: generate periodic waveforms
+Waves: #sinewave squarewave triwave sawwave pulsewave
+sinewave: sinewave.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+squarewave: squarewave.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+triwave: triwave.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+sawwave: sawwave.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+pulsewave: pulsewave.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+
+#Wins: generate common 1-D windows
 Wins: rectangular triangular bartlett hann hamming blackman blackmanharris flattop povey gauss tukey planck
 rectangular: rectangular.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 triangular: triangular.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
@@ -125,11 +142,19 @@ ac2cc: ac2cc.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 ac2mvdr: ac2mvdr.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 
 
-#Frame: get frames and apply windows for univariate signal and put into matrix
+#Frame: get frames and apply windows for univariate signal to put into matrix
 Frame: frame_univar apply_win window_univar
 frame_univar: frame_univar.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 apply_win: apply_win.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 window_univar: window_univar.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+
+
+#Freqs: gets center frequencies or STFT frequencies, and converts btwn frequency scales
+Freqs: convert_freqs get_cfs get_stft_freqs get_cfs_T #get_cns
+convert_freqs: convert_freqs.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+get_cfs: get_cfs.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+get_stft_freqs: get_stft_freqs.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+get_cfs_T: get_cfs_T.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 
 
 #STFT: steps to do the STFT (short-term Fourier transform)
@@ -139,6 +164,11 @@ hc_square: hc_square.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 fft_squared: fft_squared.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 stft: stft.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 
+
+#Wavelets: a couple of my most often-used wavelets
+Wavelets: #gabor analytic
+gabor: gabor.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+analytic: analytic.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 
 
 #If want to make a library archive for C++ use, this works with clang++
