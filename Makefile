@@ -38,26 +38,28 @@ Dirs:
 Generate: Noise Waves Wins
 
 #Noise: generate colored noise
-Noise: #white pink brown
+Noise: white pink brown
 white: srci/white.cpp c/white.c
-	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS) -Wno-c++98-compat-pedantic; $(CC) obj/$@.o -obin/$@ -largtable2
+	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS) -Wno-c++98-compat-pedantic; $(CC) obj/$@.o -obin/$@ -largtable2 -lm
 pink: srci/pink.cpp c/pink.c
-	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS) -Wno-c++98-compat-pedantic; $(CC) obj/$@.o -obin/$@ -largtable2
+	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS) -Wno-c++98-compat-pedantic; $(CC) obj/$@.o -obin/$@ -largtable2 -lm
 brown: srci/brown.cpp c/brown.c
-	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS) -Wno-c++98-compat-pedantic; $(CC) obj/$@.o -obin/$@ -largtable2
+	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS) -Wno-c++98-compat-pedantic; $(CC) obj/$@.o -obin/$@ -largtable2 -lm
 
 #Waves: generate periodic waveforms
-Waves: #sinewave squarewave triwave sawwave pulsewave
+Waves: sinewave cosinewave squarewave #triwave sawwave pulsewave
 sinewave: srci/sinewave.cpp c/sinewave.c
-	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2
+	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lm
+cosinewave: srci/cosinewave.cpp c/cosinewave.c
+	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lm
 squarewave: srci/squarewave.cpp c/squarewave.c
-	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2
+	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lm
 triwave: srci/triwave.cpp c/triwave.c
-	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2
+	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lm
 sawwave: srci/sawwave.cpp c/sawwave.c
-	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2
+	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lm
 pulsewave: srci/pulsewave.cpp c/pulsewave.c
-	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2
+	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lm
 
 #Wins: generate common 1-D windows
 Wins: rectangular triangular bartlett hann hamming blackman blackmanharris flattop povey gauss tukey planck

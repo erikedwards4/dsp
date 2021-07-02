@@ -38,14 +38,15 @@ Dirs:
 Generate: Noise Waves Wins
 
 #Noise: generate colored noise
-Noise: #white pink brown
+Noise: white pink brown
 white: white.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 pink: pink.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 brown: brown.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 
 #Waves: generate periodic waveforms
-Waves: #sinewave squarewave triwave sawwave pulsewave
+Waves: sinewave cosinewave squarewave #triwave sawwave pulsewave
 sinewave: sinewave.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+cosinewave: cosinewave.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 squarewave: squarewave.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 triwave: triwave.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 sawwave: sawwave.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)

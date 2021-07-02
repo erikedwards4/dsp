@@ -5,35 +5,40 @@
 //Declarations
 const valarray<size_t> oktypes = {1u,2u,101u,102u};
 const size_t I = 0u, O = 1u;
-double std;
+size_t N, dim;
 char zmn;
+double std;
 
 //Description
 string descr;
-descr += "Zero-mean, Gaussian brown noise.\n";
-descr += "Makes tensor of floats from a normal distribution with specified stddev,\n";
+descr += "Zero-mean, Gaussian brown noise (1-D).\n";
+descr += "Makes vector of floats from a normal distribution with specified stddev,\n";
 descr += "and then integrates (cumsum) to output the brown noise (1/f^2 characteristic).\n";
 descr += "\n";
-descr += "Use -z (--zero_mean) to zero the mean before output\n";
-descr += "Although the expected value of the mean is 0, the generated mean is not.\n";
-descr += "This subtracts the global mean of Y! If it is desired to \n";
-descr += "subtract the mean of each row or col separately, then use mean0.\n";
-descr += "\n";
 descr += "This uses modified code from PCG random, but does not require it to be installed.\n";
+descr += "\n";
+descr += "Use -n (--N) to give the number of samples in the output vec.\n";
+descr += "\n";
+descr += "Use -d (--dim) to give the nonsingleton dim of the output vec.\n";
+descr += "If d=0, then Y is a column vector [default].\n";
+descr += "If d=1, then Y is a row vector.\n";
+descr += "(d=2 and d=3 are also possible, but rarely used.)\n";
+descr += "\n";
+descr += "Use -z (--zero_mean) to zero the mean before output.\n";
+descr += "Although the expected value of the mean is 0, the generated mean is not.\n";
+descr += "\n";
 descr += "For complex output, real/imag parts are separately set using the same params.\n";
 descr += "\n";
 descr += "Examples:\n";
-descr += "$ brown -z -r2 -c3 -o Y \n";
-descr += "$ brown -d2.5 -r2 -c3 -t1 > Y \n";
-descr += "$ brown -d3 -r2 -c3 -t102 > Y \n";
+descr += "$ brown -z -n16 -o Y \n";
+descr += "$ brown -u -d1 -n16 -t1 > Y \n";
+descr += "$ brown -d1 -n16 -t102 > Y \n";
 
 //Argtable
-struct arg_dbl  *a_std = arg_dbln("d","stddev","<dbl>",0,1,"std dev parameter [default=1.0]");
+struct arg_dbl  *a_std = arg_dbln("s","std","<dbl>",0,1,"std dev parameter [default=1.0]");
 struct arg_lit  *a_zmn = arg_litn("z","zero_mean",0,1,"include to zero mean before output");
-struct arg_int   *a_nr = arg_intn("r","R","<uint>",0,1,"num rows in output [default=1]");
-struct arg_int   *a_nc = arg_intn("c","C","<uint>",0,1,"num cols in output [default=1]");
-struct arg_int   *a_ns = arg_intn("s","S","<uint>",0,1,"num slices in output [default=1]");
-struct arg_int   *a_nh = arg_intn("y","H","<uint>",0,1,"num hyperslices in the output [default=1]");
+struct arg_int    *a_n = arg_intn("n","N","<uint>",0,1,"num samples in output [default=1]");
+struct arg_int    *a_d = arg_intn("d","dim","<uint>",0,1,"nonsingleton dimension [default=0 -> col vec]");
 struct arg_int *a_otyp = arg_intn("t","type","<uint>",0,1,"output data type [default=1]");
 struct arg_int *a_ofmt = arg_intn("f","fmt","<uint>",0,1,"output file format [default=147]");
 struct arg_file  *a_fo = arg_filen("o","ofile","<file>",0,O,"output file (Y)");
@@ -57,38 +62,32 @@ if ((o1.T==oktypes).sum()==0)
     cerr << endl; return 1;
 }
 
-//Get o1.R
-if (a_nr->count==0) { o1.R = 1u; }
-else if (a_nr->ival[0]<0) { cerr << progstr+": " << __LINE__ << errstr << "R (nrows) must be nonnegative" << endl; return 1; }
-else { o1.R = size_t(a_nr->ival[0]); }
+//Get N
+if (a_n->count==0) { N = 1u; }
+else if (a_n->ival[0]<1) { cerr << progstr+": " << __LINE__ << errstr << "N must be a positive int" << endl; return 1; }
+else { N = size_t(a_n->ival[0]); }
 
-//Get o1.C
-if (a_nc->count==0) { o1.C = 1u; }
-else if (a_nc->ival[0]<0) { cerr << progstr+": " << __LINE__ << errstr << "C (ncols) must be nonnegative" << endl; return 1; }
-else { o1.C = size_t(a_nc->ival[0]); }
-
-//Get o1.S
-if (a_ns->count==0) { o1.S = 1u; }
-else if (a_ns->ival[0]<0) { cerr << progstr+": " << __LINE__ << errstr << "S (nslices) must be nonnegative" << endl; return 1; }
-else { o1.S = size_t(a_ns->ival[0]); }
-
-//Get o1.H
-if (a_nh->count==0) { o1.H = 1u; }
-else if (a_nh->ival[0]<0) { cerr << progstr+": " << __LINE__ << errstr << "H (nhyperslices) must be nonnegative" << endl; return 1; }
-else { o1.H = size_t(a_nh->ival[0]); }
+//Get dim
+if (a_d->count==0) { dim = 0u; }
+else if (a_d->ival[0]<0) { cerr << progstr+": " << __LINE__ << errstr << "dim must be nonnegative" << endl; return 1; }
+else { dim = size_t(a_d->ival[0]); }
+if (dim>3u) { cerr << progstr+": " << __LINE__ << errstr << "dim must be in {0,1,2,3}" << endl; return 1; }
 
 //Get std
 std = (a_std->count>0) ? a_std->dval[0] : 1.0;
-if (std<0.0) { cerr << progstr+": " << __LINE__ << errstr << "s (stddev) must be nonnegative" << endl; return 1; }
+if (std<0.0) { cerr << progstr+": " << __LINE__ << errstr << "s (stddev) must be nonnegative " << endl; return 1; }
 if (o1.T==1 && std>=double(FLT_MAX)) { cerr << progstr+": " << __LINE__ << errstr << "s (stddev) must be < " << double(FLT_MAX) << endl; return 1; }
 
 //Get zmn
 zmn = (a_zmn->count>0);
-if (zmn && !o1.isvec()) { cerr << progstr+": " << __LINE__ << warstr << "subtracting global mean (use mean0 to treat each row/col separately)" << endl; }
 
 //Checks
 
 //Set output header
+o1.R = (dim==0u) ? N : 1u;
+o1.C = (dim==1u) ? N : 1u;
+o1.S = (dim==2u) ? N : 1u;
+o1.H = (dim==3u) ? N : 1u;
 
 //Other prep
 
@@ -98,7 +97,7 @@ if (o1.T==1u)
     float *Y;
     try { Y = new float[o1.N()]; }
     catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for output file (Y)" << endl; return 1; }
-    if (codee::brown_s(Y,(float)std,o1.N(),zmn))
+    if (codee::brown_s(Y,o1.N(),(float)std,zmn))
     { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
     if (wo1)
     {
@@ -112,7 +111,7 @@ else if (o1.T==101u)
     float *Y;
     try { Y = new float[2u*o1.N()]; }
     catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for output file (Y)" << endl; return 1; }
-    if (codee::brown_c(Y,(float)std,o1.N(),zmn))
+    if (codee::brown_c(Y,o1.N(),(float)std,zmn))
     { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
     if (wo1)
     {

@@ -35,52 +35,54 @@ int main(int argc, char *argv[])
     ofstream ofs1;
     int8_t stdo1, wo1;
     ioinfo o1;
-    double std;
+    size_t N, dim;
     char uni, zmn;
+    double std;
 
 
     //Description
     string descr;
-    descr += "Zero-mean, Gaussian white noise.\n";
-    descr += "Outputs tensor of floats from a normal distribution with specified stddev.\n";
-    descr += "This is identical to white, except that mean is always 0.\n";
+    descr += "Zero-mean, Gaussian white noise (1-D).\n";
+    descr += "Outputs vector of floats from a normal distribution with specified stddev.\n";
+    descr += "\n";
+    descr += "This is identical to randn, except that mean param is fixed at 0.\n";
+    descr += "This uses modified code from PCG random, but does not require it to be installed.\n";
+    descr += "\n";
+    descr += "Use -n (--N) to give the number of samples in the output vec.\n";
+    descr += "\n";
+    descr += "Use -d (--dim) to give the nonsingleton dim of the output vec.\n";
+    descr += "If d=0, then Y is a column vector [default].\n";
+    descr += "If d=1, then Y is a row vector.\n";
+    descr += "(d=2 and d=3 are also possible, but rarely used.)\n";
     descr += "\n";
     descr += "Use -u (--uniform) to output zero-mean, uniform white noise.\n";
     descr += "In this case, the stddev controls the range according to the formula:\n";
     descr += "stddev = sqrt((b-a)^2-12), where the range of the output is in [a b).\n";
     descr += "\n";
-    descr += "Use -z (--zero_mean) to zero the mean before output along dim.\n";
+    descr += "Use -z (--zero_mean) to zero the mean before output.\n";
     descr += "Although the expected value of the mean is 0, the generated mean is not.\n";
-    descr += "This subtracts the global mean of Y! If it is desired to \n";
-    descr += "subtract the mean of each row or col separately, then use mean0.\n";
     descr += "\n";
-    descr += "This is only valid here for 1D (vector) outputs (for tensors, use mean0),\n";
-    descr += "because here the total mean of Y is subtracted from each element.\n";
-    descr += "\n";
-    descr += "This uses modified code from PCG random, but does not require it to be installed.\n";
     descr += "For complex output, real/imag parts are separately set using the same params.\n";
     descr += "\n";
     descr += "Examples:\n";
-    descr += "$ white -r2 -c3 -o Y \n";
-    descr += "$ white -d2.5 -r2 -c3 -t1 > Y \n";
-    descr += "$ white -d3 -r2 -c3 -t102 > Y \n";
+    descr += "$ white -d1 -n16 -o Y \n";
+    descr += "$ white -z -n16 -t1 > Y \n";
+    descr += "$ white -u -n16 -t102 > Y \n";
 
 
     //Argtable
     int nerrs;
-    struct arg_dbl  *a_std = arg_dbln("d","stddev","<dbl>",0,1,"std dev parameter [default=1.0]");
+    struct arg_dbl  *a_std = arg_dbln("s","std","<dbl>",0,1,"std dev parameter [default=1.0]");
     struct arg_lit  *a_uni = arg_litn("u","uniform",0,1,"include to output uniform white noise");
     struct arg_lit  *a_zmn = arg_litn("z","zero_mean",0,1,"include to zero mean before output");
-    struct arg_int   *a_nr = arg_intn("r","R","<uint>",0,1,"num rows in output [default=1]");
-    struct arg_int   *a_nc = arg_intn("c","C","<uint>",0,1,"num cols in output [default=1]");
-    struct arg_int   *a_ns = arg_intn("s","S","<uint>",0,1,"num slices in output [default=1]");
-    struct arg_int   *a_nh = arg_intn("y","H","<uint>",0,1,"num hyperslices in the output [default=1]");
+    struct arg_int    *a_n = arg_intn("n","N","<uint>",0,1,"num samples in output [default=1]");
+    struct arg_int    *a_d = arg_intn("d","dim","<uint>",0,1,"nonsingleton dimension [default=0 -> col vec]");
     struct arg_int *a_otyp = arg_intn("t","type","<uint>",0,1,"output data type [default=1]");
     struct arg_int *a_ofmt = arg_intn("f","fmt","<uint>",0,1,"output file format [default=147]");
     struct arg_file  *a_fo = arg_filen("o","ofile","<file>",0,O,"output file (Y)");
     struct arg_lit *a_help = arg_litn("h","help",0,1,"display this help and exit");
     struct arg_end  *a_end = arg_end(5);
-    void *argtable[] = {a_std, a_uni, a_zmn, a_nr, a_nc, a_ns, a_nh, a_otyp, a_ofmt, a_fo, a_help, a_end};
+    void *argtable[] = {a_std, a_uni, a_zmn, a_n, a_d, a_otyp, a_ofmt, a_fo, a_help, a_end};
     if (arg_nullcheck(argtable)!=0) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating argtable" << endl; return 1; }
     nerrs = arg_parse(argc, argv, argtable);
     if (a_help->count>0)
@@ -117,25 +119,16 @@ int main(int argc, char *argv[])
         cerr << endl; return 1;
     }
 
-    //Get o1.R
-    if (a_nr->count==0) { o1.R = 1u; }
-    else if (a_nr->ival[0]<0) { cerr << progstr+": " << __LINE__ << errstr << "R (nrows) must be nonnegative" << endl; return 1; }
-    else { o1.R = size_t(a_nr->ival[0]); }
+    //Get N
+    if (a_n->count==0) { N = 1u; }
+    else if (a_n->ival[0]<1) { cerr << progstr+": " << __LINE__ << errstr << "N must be a positive int" << endl; return 1; }
+    else { N = size_t(a_n->ival[0]); }
 
-    //Get o1.C
-    if (a_nc->count==0) { o1.C = 1u; }
-    else if (a_nc->ival[0]<0) { cerr << progstr+": " << __LINE__ << errstr << "C (ncols) must be nonnegative" << endl; return 1; }
-    else { o1.C = size_t(a_nc->ival[0]); }
-
-    //Get o1.S
-    if (a_ns->count==0) { o1.S = 1u; }
-    else if (a_ns->ival[0]<0) { cerr << progstr+": " << __LINE__ << errstr << "S (nslices) must be nonnegative" << endl; return 1; }
-    else { o1.S = size_t(a_ns->ival[0]); }
-
-    //Get o1.H
-    if (a_nh->count==0) { o1.H = 1u; }
-    else if (a_nh->ival[0]<0) { cerr << progstr+": " << __LINE__ << errstr << "H (nhyperslices) must be nonnegative" << endl; return 1; }
-    else { o1.H = size_t(a_nh->ival[0]); }
+    //Get dim
+    if (a_d->count==0) { dim = 0u; }
+    else if (a_d->ival[0]<0) { cerr << progstr+": " << __LINE__ << errstr << "dim must be nonnegative" << endl; return 1; }
+    else { dim = size_t(a_d->ival[0]); }
+    if (dim>3u) { cerr << progstr+": " << __LINE__ << errstr << "dim must be in {0,1,2,3}" << endl; return 1; }
 
     //Get std
     std = (a_std->count>0) ? a_std->dval[0] : 1.0;
@@ -147,10 +140,13 @@ int main(int argc, char *argv[])
 
     //Get zmn
     zmn = (a_zmn->count>0);
-    if (zmn && !o1.isvec()) { cerr << progstr+": " << __LINE__ << warstr << "subtracting global mean (use mean0 to treat each row/col separately)" << endl; }
 
 
     //Set output header info
+    o1.R = (dim==0u) ? N : 1u;
+    o1.C = (dim==1u) ? N : 1u;
+    o1.S = (dim==2u) ? N : 1u;
+    o1.H = (dim==3u) ? N : 1u;
 
 
     //Open output
@@ -174,7 +170,7 @@ int main(int argc, char *argv[])
         float *Y;
         try { Y = new float[o1.N()]; }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for output file (Y)" << endl; return 1; }
-        if (codee::white_s(Y,(float)std,o1.N(),uni,zmn))
+        if (codee::white_s(Y,o1.N(),(float)std,uni,zmn))
         { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
         if (wo1)
         {
@@ -188,7 +184,7 @@ int main(int argc, char *argv[])
         double *Y;
         try { Y = new double[o1.N()]; }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for output file (Y)" << endl; return 1; }
-        if (codee::white_d(Y,(double)std,o1.N(),uni,zmn))
+        if (codee::white_d(Y,o1.N(),(double)std,uni,zmn))
         { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
         if (wo1)
         {
@@ -202,7 +198,7 @@ int main(int argc, char *argv[])
         float *Y;
         try { Y = new float[2u*o1.N()]; }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for output file (Y)" << endl; return 1; }
-        if (codee::white_c(Y,(float)std,o1.N(),uni,zmn))
+        if (codee::white_c(Y,o1.N(),(float)std,uni,zmn))
         { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
         if (wo1)
         {
@@ -216,7 +212,7 @@ int main(int argc, char *argv[])
         double *Y;
         try { Y = new double[2u*o1.N()]; }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for output file (Y)" << endl; return 1; }
-        if (codee::white_z(Y,(double)std,o1.N(),uni,zmn))
+        if (codee::white_z(Y,o1.N(),(double)std,uni,zmn))
         { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
         if (wo1)
         {

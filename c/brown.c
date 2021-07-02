@@ -9,6 +9,7 @@
 
 #include <stdio.h>
 #include <stdint.h>
+#include <float.h>
 #include <math.h>
 #include <time.h>
 
@@ -21,17 +22,17 @@ namespace codee {
 extern "C" {
 #endif
 
-int brown_s (float *Y, const float std, const size_t N, const char zmn);
-int brown_d (double *Y, const double std, const size_t N, const char zmn);
-int brown_c (float *Y, const float std, const size_t N, const char zmn);
-int brown_z (double *Y, const double std, const size_t N, const char zmn);
+int brown_s (float *Y, const size_t N, const float std, const char zmn);
+int brown_d (double *Y, const size_t N, const double std, const char zmn);
+int brown_c (float *Y, const size_t N, const float std, const char zmn);
+int brown_z (double *Y, const size_t N, const double std, const char zmn);
 
 
-int brown_s (float *Y, const float std, const size_t N, const char zmn)
+int brown_s (float *Y, const size_t N, const float std, const char zmn)
 {
     if (std<0.0f) { fprintf(stderr, "error in brown_s: std must be nonnegative\n"); return 1; }
 
-    if (std<=0.0f)
+    if (std<FLT_EPSILON)
     {
         for (size_t n=0u; n<N; ++n, ++Y) { *Y = 0.0f; }
     }
@@ -153,11 +154,11 @@ int brown_s (float *Y, const float std, const size_t N, const char zmn)
 }
 
 
-int brown_d (double *Y, const double std, const size_t N, const char zmn)
+int brown_d (double *Y, const size_t N, const double std, const char zmn)
 {
     if (std<0.0) { fprintf(stderr, "error in brown_d: std must be nonnegative\n"); return 1; }
 
-    if (std<=0.0)
+    if (std<DBL_EPSILON)
     {
         for (size_t n=0u; n<N; ++n, ++Y) { *Y = 0.0; }
     }
@@ -279,11 +280,11 @@ int brown_d (double *Y, const double std, const size_t N, const char zmn)
 }
 
 
-int brown_c (float *Y, const float std, const size_t N, const char zmn)
+int brown_c (float *Y, const size_t N, const float std, const char zmn)
 {
     if (std<0.0f) { fprintf(stderr, "error in brown_s: std must be nonnegative\n"); return 1; }
 
-    if (std<=0.0f)
+    if (std<FLT_EPSILON)
     {
         for (size_t n=0u; n<2u*N; ++n, ++Y) { *Y = 0.0f; }
     }
@@ -367,11 +368,11 @@ int brown_c (float *Y, const float std, const size_t N, const char zmn)
 }
 
 
-int brown_z (double *Y, const double std, const size_t N, const char zmn)
+int brown_z (double *Y, const size_t N, const double std, const char zmn)
 {
     if (std<0.0) { fprintf(stderr, "error in brown_z: std must be nonnegative\n"); return 1; }
 
-    if (std<=0.0)
+    if (std<DBL_EPSILON)
     {
         for (size_t n=0u; n<2u*N; ++n, ++Y) { *Y = 0.0; }
     }

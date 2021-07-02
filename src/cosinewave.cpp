@@ -13,7 +13,7 @@
 #include <argtable2.h>
 #include "../util/cmli.hpp"
 #include <cfloat>
-#include "brown.c"
+#include "cosinewave.c"
 
 #ifdef I
 #undef I
@@ -36,48 +36,55 @@ int main(int argc, char *argv[])
     int8_t stdo1, wo1;
     ioinfo o1;
     size_t N, dim;
-    char zmn;
-    double std;
+    double amp, frq, phs;
 
 
     //Description
     string descr;
-    descr += "Zero-mean, Gaussian brown noise (1-D).\n";
-    descr += "Makes vector of floats from a normal distribution with specified stddev,\n";
-    descr += "and then integrates (cumsum) to output the brown noise (1/f^2 characteristic).\n";
+    descr += "Generates 1-D cosinewave signal.\n";
+    descr += "This is same as sinewave, but uses different phase convention:\n";
+    descr += "For cosinewave the signal is at its maximum at phase 0,\n";
+    descr += "whereas for sinewave the signal is at 0 at phase 0.\n";
     descr += "\n";
-    descr += "This uses modified code from PCG random, but does not require it to be installed.\n";
-    descr += "\n";
-    descr += "Use -n (--N) to give the number of samples in the output vec.\n";
+    descr += "Use -l (--length) to give the output vector length in sample points.\n";
     descr += "\n";
     descr += "Use -d (--dim) to give the nonsingleton dim of the output vec.\n";
     descr += "If d=0, then Y is a column vector [default].\n";
     descr += "If d=1, then Y is a row vector.\n";
     descr += "(d=2 and d=3 are also possible, but rarely used.)\n";
     descr += "\n";
-    descr += "Use -z (--zero_mean) to zero the mean before output.\n";
-    descr += "Although the expected value of the mean is 0, the generated mean is not.\n";
+    descr += "Use -a (--amplitude) to give the amplitude (max) of the output.\n";
+    descr += "Note that this is half of the peak-to-peak amplitude.\n";
     descr += "\n";
-    descr += "For complex output, real/imag parts are separately set using the same params.\n";
+    descr += "Use -f (--freq) to give the frequency in units of cycles/sample.\n";
+    descr += "Note that this is f/sr, if you know the frequency and sample rate in Hz.\n";
+    descr += "Thus, f should be 0<f<=0.5, where 0 is DC and 0.5 is Nyquist.\n";
+    descr += "\n";
+    descr += "Use -p (--phase) to give the phase in radians.\n";
+    descr += "This is usually in [0 2*pi), but the value will be taken modulo 2*pi.\n";
+    descr += "\n";
+    descr += "Since this is a generating function (no inputs), the output data type\n";
+    descr += "and file format can be specified by -t and -f, respectively. \n";
     descr += "\n";
     descr += "Examples:\n";
-    descr += "$ brown -z -n16 -o Y \n";
-    descr += "$ brown -u -d1 -n16 -t1 > Y \n";
-    descr += "$ brown -d1 -n16 -t102 > Y \n";
+    descr += "$ cosinewave -n32 -a2.5 -f0.2 -o Y \n";
+    descr += "$ cosinewave -n32 -f0.01 -p1.57079632679 > Y \n";
+    descr += "$ cosinewave -n32 -f0.01 -d1 -t1 -f101 > Y \n";
 
 
     //Argtable
     int nerrs;
-    struct arg_dbl  *a_std = arg_dbln("s","std","<dbl>",0,1,"std dev parameter [default=1.0]");
-    struct arg_lit  *a_zmn = arg_litn("z","zero_mean",0,1,"include to zero mean before output");
+    struct arg_dbl  *a_amp = arg_dbln("a","amp","<dbl>",0,1,"amplitude [default=1.0]");
+    struct arg_dbl  *a_frq = arg_dbln("f","freq","<dbl>",0,1,"frequency in cycles/sample [default=0.5]");
+    struct arg_dbl  *a_phs = arg_dbln("p","phase","<dbl>",0,1,"phase in radians [default=0.0]");
     struct arg_int    *a_n = arg_intn("n","N","<uint>",0,1,"num samples in output [default=1]");
     struct arg_int    *a_d = arg_intn("d","dim","<uint>",0,1,"nonsingleton dimension [default=0 -> col vec]");
-    struct arg_int *a_otyp = arg_intn("t","type","<uint>",0,1,"output data type [default=1]");
-    struct arg_int *a_ofmt = arg_intn("f","fmt","<uint>",0,1,"output file format [default=147]");
+    struct arg_int *a_otyp = arg_intn("t","type","<uint>",0,1,"output data type [default=2 -> double]");
+    struct arg_int *a_ofmt = arg_intn("f","fmt","<uint>",0,1,"output file format [default=102 -> colmajor]");
     struct arg_file  *a_fo = arg_filen("o","ofile","<file>",0,O,"output file (Y)");
     struct arg_lit *a_help = arg_litn("h","help",0,1,"display this help and exit");
     struct arg_end  *a_end = arg_end(5);
-    void *argtable[] = {a_std, a_zmn, a_n, a_d, a_otyp, a_ofmt, a_fo, a_help, a_end};
+    void *argtable[] = {a_amp, a_frq, a_phs, a_n, a_d, a_otyp, a_ofmt, a_fo, a_help, a_end};
     if (arg_nullcheck(argtable)!=0) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating argtable" << endl; return 1; }
     nerrs = arg_parse(argc, argv, argtable);
     if (a_help->count>0)
@@ -105,7 +112,7 @@ int main(int argc, char *argv[])
 
     //Get o1.T
     if (a_otyp->count==0) { o1.T = 1u; }
-    else if (a_otyp->ival[0]<1) { cerr << progstr+": " << __LINE__ << errstr << "output data type must be positive" << endl; return 1; }
+    else if (a_otyp->ival[0]<1) { cerr << progstr+": " << __LINE__ << errstr << "data type must be positive int" << endl; return 1; }
     else { o1.T = size_t(a_otyp->ival[0]); }
     if ((o1.T==oktypes).sum()==0)
     {
@@ -125,13 +132,18 @@ int main(int argc, char *argv[])
     else { dim = size_t(a_d->ival[0]); }
     if (dim>3u) { cerr << progstr+": " << __LINE__ << errstr << "dim must be in {0,1,2,3}" << endl; return 1; }
 
-    //Get std
-    std = (a_std->count>0) ? a_std->dval[0] : 1.0;
-    if (std<0.0) { cerr << progstr+": " << __LINE__ << errstr << "s (stddev) must be nonnegative " << endl; return 1; }
-    if (o1.T==1 && std>=double(FLT_MAX)) { cerr << progstr+": " << __LINE__ << errstr << "s (stddev) must be < " << double(FLT_MAX) << endl; return 1; }
+    //Get amp
+    amp = (a_amp->count>0) ? a_amp->dval[0] : 1.0;
+    if (amp<0.0) { cerr << progstr+": " << __LINE__ << errstr << "amplitude must be nonnegative" << endl; return 1; }
+    if (o1.T==1 && amp>=double(FLT_MAX)) { cerr << progstr+": " << __LINE__ << errstr << "amplitude must be < " << double(FLT_MAX) << endl; return 1; }
 
-    //Get zmn
-    zmn = (a_zmn->count>0);
+    //Get frq
+    frq = (a_frq->count>0) ? a_frq->dval[0] : 0.5;
+    if (frq<double(FLT_EPSILON)) { cerr << progstr+": " << __LINE__ << errstr << "frequency must be positive" << endl; return 1; }
+    if (frq>0.5) { cerr << progstr+": " << __LINE__ << errstr << "frequency must be <= 0.5" << endl; return 1; }
+
+    //Get phs
+    phs = (a_phs->count>0) ? a_phs->dval[0] : 0.0;
 
 
     //Set output header info
@@ -162,11 +174,11 @@ int main(int argc, char *argv[])
         float *Y;
         try { Y = new float[o1.N()]; }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for output file (Y)" << endl; return 1; }
-        if (codee::brown_s(Y,o1.N(),(float)std,zmn))
+        if (codee::cosinewave_s(Y,o1.N(),(float)amp,(float)frq,(float)phs))
         { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
         if (wo1)
         {
-            try { ofs1.write(reinterpret_cast<char*>(&Y[0]),o1.nbytes()); }
+            try { ofs1.write(reinterpret_cast<char*>(Y),o1.nbytes()); }
             catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem writing output file (Y)" << endl; return 1; }
         }
         delete[] Y;
@@ -176,11 +188,11 @@ int main(int argc, char *argv[])
         double *Y;
         try { Y = new double[o1.N()]; }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for output file (Y)" << endl; return 1; }
-        if (codee::brown_d(Y,o1.N(),(double)std,zmn))
+        if (codee::cosinewave_d(Y,o1.N(),(double)amp,(double)frq,(double)phs))
         { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
         if (wo1)
         {
-            try { ofs1.write(reinterpret_cast<char*>(&Y[0]),o1.nbytes()); }
+            try { ofs1.write(reinterpret_cast<char*>(Y),o1.nbytes()); }
             catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem writing output file (Y)" << endl; return 1; }
         }
         delete[] Y;
@@ -190,11 +202,11 @@ int main(int argc, char *argv[])
         float *Y;
         try { Y = new float[2u*o1.N()]; }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for output file (Y)" << endl; return 1; }
-        if (codee::brown_c(Y,o1.N(),(float)std,zmn))
+        if (codee::cosinewave_c(Y,N,(float)amp,(float)frq,(float)phs))
         { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
         if (wo1)
         {
-            try { ofs1.write(reinterpret_cast<char*>(&Y[0]),o1.nbytes()); }
+            try { ofs1.write(reinterpret_cast<char*>(Y),o1.nbytes()); }
             catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem writing output file (Y)" << endl; return 1; }
         }
         delete[] Y;
@@ -204,11 +216,11 @@ int main(int argc, char *argv[])
         double *Y;
         try { Y = new double[2u*o1.N()]; }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for output file (Y)" << endl; return 1; }
-        if (codee::brown_z(Y,o1.N(),(double)std,zmn))
+        if (codee::cosinewave_z(Y,N,(double)amp,(double)frq,(double)phs))
         { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
         if (wo1)
         {
-            try { ofs1.write(reinterpret_cast<char*>(&Y[0]),o1.nbytes()); }
+            try { ofs1.write(reinterpret_cast<char*>(Y),o1.nbytes()); }
             catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem writing output file (Y)" << endl; return 1; }
         }
         delete[] Y;

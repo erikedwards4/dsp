@@ -9,6 +9,7 @@
 
 #include <stdio.h>
 #include <stdint.h>
+#include <float.h>
 #include <math.h>
 #include <time.h>
 
@@ -21,17 +22,17 @@ namespace codee {
 extern "C" {
 #endif
 
-int white_s (float *Y, const float std, const size_t N, const char uni, const char zmn);
-int white_d (double *Y, const double std, const size_t N, const char uni, const char zmn);
-int white_c (float *Y, const float std, const size_t N, const char uni, const char zmn);
-int white_z (double *Y, const double std, const size_t N, const char uni, const char zmn);
+int white_s (float *Y, const size_t N, const float std, const char uni, const char zmn);
+int white_d (double *Y, const size_t N, const double std, const char uni, const char zmn);
+int white_c (float *Y, const size_t N, const float std, const char uni, const char zmn);
+int white_z (double *Y, const size_t N, const double std, const char uni, const char zmn);
 
 
-int white_s (float *Y, const float std, const size_t N, const char uni, const char zmn)
+int white_s (float *Y, const size_t N, const float std, const char uni, const char zmn)
 {
     if (std<0.0f) { fprintf(stderr, "error in white_s: std must be nonnegative\n"); return 1; }
 
-    if (std<=0.0f)
+    if (std<FLT_EPSILON)
     {
         for (size_t n=0u; n<N; ++n, ++Y) { *Y = 0.0f; }
     }
@@ -140,25 +141,25 @@ int white_s (float *Y, const float std, const size_t N, const char uni, const ch
                 *Y++ = R * cosf(M_2PI*u2);
             }
         }
+    }
 
-        if (zmn)
-        {
-            float sm = 0.0f;
-            for (size_t n=0; n<N; ++n) { sm += *--Y; }
-            sm /= (float)N;
-            for (size_t n=0; n<N; ++n, ++Y) { *Y -= sm; }
-        }
+    if (zmn)
+    {
+        float sm = 0.0f;
+        for (size_t n=0; n<N; ++n) { sm += *--Y; }
+        sm /= (float)N;
+        for (size_t n=0; n<N; ++n, ++Y) { *Y -= sm; }
     }
 
     return 0;
 }
 
 
-int white_d (double *Y, const double std, const size_t N, const char uni, const char zmn)
+int white_d (double *Y, const size_t N, const double std, const char uni, const char zmn)
 {
     if (std<0.0) { fprintf(stderr, "error in white_d: std must be nonnegative\n"); return 1; }
 
-    if (std<=0.0)
+    if (std<DBL_EPSILON)
     {
         for (size_t n=0u; n<N; ++n, ++Y) { *Y = 0.0; }
     }
@@ -267,25 +268,25 @@ int white_d (double *Y, const double std, const size_t N, const char uni, const 
                 *Y++ = R * cos(M_2PI*u2);
             }
         }
+    }
 
-        if (zmn)
-        {
-            double sm = 0.0;
-            for (size_t n=0; n<N; ++n) { sm += *--Y; }
-            sm /= (double)N;
-            for (size_t n=0; n<N; ++n, ++Y) { *Y -= sm; }
-        }
+    if (zmn)
+    {
+        double sm = 0.0;
+        for (size_t n=0; n<N; ++n) { sm += *--Y; }
+        sm /= (double)N;
+        for (size_t n=0; n<N; ++n, ++Y) { *Y -= sm; }
     }
 
     return 0;
 }
 
 
-int white_c (float *Y, const float std, const size_t N, const char uni, const char zmn)
+int white_c (float *Y, const size_t N, const float std, const char uni, const char zmn)
 {
     if (std<0.0f) { fprintf(stderr, "error in white_s: std must be nonnegative\n"); return 1; }
 
-    if (std<=0.0f)
+    if (std<FLT_EPSILON)
     {
         for (size_t n=0u; n<2u*N; ++n, ++Y) { *Y = 0.0f; }
     }
@@ -364,25 +365,25 @@ int white_c (float *Y, const float std, const size_t N, const char uni, const ch
                 *Y++ = R * sinf(M_2PI*u2);
             }
         }
+    }
 
-        if (zmn)
-        {
-            float smr=0.0f, smi=0.0f;
-            for (size_t n=0; n<N; ++n) { smi += *--Y; smr += *--Y; }
-            smr /= (float)N; smi /= (float)N;
-            for (size_t n=0; n<N; ++n) { *Y++ -= smr; *Y++ -= smi; }
-        }
+    if (zmn)
+    {
+        float smr=0.0f, smi=0.0f;
+        for (size_t n=0; n<N; ++n) { smi += *--Y; smr += *--Y; }
+        smr /= (float)N; smi /= (float)N;
+        for (size_t n=0; n<N; ++n) { *Y++ -= smr; *Y++ -= smi; }
     }
 
     return 0;
 }
 
 
-int white_z (double *Y, const double std, const size_t N, const char uni, const char zmn)
+int white_z (double *Y, const size_t N, const double std, const char uni, const char zmn)
 {
     if (std<0.0) { fprintf(stderr, "error in white_z: std must be nonnegative\n"); return 1; }
 
-    if (std<=0.0)
+    if (std<DBL_EPSILON)
     {
         for (size_t n=0u; n<2u*N; ++n, ++Y) { *Y = 0.0; }
     }
@@ -461,14 +462,14 @@ int white_z (double *Y, const double std, const size_t N, const char uni, const 
                 *Y++ = R * sin(M_2PI*u2);
             }
         }
+    }
 
-        if (zmn)
-        {
-            double smr=0.0, smi = 0.0;
-            for (size_t n=0; n<N; ++n) { smi += *--Y; smr += *--Y; }
-            smr /= (double)N; smi /= (double)N;
-            for (size_t n=0; n<N; ++n) { *Y++ -= smr; *Y++ -= smi; }
-        }
+    if (zmn)
+    {
+        double smr=0.0, smi = 0.0;
+        for (size_t n=0; n<N; ++n) { smi += *--Y; smr += *--Y; }
+        smr /= (double)N; smi /= (double)N;
+        for (size_t n=0; n<N; ++n) { *Y++ -= smr; *Y++ -= smi; }
     }
 
     return 0;
