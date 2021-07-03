@@ -1,6 +1,6 @@
 //Includes
 #include <cfloat>
-#include "triwave.c"
+#include "pulsewave.c"
 
 //Declarations
 const valarray<size_t> oktypes = {1u,2u,101u,102u};
@@ -10,7 +10,7 @@ double amp, frq, phs;
 
 //Description
 string descr;
-descr += "Generates 1-D triangle-wave signal.\n";
+descr += "Generates 1-D sawtooth-wave signal.\n";
 descr += "The parameters are the same as sinewave, and\n";
 descr += "the output has the same sign as the corresponding sinewave.\n";
 descr += "\n";
@@ -35,9 +35,9 @@ descr += "Since this is a generating function (no inputs), the output data type\
 descr += "and file format can be specified by -t and -f, respectively. \n";
 descr += "\n";
 descr += "Examples:\n";
-descr += "$ triwave -n32 -a2.5 -f0.2 -o Y \n";
-descr += "$ triwave -n32 -f0.01 -p1.57079632679 > Y \n";
-descr += "$ triwave -n32 -f0.01 -d1 -t1 -f101 > Y \n";
+descr += "$ pulsewave -n32 -a2.5 -f0.2 -o Y \n";
+descr += "$ pulsewave -n32 -f0.01 -p1.57079632679 > Y \n";
+descr += "$ pulsewave -n32 -f0.01 -d1 -t1 -f101 > Y \n";
 
 //Argtable
 struct arg_dbl  *a_amp = arg_dbln("a","amp","<dbl>",0,1,"amplitude [default=1.0]");
@@ -108,7 +108,7 @@ if (o1.T==1u)
     float *Y;
     try { Y = new float[o1.N()]; }
     catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for output file (Y)" << endl; return 1; }
-    if (codee::triwave_s(Y,o1.N(),(float)amp,(float)frq,(float)phs))
+    if (codee::pulsewave_s(Y,o1.N(),(float)amp,(float)frq,(float)phs))
     { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
     if (wo1)
     {
@@ -122,7 +122,7 @@ else if (o1.T==101u)
     float *Y;
     try { Y = new float[2u*o1.N()]; }
     catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for output file (Y)" << endl; return 1; }
-    if (codee::triwave_c(Y,N,(float)amp,(float)frq,(float)phs))
+    if (codee::pulsewave_c(Y,N,(float)amp,(float)frq,(float)phs))
     { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
     if (wo1)
     {

@@ -47,7 +47,7 @@ brown: srci/brown.cpp c/brown.c
 	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS) -Wno-c++98-compat-pedantic; $(CC) obj/$@.o -obin/$@ -largtable2 -lm
 
 #Waves: generate periodic waveforms
-Waves: sinewave cosinewave squarewave #triwave sawwave pulsewave
+Waves: sinewave cosinewave squarewave triwave sawwave pulsewave
 sinewave: srci/sinewave.cpp c/sinewave.c
 	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lm
 cosinewave: srci/cosinewave.cpp c/cosinewave.c

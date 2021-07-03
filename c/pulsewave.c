@@ -1,9 +1,9 @@
-//Generates a square-wave signal (1-D vector of floats),
-//with specified length (N), amp, freq, and phase.
-//Sine phase is used, such that signal is 0 at phase 0.
+//Generates a pulse-wave signal (1-D vector of floats),
+//with specified length (N), amp, freq, phase, and duty-cycle.
+//Cosine phase is used, such that the signal is 1 at phase 0.
 
-//For the complex case, the real part is the cosine-phase squarewave,
-//and the imaginary part is the corresponding sine-phase squarewave.
+//For the complex case, the real part is the cosine-phase pulsewave,
+//and the imaginary part is the corresponding sine-phase pulsewave.
 
 #include <stdio.h>
 #include <float.h>
@@ -30,16 +30,16 @@ namespace codee {
 extern "C" {
 #endif
 
-int squarewave_s (float *Y, const size_t N, const float amp, const float frq, const float phs);
-int squarewave_d (double *Y, const size_t N, const double amp, const double frq, const double phs);
-int squarewave_c (float *Y, const size_t N, const float amp, const float frq, const float phs);
-int squarewave_z (double *Y, const size_t N, const double amp, const double frq, const double phs);
+int pulsewave_s (float *Y, const size_t N, const float amp, const float frq, const float phs, const float dty);
+int pulsewave_d (double *Y, const size_t N, const double amp, const double frq, const double phs, const double dty);
+int pulsewave_c (float *Y, const size_t N, const float amp, const float frq, const float phs, const float dty);
+int pulsewave_z (double *Y, const size_t N, const double amp, const double frq, const double phs, const double dty);
 
 
-int squarewave_s (float *Y, const size_t N, const float amp, const float frq, const float phs)
+int pulsewave_s (float *Y, const size_t N, const float amp, const float frq, const float phs, const float dty)
 {
-    if (amp<0.0f) { fprintf(stderr, "error in squarewave_s: amp must be nonnegative\n"); return 1; }
-    if (frq<FLT_EPSILON) { fprintf(stderr, "error in squarewave_s: freq must be positive\n"); return 1; }
+    if (amp<0.0f) { fprintf(stderr, "error in pulsewave_s: amp must be nonnegative\n"); return 1; }
+    if (frq<FLT_EPSILON) { fprintf(stderr, "error in pulsewave_s: freq must be positive\n"); return 1; }
 
     if (amp<FLT_EPSILON)
     {
@@ -64,10 +64,10 @@ int squarewave_s (float *Y, const size_t N, const float amp, const float frq, co
 }
 
 
-int squarewave_d (double *Y, const size_t N, const double amp, const double frq, const double phs)
+int pulsewave_d (double *Y, const size_t N, const double amp, const double frq, const double phs, const double dty)
 {
-    if (amp<0.0) { fprintf(stderr, "error in squarewave_d: amp must be nonnegative\n"); return 1; }
-    if (frq<DBL_EPSILON) { fprintf(stderr, "error in squarewave_d: freq must be positive\n"); return 1; }
+    if (amp<0.0) { fprintf(stderr, "error in pulsewave_d: amp must be nonnegative\n"); return 1; }
+    if (frq<DBL_EPSILON) { fprintf(stderr, "error in pulsewave_d: freq must be positive\n"); return 1; }
 
     if (amp<DBL_EPSILON)
     {
@@ -92,10 +92,10 @@ int squarewave_d (double *Y, const size_t N, const double amp, const double frq,
 }
 
 
-int squarewave_c (float *Y, const size_t N, const float amp, const float frq, const float phs)
+int pulsewave_c (float *Y, const size_t N, const float amp, const float frq, const float phs, const float dty)
 {
-    if (amp<0.0f) { fprintf(stderr, "error in squarewave_c: amp must be nonnegative\n"); return 1; }
-    if (frq<FLT_EPSILON) { fprintf(stderr, "error in squarewave_c: freq must be positive\n"); return 1; }
+    if (amp<0.0f) { fprintf(stderr, "error in pulsewave_c: amp must be nonnegative\n"); return 1; }
+    if (frq<FLT_EPSILON) { fprintf(stderr, "error in pulsewave_c: freq must be positive\n"); return 1; }
 
     if (amp<FLT_EPSILON)
     {
@@ -126,10 +126,10 @@ int squarewave_c (float *Y, const size_t N, const float amp, const float frq, co
 }
 
 
-int squarewave_z (double *Y, const size_t N, const double amp, const double frq, const double phs)
+int pulsewave_z (double *Y, const size_t N, const double amp, const double frq, const double phs, const double dty)
 {
-    if (amp<0.0) { fprintf(stderr, "error in squarewave_z: amp must be nonnegative\n"); return 1; }
-    if (frq<DBL_EPSILON) { fprintf(stderr, "error in squarewave_z: freq must be positive\n"); return 1; }
+    if (amp<0.0) { fprintf(stderr, "error in pulsewave_z: amp must be nonnegative\n"); return 1; }
+    if (frq<DBL_EPSILON) { fprintf(stderr, "error in pulsewave_z: freq must be positive\n"); return 1; }
 
     if (amp<DBL_EPSILON)
     {

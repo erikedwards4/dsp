@@ -35,7 +35,7 @@ Dirs:
 
 
 #Generate: generate noise, simple waveforms, windows
-Generate: Noise Waves Wins
+Generate: Noise Pulses Waves Wins
 
 #Noise: generate colored noise
 Noise: white pink brown
@@ -43,8 +43,13 @@ white: white.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 pink: pink.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 brown: brown.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 
+#Pulses: generate pulse functions (dirac delta function is a.k.a. unit impulse response)
+Pulses: unit_impulse rectangular_pulse
+unit_impulse: unit_impulse.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+rectangular_pulse: rectangular_pulse.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+
 #Waves: generate periodic waveforms
-Waves: sinewave cosinewave squarewave #triwave sawwave pulsewave
+Waves: sinewave cosinewave squarewave triwave sawwave pulsewave
 sinewave: sinewave.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 cosinewave: cosinewave.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 squarewave: squarewave.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)

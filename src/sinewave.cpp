@@ -54,7 +54,7 @@ int main(int argc, char *argv[])
     descr += "Note that this is half of the peak-to-peak amplitude.\n";
     descr += "\n";
     descr += "Use -f (--freq) to give the frequency in units of cycles/sample.\n";
-    descr += "Note that this is f/sr, if you know the frequency and sample rate in Hz.\n";
+    descr += "This is the frequency in Hz divided by the sample rate in Hz.\n";
     descr += "Thus, f should be in [0 0.5], where 0 is DC and 0.5 is Nyquist.\n";
     descr += "\n";
     descr += "Use -p (--phase) to give the phase in radians.\n";

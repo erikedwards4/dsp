@@ -15,7 +15,7 @@ descr += "This is same as sinewave, but uses different phase convention:\n";
 descr += "For cosinewave the signal is at its maximum at phase 0,\n";
 descr += "whereas for sinewave the signal is at 0 at phase 0.\n";
 descr += "\n";
-descr += "Use -l (--length) to give the output vector length in sample points.\n";
+descr += "Use -n (--N) to give the output vector length in sample points.\n";
 descr += "\n";
 descr += "Use -d (--dim) to give the nonsingleton dim of the output vec.\n";
 descr += "If d=0, then Y is a column vector [default].\n";

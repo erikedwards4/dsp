@@ -13,7 +13,7 @@
 #include <argtable2.h>
 #include "../util/cmli.hpp"
 #include <cfloat>
-#include "cosinewave.c"
+#include "sawwave.c"
 
 #ifdef I
 #undef I
@@ -41,12 +41,11 @@ int main(int argc, char *argv[])
 
     //Description
     string descr;
-    descr += "Generates 1-D cosinewave signal.\n";
-    descr += "This is same as sinewave, but uses different phase convention:\n";
-    descr += "For cosinewave the signal is at its maximum at phase 0,\n";
-    descr += "whereas for sinewave the signal is at 0 at phase 0.\n";
+    descr += "Generates 1-D sawtooth-wave signal.\n";
+    descr += "The parameters are the same as sinewave, and\n";
+    descr += "the output has the same sign as the corresponding sinewave.\n";
     descr += "\n";
-    descr += "Use -l (--length) to give the output vector length in sample points.\n";
+    descr += "Use -n (--N) to give the output vector length in sample points.\n";
     descr += "\n";
     descr += "Use -d (--dim) to give the nonsingleton dim of the output vec.\n";
     descr += "If d=0, then Y is a column vector [default].\n";
@@ -58,7 +57,7 @@ int main(int argc, char *argv[])
     descr += "\n";
     descr += "Use -f (--freq) to give the frequency in units of cycles/sample.\n";
     descr += "This is the frequency in Hz divided by the sample rate in Hz.\n";
-    descr += "Thus, f should be 0<f<=0.5, where 0 is DC and 0.5 is Nyquist.\n";
+    descr += "Thus, f should be in [0 0.5], where 0 is DC and 0.5 is Nyquist.\n";
     descr += "\n";
     descr += "Use -p (--phase) to give the phase in radians.\n";
     descr += "This is usually in [0 2*pi), but the value will be taken modulo 2*pi.\n";
@@ -67,9 +66,9 @@ int main(int argc, char *argv[])
     descr += "and file format can be specified by -t and -f, respectively. \n";
     descr += "\n";
     descr += "Examples:\n";
-    descr += "$ cosinewave -n32 -a2.5 -f0.2 -o Y \n";
-    descr += "$ cosinewave -n32 -f0.01 -p1.57079632679 > Y \n";
-    descr += "$ cosinewave -n32 -f0.01 -d1 -t1 -f101 > Y \n";
+    descr += "$ sawwave -n32 -a2.5 -f0.2 -o Y \n";
+    descr += "$ sawwave -n32 -f0.01 -p1.57079632679 > Y \n";
+    descr += "$ sawwave -n32 -f0.01 -d1 -t1 -f101 > Y \n";
 
 
     //Argtable
@@ -139,8 +138,8 @@ int main(int argc, char *argv[])
 
     //Get frq
     frq = (a_frq->count>0) ? a_frq->dval[0] : 0.5;
-    if (frq<double(FLT_EPSILON)) { cerr << progstr+": " << __LINE__ << errstr << "frequency must be positive" << endl; return 1; }
-    if (frq>0.5) { cerr << progstr+": " << __LINE__ << errstr << "frequency must be <= 0.5" << endl; return 1; }
+    if (frq<0.0) { cerr << progstr+": " << __LINE__ << errstr << "frequency must be nonnegative" << endl; return 1; }
+    if (frq>0.5) { cerr << progstr+": " << __LINE__ << warstr << "frequency is greater than 0.5 (expect aliasing)" << endl; }
 
     //Get phs
     phs = (a_phs->count>0) ? a_phs->dval[0] : 0.0;
@@ -174,7 +173,7 @@ int main(int argc, char *argv[])
         float *Y;
         try { Y = new float[o1.N()]; }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for output file (Y)" << endl; return 1; }
-        if (codee::cosinewave_s(Y,o1.N(),(float)amp,(float)frq,(float)phs))
+        if (codee::sawwave_s(Y,o1.N(),(float)amp,(float)frq,(float)phs))
         { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
         if (wo1)
         {
@@ -188,7 +187,7 @@ int main(int argc, char *argv[])
         double *Y;
         try { Y = new double[o1.N()]; }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for output file (Y)" << endl; return 1; }
-        if (codee::cosinewave_d(Y,o1.N(),(double)amp,(double)frq,(double)phs))
+        if (codee::sawwave_d(Y,o1.N(),(double)amp,(double)frq,(double)phs))
         { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
         if (wo1)
         {
@@ -202,7 +201,7 @@ int main(int argc, char *argv[])
         float *Y;
         try { Y = new float[2u*o1.N()]; }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for output file (Y)" << endl; return 1; }
-        if (codee::cosinewave_c(Y,N,(float)amp,(float)frq,(float)phs))
+        if (codee::sawwave_c(Y,N,(float)amp,(float)frq,(float)phs))
         { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
         if (wo1)
         {
@@ -216,7 +215,7 @@ int main(int argc, char *argv[])
         double *Y;
         try { Y = new double[2u*o1.N()]; }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for output file (Y)" << endl; return 1; }
-        if (codee::cosinewave_z(Y,N,(double)amp,(double)frq,(double)phs))
+        if (codee::sawwave_z(Y,N,(double)amp,(double)frq,(double)phs))
         { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
         if (wo1)
         {
