@@ -38,14 +38,16 @@ Dirs:
 Generate: Noise Pulses Waves Wins
 
 #Noise: generate colored noise
-Noise: white pink brown
+Noise: white pink brown violet
 white: white.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 pink: pink.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 brown: brown.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+violet: violet.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 
-#Pulses: generate pulse functions (dirac delta function is a.k.a. unit impulse response)
-Pulses: unit_impulse rectangular_pulse
+#Pulses: generate pulse functions (unit impulse is a.k.a. dirac delta)
+Pulses: unit_impulse delta_impulse rectangular_pulse
 unit_impulse: unit_impulse.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+delta_impulse: delta_impulse.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 rectangular_pulse: rectangular_pulse.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 
 #Waves: generate periodic waveforms

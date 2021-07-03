@@ -112,10 +112,10 @@ int main(int argc, char *argv[])
     //Get options
 
     //Get dim
-    if (a_d->count==0) { dim = (i1.isrowvec()==1u) ? 1u : 0u; }
+    if (a_d->count==0) { dim = i1.isrowvec() ? 1u : 0u; }
     else if (a_d->ival[0]<0) { cerr << progstr+": " << __LINE__ << errstr << "dim must be nonnegative" << endl; return 1; }
     else { dim = size_t(a_d->ival[0]); }
-    if (dim>3u) { cerr << progstr+": " << __LINE__ << errstr << "dim must be in {0,1u,2u,3}" << endl; return 1; }
+    if (dim>3u) { cerr << progstr+": " << __LINE__ << errstr << "dim must be in {0,1,2,3}" << endl; return 1; }
 
     //Get ndst
     if (a_n->count==0) { ndst = (dim==0u) ? i1.R : (dim==1u) ? i1.C : (dim==2u) ? i1.S : i1.H; }

@@ -6,7 +6,7 @@
 const valarray<size_t> oktypes = {1u,2u,101u,102u};
 const size_t I = 0u, O = 1u;
 size_t N, dim;
-double amp, frq, phs;
+double amp, frq, phs, dty;
 
 //Description
 string descr;
@@ -31,6 +31,9 @@ descr += "\n";
 descr += "Use -p (--phase) to give the phase in radians.\n";
 descr += "This is usually in [0 2*pi), but the value will be taken modulo 2*pi.\n";
 descr += "\n";
+descr += "Use -c (--duty-cycle) to give the duty cycle in [0.0 1.0].\n";
+descr += "This is the fraction of the output wave that equals amp.\n";
+descr += "\n";
 descr += "Since this is a generating function (no inputs), the output data type\n";
 descr += "and file format can be specified by -t and -f, respectively. \n";
 descr += "\n";
@@ -43,6 +46,7 @@ descr += "$ pulsewave -n32 -f0.01 -d1 -t1 -f101 > Y \n";
 struct arg_dbl  *a_amp = arg_dbln("a","amp","<dbl>",0,1,"amplitude [default=1.0]");
 struct arg_dbl  *a_frq = arg_dbln("f","freq","<dbl>",0,1,"frequency in cycles/sample [default=0.5]");
 struct arg_dbl  *a_phs = arg_dbln("p","phase","<dbl>",0,1,"phase in radians [default=0.0]");
+struct arg_dbl  *a_dty = arg_dbln("c","duty-cycle","<dbl>",0,1,"duty cycle in [0.0 1.0] [default=0.5]");
 struct arg_int    *a_n = arg_intn("n","N","<uint>",0,1,"num samples in output [default=1]");
 struct arg_int    *a_d = arg_intn("d","dim","<uint>",0,1,"nonsingleton dimension [default=0 -> col vec]");
 struct arg_int *a_otyp = arg_intn("t","type","<uint>",0,1,"output data type [default=2 -> double]");
@@ -92,6 +96,10 @@ if (frq>0.5) { cerr << progstr+": " << __LINE__ << warstr << "frequency is great
 //Get phs
 phs = (a_phs->count>0) ? a_phs->dval[0] : 0.0;
 
+//Get dty
+dty = (a_dty->count>0) ? a_dty->dval[0] : 0.5;
+if (dty<0.0 || dty>1.0) { cerr << progstr+": " << __LINE__ << errstr << "duty cycle must be in [0.0 1.0]" << endl; return 1; }
+
 //Checks
 
 //Set output header info
@@ -108,7 +116,7 @@ if (o1.T==1u)
     float *Y;
     try { Y = new float[o1.N()]; }
     catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for output file (Y)" << endl; return 1; }
-    if (codee::pulsewave_s(Y,o1.N(),(float)amp,(float)frq,(float)phs))
+    if (codee::pulsewave_s(Y,o1.N(),(float)amp,(float)frq,(float)phs,(float)dty))
     { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
     if (wo1)
     {
@@ -122,7 +130,7 @@ else if (o1.T==101u)
     float *Y;
     try { Y = new float[2u*o1.N()]; }
     catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for output file (Y)" << endl; return 1; }
-    if (codee::pulsewave_c(Y,N,(float)amp,(float)frq,(float)phs))
+    if (codee::pulsewave_c(Y,N,(float)amp,(float)frq,(float)phs,(float)dty))
     { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
     if (wo1)
     {

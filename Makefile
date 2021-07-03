@@ -12,7 +12,7 @@
 
 SHELL=/bin/bash
 ss=../util/bin/srci2src
-CC=clang++
+CC=g++
 
 ifeq ($(CC),clang++)
 	STD=-std=c++11
@@ -35,16 +35,27 @@ Dirs:
 
 
 #Generate: generate noise, simple waveforms, windows
-Generate: Noise Waves Wins
+Generate: Noise Pulses Waves Wins
 
 #Noise: generate colored noise
-Noise: white pink brown
+Noise: white pink brown violet
 white: srci/white.cpp c/white.c
 	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS) -Wno-c++98-compat-pedantic; $(CC) obj/$@.o -obin/$@ -largtable2 -lm
 pink: srci/pink.cpp c/pink.c
 	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS) -Wno-c++98-compat-pedantic; $(CC) obj/$@.o -obin/$@ -largtable2 -lm
 brown: srci/brown.cpp c/brown.c
 	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS) -Wno-c++98-compat-pedantic; $(CC) obj/$@.o -obin/$@ -largtable2 -lm
+violet: srci/violet.cpp c/violet.c
+	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS) -Wno-c++98-compat-pedantic; $(CC) obj/$@.o -obin/$@ -largtable2 -lm
+
+#Pulses: generate pulse functions (unit impulse is a.k.a. dirac delta)
+Pulses: unit_impulse delta_impulse rectangular_pulse
+unit_impulse: srci/unit_impulse.cpp c/unit_impulse.c
+	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2
+delta_impulse: srci/delta_impulse.cpp c/delta_impulse.c
+	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2
+rectangular_pulse: srci/rectangular_pulse.cpp c/rectangular_pulse.c
+	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2
 
 #Waves: generate periodic waveforms
 Waves: sinewave cosinewave squarewave triwave sawwave pulsewave

@@ -13,12 +13,12 @@
     #define M_PI 3.14159265358979323846
 #endif
 
-#ifndef M_PI_2
-    #define M_PI_2 1.57079632679489661923
-#endif
-
 #ifndef M_PIf
     #define M_PIf 3.14159265358979323846f
+#endif
+
+#ifndef M_PI_2
+    #define M_PI_2 1.57079632679489661923
 #endif
 
 #ifndef M_PI_2f
@@ -41,7 +41,8 @@ int squarewave_s (float *Y, const size_t N, const float amp, const float frq, co
     if (amp<0.0f) { fprintf(stderr, "error in squarewave_s: amp must be nonnegative\n"); return 1; }
     if (frq<FLT_EPSILON) { fprintf(stderr, "error in squarewave_s: freq must be positive\n"); return 1; }
 
-    if (amp<FLT_EPSILON)
+    if (N==0u) {}
+    else if (amp<FLT_EPSILON)
     {
         for (size_t n=0u; n<N; ++n, ++Y) { *Y = 0.0f; }
     }
@@ -69,7 +70,8 @@ int squarewave_d (double *Y, const size_t N, const double amp, const double frq,
     if (amp<0.0) { fprintf(stderr, "error in squarewave_d: amp must be nonnegative\n"); return 1; }
     if (frq<DBL_EPSILON) { fprintf(stderr, "error in squarewave_d: freq must be positive\n"); return 1; }
 
-    if (amp<DBL_EPSILON)
+    if (N==0u) {}
+    else if (amp<DBL_EPSILON)
     {
         for (size_t n=0u; n<N; ++n, ++Y) { *Y = 0.0; }
     }
@@ -97,7 +99,8 @@ int squarewave_c (float *Y, const size_t N, const float amp, const float frq, co
     if (amp<0.0f) { fprintf(stderr, "error in squarewave_c: amp must be nonnegative\n"); return 1; }
     if (frq<FLT_EPSILON) { fprintf(stderr, "error in squarewave_c: freq must be positive\n"); return 1; }
 
-    if (amp<FLT_EPSILON)
+    if (N==0u) {}
+    else if (amp<FLT_EPSILON)
     {
         for (size_t n=0u; n<2u*N; ++n, ++Y) { *Y = 0.0f; }
     }
@@ -131,7 +134,8 @@ int squarewave_z (double *Y, const size_t N, const double amp, const double frq,
     if (amp<0.0) { fprintf(stderr, "error in squarewave_z: amp must be nonnegative\n"); return 1; }
     if (frq<DBL_EPSILON) { fprintf(stderr, "error in squarewave_z: freq must be positive\n"); return 1; }
 
-    if (amp<DBL_EPSILON)
+    if (N==0u) {}
+    else if (amp<DBL_EPSILON)
     {
         for (size_t n=0u; n<2u*N; ++n, ++Y) { *Y = 0.0; }
     }

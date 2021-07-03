@@ -31,7 +31,8 @@ int cosinewave_s (float *Y, const size_t N, const float amp, const float frq, co
     if (amp<0.0f) { fprintf(stderr, "error in cosinewave_s: amp must be nonnegative\n"); return 1; }
     if (frq<FLT_EPSILON) { fprintf(stderr, "error in cosinewave_s: freq must be positive\n"); return 1; }
 
-    if (amp<FLT_EPSILON)
+    if (N==0u) {}
+    else if (amp<FLT_EPSILON)
     {
         for (size_t n=0u; n<N; ++n, ++Y) { *Y = 0.0f; }
     }
@@ -61,7 +62,8 @@ int cosinewave_d (double *Y, const size_t N, const double amp, const double frq,
     if (amp<0.0) { fprintf(stderr, "error in cosinewave_d: amp must be nonnegative\n"); return 1; }
     if (frq<DBL_EPSILON) { fprintf(stderr, "error in cosinewave_d: freq must be positive\n"); return 1; }
 
-    if (amp<DBL_EPSILON)
+    if (N==0u) {}
+    else if (amp<DBL_EPSILON)
     {
         for (size_t n=0u; n<N; ++n, ++Y) { *Y = 0.0; }
     }
@@ -91,7 +93,8 @@ int cosinewave_c (float *Y, const size_t N, const float amp, const float frq, co
     if (amp<0.0f) { fprintf(stderr, "error in cosinewave_c: amp must be nonnegative\n"); return 1; }
     if (frq<FLT_EPSILON) { fprintf(stderr, "error in cosinewave_c: freq must be positive\n"); return 1; }
 
-    if (amp<FLT_EPSILON)
+    if (N==0u) {}
+    else if (amp<FLT_EPSILON)
     {
         for (size_t n=0u; n<2u*N; ++n, ++Y) { *Y = 0.0f; }
     }
@@ -123,7 +126,8 @@ int cosinewave_z (double *Y, const size_t N, const double amp, const double frq,
     if (amp<0.0) { fprintf(stderr, "error in cosinewave_z: amp must be nonnegative\n"); return 1; }
     if (frq<DBL_EPSILON) { fprintf(stderr, "error in cosinewave_z: freq must be positive\n"); return 1; }
 
-    if (amp<DBL_EPSILON)
+    if (N==0u) {}
+    else if (amp<DBL_EPSILON)
     {
         for (size_t n=0u; n<2u*N; ++n, ++Y) { *Y = 0.0; }
     }

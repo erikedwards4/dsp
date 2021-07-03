@@ -43,8 +43,9 @@ int main(int argc, char *argv[])
     //Description
     string descr;
     descr += "Zero-mean, Gaussian brown noise (1-D).\n";
-    descr += "Makes vector of floats from a normal distribution with specified stddev,\n";
-    descr += "and then integrates (cumsum) to output the brown noise (1/f^2 characteristic).\n";
+    descr += "Makes vector of Gaussian white noise with specified stddev, and then\n";
+    descr += "integrates (cumsum) to output the brown noise (1/f^2 characteristic).\n";
+    descr += "Brown noise is also called Brownian noise or red noise.\n";
     descr += "\n";
     descr += "This uses modified code from PCG random, but does not require it to be installed.\n";
     descr += "\n";

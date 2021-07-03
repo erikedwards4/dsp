@@ -32,7 +32,8 @@ int white_s (float *Y, const size_t N, const float std, const char uni, const ch
 {
     if (std<0.0f) { fprintf(stderr, "error in white_s: std must be nonnegative\n"); return 1; }
 
-    if (std<FLT_EPSILON)
+    if (N==0u) {}
+    else if (std<FLT_EPSILON)
     {
         for (size_t n=0u; n<N; ++n, ++Y) { *Y = 0.0f; }
     }
@@ -159,7 +160,8 @@ int white_d (double *Y, const size_t N, const double std, const char uni, const 
 {
     if (std<0.0) { fprintf(stderr, "error in white_d: std must be nonnegative\n"); return 1; }
 
-    if (std<DBL_EPSILON)
+    if (N==0u) {}
+    else if (std<DBL_EPSILON)
     {
         for (size_t n=0u; n<N; ++n, ++Y) { *Y = 0.0; }
     }
@@ -286,7 +288,8 @@ int white_c (float *Y, const size_t N, const float std, const char uni, const ch
 {
     if (std<0.0f) { fprintf(stderr, "error in white_s: std must be nonnegative\n"); return 1; }
 
-    if (std<FLT_EPSILON)
+    if (N==0u) {}
+    else if (std<FLT_EPSILON)
     {
         for (size_t n=0u; n<2u*N; ++n, ++Y) { *Y = 0.0f; }
     }
@@ -383,7 +386,8 @@ int white_z (double *Y, const size_t N, const double std, const char uni, const 
 {
     if (std<0.0) { fprintf(stderr, "error in white_z: std must be nonnegative\n"); return 1; }
 
-    if (std<DBL_EPSILON)
+    if (N==0u) {}
+    else if (std<DBL_EPSILON)
     {
         for (size_t n=0u; n<2u*N; ++n, ++Y) { *Y = 0.0; }
     }
