@@ -34,7 +34,7 @@ Dirs:
 	mkdir -pm 777 obj
 
 
-#Generate: generate noise, simple waveforms, windows
+#Generate: generate noise, pulses, waveforms, windows
 Generate: Noise Pulses Waves Wins
 
 #Noise: generate colored noise
