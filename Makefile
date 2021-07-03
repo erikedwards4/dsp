@@ -49,12 +49,12 @@ violet: srci/violet.cpp c/violet.c
 	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS) -Wno-c++98-compat-pedantic; $(CC) obj/$@.o -obin/$@ -largtable2 -lm
 
 #Pulses: generate pulse functions (unit impulse is a.k.a. dirac delta)
-Pulses: unit_impulse delta_impulse rectangular_pulse
+Pulses: unit_impulse delta_impulse rect_pulse
 unit_impulse: srci/unit_impulse.cpp c/unit_impulse.c
 	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2
 delta_impulse: srci/delta_impulse.cpp c/delta_impulse.c
 	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2
-rectangular_pulse: srci/rectangular_pulse.cpp c/rectangular_pulse.c
+rect_pulse: srci/rect_pulse.cpp c/rect_pulse.c
 	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2
 
 #Waves: generate periodic waveforms

@@ -1,6 +1,6 @@
 //Generates a delta-impulse signal (1-D vector of floats),
-//with specified length (N), delay (tau), and amplitude.
-//The signal is amp at sample tau, and 0 elsewhere.
+//with specified length (N), samp, and amplitude.
+//The signal is amp at sample samp, and 0 elsewhere.
 
 //This is identical to unit_impulse, except that amplitude
 //can be any float, rather than just 1.0.
