@@ -12,7 +12,7 @@
 #include <unordered_map>
 #include <argtable2.h>
 #include "../util/cmli.hpp"
-#include "fft.vec.algo.c"
+#include "fft.algo.c"
 
 #ifdef I
 #undef I
@@ -183,8 +183,8 @@ int main(int argc, char *argv[])
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for output file (Y)" << endl; return 1; }
         try { ifs1.read(reinterpret_cast<char*>(X),i1.nbytes()); }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 1 (X)" << endl; return 1; }
-        //if (codee::fft_algo_s(Y,X,i1.R,i1.C,i1.S,i1.H,i1.iscolmajor(),dim,nfft,sc))
-        if (codee::fft_vec_algo_s(Y,X,i1.N(),nfft,sc))
+        //if (codee::fft_vec_algo_s(Y,X,i1.N(),nfft,sc))
+        if (codee::fft_algo_s(Y,X,i1.R,i1.C,i1.S,i1.H,i1.iscolmajor(),dim,nfft,sc))
         { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
         if (wo1)
         {
@@ -202,8 +202,8 @@ int main(int argc, char *argv[])
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for output file (Y)" << endl; return 1; }
         try { ifs1.read(reinterpret_cast<char*>(X),i1.nbytes()); }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 1 (X)" << endl; return 1; }
-        //if (codee::fft_algo_d(Y,X,i1.R,i1.C,i1.S,i1.H,i1.iscolmajor(),dim,nfft,sc))
-        if (codee::fft_vec_algo_d(Y,X,i1.N(),nfft,sc))
+        //if (codee::fft_vec_algo_d(Y,X,i1.N(),nfft,sc))
+        if (codee::fft_algo_d(Y,X,i1.R,i1.C,i1.S,i1.H,i1.iscolmajor(),dim,nfft,sc))
         { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
         if (wo1)
         {
@@ -221,7 +221,7 @@ int main(int argc, char *argv[])
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for output file (Y)" << endl; return 1; }
         try { ifs1.read(reinterpret_cast<char*>(X),i1.nbytes()); }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 1 (X)" << endl; return 1; }
-        if (codee::fft_vec_algo_c(Y,X,i1.N(),nfft,sc))
+        if (codee::fft_algo_c(Y,X,i1.R,i1.C,i1.S,i1.H,i1.iscolmajor(),dim,nfft,sc))
         { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
         if (wo1)
         {
@@ -239,7 +239,7 @@ int main(int argc, char *argv[])
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for output file (Y)" << endl; return 1; }
         try { ifs1.read(reinterpret_cast<char*>(X),i1.nbytes()); }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 1 (X)" << endl; return 1; }
-        if (codee::fft_vec_algo_z(Y,X,i1.N(),nfft,sc))
+        if (codee::fft_algo_z(Y,X,i1.R,i1.C,i1.S,i1.H,i1.iscolmajor(),dim,nfft,sc))
         { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
         if (wo1)
         {

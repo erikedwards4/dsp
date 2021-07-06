@@ -32,12 +32,45 @@ namespace codee {
 extern "C" {
 #endif
 
+void get_bittbl(size_t* bitrev, const size_t nfft);
 void get_cstbl_s (float* cstbl, const size_t nfft);
 void get_cstbl_d (double* cstbl, const size_t nfft);
 int fft_vec_algo_s (float *Y, const float *X, const size_t N, const size_t nfft, const char sc);
 int fft_vec_algo_d (double *Y, const double *X, const size_t N, const size_t nfft, const char sc);
 int fft_vec_algo_c (float *Y, const float *X, const size_t N, const size_t nfft, const char sc);
 int fft_vec_algo_z (double *Y, const double *X, const size_t N, const size_t nfft, const char sc);
+
+void get_bittbl(size_t* bittbl, const size_t nfft)
+{
+    //struct timespec tic, toc; clock_gettime(CLOCK_REALTIME,&tic);
+
+    //Direct from Wikipedia article (https://en.wikipedia.org/wiki/Bit-reversal_permutation)
+    // size_t K=0u, P2=1u;
+    // while (P2<nfft) { P2 *= 2u; ++K; }
+    // bittbl[0u] = 0u;
+    // size_t L = 1u;
+    // for (size_t k=0u; k<K; ++k, L*=2u)
+    // {
+    //     for (size_t l=1u; l<L; ++l) { bittbl[l] *= 2u; }
+    //     for (size_t l=0u; l<L; ++l) { bittbl[l+L] = bittbl[l] + 1u; }
+    // }
+
+    //Other solution (approx. same speed, but shorter assembly code)
+    const size_t nfft2 = nfft/2u;
+    size_t j=0u, k;
+    *bittbl++ = 0u;
+    for (size_t i=1u; i<nfft; ++i, ++bittbl)
+    {
+        k = nfft2;
+        while (k<=j) { j -= k; k /= 2u; }
+        j += k;
+        *bittbl = j;
+    }
+    bittbl -= nfft;
+
+    //clock_gettime(CLOCK_REALTIME,&toc); fprintf(stderr,"elapsed time = %.6f ms\n",(toc.tv_sec-tic.tv_sec)*1e3+(toc.tv_nsec-tic.tv_nsec)/1e6);
+}
+
 
 void get_cstbl_s (float* cstbl, const size_t nfft)
 {
