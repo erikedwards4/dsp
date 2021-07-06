@@ -76,8 +76,9 @@ planck: planck.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 
 
 #Transform: common 1-D signal transforms
-Transforms: fft ifft dct idct dst idst hilbert
-fft: fft.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+Transforms: fft.fftw fft.algo #ifft dct idct dst idst hilbert
+fft.algo: fft.algo.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+fft.fftw: fft.fftw.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 ifft: ifft.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 dct: dct.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 idct: idct.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)

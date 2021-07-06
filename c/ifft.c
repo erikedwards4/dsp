@@ -14,6 +14,10 @@
     #define M_SQRT2 1.41421356237309504880
 #endif
 
+#ifndef M_SQRT2f
+    #define M_SQRT2f 1.41421356237309504880f
+#endif
+
 #ifdef __cplusplus
 namespace codee {
 extern "C" {
@@ -31,7 +35,7 @@ int ifft_s (float *Y, const float *X, const size_t R, const size_t C, const size
 
     const size_t N = R*C*S*H;
     const size_t Lx = (dim==0) ? R : (dim==1) ? C : (dim==2) ? S : H;
-    const float s = (sc) ? (float)M_SQRT2 : 1.0f/nfft;
+    const float s = (sc) ? M_SQRT2f : 1.0f/nfft;
     if (Lx!=nfft/2+1) { fprintf(stderr,"error in ifft_s: nfrqs (vec length in X) must equal nfft/2+1\n"); return 1; }
 
     //Initialize fftwf
@@ -187,7 +191,7 @@ int ifft_c (float *Y, const float *X, const size_t R, const size_t C, const size
 
     const size_t N = R*C*S*H;
     const size_t Lx = (dim==0) ? R : (dim==1) ? C : (dim==2) ? S : H;
-    const float s = (sc) ? (float)M_SQRT2 : 1.0f/nfft;
+    const float s = (sc) ? M_SQRT2f : 1.0f/nfft;
     if (Lx!=nfft) { fprintf(stderr,"error in ifft_c: nfrqs (vec length in X) must equal nfft\n"); return 1; }
 
     //Initialize fftwf

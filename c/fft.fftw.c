@@ -10,7 +10,7 @@
 #include <stdio.h>
 #include <math.h>
 #include <fftw3.h>
-#include <time.h>
+//#include <time.h>
 
 #ifndef M_SQRT1_2
     #define M_SQRT1_2 0.707106781186547524401
@@ -25,28 +25,28 @@ namespace codee {
 extern "C" {
 #endif
 
-int fft_s (float *Y, const float *X, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim, const size_t nfft, const char sc);
-int fft_d (double *Y, const double *X, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim, const size_t nfft, const char sc);
-int fft_c (float *Y, const float *X, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim, const size_t nfft, const char sc);
-int fft_z (double *Y, const double *X, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim, const size_t nfft, const char sc);
+int fft_fftw_s (float *Y, const float *X, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim, const size_t nfft, const char sc);
+int fft_fftw_d (double *Y, const double *X, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim, const size_t nfft, const char sc);
+int fft_fftw_c (float *Y, const float *X, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim, const size_t nfft, const char sc);
+int fft_fftw_z (double *Y, const double *X, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim, const size_t nfft, const char sc);
 
 
-int fft_s (float *Y, const float *X, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim, const size_t nfft, const char sc)
+int fft_fftw_s (float *Y, const float *X, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim, const size_t nfft, const char sc)
 {
-    if (dim>3) { fprintf(stderr,"error in fft_s: dim must be in [0 3]\n"); return 1; }
-    struct timespec tic, toc; clock_gettime(CLOCK_REALTIME,&tic);
+    if (dim>3) { fprintf(stderr,"error in fft_fftw_s: dim must be in [0 3]\n"); return 1; }
+    //struct timespec tic, toc; clock_gettime(CLOCK_REALTIME,&tic);
     
     const size_t N = R*C*S*H;
     const size_t Lx = (dim==0) ? R : (dim==1) ? C : (dim==2) ? S : H;
     const size_t Ly = nfft/2 + 1;
-    if (nfft<Lx) { fprintf(stderr,"error in fft_s: nfft must be >= L (vec length)\n"); return 1; }
+    if (nfft<Lx) { fprintf(stderr,"error in fft_fftw_s: nfft must be >= L (vec length)\n"); return 1; }
 
     //Initialize fftwf
     float *X1, *Y1;
     X1 = (float *)fftwf_malloc(nfft*sizeof(float));
     Y1 = (float *)fftwf_malloc(2*Ly*sizeof(float));
     fftwf_plan plan = fftwf_plan_dft_r2c_1d((int)nfft,X1,(fftwf_complex *)Y1,FFTW_ESTIMATE);
-    if (!plan) { fprintf(stderr,"error in fft_s: problem creating fftw plan"); return 1; }
+    if (!plan) { fprintf(stderr,"error in fft_fftw_s: problem creating fftw plan"); return 1; }
 
     if (N==0) {}
     else if (Lx==1 && Ly==1)
@@ -135,26 +135,26 @@ int fft_s (float *Y, const float *X, const size_t R, const size_t C, const size_
     }
     
     fftwf_destroy_plan(plan); fftwf_free(X1); fftwf_free(Y1);
-    clock_gettime(CLOCK_REALTIME,&toc); fprintf(stderr,"elapsed time = %.6f ms\n",(toc.tv_sec-tic.tv_sec)*1e3+(toc.tv_nsec-tic.tv_nsec)/1e6);
+    //clock_gettime(CLOCK_REALTIME,&toc); fprintf(stderr,"elapsed time = %.6f ms\n",(toc.tv_sec-tic.tv_sec)*1e3+(toc.tv_nsec-tic.tv_nsec)/1e6);
     return 0;
 }
 
 
-int fft_d (double *Y, const double *X, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim, const size_t nfft, const char sc)
+int fft_fftw_d (double *Y, const double *X, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim, const size_t nfft, const char sc)
 {
-    if (dim>3) { fprintf(stderr,"error in fft_d: dim must be in [0 3]\n"); return 1; }
+    if (dim>3) { fprintf(stderr,"error in fft_fftw_d: dim must be in [0 3]\n"); return 1; }
 
     const size_t N = R*C*S*H;
     const size_t Lx = (dim==0) ? R : (dim==1) ? C : (dim==2) ? S : H;
     const size_t Ly = nfft/2 + 1;
-    if (nfft<Lx) { fprintf(stderr,"error in fft_d: nfft must be >= L (vec length)\n"); return 1; }
+    if (nfft<Lx) { fprintf(stderr,"error in fft_fftw_d: nfft must be >= L (vec length)\n"); return 1; }
 
     //Initialize fftw
     double *X1, *Y1;
     X1 = (double *)fftw_malloc(nfft*sizeof(double));
     Y1 = (double *)fftw_malloc(2*Ly*sizeof(double));
     fftw_plan plan = fftw_plan_dft_r2c_1d((int)nfft,X1,(fftw_complex *)Y1,FFTW_ESTIMATE);
-    if (!plan) { fprintf(stderr,"error in fft_d: problem creating fftw plan"); return 1; }
+    if (!plan) { fprintf(stderr,"error in fft_fftw_d: problem creating fftw plan"); return 1; }
 
     if (N==0) {}
     else if (Lx==1 && Ly==1)
@@ -247,20 +247,20 @@ int fft_d (double *Y, const double *X, const size_t R, const size_t C, const siz
 }
 
 
-int fft_c (float *Y, const float *X, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim, const size_t nfft, const char sc)
+int fft_fftw_c (float *Y, const float *X, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim, const size_t nfft, const char sc)
 {
-    if (dim>3) { fprintf(stderr,"error in fft_c: dim must be in [0 3]\n"); return 1; }
+    if (dim>3) { fprintf(stderr,"error in fft_fftw_c: dim must be in [0 3]\n"); return 1; }
 
     const size_t N = R*C*S*H;
     const size_t Lx = (dim==0) ? R : (dim==1) ? C : (dim==2) ? S : H;
-    if (nfft<Lx) { fprintf(stderr,"error in fft_c: nfft must be >= L (vec length)\n"); return 1; }
+    if (nfft<Lx) { fprintf(stderr,"error in fft_fftw_c: nfft must be >= L (vec length)\n"); return 1; }
 
     //Initialize fftwf
     float *X1, *Y1;
     X1 = (float *)fftwf_malloc(2*nfft*sizeof(float));
     Y1 = (float *)fftwf_malloc(2*nfft*sizeof(float));
     fftwf_plan plan = fftwf_plan_dft_1d((int)nfft,(fftwf_complex *)X1,(fftwf_complex *)Y1,FFTW_FORWARD,FFTW_ESTIMATE);
-    if (!plan) { fprintf(stderr,"error in fft_c: problem creating fftw plan"); return 1; }
+    if (!plan) { fprintf(stderr,"error in fft_fftw_c: problem creating fftw plan"); return 1; }
 
     if (N==0) {}
     else if (Lx==1 && nfft==1)
@@ -354,20 +354,20 @@ int fft_c (float *Y, const float *X, const size_t R, const size_t C, const size_
 }
 
 
-int fft_z (double *Y, const double *X, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim, const size_t nfft, const char sc)
+int fft_fftw_z (double *Y, const double *X, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim, const size_t nfft, const char sc)
 {
-    if (dim>3) { fprintf(stderr,"error in fft_z: dim must be in [0 3]\n"); return 1; }
+    if (dim>3) { fprintf(stderr,"error in fft_fftw_z: dim must be in [0 3]\n"); return 1; }
 
     const size_t N = R*C*S*H;
     const size_t Lx = (dim==0) ? R : (dim==1) ? C : (dim==2) ? S : H;
-    if (nfft<Lx) { fprintf(stderr,"error in fft_z: nfft must be >= L (vec length)\n"); return 1; }
+    if (nfft<Lx) { fprintf(stderr,"error in fft_fftw_z: nfft must be >= L (vec length)\n"); return 1; }
 
     //Initialize fftw
     double *X1, *Y1;
     X1 = (double *)fftw_malloc(2*nfft*sizeof(double));
     Y1 = (double *)fftw_malloc(2*nfft*sizeof(double));
     fftw_plan plan = fftw_plan_dft_1d((int)nfft,(fftw_complex *)X1,(fftw_complex *)Y1,FFTW_FORWARD,FFTW_ESTIMATE);
-    if (!plan) { fprintf(stderr,"error in fft_z: problem creating fftw plan"); return 1; }
+    if (!plan) { fprintf(stderr,"error in fft_fftw_z: problem creating fftw plan"); return 1; }
 
     if (N==0) {}
     else if (Lx==1 && nfft==1)

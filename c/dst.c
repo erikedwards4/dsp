@@ -5,7 +5,6 @@
 //real and imaginary parts separately (following Octave convention).
 
 #include <stdio.h>
-#include <math.h>
 #include <fftw3.h>
 
 #ifdef __cplusplus

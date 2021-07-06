@@ -4,12 +4,7 @@
 //and the actual Hilbert transform in the imaginary part.
 
 #include <stdio.h>
-#include <math.h>
 #include <fftw3.h>
-
-#ifndef M_SQRT1_2
-    #define M_SQRT1_2 0.707106781186547524401
-#endif
 
 #ifdef __cplusplus
 namespace codee {

@@ -30,9 +30,9 @@ descr += "\n";
 descr += "For complex output, real/imag parts are separately set using the same params.\n";
 descr += "\n";
 descr += "Examples:\n";
-descr += "$ violet -z -n16 -o Y \n";
-descr += "$ violet -u -d1 -n16 -t1 > Y \n";
-descr += "$ violet -d1 -n16 -t102 > Y \n";
+descr += "$ violet -n16 -d1 -o Y \n";
+descr += "$ violet -n16 -z -t1 > Y \n";
+descr += "$ violet -n16 -s2.5 -t102 > Y \n";
 
 //Argtable
 struct arg_dbl  *a_std = arg_dbln("s","std","<dbl>",0,1,"std dev parameter [default=1.0]");
