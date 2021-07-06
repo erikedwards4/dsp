@@ -1,7 +1,10 @@
 //Does 1-D FFT (fast Fourier transform) of each vector in X along dim.
 //The output Y is complex-valued and has the same size as X,
-//except along dim, where Y has length Ly = nfft/2 + 1 for real-valued X,
-//and length Ly = nfft for complex-valued X.
+//except along dim, where Y has length Ly = nfft.
+
+//Note that this is different convention from fft.fftw,
+//where Y has length Ly = nfft/2 + 1 for real-valued X,
+//because here it is required to allocate Y at full nfft length.
 
 //If sc, then scales Y by sqrt(0.5/n) so that invertible with ifft.
 
@@ -41,10 +44,10 @@ void fft_1d_d (double *Y, const size_t nfft, const size_t *bittbl, const double 
 void fft_1d_c (float *Y, const size_t nfft, const size_t *bittbl, const float *cstbl);
 void fft_1d_z (double *Y, const size_t nfft, const size_t *bittbl, const double *cstbl);
 
-int fft_algo_s (float *Y, const float *X, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim, const size_t nfft, const char sc);
-int fft_algo_d (double *Y, const double *X, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim, const size_t nfft, const char sc);
-int fft_algo_c (float *Y, const float *X, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim, const size_t nfft, const char sc);
-int fft_algo_z (double *Y, const double *X, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim, const size_t nfft, const char sc);
+int fft_rad2_s (float *Y, const float *X, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim, const size_t nfft, const char sc);
+int fft_rad2_d (double *Y, const double *X, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim, const size_t nfft, const char sc);
+int fft_rad2_c (float *Y, const float *X, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim, const size_t nfft, const char sc);
+int fft_rad2_z (double *Y, const double *X, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim, const size_t nfft, const char sc);
 
 
 void get_bittbl(size_t* bittbl, const size_t nfft)
@@ -285,10 +288,6 @@ void fft_1d_z (double *Y, const size_t nfft, const size_t *bittbl, const double 
     if (nfft<2u) {}
     else if (nfft==2u)
     {
-        //const double nyr = *Y - *(Y+2u);
-        //const double nyi = *(Y+1u) - *(Y+3u);
-        //*Y += *(Y+2u); ++Y; *Y += *(Y+2u); ++Y;
-        //*Y++ = nyr; *Y++ = nyi;
         const double nyr = Y[0u] - Y[2u];
         const double nyi = Y[1u] - Y[3u];
         Y[0u] += Y[2u]; Y[1u] += Y[3u];
@@ -345,21 +344,15 @@ void fft_1d_z (double *Y, const size_t nfft, const size_t *bittbl, const double 
 }
 
 
-int fft_algo_s (float *Y, const float *X, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim, const size_t nfft, const char sc)
+int fft_rad2_s (float *Y, const float *X, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim, const size_t nfft, const char sc)
 {
     //struct timespec tic, toc; clock_gettime(CLOCK_REALTIME,&tic);
-    if (nfft>0u && (nfft & (nfft-1u))) { fprintf(stderr,"error in fft_algo_s: nfft must be a power of 2\n"); return 1; }
+    if (nfft>0u && (nfft & (nfft-1u))) { fprintf(stderr,"error in fft_rad2_s: nfft must be a power of 2\n"); return 1; }
     
     const size_t N = R*C*S*H;
     const size_t Lx = (dim==0u) ? R : (dim==1u) ? C : (dim==2u) ? S : H;
     const size_t Ly = nfft;
-    if (nfft<Lx) { fprintf(stderr,"error in fft_algo_s: nfft must be >= L (vec length)\n"); return 1; }
-
-    //Initialize fft
-    size_t bittbl[nfft];
-    float cstbl[nfft+nfft/4u];
-    get_bittbl(bittbl,nfft);
-    get_cstbl_s(cstbl,nfft);
+    if (nfft<Lx) { fprintf(stderr,"error in fft_rad2_s: nfft must be >= L (vec length)\n"); return 1; }
 
     if (nfft==0u || N==0u) {}
     else if (nfft==1u)
@@ -368,16 +361,29 @@ int fft_algo_s (float *Y, const float *X, const size_t R, const size_t C, const 
     }
     else if (Lx==N)
     {
+        size_t *bittbl; float *cstbl;
+        if (!(bittbl=(size_t *)malloc(nfft*sizeof(size_t)))) { fprintf(stderr,"error in fft_rad2_s: problem with malloc. "); perror("malloc"); return 1; }
+        if (!(cstbl=(float *)malloc((nfft+nfft/4u)*sizeof(float)))) { fprintf(stderr,"error in fft_rad2_s: problem with malloc. "); perror("malloc"); return 1; }
+        get_bittbl(bittbl,nfft);
+        get_cstbl_s(cstbl,nfft);
         for (size_t l=0u; l<Lx; ++l, ++X) { *Y++ = *X; *Y++ = 0.0f; }
         for (size_t l=Lx; l<Ly; ++l) { *Y++ = 0.0f; *Y++ = 0.0f; }
         Y -= 2u*Ly;
         fft_1d_s(Y,nfft,bittbl,cstbl);
+        free(bittbl); free(cstbl);
     }
     else
     {
         const size_t K = (iscolmajor) ? ((dim==0u) ? 1u : (dim==1u) ? R : (dim==2u) ? R*C : R*C*S) : ((dim==0u) ? C*S*H : (dim==1u) ? S*H : (dim==2u) ? H : 1u);
         const size_t B = (iscolmajor && dim==0u) ? C*S*H : K;
         const size_t V = N/Lx, G = V/B;
+
+        //Initialize fft
+        size_t *bittbl; float *cstbl;
+        if (!(bittbl=(size_t *)malloc(nfft*sizeof(size_t)))) { fprintf(stderr,"error in fft_rad2_s: problem with malloc. "); perror("malloc"); return 1; }
+        if (!(cstbl=(float *)malloc((nfft+nfft/4u)*sizeof(float)))) { fprintf(stderr,"error in fft_rad2_s: problem with malloc. "); perror("malloc"); return 1; }
+        get_bittbl(bittbl,nfft);
+        get_cstbl_s(cstbl,nfft);
 
         if (K==1u && (G==1u || B==1u))
         {
@@ -392,7 +398,7 @@ int fft_algo_s (float *Y, const float *X, const size_t R, const size_t C, const 
         else
         {
             float *Y1;
-            if (!(Y1=(float *)malloc(2u*Ly*sizeof(float)))) { fprintf(stderr,"error in fft_algo_s: problem with malloc. "); perror("malloc"); return 1; }
+            if (!(Y1=(float *)malloc(2u*Ly*sizeof(float)))) { fprintf(stderr,"error in fft_rad2_s: problem with malloc. "); perror("malloc"); return 1; }
             for (size_t g=0u; g<G; ++g, X+=B*(Lx-1u), Y+=2u*B*(Ly-1u))
             {
                 for (size_t b=0; b<B; ++b, X-=K*Lx-1u, Y1-=2u*Ly, Y-=2u*K*Ly-2u)
@@ -406,6 +412,7 @@ int fft_algo_s (float *Y, const float *X, const size_t R, const size_t C, const 
             }
             free(Y1);
         }
+        free(bittbl); free(cstbl);
     }
 
     //Scale
@@ -420,20 +427,14 @@ int fft_algo_s (float *Y, const float *X, const size_t R, const size_t C, const 
 }
 
 
-int fft_algo_d (double *Y, const double *X, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim, const size_t nfft, const char sc)
+int fft_rad2_d (double *Y, const double *X, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim, const size_t nfft, const char sc)
 {
-    if (nfft>0u && (nfft & (nfft-1u))) { fprintf(stderr,"error in fft_algo_d: nfft must be a power of 2\n"); return 1; }
+    if (nfft>0u && (nfft & (nfft-1u))) { fprintf(stderr,"error in fft_rad2_d: nfft must be a power of 2\n"); return 1; }
     
     const size_t N = R*C*S*H;
     const size_t Lx = (dim==0u) ? R : (dim==1u) ? C : (dim==2u) ? S : H;
     const size_t Ly = nfft;
-    if (nfft<Lx) { fprintf(stderr,"error in fft_algo_d: nfft must be >= L (vec length)\n"); return 1; }
-
-    //Initialize fft
-    size_t bittbl[nfft];
-    double cstbl[nfft+nfft/4u];
-    get_bittbl(bittbl,nfft);
-    get_cstbl_d(cstbl,nfft);
+    if (nfft<Lx) { fprintf(stderr,"error in fft_rad2_d: nfft must be >= L (vec length)\n"); return 1; }
 
     if (nfft==0u || N==0u) {}
     else if (nfft==1u)
@@ -442,16 +443,29 @@ int fft_algo_d (double *Y, const double *X, const size_t R, const size_t C, cons
     }
     else if (Lx==N)
     {
+        size_t *bittbl; double *cstbl;
+        if (!(bittbl=(size_t *)malloc(nfft*sizeof(size_t)))) { fprintf(stderr,"error in fft_rad2_d: problem with malloc. "); perror("malloc"); return 1; }
+        if (!(cstbl=(double *)malloc((nfft+nfft/4u)*sizeof(double)))) { fprintf(stderr,"error in fft_rad2_d: problem with malloc. "); perror("malloc"); return 1; }
+        get_bittbl(bittbl,nfft);
+        get_cstbl_d(cstbl,nfft);
         for (size_t l=0u; l<Lx; ++l, ++X) { *Y++ = *X; *Y++ = 0.0; }
         for (size_t l=Lx; l<Ly; ++l) { *Y++ = 0.0; *Y++ = 0.0; }
         Y -= 2u*Ly;
         fft_1d_d(Y,nfft,bittbl,cstbl);
+        free(bittbl); free(cstbl);
     }
     else
     {
         const size_t K = (iscolmajor) ? ((dim==0u) ? 1u : (dim==1u) ? R : (dim==2u) ? R*C : R*C*S) : ((dim==0u) ? C*S*H : (dim==1u) ? S*H : (dim==2u) ? H : 1u);
         const size_t B = (iscolmajor && dim==0u) ? C*S*H : K;
         const size_t V = N/Lx, G = V/B;
+
+        //Initialize fft
+        size_t *bittbl; double *cstbl;
+        if (!(bittbl=(size_t *)malloc(nfft*sizeof(size_t)))) { fprintf(stderr,"error in fft_rad2_d: problem with malloc. "); perror("malloc"); return 1; }
+        if (!(cstbl=(double *)malloc((nfft+nfft/4u)*sizeof(double)))) { fprintf(stderr,"error in fft_rad2_d: problem with malloc. "); perror("malloc"); return 1; }
+        get_bittbl(bittbl,nfft);
+        get_cstbl_d(cstbl,nfft);
 
         if (K==1u && (G==1u || B==1u))
         {
@@ -466,13 +480,13 @@ int fft_algo_d (double *Y, const double *X, const size_t R, const size_t C, cons
         else
         {
             double *Y1;
-            if (!(Y1=(double *)malloc(2u*Ly*sizeof(double)))) { fprintf(stderr,"error in fft_algo_d: problem with malloc. "); perror("malloc"); return 1; }
+            if (!(Y1=(double *)malloc(2u*Ly*sizeof(double)))) { fprintf(stderr,"error in fft_rad2_d: problem with malloc. "); perror("malloc"); return 1; }
             for (size_t g=0u; g<G; ++g, X+=B*(Lx-1u), Y+=2u*B*(Ly-1u))
             {
                 for (size_t b=0; b<B; ++b, X-=K*Lx-1u, Y1-=2u*Ly, Y-=2u*K*Ly-2u)
                 {
-                    for (size_t l=0u; l<Lx; ++l, X+=K) { *Y1++ = *X; *Y1++ = 0.0f; }
-                    for (size_t l=Lx; l<Ly; ++l) { *Y1++ = 0.0f; *Y1++ = 0.0f; }
+                    for (size_t l=0u; l<Lx; ++l, X+=K) { *Y1++ = *X; *Y1++ = 0.0; }
+                    for (size_t l=Lx; l<Ly; ++l) { *Y1++ = 0.0; *Y1++ = 0.0; }
                     Y1 -= 2u*Ly;
                     fft_1d_d(Y1,nfft,bittbl,cstbl);
                     for (size_t l=0u; l<Ly; ++l, ++Y1, Y+=2u*K-1u) { *Y = *Y1; *++Y = *++Y1; }
@@ -480,6 +494,7 @@ int fft_algo_d (double *Y, const double *X, const size_t R, const size_t C, cons
             }
             free(Y1);
         }
+        free(bittbl); free(cstbl);
     }
 
     //Scale
@@ -493,20 +508,14 @@ int fft_algo_d (double *Y, const double *X, const size_t R, const size_t C, cons
 }
 
 
-int fft_algo_c (float *Y, const float *X, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim, const size_t nfft, const char sc)
+int fft_rad2_c (float *Y, const float *X, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim, const size_t nfft, const char sc)
 {
-    if (nfft>0u && (nfft & (nfft-1u))) { fprintf(stderr,"error in fft_algo_c: nfft must be a power of 2\n"); return 1; }
+    if (nfft>0u && (nfft & (nfft-1u))) { fprintf(stderr,"error in fft_rad2_c: nfft must be a power of 2\n"); return 1; }
     
     const size_t N = R*C*S*H;
     const size_t Lx = (dim==0u) ? R : (dim==1u) ? C : (dim==2u) ? S : H;
     const size_t Ly = nfft;
-    if (nfft<Lx) { fprintf(stderr,"error in fft_algo_c: nfft must be >= L (vec length)\n"); return 1; }
-
-    //Initialize fft
-    size_t bittbl[nfft];
-    float cstbl[nfft+nfft/4u];
-    get_bittbl(bittbl,nfft);
-    get_cstbl_s(cstbl,nfft);
+    if (nfft<Lx) { fprintf(stderr,"error in fft_rad2_c: nfft must be >= L (vec length)\n"); return 1; }
 
     if (nfft==0u || N==0u) {}
     else if (nfft==1u)
@@ -515,16 +524,29 @@ int fft_algo_c (float *Y, const float *X, const size_t R, const size_t C, const 
     }
     else if (Lx==N)
     {
+        size_t *bittbl; float *cstbl;
+        if (!(bittbl=(size_t *)malloc(nfft*sizeof(size_t)))) { fprintf(stderr,"error in fft_rad2_s: problem with malloc. "); perror("malloc"); return 1; }
+        if (!(cstbl=(float *)malloc((nfft+nfft/4u)*sizeof(float)))) { fprintf(stderr,"error in fft_rad2_s: problem with malloc. "); perror("malloc"); return 1; }
+        get_bittbl(bittbl,nfft);
+        get_cstbl_s(cstbl,nfft);
         for (size_t l=0u; l<2u*Lx; ++l, ++X, ++Y) { *Y = *X; }
         for (size_t l=2u*Lx; l<2u*Ly; ++l, ++Y) { *Y = 0.0f; }
         Y -= 2u*Ly;
         fft_1d_c(Y,nfft,bittbl,cstbl);
+        free(bittbl); free(cstbl);
     }
     else
     {
         const size_t K = (iscolmajor) ? ((dim==0u) ? 1u : (dim==1u) ? R : (dim==2u) ? R*C : R*C*S) : ((dim==0u) ? C*S*H : (dim==1u) ? S*H : (dim==2u) ? H : 1u);
         const size_t B = (iscolmajor && dim==0u) ? C*S*H : K;
         const size_t V = N/Lx, G = V/B;
+
+        //Initialize fft
+        size_t *bittbl; float *cstbl;
+        if (!(bittbl=(size_t *)malloc(nfft*sizeof(size_t)))) { fprintf(stderr,"error in fft_rad2_s: problem with malloc. "); perror("malloc"); return 1; }
+        if (!(cstbl=(float *)malloc((nfft+nfft/4u)*sizeof(float)))) { fprintf(stderr,"error in fft_rad2_s: problem with malloc. "); perror("malloc"); return 1; }
+        get_bittbl(bittbl,nfft);
+        get_cstbl_s(cstbl,nfft);
 
         if (K==1u && (G==1u || B==1u))
         {
@@ -539,7 +561,7 @@ int fft_algo_c (float *Y, const float *X, const size_t R, const size_t C, const 
         else
         {
             float *Y1;
-            if (!(Y1=(float *)malloc(2u*Ly*sizeof(float)))) { fprintf(stderr,"error in fft_algo_c: problem with malloc. "); perror("malloc"); return 1; }
+            if (!(Y1=(float *)malloc(2u*Ly*sizeof(float)))) { fprintf(stderr,"error in fft_rad2_c: problem with malloc. "); perror("malloc"); return 1; }
             for (size_t g=0u; g<G; ++g, X+=B*(Lx-1u), Y+=2u*B*(Ly-1u))
             {
                 for (size_t b=0; b<B; ++b, X-=K*Lx-1u, Y1-=2u*Ly, Y-=2u*K*Ly-2u)
@@ -553,6 +575,7 @@ int fft_algo_c (float *Y, const float *X, const size_t R, const size_t C, const 
             }
             free(Y1);
         }
+        free(bittbl); free(cstbl);
     }
 
     //Scale
@@ -566,20 +589,14 @@ int fft_algo_c (float *Y, const float *X, const size_t R, const size_t C, const 
 }
 
 
-int fft_algo_z (double *Y, const double *X, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim, const size_t nfft, const char sc)
+int fft_rad2_z (double *Y, const double *X, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim, const size_t nfft, const char sc)
 {
-    if (nfft>0u && (nfft & (nfft-1u))) { fprintf(stderr,"error in fft_algo_z: nfft must be a power of 2\n"); return 1; }
+    if (nfft>0u && (nfft & (nfft-1u))) { fprintf(stderr,"error in fft_rad2_z: nfft must be a power of 2\n"); return 1; }
     
     const size_t N = R*C*S*H;
     const size_t Lx = (dim==0u) ? R : (dim==1u) ? C : (dim==2u) ? S : H;
     const size_t Ly = nfft;
-    if (nfft<Lx) { fprintf(stderr,"error in fft_algo_z: nfft must be >= L (vec length)\n"); return 1; }
-
-    //Initialize fft
-    size_t bittbl[nfft];
-    double cstbl[nfft+nfft/4u];
-    get_bittbl(bittbl,nfft);
-    get_cstbl_d(cstbl,nfft);
+    if (nfft<Lx) { fprintf(stderr,"error in fft_rad2_z: nfft must be >= L (vec length)\n"); return 1; }
 
     if (nfft==0u || N==0u) {}
     else if (nfft==1u)
@@ -588,16 +605,29 @@ int fft_algo_z (double *Y, const double *X, const size_t R, const size_t C, cons
     }
     else if (Lx==N)
     {
+        size_t *bittbl; double *cstbl;
+        if (!(bittbl=(size_t *)malloc(nfft*sizeof(size_t)))) { fprintf(stderr,"error in fft_rad2_d: problem with malloc. "); perror("malloc"); return 1; }
+        if (!(cstbl=(double *)malloc((nfft+nfft/4u)*sizeof(double)))) { fprintf(stderr,"error in fft_rad2_d: problem with malloc. "); perror("malloc"); return 1; }
+        get_bittbl(bittbl,nfft);
+        get_cstbl_d(cstbl,nfft);
         for (size_t l=0u; l<2u*Lx; ++l, ++X, ++Y) { *Y = *X; }
         for (size_t l=2u*Lx; l<2u*Ly; ++l, ++Y) { *Y = 0.0; }
         Y -= 2u*Ly;
         fft_1d_z(Y,nfft,bittbl,cstbl);
+        free(bittbl); free(cstbl);
     }
     else
     {
         const size_t K = (iscolmajor) ? ((dim==0u) ? 1u : (dim==1u) ? R : (dim==2u) ? R*C : R*C*S) : ((dim==0u) ? C*S*H : (dim==1u) ? S*H : (dim==2u) ? H : 1u);
         const size_t B = (iscolmajor && dim==0u) ? C*S*H : K;
         const size_t V = N/Lx, G = V/B;
+
+        //Initialize fft
+        size_t *bittbl; double *cstbl;
+        if (!(bittbl=(size_t *)malloc(nfft*sizeof(size_t)))) { fprintf(stderr,"error in fft_rad2_d: problem with malloc. "); perror("malloc"); return 1; }
+        if (!(cstbl=(double *)malloc((nfft+nfft/4u)*sizeof(double)))) { fprintf(stderr,"error in fft_rad2_d: problem with malloc. "); perror("malloc"); return 1; }
+        get_bittbl(bittbl,nfft);
+        get_cstbl_d(cstbl,nfft);
 
         if (K==1u && (G==1u || B==1u))
         {
@@ -612,7 +642,7 @@ int fft_algo_z (double *Y, const double *X, const size_t R, const size_t C, cons
         else
         {
             double *Y1;
-            if (!(Y1=(double *)malloc(2u*Ly*sizeof(double)))) { fprintf(stderr,"error in fft_algo_z: problem with malloc. "); perror("malloc"); return 1; }
+            if (!(Y1=(double *)malloc(2u*Ly*sizeof(double)))) { fprintf(stderr,"error in fft_rad2_z: problem with malloc. "); perror("malloc"); return 1; }
             for (size_t g=0u; g<G; ++g, X+=B*(Lx-1u), Y+=2u*B*(Ly-1u))
             {
                 for (size_t b=0; b<B; ++b, X-=K*Lx-1u, Y1-=2u*Ly, Y-=2u*K*Ly-2u)
@@ -626,6 +656,7 @@ int fft_algo_z (double *Y, const double *X, const size_t R, const size_t C, cons
             }
             free(Y1);
         }
+        free(bittbl); free(cstbl);
     }
 
     //Scale

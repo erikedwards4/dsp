@@ -55,6 +55,7 @@ int main(int argc, char *argv[])
     descr += "where nfrqs = floor(nfft/2)+1 = num nonnegative FFT frequencies.\n";
     descr += "\n";
     descr += "Note: to get same result + negative freqs, just convert X to complex.\n";
+    descr += "Alternately, use fft.rad2, which outputs all nfft freqs.\n";
     descr += "\n";
     descr += "Include -s (--scale) to scale by sqrt(0.5/L), for formal definition.\n";
     descr += "\n";
@@ -140,6 +141,7 @@ int main(int argc, char *argv[])
     o1.F = i1.F;
     o1.T = i1.isreal() ? i1.T+100u : i1.T;
     Ly = i1.isreal() ? nfft/2+1u : nfft;
+    //Ly = i1.isreal() ? nfft : nfft;
     o1.R = (dim==0u) ? Ly : i1.R;
     o1.C = (dim==1u) ? Ly : i1.C;
     o1.S = (dim==2u) ? Ly : i1.S;
@@ -159,7 +161,7 @@ int main(int argc, char *argv[])
 
 
     //Other prep
-    struct timespec tic, toc; clock_gettime(CLOCK_REALTIME,&tic);
+    //struct timespec tic, toc; clock_gettime(CLOCK_REALTIME,&tic);
     
 
     //Process
@@ -242,7 +244,7 @@ int main(int argc, char *argv[])
     
 
     //Finish
-    clock_gettime(CLOCK_REALTIME,&toc); fprintf(stderr,"elapsed time = %.6f ms\n",(toc.tv_sec-tic.tv_sec)*1e3+(toc.tv_nsec-tic.tv_nsec)/1e6);
+    //clock_gettime(CLOCK_REALTIME,&toc); fprintf(stderr,"elapsed time = %.6f ms\n",(toc.tv_sec-tic.tv_sec)*1e3+(toc.tv_nsec-tic.tv_nsec)/1e6);
 
 
     //Exit

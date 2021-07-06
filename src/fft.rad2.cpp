@@ -12,7 +12,7 @@
 #include <unordered_map>
 #include <argtable2.h>
 #include "../util/cmli.hpp"
-#include "fft.algo.c"
+#include "fft.rad2.c"
 
 #ifdef I
 #undef I
@@ -43,6 +43,7 @@ int main(int argc, char *argv[])
     descr += "1D FFT (fast Fourier transform) of each vector (1D signal) in X.\n";
     descr += "This uses the iterative-FFT algorithm in Ch. 20 (p.997) \n";
     descr += "of Introduction to Algorithms, 3rd Ed. [Cormen et al. 2009].\n";
+    descr += "This is part of (or at least closely-related to) the radix-2 family.\n";
     descr += "\n";
     descr += "This only works if nfft is a power of 2,\n";
     descr += "but then it is faster than the fftw version.\n";
@@ -55,18 +56,16 @@ int main(int argc, char *argv[])
     descr += "The default is the next-power-of-2 of the length of X along dim.\n";
     descr += "X is zero-padded as necessary to match nfft.\n";
     descr += "\n";
-    descr += "The output (Y) is complex-valued with length nfft along dim\n";
-    descr += "for complex X, and length nfrqs along dim for real X, \n";
-    descr += "where nfrqs = floor(nfft/2)+1 = num nonnegative FFT frequencies.\n";
-    descr += "\n";
-    descr += "Note: to get same result + negative freqs, just convert X to complex.\n";
+    descr += "The output (Y) is complex-valued with length nfft along dim.\n";
+    descr += "To get same result without negative freqs, use fft,\n";
+    descr += "which outputs nfrqs = floor(nfft/2)+1 for real-valued X.\n";
     descr += "\n";
     descr += "Include -s (--scale) to scale by sqrt(0.5/L), for formal definition.\n";
     descr += "\n";
     descr += "Examples:\n";
-    descr += "$ fft.algo -n256 X -o Y \n";
-    descr += "$ fft.algo -n256 -d1 X > Y \n";
-    descr += "$ cat X | fft.algo -n256 > Y \n";
+    descr += "$ fft.rad2 -n256 X -o Y \n";
+    descr += "$ fft.rad2 -n256 -d1 X > Y \n";
+    descr += "$ cat X | fft.rad2 -n256 > Y \n";
 
 
     //Argtable
@@ -170,7 +169,7 @@ int main(int argc, char *argv[])
 
 
     //Other prep
-    struct timespec tic, toc; clock_gettime(CLOCK_REALTIME,&tic);
+    //struct timespec tic, toc; clock_gettime(CLOCK_REALTIME,&tic);
     
 
     //Process
@@ -179,12 +178,11 @@ int main(int argc, char *argv[])
         float *X, *Y;
         try { X = new float[i1.N()]; }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for input file 1 (X)" << endl; return 1; }
-        try { Y = new float[2u*nfft]; }
+        try { Y = new float[2u*o1.N()]; }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for output file (Y)" << endl; return 1; }
         try { ifs1.read(reinterpret_cast<char*>(X),i1.nbytes()); }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 1 (X)" << endl; return 1; }
-        //if (codee::fft_vec_algo_s(Y,X,i1.N(),nfft,sc))
-        if (codee::fft_algo_s(Y,X,i1.R,i1.C,i1.S,i1.H,i1.iscolmajor(),dim,nfft,sc))
+        if (codee::fft_rad2_s(Y,X,i1.R,i1.C,i1.S,i1.H,i1.iscolmajor(),dim,nfft,sc))
         { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
         if (wo1)
         {
@@ -198,12 +196,11 @@ int main(int argc, char *argv[])
         double *X, *Y;
         try { X = new double[i1.N()]; }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for input file 1 (X)" << endl; return 1; }
-        try { Y = new double[2u*nfft]; }
+        try { Y = new double[2u*o1.N()]; }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for output file (Y)" << endl; return 1; }
         try { ifs1.read(reinterpret_cast<char*>(X),i1.nbytes()); }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 1 (X)" << endl; return 1; }
-        //if (codee::fft_vec_algo_d(Y,X,i1.N(),nfft,sc))
-        if (codee::fft_algo_d(Y,X,i1.R,i1.C,i1.S,i1.H,i1.iscolmajor(),dim,nfft,sc))
+        if (codee::fft_rad2_d(Y,X,i1.R,i1.C,i1.S,i1.H,i1.iscolmajor(),dim,nfft,sc))
         { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
         if (wo1)
         {
@@ -217,11 +214,11 @@ int main(int argc, char *argv[])
         float *X, *Y;
         try { X = new float[2u*i1.N()]; }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for input file 1 (X)" << endl; return 1; }
-        try { Y = new float[2u*nfft]; }
+        try { Y = new float[2u*o1.N()]; }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for output file (Y)" << endl; return 1; }
         try { ifs1.read(reinterpret_cast<char*>(X),i1.nbytes()); }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 1 (X)" << endl; return 1; }
-        if (codee::fft_algo_c(Y,X,i1.R,i1.C,i1.S,i1.H,i1.iscolmajor(),dim,nfft,sc))
+        if (codee::fft_rad2_c(Y,X,i1.R,i1.C,i1.S,i1.H,i1.iscolmajor(),dim,nfft,sc))
         { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
         if (wo1)
         {
@@ -235,11 +232,11 @@ int main(int argc, char *argv[])
         double *X, *Y;
         try { X = new double[2u*i1.N()]; }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for input file 1 (X)" << endl; return 1; }
-        try { Y = new double[2u*nfft]; }
+        try { Y = new double[2u*o1.N()]; }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for output file (Y)" << endl; return 1; }
         try { ifs1.read(reinterpret_cast<char*>(X),i1.nbytes()); }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 1 (X)" << endl; return 1; }
-        if (codee::fft_algo_z(Y,X,i1.R,i1.C,i1.S,i1.H,i1.iscolmajor(),dim,nfft,sc))
+        if (codee::fft_rad2_z(Y,X,i1.R,i1.C,i1.S,i1.H,i1.iscolmajor(),dim,nfft,sc))
         { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
         if (wo1)
         {
@@ -255,7 +252,7 @@ int main(int argc, char *argv[])
     
 
     //Finish
-    clock_gettime(CLOCK_REALTIME,&toc); fprintf(stderr,"elapsed time = %.6f ms\n",(toc.tv_sec-tic.tv_sec)*1e3+(toc.tv_nsec-tic.tv_nsec)/1e6);
+    //clock_gettime(CLOCK_REALTIME,&toc); fprintf(stderr,"elapsed time = %.6f ms\n",(toc.tv_sec-tic.tv_sec)*1e3+(toc.tv_nsec-tic.tv_nsec)/1e6);
 
 
     //Exit

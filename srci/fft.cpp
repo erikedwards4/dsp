@@ -1,5 +1,6 @@
 //Includes
-#include "fft.c"
+#include "fft.fftw.c"
+#include "fft.rad2.c"
 
 //Declarations
 const valarray<size_t> oktypes = {1u,2u,101u,102u};
@@ -10,6 +11,9 @@ char sc;
 //Description
 string descr;
 descr += "1D FFT (fast Fourier transform) of each vector (1D signal) in X.\n";
+descr += "This uses a direct implementation of the radix-2 algorithm for\n";
+descr += "vectors with power-of-2 lengths less than 2^16, but for any other\n";
+descr += "case (longer vecs, tensors, non-power-of-2 lengths) it uses FFTW.\n";
 descr += "\n";
 descr += "Use -d (--dim) to give the dimension along which to transform.\n";
 descr += "Use -d0 to operate along cols, -d1 to operate along rows, etc.\n";
@@ -24,6 +28,7 @@ descr += "for complex X, and length nfrqs along dim for real X, \n";
 descr += "where nfrqs = floor(nfft/2)+1 = num nonnegative FFT frequencies.\n";
 descr += "\n";
 descr += "Note: to get same result + negative freqs, just convert X to complex.\n";
+descr += "Alternately, use fft.rad2, which outputs all nfft freqs.\n";
 descr += "\n";
 descr += "Include -s (--scale) to scale by sqrt(0.5/L), for formal definition.\n";
 descr += "\n";
@@ -66,12 +71,14 @@ if (dim==3u && nfft<i1.H) { cerr << progstr+": " << __LINE__ << errstr << "nfft 
 o1.F = i1.F;
 o1.T = i1.isreal() ? i1.T+100u : i1.T;
 Ly = i1.isreal() ? nfft/2+1u : nfft;
+//Ly = i1.isreal() ? nfft : nfft;
 o1.R = (dim==0u) ? Ly : i1.R;
 o1.C = (dim==1u) ? Ly : i1.C;
 o1.S = (dim==2u) ? Ly : i1.S;
 o1.H = (dim==3u) ? Ly : i1.H;
 
 //Other prep
+//struct timespec tic, toc; clock_gettime(CLOCK_REALTIME,&tic);
 
 //Process
 if (i1.T==1u)
@@ -79,12 +86,22 @@ if (i1.T==1u)
     float *X, *Y;
     try { X = new float[i1.N()]; }
     catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for input file 1 (X)" << endl; return 1; }
-    try { Y = new float[2u*o1.N()]; }
-    catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for output file (Y)" << endl; return 1; }
     try { ifs1.read(reinterpret_cast<char*>(X),i1.nbytes()); }
     catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 1 (X)" << endl; return 1; }
-    if (codee::fft_s(Y,X,i1.R,i1.C,i1.S,i1.H,i1.iscolmajor(),dim,nfft,sc))
-    { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
+    if (i1.isvec() && nfft>0u && nfft<65536u && !(nfft & (nfft-1u)))
+    {
+        try { Y = new float[2u*nfft]; }
+        catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for output file (Y)" << endl; return 1; }
+        if (codee::fft_rad2_s(Y,X,i1.R,i1.C,i1.S,i1.H,i1.iscolmajor(),dim,nfft,sc))
+        { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
+    }
+    else
+    {
+        try { Y = new float[2u*o1.N()]; }
+        catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for output file (Y)" << endl; return 1; }
+        if (codee::fft_fftw_s(Y,X,i1.R,i1.C,i1.S,i1.H,i1.iscolmajor(),dim,nfft,sc))
+        { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
+    }
     if (wo1)
     {
         try { ofs1.write(reinterpret_cast<char*>(Y),o1.nbytes()); }
@@ -97,12 +114,22 @@ else if (i1.T==101u)
     float *X, *Y;
     try { X = new float[2u*i1.N()]; }
     catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for input file 1 (X)" << endl; return 1; }
-    try { Y = new float[2u*o1.N()]; }
-    catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for output file (Y)" << endl; return 1; }
     try { ifs1.read(reinterpret_cast<char*>(X),i1.nbytes()); }
     catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 1 (X)" << endl; return 1; }
-    if (codee::fft_c(Y,X,i1.R,i1.C,i1.S,i1.H,i1.iscolmajor(),dim,nfft,sc))
-    { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
+    if (i1.isvec() && nfft>0u && nfft<65536u && !(nfft & (nfft-1u)))
+    {
+        try { Y = new float[2u*nfft]; }
+        catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for output file (Y)" << endl; return 1; }
+        if (codee::fft_rad2_c(Y,X,i1.R,i1.C,i1.S,i1.H,i1.iscolmajor(),dim,nfft,sc))
+        { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
+    }
+    else
+    {
+        try { Y = new float[2u*o1.N()]; }
+        catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for output file (Y)" << endl; return 1; }
+        if (codee::fft_fftw_c(Y,X,i1.R,i1.C,i1.S,i1.H,i1.iscolmajor(),dim,nfft,sc))
+        { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
+    }
     if (wo1)
     {
         try { ofs1.write(reinterpret_cast<char*>(Y),o1.nbytes()); }
@@ -112,3 +139,4 @@ else if (i1.T==101u)
 }
 
 //Finish
+//clock_gettime(CLOCK_REALTIME,&toc); fprintf(stderr,"elapsed time = %.6f ms\n",(toc.tv_sec-tic.tv_sec)*1e3+(toc.tv_nsec-tic.tv_nsec)/1e6);
