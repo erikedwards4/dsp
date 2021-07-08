@@ -144,7 +144,7 @@ int main(int argc, char *argv[])
     //Set output header info
     o1.F = i1.F;
     o1.T = i1.isreal() ? i1.T+100u : i1.T;
-    Ly = i1.isreal() ? nfft/2+1u : nfft;
+    Ly = i1.isreal() ? nfft/2u+1u : nfft;
     //Ly = i1.isreal() ? nfft : nfft;
     o1.R = (dim==0u) ? Ly : i1.R;
     o1.C = (dim==1u) ? Ly : i1.C;
@@ -176,17 +176,15 @@ int main(int argc, char *argv[])
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for input file 1 (X)" << endl; return 1; }
         try { ifs1.read(reinterpret_cast<char*>(X),i1.nbytes()); }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 1 (X)" << endl; return 1; }
+        try { Y = new float[2u*o1.N()]; }
+        catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for output file (Y)" << endl; return 1; }
         if (i1.isvec() && nfft>0u && nfft<65536u && !(nfft & (nfft-1u)))
         {
-            try { Y = new float[2u*nfft]; }
-            catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for output file (Y)" << endl; return 1; }
             if (codee::fft_rad2_s(Y,X,i1.R,i1.C,i1.S,i1.H,i1.iscolmajor(),dim,nfft,sc))
             { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
         }
         else
         {
-            try { Y = new float[2u*o1.N()]; }
-            catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for output file (Y)" << endl; return 1; }
             if (codee::fft_fftw_s(Y,X,i1.R,i1.C,i1.S,i1.H,i1.iscolmajor(),dim,nfft,sc))
             { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
         }
@@ -204,17 +202,15 @@ int main(int argc, char *argv[])
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for input file 1 (X)" << endl; return 1; }
         try { ifs1.read(reinterpret_cast<char*>(X),i1.nbytes()); }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 1 (X)" << endl; return 1; }
+        try { Y = new double[2u*o1.N()]; }
+        catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for output file (Y)" << endl; return 1; }
         if (i1.isvec() && nfft>0u && nfft<65536u && !(nfft & (nfft-1u)))
         {
-            try { Y = new double[2u*nfft]; }
-            catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for output file (Y)" << endl; return 1; }
             if (codee::fft_rad2_d(Y,X,i1.R,i1.C,i1.S,i1.H,i1.iscolmajor(),dim,nfft,sc))
             { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
         }
         else
         {
-            try { Y = new double[2u*o1.N()]; }
-            catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for output file (Y)" << endl; return 1; }
             if (codee::fft_fftw_d(Y,X,i1.R,i1.C,i1.S,i1.H,i1.iscolmajor(),dim,nfft,sc))
             { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
         }
@@ -232,17 +228,15 @@ int main(int argc, char *argv[])
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for input file 1 (X)" << endl; return 1; }
         try { ifs1.read(reinterpret_cast<char*>(X),i1.nbytes()); }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 1 (X)" << endl; return 1; }
+        try { Y = new float[2u*o1.N()]; }
+        catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for output file (Y)" << endl; return 1; }
         if (i1.isvec() && nfft>0u && nfft<65536u && !(nfft & (nfft-1u)))
         {
-            try { Y = new float[2u*nfft]; }
-            catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for output file (Y)" << endl; return 1; }
             if (codee::fft_rad2_c(Y,X,i1.R,i1.C,i1.S,i1.H,i1.iscolmajor(),dim,nfft,sc))
             { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
         }
         else
         {
-            try { Y = new float[2u*o1.N()]; }
-            catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for output file (Y)" << endl; return 1; }
             if (codee::fft_fftw_c(Y,X,i1.R,i1.C,i1.S,i1.H,i1.iscolmajor(),dim,nfft,sc))
             { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
         }
@@ -260,17 +254,15 @@ int main(int argc, char *argv[])
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for input file 1 (X)" << endl; return 1; }
         try { ifs1.read(reinterpret_cast<char*>(X),i1.nbytes()); }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 1 (X)" << endl; return 1; }
+        try { Y = new double[2u*o1.N()]; }
+        catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for output file (Y)" << endl; return 1; }
         if (i1.isvec() && nfft>0u && nfft<65536u && !(nfft & (nfft-1u)))
         {
-            try { Y = new double[2u*nfft]; }
-            catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for output file (Y)" << endl; return 1; }
             if (codee::fft_rad2_z(Y,X,i1.R,i1.C,i1.S,i1.H,i1.iscolmajor(),dim,nfft,sc))
             { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
         }
         else
         {
-            try { Y = new double[2u*o1.N()]; }
-            catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for output file (Y)" << endl; return 1; }
             if (codee::fft_fftw_z(Y,X,i1.R,i1.C,i1.S,i1.H,i1.iscolmajor(),dim,nfft,sc))
             { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
         }

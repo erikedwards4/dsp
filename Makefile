@@ -101,7 +101,7 @@ planck: srci/planck.cpp c/planck.c
 
 
 #Transform: common 1-D signal transforms
-Transform: fft fft.fftw fft.rad2 #ifft ifft.fftw ifft.rad2 dct idct dst idst hilbert
+Transform: fft fft.fftw fft.rad2 ifft ifft.fftw #ifft.rad2 dct idct dst idst hilbert
 fft: srci/fft.cpp c/fft.c
 	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lfftw3f -lfftw3 -lm
 fft.fftw: srci/fft.fftw.cpp c/fft.fftw.c

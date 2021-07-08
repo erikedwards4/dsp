@@ -140,7 +140,7 @@ int main(int argc, char *argv[])
     //Set output header info
     o1.F = i1.F;
     o1.T = i1.isreal() ? i1.T+100u : i1.T;
-    Ly = i1.isreal() ? nfft/2+1u : nfft;
+    Ly = i1.isreal() ? nfft/2u+1u : nfft;
     //Ly = i1.isreal() ? nfft : nfft;
     o1.R = (dim==0u) ? Ly : i1.R;
     o1.C = (dim==1u) ? Ly : i1.C;

@@ -15,7 +15,7 @@ descr += "of Introduction to Algorithms, 3rd Ed. [Cormen et al. 2009].\n";
 descr += "This is part of (or at least closely-related to) the radix-2 family.\n";
 descr += "\n";
 descr += "This only works if nfft is a power of 2,\n";
-descr += "but then it is faster than the fftw version.\n";
+descr += "but then it is faster than the fftw version for smaller 1-D vecs.\n";
 descr += "\n";
 descr += "Use -d (--dim) to give the dimension along which to transform.\n";
 descr += "Use -d0 to operate along cols, -d1 to operate along rows, etc.\n";
@@ -74,8 +74,8 @@ if (dim==3u && nfft<i1.H) { cerr << progstr+": " << __LINE__ << errstr << "nfft 
 //Set output header info
 o1.F = i1.F;
 o1.T = i1.isreal() ? i1.T+100u : i1.T;
-//Ly = i1.isreal() ? nfft/2+1u : nfft;
-Ly = i1.isreal() ? nfft : nfft;
+Ly = i1.isreal() ? nfft/2u+1u : nfft;
+//Ly = i1.isreal() ? nfft : nfft;
 o1.R = (dim==0u) ? Ly : i1.R;
 o1.C = (dim==1u) ? Ly : i1.C;
 o1.S = (dim==2u) ? Ly : i1.S;

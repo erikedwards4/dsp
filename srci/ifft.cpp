@@ -1,5 +1,6 @@
 //Includes
-#include "ifft.c"
+#include "ifft.fftw.c"
+#include "ifft.rad2.c"
 
 //Declarations
 const valarray<size_t> oktypes = {1u,2u,101u,102u};
@@ -22,7 +23,7 @@ descr += "The default (L) is the length of X along dim.\n";
 descr += "X is zero-padded as necessary to match nfft.\n";
 descr += "\n";
 descr += "The output (Y) is complex-valued with length nfft along dim,\n";
-descr += "unless the using -r (--real) option.\n";
+descr += "unless using the -r (--real) option.\n";
 descr += "\n";
 descr += "Use -r (--real) if X represents n/2+1 nonnegative freqs.\n";
 descr += "In this case (and only this case), the output Y is real-valued.\n";
@@ -62,7 +63,7 @@ sc = (a_sc->count>0);
 if (a_n->count==0)
 {
     nfft = (dim==0u) ? i1.R : (dim==1u) ? i1.C : (dim==2u) ? i1.S : i1.H;
-    if (rl) { nfft = 2*(nfft-1); }
+    if (rl) { nfft = 2u*(nfft-1u); }
 }
 else if (a_n->ival[0]<1) { cerr << progstr+": " << __LINE__ << errstr << "nfft must be positive" << endl; return 1; }
 else { nfft = size_t(a_n->ival[0]); }
@@ -95,8 +96,16 @@ if (o1.T==1u)
     catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for output file (Y)" << endl; return 1; }
     try { ifs1.read(reinterpret_cast<char*>(X),i1.nbytes()); }
     catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 1 (X)" << endl; return 1; }
-    if (codee::ifft_s(Y,X,i1.R,i1.C,i1.S,i1.H,i1.iscolmajor(),dim,nfft,sc))
-    { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
+    if (i1.isvec() && nfft>0u && nfft<65536u && !(nfft & (nfft-1u)))
+    {
+        if (codee::ifft_rad2_s(Y,X,i1.R,i1.C,i1.S,i1.H,i1.iscolmajor(),dim,nfft,sc))
+        { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
+    }
+    else
+    {
+        if (codee::ifft_fftw_s(Y,X,i1.R,i1.C,i1.S,i1.H,i1.iscolmajor(),dim,nfft,sc))
+        { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
+    }
     if (wo1)
     {
         try { ofs1.write(reinterpret_cast<char*>(Y),o1.nbytes()); }
@@ -113,7 +122,16 @@ else if (o1.T==101u)
     catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for output file (Y)" << endl; return 1; }
     try { ifs1.read(reinterpret_cast<char*>(X),i1.nbytes()); }
     catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 1 (X)" << endl; return 1; }
-    if (codee::ifft_c(Y,X,i1.R,i1.C,i1.S,i1.H,i1.iscolmajor(),dim,nfft,sc)) { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
+    if (i1.isvec() && nfft>0u && nfft<65536u && !(nfft & (nfft-1u)))
+    {
+        if (codee::ifft_rad2_c(Y,X,i1.R,i1.C,i1.S,i1.H,i1.iscolmajor(),dim,nfft,sc))
+        { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
+    }
+    else
+    {
+        if (codee::ifft_fftw_c(Y,X,i1.R,i1.C,i1.S,i1.H,i1.iscolmajor(),dim,nfft,sc))
+        { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
+    }
     if (wo1)
     {
         try { ofs1.write(reinterpret_cast<char*>(Y),o1.nbytes()); }
