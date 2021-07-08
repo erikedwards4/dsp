@@ -112,7 +112,7 @@ int fft_fftw_s (float *Y, const float *X, const size_t R, const size_t C, const 
     //Scale
     if (sc)
     {
-        const float s = (float)(1.0/sqrt(2u*Lx));
+        const float s = (float)(1.0/sqrt(2u*nfft));
         for (size_t l=0u; l<2u*Ly*N/Lx; ++l, ++Y) { *Y *= s; }
     }
 
@@ -201,7 +201,7 @@ int fft_fftw_d (double *Y, const double *X, const size_t R, const size_t C, cons
     //Scale
     if (sc)
     {
-        const double s = 1.0/sqrt(2u*Lx);
+        const double s = 1.0/sqrt(2u*nfft);
         for (size_t l=0u; l<2u*Ly*N/Lx; ++l, ++Y) { *Y *= s; }
     }
 
@@ -281,7 +281,7 @@ int fft_fftw_c (float *Y, const float *X, const size_t R, const size_t C, const 
     //Scale
     if (sc)
     {
-        const float s = (float)(1.0f/sqrtf(2u*Lx));
+        const float s = (float)(1.0f/sqrt(2u*nfft));
         for (size_t l=0u; l<2u*nfft*N/Lx; ++l, ++Y) { *Y *= s; }
         Y -= 2u*nfft;
     }
@@ -361,7 +361,7 @@ int fft_fftw_z (double *Y, const double *X, const size_t R, const size_t C, cons
     //Scale
     if (sc)
     {
-        const double s = 1.0/sqrt(2u*Lx);
+        const double s = 1.0/sqrt(2u*nfft);
         for (size_t l=0u; l<2u*nfft*N/Lx; ++l, ++Y) { *Y *= s; }
     }
     

@@ -60,9 +60,9 @@ int main(int argc, char *argv[])
     descr += "Include -s (--scale) to scale by sqrt(0.5/L), for formal definition.\n";
     descr += "\n";
     descr += "Examples:\n";
-    descr += "$ fft -n256 X -o Y \n";
-    descr += "$ fft -n256 -d1 X > Y \n";
-    descr += "$ cat X | fft -n256 > Y \n";
+    descr += "$ fft.fftw -n256 X -o Y \n";
+    descr += "$ fft.fftw -n256 -d1 X > Y \n";
+    descr += "$ cat X | fft.fftw -n256 > Y \n";
 
 
     //Argtable

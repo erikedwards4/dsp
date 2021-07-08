@@ -46,7 +46,7 @@ int main(int argc, char *argv[])
     descr += "This is part of (or at least closely-related to) the radix-2 family.\n";
     descr += "\n";
     descr += "This only works if nfft is a power of 2,\n";
-    descr += "but then it is faster than the fftw version.\n";
+    descr += "but then it is faster than the fftw version for smaller 1-D vecs.\n";
     descr += "\n";
     descr += "Use -d (--dim) to give the dimension along which to transform.\n";
     descr += "Use -d0 to operate along cols, -d1 to operate along rows, etc.\n";
