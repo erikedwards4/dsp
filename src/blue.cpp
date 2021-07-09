@@ -13,7 +13,7 @@
 #include <argtable2.h>
 #include "../util/cmli.hpp"
 #include <cfloat>
-#include "brown.c"
+#include "blue.c"
 
 #ifdef I
 #undef I
@@ -42,10 +42,9 @@ int main(int argc, char *argv[])
 
     //Description
     string descr;
-    descr += "Zero-mean, Gaussian brown noise (1-D).\n";
+    descr += "Zero-mean, Gaussian blue noise (1-D).\n";
     descr += "Makes vector of Gaussian white noise with specified stddev, and then\n";
-    descr += "integrates (cumsum) to output the brown noise (1/f^2 characteristic).\n";
-    descr += "Brown noise is also called Brownian noise or red noise.\n";
+    descr += "takes FFT, multiplies by the f^1 characteristic, and takes IFFT.\n";
     descr += "\n";
     descr += "This uses modified code from PCG random, but does not require it to be installed.\n";
     descr += "\n";
@@ -62,9 +61,9 @@ int main(int argc, char *argv[])
     descr += "For complex output, real/imag parts are separately set using the same params.\n";
     descr += "\n";
     descr += "Examples:\n";
-    descr += "$ brown -n16 -o Y \n";
-    descr += "$ brown -d1 -n16 -z -t1 > Y \n";
-    descr += "$ brown -d1 -n16 -t102 > Y \n";
+    descr += "$ blue -n16 -o Y \n";
+    descr += "$ blue -d1 -n16 -z -t1 > Y \n";
+    descr += "$ blue -d1 -n16 -t102 > Y \n";
 
 
     //Argtable
@@ -163,7 +162,7 @@ int main(int argc, char *argv[])
         float *Y;
         try { Y = new float[o1.N()]; }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for output file (Y)" << endl; return 1; }
-        if (codee::brown_s(Y,o1.N(),(float)std,zmn))
+        if (codee::blue_s(Y,o1.N(),(float)std,zmn))
         { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
         if (wo1)
         {
@@ -177,7 +176,7 @@ int main(int argc, char *argv[])
         double *Y;
         try { Y = new double[o1.N()]; }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for output file (Y)" << endl; return 1; }
-        if (codee::brown_d(Y,o1.N(),(double)std,zmn))
+        if (codee::blue_d(Y,o1.N(),(double)std,zmn))
         { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
         if (wo1)
         {
@@ -191,7 +190,7 @@ int main(int argc, char *argv[])
         float *Y;
         try { Y = new float[2u*o1.N()]; }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for output file (Y)" << endl; return 1; }
-        if (codee::brown_c(Y,o1.N(),(float)std,zmn))
+        if (codee::blue_c(Y,o1.N(),(float)std,zmn))
         { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
         if (wo1)
         {
@@ -205,7 +204,7 @@ int main(int argc, char *argv[])
         double *Y;
         try { Y = new double[2u*o1.N()]; }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for output file (Y)" << endl; return 1; }
-        if (codee::brown_z(Y,o1.N(),(double)std,zmn))
+        if (codee::blue_z(Y,o1.N(),(double)std,zmn))
         { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
         if (wo1)
         {

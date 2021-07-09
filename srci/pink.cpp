@@ -30,8 +30,8 @@ descr += "\n";
 descr += "For complex output, real/imag parts are separately set using the same params.\n";
 descr += "\n";
 descr += "Examples:\n";
-descr += "$ pink -z -n16 -o Y \n";
-descr += "$ pink -u -d1 -n16 -t1 > Y \n";
+descr += "$ pink -n16 -o Y \n";
+descr += "$ pink -d1 -n16 -z -t1 > Y \n";
 descr += "$ pink -d1 -n16 -t102 > Y \n";
 
 //Argtable

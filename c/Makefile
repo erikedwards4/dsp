@@ -9,7 +9,7 @@
 #It is not necessary to run this when making the C++ command-line tools.
 
 SHELL=/bin/bash
-CC=clang
+CC=gcc
 
 ifeq ($(CC),$(filter $(CC),clang gcc))
 	STD=-std=c11
@@ -38,10 +38,12 @@ Dirs:
 Generate: Noise Pulses Waves Wins
 
 #Noise: generate colored noise
-Noise: white pink brown violet
+Noise: white pink red brown blue violet
 white: white.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 pink: pink.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+red: red.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 brown: brown.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+blue: blue.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 violet: violet.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 
 #Pulses: generate pulse functions (unit impulse is a.k.a. dirac delta)

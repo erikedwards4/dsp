@@ -1,6 +1,6 @@
 //Includes
 #include <cfloat>
-#include "brown.c"
+#include "blue.c"
 
 //Declarations
 const valarray<size_t> oktypes = {1u,2u,101u,102u};
@@ -11,10 +11,9 @@ double std;
 
 //Description
 string descr;
-descr += "Zero-mean, Gaussian brown noise (1-D).\n";
+descr += "Zero-mean, Gaussian blue noise (1-D).\n";
 descr += "Makes vector of Gaussian white noise with specified stddev, and then\n";
-descr += "integrates (cumsum) to output the brown noise (1/f^2 characteristic).\n";
-descr += "Brown noise is also called Brownian noise or red noise.\n";
+descr += "takes FFT, multiplies by the f^1 characteristic, and takes IFFT.\n";
 descr += "\n";
 descr += "This uses modified code from PCG random, but does not require it to be installed.\n";
 descr += "\n";
@@ -31,9 +30,9 @@ descr += "\n";
 descr += "For complex output, real/imag parts are separately set using the same params.\n";
 descr += "\n";
 descr += "Examples:\n";
-descr += "$ brown -n16 -o Y \n";
-descr += "$ brown -d1 -n16 -z -t1 > Y \n";
-descr += "$ brown -d1 -n16 -t102 > Y \n";
+descr += "$ blue -n16 -o Y \n";
+descr += "$ blue -d1 -n16 -z -t1 > Y \n";
+descr += "$ blue -d1 -n16 -t102 > Y \n";
 
 //Argtable
 struct arg_dbl  *a_std = arg_dbln("s","std","<dbl>",0,1,"std dev parameter [default=1.0]");
@@ -98,7 +97,7 @@ if (o1.T==1u)
     float *Y;
     try { Y = new float[o1.N()]; }
     catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for output file (Y)" << endl; return 1; }
-    if (codee::brown_s(Y,o1.N(),(float)std,zmn))
+    if (codee::blue_s(Y,o1.N(),(float)std,zmn))
     { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
     if (wo1)
     {
@@ -112,7 +111,7 @@ else if (o1.T==101u)
     float *Y;
     try { Y = new float[2u*o1.N()]; }
     catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for output file (Y)" << endl; return 1; }
-    if (codee::brown_c(Y,o1.N(),(float)std,zmn))
+    if (codee::blue_c(Y,o1.N(),(float)std,zmn))
     { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
     if (wo1)
     {

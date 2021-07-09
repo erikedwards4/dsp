@@ -42,6 +42,7 @@ int violet_s (float *Y, const size_t N, const float std, const char zmn)
         float u1, u2, R;
         uint32_t r, xorshifted, rot;
         uint64_t state = 0u;
+        const uint64_t mul = 6364136223846793005u;
         const uint64_t inc = ((uint64_t)(&state) << 1u) | 1u;
         struct timespec ts;
 
@@ -54,12 +55,12 @@ int violet_s (float *Y, const size_t N, const float std, const char zmn)
         {
             for (size_t n=0u; n<N-1u; n+=2u)
             {
-                state = state*6364136223846793005ull + inc;
+                state = state*mul + inc;
                 xorshifted = (uint32_t)(((state >> 18u) ^ state) >> 27u);
                 rot = state >> 59u;
                 r = (xorshifted >> rot) | (xorshifted << ((-rot) & 31));
                 u1 = ldexp((float)r,-32);
-                state = state*6364136223846793005ull + inc;
+                state = state*mul + inc;
                 xorshifted = (uint32_t)(((state >> 18u) ^ state) >> 27u);
                 rot = state >> 59u;
                 r = (xorshifted >> rot) | (xorshifted << ((-rot) & 31));
@@ -68,14 +69,14 @@ int violet_s (float *Y, const size_t N, const float std, const char zmn)
                 *Y++ = R * cosf(M_2PI*u2);
                 *Y++ = R * sinf(M_2PI*u2);
             }
-            if (N%2==1)
+            if (N%2u==1u)
             {
-                state = state*6364136223846793005ull + inc;
+                state = state*mul + inc;
                 xorshifted = (uint32_t)(((state >> 18u) ^ state) >> 27u);
                 rot = state >> 59u;
                 r = (xorshifted >> rot) | (xorshifted << ((-rot) & 31));
                 u1 = ldexp((float)r,-32);
-                state = state*6364136223846793005ull + inc;
+                state = state*mul + inc;
                 xorshifted = (uint32_t)(((state >> 18u) ^ state) >> 27u);
                 rot = state >> 59u;
                 r = (xorshifted >> rot) | (xorshifted << ((-rot) & 31));
@@ -88,12 +89,12 @@ int violet_s (float *Y, const size_t N, const float std, const char zmn)
         {
             for (size_t n=0u; n<N-1u; n+=2u)
             {
-                state = state*6364136223846793005ull + inc;
+                state = state*mul + inc;
                 xorshifted = (uint32_t)(((state >> 18u) ^ state) >> 27u);
                 rot = state >> 59u;
                 r = (xorshifted >> rot) | (xorshifted << ((-rot) & 31));
                 u1 = ldexp((float)r,-32);
-                state = state*6364136223846793005ull + inc;
+                state = state*mul + inc;
                 xorshifted = (uint32_t)(((state >> 18u) ^ state) >> 27u);
                 rot = state >> 59u;
                 r = (xorshifted >> rot) | (xorshifted << ((-rot) & 31));
@@ -102,14 +103,14 @@ int violet_s (float *Y, const size_t N, const float std, const char zmn)
                 *Y++ = R * cosf(M_2PI*u2);
                 *Y++ = R * sinf(M_2PI*u2);
             }
-            if (N%2==1)
+            if (N%2u==1u)
             {
-                state = state*6364136223846793005ull + inc;
+                state = state*mul + inc;
                 xorshifted = (uint32_t)(((state >> 18u) ^ state) >> 27u);
                 rot = state >> 59u;
                 r = (xorshifted >> rot) | (xorshifted << ((-rot) & 31));
                 u1 = ldexp((float)r,-32);
-                state = state*6364136223846793005ull + inc;
+                state = state*mul + inc;
                 xorshifted = (uint32_t)(((state >> 18u) ^ state) >> 27u);
                 rot = state >> 59u;
                 r = (xorshifted >> rot) | (xorshifted << ((-rot) & 31));
@@ -120,14 +121,14 @@ int violet_s (float *Y, const size_t N, const float std, const char zmn)
         }
 
         --Y;
-        for (size_t n=0; n<N-1u; ++n, --Y) { *Y -= *(Y-1); }
+        for (size_t n=0u; n<N-1u; ++n, --Y) { *Y -= *(Y-1); }
 
         if (zmn)
         {
             float sm = 0.0f;
-            for (size_t n=0; n<N; ++n, ++Y) { sm += *Y; }
+            for (size_t n=0u; n<N; ++n, ++Y) { sm += *Y; }
             sm /= (float)N;
-            for (size_t n=0; n<N; ++n) { *--Y -= sm; }
+            for (size_t n=0u; n<N; ++n) { *--Y -= sm; }
         }
     }
 
@@ -150,6 +151,7 @@ int violet_d (double *Y, const size_t N, const double std, const char zmn)
         double u1, u2, R;
         uint32_t r, xorshifted, rot;
         uint64_t state = 0u;
+        const uint64_t mul = 6364136223846793005u;
         const uint64_t inc = ((uint64_t)(&state) << 1u) | 1u;
         struct timespec ts;
 
@@ -162,12 +164,12 @@ int violet_d (double *Y, const size_t N, const double std, const char zmn)
         {
             for (size_t n=0u; n<N-1u; n+=2u)
             {
-                state = state*6364136223846793005ull + inc;
+                state = state*mul + inc;
                 xorshifted = (uint32_t)(((state >> 18u) ^ state) >> 27u);
                 rot = state >> 59u;
                 r = (xorshifted >> rot) | (xorshifted << ((-rot) & 31));
                 u1 = ldexp((double)r,-32);
-                state = state*6364136223846793005ull + inc;
+                state = state*mul + inc;
                 xorshifted = (uint32_t)(((state >> 18u) ^ state) >> 27u);
                 rot = state >> 59u;
                 r = (xorshifted >> rot) | (xorshifted << ((-rot) & 31));
@@ -176,14 +178,14 @@ int violet_d (double *Y, const size_t N, const double std, const char zmn)
                 *Y++ = R * cos(M_2PI*u2);
                 *Y++ = R * sin(M_2PI*u2);
             }
-            if (N%2==1)
+            if (N%2u==1u)
             {
-                state = state*6364136223846793005ull + inc;
+                state = state*mul + inc;
                 xorshifted = (uint32_t)(((state >> 18u) ^ state) >> 27u);
                 rot = state >> 59u;
                 r = (xorshifted >> rot) | (xorshifted << ((-rot) & 31));
                 u1 = ldexp((double)r,-32);
-                state = state*6364136223846793005ull + inc;
+                state = state*mul + inc;
                 xorshifted = (uint32_t)(((state >> 18u) ^ state) >> 27u);
                 rot = state >> 59u;
                 r = (xorshifted >> rot) | (xorshifted << ((-rot) & 31));
@@ -196,12 +198,12 @@ int violet_d (double *Y, const size_t N, const double std, const char zmn)
         {
             for (size_t n=0u; n<N-1u; n+=2u)
             {
-                state = state*6364136223846793005ull + inc;
+                state = state*mul + inc;
                 xorshifted = (uint32_t)(((state >> 18u) ^ state) >> 27u);
                 rot = state >> 59u;
                 r = (xorshifted >> rot) | (xorshifted << ((-rot) & 31));
                 u1 = ldexp((double)r,-32);
-                state = state*6364136223846793005ull + inc;
+                state = state*mul + inc;
                 xorshifted = (uint32_t)(((state >> 18u) ^ state) >> 27u);
                 rot = state >> 59u;
                 r = (xorshifted >> rot) | (xorshifted << ((-rot) & 31));
@@ -210,14 +212,14 @@ int violet_d (double *Y, const size_t N, const double std, const char zmn)
                 *Y++ = R * cos(M_2PI*u2);
                 *Y++ = R * sin(M_2PI*u2);
             }
-            if (N%2==1)
+            if (N%2u==1u)
             {
-                state = state*6364136223846793005ull + inc;
+                state = state*mul + inc;
                 xorshifted = (uint32_t)(((state >> 18u) ^ state) >> 27u);
                 rot = state >> 59u;
                 r = (xorshifted >> rot) | (xorshifted << ((-rot) & 31));
                 u1 = ldexp((double)r,-32);
-                state = state*6364136223846793005ull + inc;
+                state = state*mul + inc;
                 xorshifted = (uint32_t)(((state >> 18u) ^ state) >> 27u);
                 rot = state >> 59u;
                 r = (xorshifted >> rot) | (xorshifted << ((-rot) & 31));
@@ -228,14 +230,14 @@ int violet_d (double *Y, const size_t N, const double std, const char zmn)
         }
 
         --Y;
-        for (size_t n=0; n<N-1u; ++n, --Y) { *Y -= *(Y-1); }
+        for (size_t n=0u; n<N-1u; ++n, --Y) { *Y -= *(Y-1); }
 
         if (zmn)
         {
             double sm = 0.0;
-            for (size_t n=0; n<N; ++n, ++Y) { sm += *Y; }
+            for (size_t n=0u; n<N; ++n, ++Y) { sm += *Y; }
             sm /= (double)N;
-            for (size_t n=0; n<N; ++n) { *--Y -= sm; }
+            for (size_t n=0u; n<N; ++n) { *--Y -= sm; }
         }
     }
 
@@ -258,6 +260,7 @@ int violet_c (float *Y, const size_t N, const float std, const char zmn)
         float u1, u2, R;
         uint32_t r, xorshifted, rot;
         uint64_t state = 0u;
+        const uint64_t mul = 6364136223846793005u;
         const uint64_t inc = ((uint64_t)(&state) << 1u) | 1u;
         struct timespec ts;
 
@@ -270,12 +273,12 @@ int violet_c (float *Y, const size_t N, const float std, const char zmn)
         {
             for (size_t n=0u; n<N; ++n)
             {
-                state = state*6364136223846793005ull + inc;
+                state = state*mul + inc;
                 xorshifted = (uint32_t)(((state >> 18u) ^ state) >> 27u);
                 rot = state >> 59u;
                 r = (xorshifted >> rot) | (xorshifted << ((-rot) & 31));
                 u1 = ldexp((float)r,-32);
-                state = state*6364136223846793005ull + inc;
+                state = state*mul + inc;
                 xorshifted = (uint32_t)(((state >> 18u) ^ state) >> 27u);
                 rot = state >> 59u;
                 r = (xorshifted >> rot) | (xorshifted << ((-rot) & 31));
@@ -289,12 +292,12 @@ int violet_c (float *Y, const size_t N, const float std, const char zmn)
         {
             for (size_t n=0u; n<N; ++n)
             {
-                state = state*6364136223846793005ull + inc;
+                state = state*mul + inc;
                 xorshifted = (uint32_t)(((state >> 18u) ^ state) >> 27u);
                 rot = state >> 59u;
                 r = (xorshifted >> rot) | (xorshifted << ((-rot) & 31));
                 u1 = ldexp((float)r,-32);
-                state = state*6364136223846793005ull + inc;
+                state = state*mul + inc;
                 xorshifted = (uint32_t)(((state >> 18u) ^ state) >> 27u);
                 rot = state >> 59u;
                 r = (xorshifted >> rot) | (xorshifted << ((-rot) & 31));
@@ -306,15 +309,15 @@ int violet_c (float *Y, const size_t N, const float std, const char zmn)
         }
 
         --Y;
-        for (size_t n=0; n<N-1u; ++n, --Y) { *Y -= *(Y-2); --Y; *Y -= *(Y-2); }
+        for (size_t n=0u; n<N-1u; ++n, --Y) { *Y -= *(Y-2); --Y; *Y -= *(Y-2); }
         --Y;
 
         if (zmn)
         {
             float smr = 0.0f, smi = 0.0f;
-            for (size_t n=0; n<N; ++n) { smr += *Y++; smi += *Y++; }
+            for (size_t n=0u; n<N; ++n) { smr += *Y++; smi += *Y++; }
             smr /= (float)N; smi /= (float)N;
-            for (size_t n=0; n<N; ++n) { *--Y -= smi; *--Y -= smr; }
+            for (size_t n=0u; n<N; ++n) { *--Y -= smi; *--Y -= smr; }
         }
     }
 
@@ -337,6 +340,7 @@ int violet_z (double *Y, const size_t N, const double std, const char zmn)
         double u1, u2, R;
         uint32_t r, xorshifted, rot;
         uint64_t state = 0u;
+        const uint64_t mul = 6364136223846793005u;
         const uint64_t inc = ((uint64_t)(&state) << 1u) | 1u;
         struct timespec ts;
 
@@ -349,12 +353,12 @@ int violet_z (double *Y, const size_t N, const double std, const char zmn)
         {
             for (size_t n=0u; n<N; ++n)
             {
-                state = state*6364136223846793005ull + inc;
+                state = state*mul + inc;
                 xorshifted = (uint32_t)(((state >> 18u) ^ state) >> 27u);
                 rot = state >> 59u;
                 r = (xorshifted >> rot) | (xorshifted << ((-rot) & 31));
                 u1 = ldexp((double)r,-32);
-                state = state*6364136223846793005ull + inc;
+                state = state*mul + inc;
                 xorshifted = (uint32_t)(((state >> 18u) ^ state) >> 27u);
                 rot = state >> 59u;
                 r = (xorshifted >> rot) | (xorshifted << ((-rot) & 31));
@@ -368,12 +372,12 @@ int violet_z (double *Y, const size_t N, const double std, const char zmn)
         {
             for (size_t n=0u; n<N; ++n)
             {
-                state = state*6364136223846793005ull + inc;
+                state = state*mul + inc;
                 xorshifted = (uint32_t)(((state >> 18u) ^ state) >> 27u);
                 rot = state >> 59u;
                 r = (xorshifted >> rot) | (xorshifted << ((-rot) & 31));
                 u1 = ldexp((double)r,-32);
-                state = state*6364136223846793005ull + inc;
+                state = state*mul + inc;
                 xorshifted = (uint32_t)(((state >> 18u) ^ state) >> 27u);
                 rot = state >> 59u;
                 r = (xorshifted >> rot) | (xorshifted << ((-rot) & 31));
@@ -385,15 +389,15 @@ int violet_z (double *Y, const size_t N, const double std, const char zmn)
         }
 
         --Y;
-        for (size_t n=0; n<N-1u; ++n, --Y) { *Y -= *(Y-2); --Y; *Y -= *(Y-2); }
+        for (size_t n=0u; n<N-1u; ++n, --Y) { *Y -= *(Y-2); --Y; *Y -= *(Y-2); }
         --Y;
 
         if (zmn)
         {
             double smr = 0.0, smi = 0.0;
-            for (size_t n=0; n<N; ++n) { smr += *Y++; smi += *Y++; }
+            for (size_t n=0u; n<N; ++n) { smr += *Y++; smi += *Y++; }
             smr /= (double)N; smi /= (double)N;
-            for (size_t n=0; n<N; ++n) { *--Y -= smi; *--Y -= smr; }
+            for (size_t n=0u; n<N; ++n) { *--Y -= smi; *--Y -= smr; }
         }
     }
 

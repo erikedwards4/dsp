@@ -37,23 +37,24 @@ int white_s (float *Y, const size_t N, const float std, const char uni, const ch
     {
         for (size_t n=0u; n<N; ++n, ++Y) { *Y = 0.0f; }
     }
-    else if (uni==1)
+    else if (uni)
     {
         uint32_t r, xorshifted, rot;
         uint64_t state = 0u;
+        const uint64_t mul = 6364136223846793005u;
         const uint64_t inc = ((uint64_t)(&state) << 1u) | 1u;
         struct timespec ts;
         const float sc = sqrtf(std*std+12.0f);
         const float a = -0.5f * sc;
 
         //Init random num generator
-	    if (timespec_get(&ts,TIME_UTC)==0) { fprintf(stderr, "error in randu_s: timespec_get.\n"); perror("timespec_get"); return 1; }
+	    if (timespec_get(&ts,TIME_UTC)==0) { fprintf(stderr, "error in white_s: timespec_get.\n"); perror("timespec_get"); return 1; }
 	    state = (uint64_t)(ts.tv_nsec^ts.tv_sec) + inc;
 
         //Generate
         for (size_t n=0u; n<N; ++n, ++Y)
         {
-            state = state*6364136223846793005ull + inc;
+            state = state*mul + inc;
             xorshifted = (uint32_t)(((state >> 18u) ^ state) >> 27u);
             rot = state >> 59u;
             r = (xorshifted >> rot) | (xorshifted << ((-rot) & 31));
@@ -66,6 +67,7 @@ int white_s (float *Y, const size_t N, const float std, const char uni, const ch
         float u1, u2, R;
         uint32_t r, xorshifted, rot;
         uint64_t state = 0u;
+        const uint64_t mul = 6364136223846793005u;
         const uint64_t inc = ((uint64_t)(&state) << 1u) | 1u;
         struct timespec ts;
 
@@ -78,12 +80,12 @@ int white_s (float *Y, const size_t N, const float std, const char uni, const ch
         {
             for (size_t n=0u; n<N-1u; n+=2u)
             {
-                state = state*6364136223846793005ull + inc;
+                state = state*mul + inc;
                 xorshifted = (uint32_t)(((state >> 18u) ^ state) >> 27u);
                 rot = state >> 59u;
                 r = (xorshifted >> rot) | (xorshifted << ((-rot) & 31));
                 u1 = ldexp((float)r,-32);
-                state = state*6364136223846793005ull + inc;
+                state = state*mul + inc;
                 xorshifted = (uint32_t)(((state >> 18u) ^ state) >> 27u);
                 rot = state >> 59u;
                 r = (xorshifted >> rot) | (xorshifted << ((-rot) & 31));
@@ -92,14 +94,14 @@ int white_s (float *Y, const size_t N, const float std, const char uni, const ch
                 *Y++ = R * cosf(M_2PI*u2);
                 *Y++ = R * sinf(M_2PI*u2);
             }
-            if (N%2==1)
+            if (N%2u==1u)
             {
-                state = state*6364136223846793005ull + inc;
+                state = state*mul + inc;
                 xorshifted = (uint32_t)(((state >> 18u) ^ state) >> 27u);
                 rot = state >> 59u;
                 r = (xorshifted >> rot) | (xorshifted << ((-rot) & 31));
                 u1 = ldexp((float)r,-32);
-                state = state*6364136223846793005ull + inc;
+                state = state*mul + inc;
                 xorshifted = (uint32_t)(((state >> 18u) ^ state) >> 27u);
                 rot = state >> 59u;
                 r = (xorshifted >> rot) | (xorshifted << ((-rot) & 31));
@@ -112,12 +114,12 @@ int white_s (float *Y, const size_t N, const float std, const char uni, const ch
         {
             for (size_t n=0u; n<N-1u; n+=2u)
             {
-                state = state*6364136223846793005ull + inc;
+                state = state*mul + inc;
                 xorshifted = (uint32_t)(((state >> 18u) ^ state) >> 27u);
                 rot = state >> 59u;
                 r = (xorshifted >> rot) | (xorshifted << ((-rot) & 31));
                 u1 = ldexp((float)r,-32);
-                state = state*6364136223846793005ull + inc;
+                state = state*mul + inc;
                 xorshifted = (uint32_t)(((state >> 18u) ^ state) >> 27u);
                 rot = state >> 59u;
                 r = (xorshifted >> rot) | (xorshifted << ((-rot) & 31));
@@ -126,14 +128,14 @@ int white_s (float *Y, const size_t N, const float std, const char uni, const ch
                 *Y++ = R * cosf(M_2PI*u2);
                 *Y++ = R * sinf(M_2PI*u2);
             }
-            if (N%2==1)
+            if (N%2u==1u)
             {
-                state = state*6364136223846793005ull + inc;
+                state = state*mul + inc;
                 xorshifted = (uint32_t)(((state >> 18u) ^ state) >> 27u);
                 rot = state >> 59u;
                 r = (xorshifted >> rot) | (xorshifted << ((-rot) & 31));
                 u1 = ldexp((float)r,-32);
-                state = state*6364136223846793005ull + inc;
+                state = state*mul + inc;
                 xorshifted = (uint32_t)(((state >> 18u) ^ state) >> 27u);
                 rot = state >> 59u;
                 r = (xorshifted >> rot) | (xorshifted << ((-rot) & 31));
@@ -147,9 +149,9 @@ int white_s (float *Y, const size_t N, const float std, const char uni, const ch
     if (zmn)
     {
         float sm = 0.0f;
-        for (size_t n=0; n<N; ++n) { sm += *--Y; }
+        for (size_t n=0u; n<N; ++n) { sm += *--Y; }
         sm /= (float)N;
-        for (size_t n=0; n<N; ++n, ++Y) { *Y -= sm; }
+        for (size_t n=0u; n<N; ++n, ++Y) { *Y -= sm; }
     }
 
     return 0;
@@ -165,10 +167,11 @@ int white_d (double *Y, const size_t N, const double std, const char uni, const 
     {
         for (size_t n=0u; n<N; ++n, ++Y) { *Y = 0.0; }
     }
-    else if (uni==1)
+    else if (uni)
     {
         uint32_t r, xorshifted, rot;
         uint64_t state = 0u;
+        const uint64_t mul = 6364136223846793005u;
         const uint64_t inc = ((uint64_t)(&state) << 1u) | 1u;
         struct timespec ts;
         const double sc = sqrt(std*std+12.0);
@@ -181,7 +184,7 @@ int white_d (double *Y, const size_t N, const double std, const char uni, const 
         //Generate
         for (size_t n=0u; n<N; ++n, ++Y)
         {
-            state = state*6364136223846793005ull + inc;
+            state = state*mul + inc;
             xorshifted = (uint32_t)(((state >> 18u) ^ state) >> 27u);
             rot = state >> 59u;
             r = (xorshifted >> rot) | (xorshifted << ((-rot) & 31));
@@ -194,6 +197,7 @@ int white_d (double *Y, const size_t N, const double std, const char uni, const 
         double u1, u2, R;
         uint32_t r, xorshifted, rot;
         uint64_t state = 0u;
+        const uint64_t mul = 6364136223846793005u;
         const uint64_t inc = ((uint64_t)(&state) << 1u) | 1u;
         struct timespec ts;
 
@@ -206,12 +210,12 @@ int white_d (double *Y, const size_t N, const double std, const char uni, const 
         {
             for (size_t n=0u; n<N-1u; n+=2u)
             {
-                state = state*6364136223846793005ull + inc;
+                state = state*mul + inc;
                 xorshifted = (uint32_t)(((state >> 18u) ^ state) >> 27u);
                 rot = state >> 59u;
                 r = (xorshifted >> rot) | (xorshifted << ((-rot) & 31));
                 u1 = ldexp((double)r,-32);
-                state = state*6364136223846793005ull + inc;
+                state = state*mul + inc;
                 xorshifted = (uint32_t)(((state >> 18u) ^ state) >> 27u);
                 rot = state >> 59u;
                 r = (xorshifted >> rot) | (xorshifted << ((-rot) & 31));
@@ -220,14 +224,14 @@ int white_d (double *Y, const size_t N, const double std, const char uni, const 
                 *Y++ = R * cos(M_2PI*u2);
                 *Y++ = R * sin(M_2PI*u2);
             }
-            if (N%2==1)
+            if (N%2u==1u)
             {
-                state = state*6364136223846793005ull + inc;
+                state = state*mul + inc;
                 xorshifted = (uint32_t)(((state >> 18u) ^ state) >> 27u);
                 rot = state >> 59u;
                 r = (xorshifted >> rot) | (xorshifted << ((-rot) & 31));
                 u1 = ldexp((double)r,-32);
-                state = state*6364136223846793005ull + inc;
+                state = state*mul + inc;
                 xorshifted = (uint32_t)(((state >> 18u) ^ state) >> 27u);
                 rot = state >> 59u;
                 r = (xorshifted >> rot) | (xorshifted << ((-rot) & 31));
@@ -240,12 +244,12 @@ int white_d (double *Y, const size_t N, const double std, const char uni, const 
         {
             for (size_t n=0u; n<N-1u; n+=2u)
             {
-                state = state*6364136223846793005ull + inc;
+                state = state*mul + inc;
                 xorshifted = (uint32_t)(((state >> 18u) ^ state) >> 27u);
                 rot = state >> 59u;
                 r = (xorshifted >> rot) | (xorshifted << ((-rot) & 31));
                 u1 = ldexp((double)r,-32);
-                state = state*6364136223846793005ull + inc;
+                state = state*mul + inc;
                 xorshifted = (uint32_t)(((state >> 18u) ^ state) >> 27u);
                 rot = state >> 59u;
                 r = (xorshifted >> rot) | (xorshifted << ((-rot) & 31));
@@ -254,14 +258,14 @@ int white_d (double *Y, const size_t N, const double std, const char uni, const 
                 *Y++ = R * cos(M_2PI*u2);
                 *Y++ = R * sin(M_2PI*u2);
             }
-            if (N%2==1)
+            if (N%2u==1u)
             {
-                state = state*6364136223846793005ull + inc;
+                state = state*mul + inc;
                 xorshifted = (uint32_t)(((state >> 18u) ^ state) >> 27u);
                 rot = state >> 59u;
                 r = (xorshifted >> rot) | (xorshifted << ((-rot) & 31));
                 u1 = ldexp((double)r,-32);
-                state = state*6364136223846793005ull + inc;
+                state = state*mul + inc;
                 xorshifted = (uint32_t)(((state >> 18u) ^ state) >> 27u);
                 rot = state >> 59u;
                 r = (xorshifted >> rot) | (xorshifted << ((-rot) & 31));
@@ -275,9 +279,9 @@ int white_d (double *Y, const size_t N, const double std, const char uni, const 
     if (zmn)
     {
         double sm = 0.0;
-        for (size_t n=0; n<N; ++n) { sm += *--Y; }
+        for (size_t n=0u; n<N; ++n) { sm += *--Y; }
         sm /= (double)N;
-        for (size_t n=0; n<N; ++n, ++Y) { *Y -= sm; }
+        for (size_t n=0u; n<N; ++n, ++Y) { *Y -= sm; }
     }
 
     return 0;
@@ -286,30 +290,31 @@ int white_d (double *Y, const size_t N, const double std, const char uni, const 
 
 int white_c (float *Y, const size_t N, const float std, const char uni, const char zmn)
 {
-    if (std<0.0f) { fprintf(stderr, "error in white_s: std must be nonnegative\n"); return 1; }
+    if (std<0.0f) { fprintf(stderr, "error in white_c: std must be nonnegative\n"); return 1; }
 
     if (N==0u) {}
     else if (std<FLT_EPSILON)
     {
         for (size_t n=0u; n<2u*N; ++n, ++Y) { *Y = 0.0f; }
     }
-    else if (uni==1)
+    else if (uni)
     {
         uint32_t r, xorshifted, rot;
         uint64_t state = 0u;
+        const uint64_t mul = 6364136223846793005u;
         const uint64_t inc = ((uint64_t)(&state) << 1u) | 1u;
         struct timespec ts;
         const float sc = sqrtf(std*std+12.0f);
         const float a = -0.5f * sc;
 
         //Init random num generator
-	    if (timespec_get(&ts,TIME_UTC)==0) { fprintf(stderr, "error in randu_s: timespec_get.\n"); perror("timespec_get"); return 1; }
+	    if (timespec_get(&ts,TIME_UTC)==0) { fprintf(stderr, "error in white_c: timespec_get.\n"); perror("timespec_get"); return 1; }
 	    state = (uint64_t)(ts.tv_nsec^ts.tv_sec) + inc;
 
         //Generate
         for (size_t n=0u; n<2u*N; ++n, ++Y)
         {
-            state = state*6364136223846793005ull + inc;
+            state = state*mul + inc;
             xorshifted = (uint32_t)(((state >> 18u) ^ state) >> 27u);
             rot = state >> 59u;
             r = (xorshifted >> rot) | (xorshifted << ((-rot) & 31));
@@ -322,6 +327,7 @@ int white_c (float *Y, const size_t N, const float std, const char uni, const ch
         float u1, u2, R;
         uint32_t r, xorshifted, rot;
         uint64_t state = 0u;
+        const uint64_t mul = 6364136223846793005u;
         const uint64_t inc = ((uint64_t)(&state) << 1u) | 1u;
         struct timespec ts;
 
@@ -334,12 +340,12 @@ int white_c (float *Y, const size_t N, const float std, const char uni, const ch
         {
             for (size_t n=0u; n<N; ++n)
             {
-                state = state*6364136223846793005ull + inc;
+                state = state*mul + inc;
                 xorshifted = (uint32_t)(((state >> 18u) ^ state) >> 27u);
                 rot = state >> 59u;
                 r = (xorshifted >> rot) | (xorshifted << ((-rot) & 31));
                 u1 = ldexp((float)r,-32);
-                state = state*6364136223846793005ull + inc;
+                state = state*mul + inc;
                 xorshifted = (uint32_t)(((state >> 18u) ^ state) >> 27u);
                 rot = state >> 59u;
                 r = (xorshifted >> rot) | (xorshifted << ((-rot) & 31));
@@ -353,12 +359,12 @@ int white_c (float *Y, const size_t N, const float std, const char uni, const ch
         {
             for (size_t n=0u; n<N; ++n)
             {
-                state = state*6364136223846793005ull + inc;
+                state = state*mul + inc;
                 xorshifted = (uint32_t)(((state >> 18u) ^ state) >> 27u);
                 rot = state >> 59u;
                 r = (xorshifted >> rot) | (xorshifted << ((-rot) & 31));
                 u1 = ldexp((float)r,-32);
-                state = state*6364136223846793005ull + inc;
+                state = state*mul + inc;
                 xorshifted = (uint32_t)(((state >> 18u) ^ state) >> 27u);
                 rot = state >> 59u;
                 r = (xorshifted >> rot) | (xorshifted << ((-rot) & 31));
@@ -373,9 +379,9 @@ int white_c (float *Y, const size_t N, const float std, const char uni, const ch
     if (zmn)
     {
         float smr=0.0f, smi=0.0f;
-        for (size_t n=0; n<N; ++n) { smi += *--Y; smr += *--Y; }
+        for (size_t n=0u; n<N; ++n) { smi += *--Y; smr += *--Y; }
         smr /= (float)N; smi /= (float)N;
-        for (size_t n=0; n<N; ++n) { *Y++ -= smr; *Y++ -= smi; }
+        for (size_t n=0u; n<N; ++n) { *Y++ -= smr; *Y++ -= smi; }
     }
 
     return 0;
@@ -391,23 +397,24 @@ int white_z (double *Y, const size_t N, const double std, const char uni, const 
     {
         for (size_t n=0u; n<2u*N; ++n, ++Y) { *Y = 0.0; }
     }
-    else if (uni==1)
+    else if (uni)
     {
         uint32_t r, xorshifted, rot;
         uint64_t state = 0u;
+        const uint64_t mul = 6364136223846793005u;
         const uint64_t inc = ((uint64_t)(&state) << 1u) | 1u;
         struct timespec ts;
         const double sc = sqrt(std*std+12.0);
         const double a = -0.5 * sc;
 
         //Init random num generator
-	    if (timespec_get(&ts,TIME_UTC)==0) { fprintf(stderr, "error in randu_s: timespec_get.\n"); perror("timespec_get"); return 1; }
+	    if (timespec_get(&ts,TIME_UTC)==0) { fprintf(stderr, "error in white_z: timespec_get.\n"); perror("timespec_get"); return 1; }
 	    state = (uint64_t)(ts.tv_nsec^ts.tv_sec) + inc;
 
         //Generate
         for (size_t n=0u; n<2u*N; ++n, ++Y)
         {
-            state = state*6364136223846793005ull + inc;
+            state = state*mul + inc;
             xorshifted = (uint32_t)(((state >> 18u) ^ state) >> 27u);
             rot = state >> 59u;
             r = (xorshifted >> rot) | (xorshifted << ((-rot) & 31));
@@ -420,6 +427,7 @@ int white_z (double *Y, const size_t N, const double std, const char uni, const 
         double u1, u2, R;
         uint32_t r, xorshifted, rot;
         uint64_t state = 0u;
+        const uint64_t mul = 6364136223846793005u;
         const uint64_t inc = ((uint64_t)(&state) << 1u) | 1u;
         struct timespec ts;
 
@@ -432,12 +440,12 @@ int white_z (double *Y, const size_t N, const double std, const char uni, const 
         {
             for (size_t n=0u; n<N; ++n)
             {
-                state = state*6364136223846793005ull + inc;
+                state = state*mul + inc;
                 xorshifted = (uint32_t)(((state >> 18u) ^ state) >> 27u);
                 rot = state >> 59u;
                 r = (xorshifted >> rot) | (xorshifted << ((-rot) & 31));
                 u1 = ldexp((double)r,-32);
-                state = state*6364136223846793005ull + inc;
+                state = state*mul + inc;
                 xorshifted = (uint32_t)(((state >> 18u) ^ state) >> 27u);
                 rot = state >> 59u;
                 r = (xorshifted >> rot) | (xorshifted << ((-rot) & 31));
@@ -451,12 +459,12 @@ int white_z (double *Y, const size_t N, const double std, const char uni, const 
         {
             for (size_t n=0u; n<N; ++n)
             {
-                state = state*6364136223846793005ull + inc;
+                state = state*mul + inc;
                 xorshifted = (uint32_t)(((state >> 18u) ^ state) >> 27u);
                 rot = state >> 59u;
                 r = (xorshifted >> rot) | (xorshifted << ((-rot) & 31));
                 u1 = ldexp((double)r,-32);
-                state = state*6364136223846793005ull + inc;
+                state = state*mul + inc;
                 xorshifted = (uint32_t)(((state >> 18u) ^ state) >> 27u);
                 rot = state >> 59u;
                 r = (xorshifted >> rot) | (xorshifted << ((-rot) & 31));
@@ -471,9 +479,9 @@ int white_z (double *Y, const size_t N, const double std, const char uni, const 
     if (zmn)
     {
         double smr=0.0, smi = 0.0;
-        for (size_t n=0; n<N; ++n) { smi += *--Y; smr += *--Y; }
+        for (size_t n=0u; n<N; ++n) { smi += *--Y; smr += *--Y; }
         smr /= (double)N; smi /= (double)N;
-        for (size_t n=0; n<N; ++n) { *Y++ -= smr; *Y++ -= smi; }
+        for (size_t n=0u; n<N; ++n) { *Y++ -= smr; *Y++ -= smi; }
     }
 
     return 0;
