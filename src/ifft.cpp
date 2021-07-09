@@ -12,7 +12,8 @@
 #include <unordered_map>
 #include <argtable2.h>
 #include "../util/cmli.hpp"
-#include "ifft.c"
+#include "ifft.fftw.c"
+#include "ifft.rad2.c"
 
 #ifdef I
 #undef I
@@ -41,6 +42,7 @@ int main(int argc, char *argv[])
     //Description
     string descr;
     descr += "1D IFFT (inverse fast Fourier transform) of each vector (1D signal) in X.\n";
+    descr += "\n";
     descr += "This is meant for inverting fft (the 1D FFT in this namespace).\n";
     descr += "Thus, X must be complex-valued and have appropriate length.\n";
     descr += "\n";
@@ -48,31 +50,33 @@ int main(int argc, char *argv[])
     descr += "Use -d0 to operate along cols, -d1 to operate along rows, etc.\n";
     descr += "The default is 0 (along cols), unless X is a row vector.\n";
     descr += "\n";
-    descr += "Use -n (--nfft) to specify transform length [default=L].\n";
-    descr += "The default (L) is the length of X along dim.\n";
-    descr += "X is zero-padded as necessary to match nfft.\n";
+    descr += "The transform nfft is automatically set to the length of X along dim.\n";
+    descr += "Again, this is mean for inverting fft (the 1D FFT in this namespace).\n";
+    descr += "Instead, use or don't use the -r option to control output length.\n";
     descr += "\n";
     descr += "The output (Y) is complex-valued with length nfft along dim,\n";
-    descr += "unless the using -r (--real) option.\n";
+    descr += "unless using the -r (--real) option.\n";
     descr += "\n";
     descr += "Use -r (--real) if X represents n/2+1 nonnegative freqs.\n";
     descr += "In this case (and only this case), the output Y is real-valued.\n";
-    descr += "To be safe, explicitly include -n if using -r (otherwise assumes n even).\n";
+    descr += "Note that this assumes that the FFT nfft was even.\n";
+    descr += "To allow for odd-length FFT, use the -n (--nfft) option.\n";
+    descr += "The output Y always has length nfft (but may be real or complex).\n";
     descr += "\n";
-    descr += "Include -s (--scale) to scale by sqrt(2), to invert with scaled fft.\n";
+    descr += "Include -s (--scale) to scale, to invert with scaled fft.\n";
     descr += "Otherwise, Y will be scaled by 1/nfft, to invert with unscaled fft.\n";
     descr += "\n";
     descr += "Examples:\n";
-    descr += "$ ifft -n256 X -o Y \n";
-    descr += "$ ifft -n256 -d1 X > Y \n";
-    descr += "$ cat X | ifft -n256 > Y \n";
+    descr += "$ ifft X -o Y \n";
+    descr += "$ ifft -d1 -r X > Y \n";
+    descr += "$ cat X | ifft -n9 -r > Y \n";
 
 
     //Argtable
     int nerrs;
     struct arg_file  *a_fi = arg_filen(nullptr,nullptr,"<file>",I-1,I,"input file (X)");
     struct arg_int    *a_d = arg_intn("d","dim","<uint>",0,1,"dimension along which to transform [default=0]");
-    struct arg_int    *a_n = arg_intn("n","nfft","<uint>",0,1,"transform length [default=L]");
+    struct arg_int    *a_n = arg_intn("n","nfft","<uint>",0,1,"forward FFT transform length [default=L]");
     struct arg_lit   *a_rl = arg_litn("r","real",0,1,"return real Y (i.e., X is only nonnegative freqs)");
     struct arg_lit   *a_sc = arg_litn("s","scale",0,1,"include to scale by sqrt(2) [default is 1/nfft]");
     struct arg_file  *a_fo = arg_filen("o","ofile","<file>",0,O,"output file (Y)");
@@ -134,7 +138,7 @@ int main(int argc, char *argv[])
     if (a_n->count==0)
     {
         nfft = (dim==0u) ? i1.R : (dim==1u) ? i1.C : (dim==2u) ? i1.S : i1.H;
-        if (rl) { nfft = 2*(nfft-1); }
+        if (rl) { nfft = 2u*(nfft-1u); }
     }
     else if (a_n->ival[0]<1) { cerr << progstr+": " << __LINE__ << errstr << "nfft must be positive" << endl; return 1; }
     else { nfft = size_t(a_n->ival[0]); }
@@ -183,8 +187,16 @@ int main(int argc, char *argv[])
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for output file (Y)" << endl; return 1; }
         try { ifs1.read(reinterpret_cast<char*>(X),i1.nbytes()); }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 1 (X)" << endl; return 1; }
-        if (codee::ifft_s(Y,X,i1.R,i1.C,i1.S,i1.H,i1.iscolmajor(),dim,nfft,sc))
-        { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
+        if (i1.isvec() && nfft>0u && nfft<65536u && !(nfft & (nfft-1u)))
+        {
+            if (codee::ifft_rad2_s(Y,X,i1.R,i1.C,i1.S,i1.H,i1.iscolmajor(),dim,nfft,sc))
+            { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
+        }
+        else
+        {
+            if (codee::ifft_fftw_s(Y,X,i1.R,i1.C,i1.S,i1.H,i1.iscolmajor(),dim,nfft,sc))
+            { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
+        }
         if (wo1)
         {
             try { ofs1.write(reinterpret_cast<char*>(Y),o1.nbytes()); }
@@ -201,8 +213,16 @@ int main(int argc, char *argv[])
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for output file (Y)" << endl; return 1; }
         try { ifs1.read(reinterpret_cast<char*>(X),i1.nbytes()); }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 1 (X)" << endl; return 1; }
-        if (codee::ifft_d(Y,X,i1.R,i1.C,i1.S,i1.H,i1.iscolmajor(),dim,nfft,sc))
-        { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
+        if (i1.isvec() && nfft>0u && nfft<65536u && !(nfft & (nfft-1u)))
+        {
+            if (codee::ifft_rad2_d(Y,X,i1.R,i1.C,i1.S,i1.H,i1.iscolmajor(),dim,nfft,sc))
+            { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
+        }
+        else
+        {
+            if (codee::ifft_fftw_d(Y,X,i1.R,i1.C,i1.S,i1.H,i1.iscolmajor(),dim,nfft,sc))
+            { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
+        }
         if (wo1)
         {
             try { ofs1.write(reinterpret_cast<char*>(Y),o1.nbytes()); }
@@ -219,7 +239,16 @@ int main(int argc, char *argv[])
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for output file (Y)" << endl; return 1; }
         try { ifs1.read(reinterpret_cast<char*>(X),i1.nbytes()); }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 1 (X)" << endl; return 1; }
-        if (codee::ifft_c(Y,X,i1.R,i1.C,i1.S,i1.H,i1.iscolmajor(),dim,nfft,sc)) { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
+        if (i1.isvec() && nfft>0u && nfft<65536u && !(nfft & (nfft-1u)))
+        {
+            if (codee::ifft_rad2_c(Y,X,i1.R,i1.C,i1.S,i1.H,i1.iscolmajor(),dim,nfft,sc))
+            { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
+        }
+        else
+        {
+            if (codee::ifft_fftw_c(Y,X,i1.R,i1.C,i1.S,i1.H,i1.iscolmajor(),dim,nfft,sc))
+            { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
+        }
         if (wo1)
         {
             try { ofs1.write(reinterpret_cast<char*>(Y),o1.nbytes()); }
@@ -236,7 +265,16 @@ int main(int argc, char *argv[])
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for output file (Y)" << endl; return 1; }
         try { ifs1.read(reinterpret_cast<char*>(X),i1.nbytes()); }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 1 (X)" << endl; return 1; }
-        if (codee::ifft_z(Y,X,i1.R,i1.C,i1.S,i1.H,i1.iscolmajor(),dim,nfft,sc)) { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
+        if (i1.isvec() && nfft>0u && nfft<65536u && !(nfft & (nfft-1u)))
+        {
+            if (codee::ifft_rad2_z(Y,X,i1.R,i1.C,i1.S,i1.H,i1.iscolmajor(),dim,nfft,sc))
+            { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
+        }
+        else
+        {
+            if (codee::ifft_fftw_z(Y,X,i1.R,i1.C,i1.S,i1.H,i1.iscolmajor(),dim,nfft,sc))
+            { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
+        }
         if (wo1)
         {
             try { ofs1.write(reinterpret_cast<char*>(Y),o1.nbytes()); }

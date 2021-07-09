@@ -23,7 +23,7 @@ int apply_win_s (float *X, const char iscolmajor, const int R, const int C, cons
     if (R<1) { fprintf(stderr,"error in apply_win_s: R (nrows X) must be positive\n"); return 1; }
     if (C<1) { fprintf(stderr,"error in apply_win_s: C (ncols X) must be positive\n"); return 1; }
 
-    if (dim==0)
+    if (dim==0u)
     {
         if (iscolmajor)
         {
@@ -34,7 +34,7 @@ int apply_win_s (float *X, const char iscolmajor, const int R, const int C, cons
             for (l=0; l<C; l++) { cblas_sscal(R,W[l],&X[l],C); }
         }
     }
-    else if (dim==1)
+    else if (dim==1u)
     {
         if (iscolmajor)
         {
@@ -62,7 +62,7 @@ int apply_win_d (double *X, const char iscolmajor, const int R, const int C, con
     if (R<1) { fprintf(stderr,"error in apply_win_d: R (nrows X) must be positive\n"); return 1; }
     if (C<1) { fprintf(stderr,"error in apply_win_d: C (ncols X) must be positive\n"); return 1; }
 
-    if (dim==0)
+    if (dim==0u)
     {
         if (iscolmajor)
         {
@@ -73,7 +73,7 @@ int apply_win_d (double *X, const char iscolmajor, const int R, const int C, con
             for (l=0; l<C; l++) { cblas_dscal(R,W[l],&X[l],C); }
         }
     }
-    else if (dim==1)
+    else if (dim==1u)
     {
         if (iscolmajor)
         {
@@ -101,7 +101,7 @@ int apply_win_c (float *X, const char iscolmajor, const int R, const int C, cons
     if (R<1) { fprintf(stderr,"error in apply_win_c: R (nrows X) must be positive\n"); return 1; }
     if (C<1) { fprintf(stderr,"error in apply_win_c: C (ncols X) must be positive\n"); return 1; }
 
-    if (dim==0)
+    if (dim==0u)
     {
         if (iscolmajor)
         {
@@ -112,7 +112,7 @@ int apply_win_c (float *X, const char iscolmajor, const int R, const int C, cons
             for (l=0; l<2*C; l+=2) { cblas_cscal(R,&W[l],&X[l],C); }
         }
     }
-    else if (dim==1)
+    else if (dim==1u)
     {
         if (iscolmajor)
         {
@@ -140,7 +140,7 @@ int apply_win_z (double *X, const char iscolmajor, const int R, const int C, con
     if (R<1) { fprintf(stderr,"error in apply_win_z: R (nrows X) must be positive\n"); return 1; }
     if (C<1) { fprintf(stderr,"error in apply_win_z: C (ncols X) must be positive\n"); return 1; }
 
-    if (dim==0)
+    if (dim==0u)
     {
         if (iscolmajor)
         {
@@ -151,7 +151,7 @@ int apply_win_z (double *X, const char iscolmajor, const int R, const int C, con
             for (l=0; l<2*C; l+=2) { cblas_zscal(R,&W[l],&X[l],C); }
         }
     }
-    else if (dim==1)
+    else if (dim==1u)
     {
         if (iscolmajor)
         {

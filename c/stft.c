@@ -46,7 +46,7 @@ int stft_s (float *Y, const char iscolmajor, const int R, const int C, const flo
     if (!plan) { fprintf(stderr,"error in stft_s: problem creating fftw plan\n"); return 1; }
     cblas_scopy(nfft,&z,0,&X1[0],1); //zero-pad
 
-    if (dim==0)
+    if (dim==0u)
     {
         if (iscolmajor)
         {
@@ -111,7 +111,7 @@ int stft_s (float *Y, const char iscolmajor, const int R, const int C, const flo
             }
         }
     }
-    else if (dim==1)
+    else if (dim==1u)
     {
         if (iscolmajor)
         {
@@ -216,7 +216,7 @@ int stft_d (double *Y, const char iscolmajor, const int R, const int C, const do
     if (!plan) { fprintf(stderr,"error in stft_d: problem creating fftw plan\n"); return 1; }
     cblas_dcopy(nfft,&z,0,&X1[0],1); //zero-pad
 
-    if (dim==0)
+    if (dim==0u)
     {
         if (iscolmajor)
         {
@@ -281,7 +281,7 @@ int stft_d (double *Y, const char iscolmajor, const int R, const int C, const do
             }
         }
     }
-    else if (dim==1)
+    else if (dim==1u)
     {
         if (iscolmajor)
         {

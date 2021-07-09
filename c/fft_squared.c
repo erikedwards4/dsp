@@ -40,7 +40,7 @@ int fft_squared_s (float *Y, const float *X, const char iscolmajor, const int R,
     if (!plan) { fprintf(stderr,"error in fft_squared_s: problem creating fftw plan\n"); return 1; }
     cblas_scopy(nfft-R,&z,0,&X1[R],1); //zero-pad
 
-    if (dim==0)
+    if (dim==0u)
     {
         if (iscolmajor)
         {
@@ -77,7 +77,7 @@ int fft_squared_s (float *Y, const float *X, const char iscolmajor, const int R,
             }
         }
     }
-    else if (dim==1)
+    else if (dim==1u)
     {
         if (iscolmajor)
         {
@@ -134,7 +134,7 @@ int fft_squared_d (double *Y, const double *X, const char iscolmajor, const int 
     if (!plan) { fprintf(stderr,"error in fft_squared_d: problem creating fftw plan\n"); return 1; }
     cblas_dcopy(nfft,&z,0,&X1[0],1); //zero-pad
 
-    if (dim==0)
+    if (dim==0u)
     {
         if (iscolmajor)
         {
@@ -159,7 +159,7 @@ int fft_squared_d (double *Y, const double *X, const char iscolmajor, const int 
             }
         }
     }
-    else if (dim==1)
+    else if (dim==1u)
     {
         if (iscolmajor)
         {

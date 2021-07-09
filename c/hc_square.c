@@ -34,7 +34,7 @@ int hc_square_s (float *Y, const char iscolmajor, const int R, const int C, cons
     if (dim==0 && F!=R) { fprintf(stderr,"error in hc_square_d: nrows in Y must = F = nfft/2+1\n"); return 1; }
     if (dim==1 && F!=C) { fprintf(stderr,"error in hc_square_d: ncols in Y must = F = nfft/2+1\n"); return 1; }
 
-    if (dim==0)
+    if (dim==0u)
     {
         if (iscolmajor)
         {
@@ -55,7 +55,7 @@ int hc_square_s (float *Y, const char iscolmajor, const int R, const int C, cons
             }
         }
     }
-    else if (dim==1)
+    else if (dim==1u)
     {
         if (iscolmajor)
         {
@@ -97,7 +97,7 @@ int hc_square_d (double *Y, const char iscolmajor, const int R, const int C, con
     if (dim==0 && F!=R) { fprintf(stderr,"error in hc_square_d: nrows in Y must equal F = nfft/2+1\n"); return 1; }
     if (dim==1 && F!=C) { fprintf(stderr,"error in hc_square_d: ncols in Y must equal F = nfft/2+1\n"); return 1; }
 
-    if (dim==0)
+    if (dim==0u)
     {
         if (iscolmajor)
         {
@@ -118,7 +118,7 @@ int hc_square_d (double *Y, const char iscolmajor, const int R, const int C, con
             }
         }
     }
-    else if (dim==1)
+    else if (dim==1u)
     {
         if (iscolmajor)
         {

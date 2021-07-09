@@ -105,14 +105,14 @@ planck: srci/planck.cpp c/planck.c
 
 
 #Transform: common 1-D signal transforms
-Transform: fft fft.fftw fft.rad2 ifft ifft.fftw ifft.rad2 #dct idct dst idst hilbert
-fft: srci/fft.cpp c/fft.c
+Transform: fft fft.fftw fft.rad2 ifft ifft.fftw ifft.rad2 dct idct dst idst hilbert
+fft: srci/fft.cpp c/fft.fftw.c c/fft.rad2.c
 	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lfftw3f -lfftw3 -lm
 fft.fftw: srci/fft.fftw.cpp c/fft.fftw.c
 	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lfftw3f -lfftw3 -lm
 fft.rad2: srci/fft.rad2.cpp c/fft.rad2.c
 	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lfftw3f -lfftw3 -lm
-ifft: srci/ifft.cpp c/ifft.c
+ifft: srci/ifft.cpp c/ifft.fftw.c c/ifft.rad2.c
 	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lfftw3f -lfftw3 -lm
 ifft.fftw: srci/ifft.fftw.cpp c/ifft.fftw.c
 	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lfftw3f -lfftw3 -lm

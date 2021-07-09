@@ -26,8 +26,8 @@ int window_univar_z (double *Y, const char iscolmajor, const int R, const int C,
 int window_univar_s (float *Y, const char iscolmajor, const int R, const int C, const float *X, const int N, const float *W, const int dim, const int c0, const float stp, const char mn0)
 {
     const float z = 0.0f, o = 1.0f;
-    const int T = (dim==0) ? C : R;
-    const int L = (dim==0) ? R : C;
+    const int T = (dim==0u) ? C : R;
+    const int L = (dim==0u) ? R : C;
     const int Lpre = L/2;      //nsamps before center samp
     const int istp = (int)stp;
     int ss = c0 - Lpre;        //start samp of current frame
@@ -45,7 +45,7 @@ int window_univar_s (float *Y, const char iscolmajor, const int R, const int C, 
     if (L>=N) { fprintf(stderr,"error in window_univar_s: L (winlength) must be < N (length X)\n"); return 1; }
     if (stp<=0.0f) { fprintf(stderr,"error in window_univar_s: stp (step size) must be positive\n"); return 1; }
 
-    if (dim==0)
+    if (dim==0u)
     {
         if (iscolmajor)
         {
@@ -118,7 +118,7 @@ int window_univar_s (float *Y, const char iscolmajor, const int R, const int C, 
             if (mn0) { for (t=0; t<T; t++) { cblas_saxpy(L,-cblas_sdot(L,&Y[t],T,&o,0)/L,&o,0,&Y[t],T); } }
         }
     }
-    else if (dim==1)
+    else if (dim==1u)
     {
         if (iscolmajor)
         {
@@ -208,8 +208,8 @@ int window_univar_s (float *Y, const char iscolmajor, const int R, const int C, 
 int window_univar_d (double *Y, const char iscolmajor, const int R, const int C, const double *X, const int N, const double *W, const int dim, const int c0, const double stp, const char mn0)
 {
     const double z = 0.0, o = 1.0;
-    const int T = (dim==0) ? C : R;
-    const int L = (dim==0) ? R : C;
+    const int T = (dim==0u) ? C : R;
+    const int L = (dim==0u) ? R : C;
     const int Lpre = L/2;      //nsamps before center samp
     const int istp = (int)stp;
     int ss = c0 - Lpre;        //start samp of current frame
@@ -227,7 +227,7 @@ int window_univar_d (double *Y, const char iscolmajor, const int R, const int C,
     if (L>=N) { fprintf(stderr,"error in window_univar_d: L (winlength) must be < N (length X)\n"); return 1; }
     if (stp<=0.0) { fprintf(stderr,"error in window_univar_d: stp (step size) must be positive\n"); return 1; }
 
-    if (dim==0)
+    if (dim==0u)
     {
         if (iscolmajor)
         {
@@ -300,7 +300,7 @@ int window_univar_d (double *Y, const char iscolmajor, const int R, const int C,
             if (mn0) { for (t=0; t<T; t++) { cblas_daxpy(L,-cblas_ddot(L,&Y[t],T,&o,0)/L,&o,0,&Y[t],T); } }
         }
     }
-    else if (dim==1)
+    else if (dim==1u)
     {
         if (iscolmajor)
         {
@@ -385,8 +385,8 @@ int window_univar_d (double *Y, const char iscolmajor, const int R, const int C,
 int window_univar_c (float *Y, const char iscolmajor, const int R, const int C, const float *X, const int N, const float *W, const int dim, const int c0, const float stp, const char mn0)
 {
     const float z[2] = {0.0f,0.0f}, o[2] = {1.0f,0.0f};
-    const int T = (dim==0) ? C : R;
-    const int L = (dim==0) ? R : C;
+    const int T = (dim==0u) ? C : R;
+    const int L = (dim==0u) ? R : C;
     const int Lpre = L/2;      //nsamps before center samp
     const int istp = (int)stp;
     int ss = c0 - Lpre;        //start samp of current frame
@@ -404,7 +404,7 @@ int window_univar_c (float *Y, const char iscolmajor, const int R, const int C, 
     if (L>=N) { fprintf(stderr,"error in window_univar_c: L (winlength) must be < N (length X)\n"); return 1; }
     if (stp<=0.0f) { fprintf(stderr,"error in window_univar_c: stp (step size) must be positive\n"); return 1; }
 
-    if (dim==0)
+    if (dim==0u)
     {
         if (iscolmajor)
         {
@@ -491,7 +491,7 @@ int window_univar_c (float *Y, const char iscolmajor, const int R, const int C, 
             }
         }
     }
-    else if (dim==1)
+    else if (dim==1u)
     {
         if (iscolmajor)
         {
@@ -590,8 +590,8 @@ int window_univar_c (float *Y, const char iscolmajor, const int R, const int C, 
 int window_univar_z (double *Y, const char iscolmajor, const int R, const int C, const double *X, const int N, const double *W, const int dim, const int c0, const double stp, const char mn0)
 {
     const double z[2] = {0.0,0.0}, o[2] = {1.0,0.0};
-    const int T = (dim==0) ? C : R;
-    const int L = (dim==0) ? R : C;
+    const int T = (dim==0u) ? C : R;
+    const int L = (dim==0u) ? R : C;
     const int Lpre = L/2;      //nsamps before center samp
     const int istp = (int)stp;
     int ss = c0 - Lpre;        //start samp of current frame
@@ -609,7 +609,7 @@ int window_univar_z (double *Y, const char iscolmajor, const int R, const int C,
     if (L>=N) { fprintf(stderr,"error in window_univar_z: L (winlength) must be < N (length X)\n"); return 1; }
     if (stp<=0.0) { fprintf(stderr,"error in window_univar_z: stp (step size) must be positive\n"); return 1; }
 
-    if (dim==0)
+    if (dim==0u)
     {
         if (iscolmajor)
         {
@@ -696,7 +696,7 @@ int window_univar_z (double *Y, const char iscolmajor, const int R, const int C,
             }
         }
     }
-    else if (dim==1)
+    else if (dim==1u)
     {
         if (iscolmajor)
         {

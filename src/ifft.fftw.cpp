@@ -61,6 +61,7 @@ int main(int argc, char *argv[])
     descr += "In this case (and only this case), the output Y is real-valued.\n";
     descr += "Note that this assumes that the FFT nfft was even.\n";
     descr += "To allow for odd-length FFT, use the -n (--nfft) option.\n";
+    descr += "The output Y always has length nfft (but may be real or complex).\n";
     descr += "\n";
     descr += "Include -s (--scale) to scale, to invert with scaled fft.\n";
     descr += "Otherwise, Y will be scaled by 1/nfft, to invert with unscaled fft.\n";

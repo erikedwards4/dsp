@@ -22,8 +22,8 @@ int frame_univar_z (double *Y, const char iscolmajor, const int R, const int C, 
 int frame_univar_s (float *Y, const char iscolmajor, const int R, const int C, const float *X, const int N, const int dim, const int c0, const float stp)
 {
     const float z = 0.0f;
-    const int T = (dim==0) ? C : R;
-    const int L = (dim==0) ? R : C;
+    const int T = (dim==0u) ? C : R;
+    const int L = (dim==0u) ? R : C;
     const int Lpre = L/2;      //nsamps before center samp
     const int istp = (int)stp;
     int ss = c0 - Lpre;        //start samp of current frame
@@ -41,7 +41,7 @@ int frame_univar_s (float *Y, const char iscolmajor, const int R, const int C, c
     if (L>=N) { fprintf(stderr,"error in frame_univar_s: L must be < N (length X)\n"); return 1; }
     if (stp<=0.0f) { fprintf(stderr,"error in frame_univar_s: stp (step size) must be positive\n"); return 1; }
 
-    if (dim==0)
+    if (dim==0u)
     {
         if (iscolmajor)
         {
@@ -112,7 +112,7 @@ int frame_univar_s (float *Y, const char iscolmajor, const int R, const int C, c
             }
         }
     }
-    else if (dim==1)
+    else if (dim==1u)
     {
         if (iscolmajor)
         {
@@ -195,8 +195,8 @@ int frame_univar_s (float *Y, const char iscolmajor, const int R, const int C, c
 int frame_univar_d (double *Y, const char iscolmajor, const int R, const int C, const double *X, const int N, const int dim, const int c0, const double stp)
 {
     const double z = 0.0;
-    const int T = (dim==0) ? C : R;
-    const int L = (dim==0) ? R : C;
+    const int T = (dim==0u) ? C : R;
+    const int L = (dim==0u) ? R : C;
     const int Lpre = L/2;      //nsamps before center samp
     const int istp = (int)stp;
     int ss = c0 - Lpre;        //start samp of current frame
@@ -214,7 +214,7 @@ int frame_univar_d (double *Y, const char iscolmajor, const int R, const int C, 
     if (L>=N) { fprintf(stderr,"error in frame_univar_d: L must be < N (length X)\n"); return 1; }
     if (stp<=0.0) { fprintf(stderr,"error in frame_univar_d: stp (step size) must be positive\n"); return 1; }
 
-    if (dim==0)
+    if (dim==0u)
     {
         if (iscolmajor)
         {
@@ -285,7 +285,7 @@ int frame_univar_d (double *Y, const char iscolmajor, const int R, const int C, 
             }
         }
     }
-    else if (dim==1)
+    else if (dim==1u)
     {
         if (iscolmajor)
         {
@@ -368,8 +368,8 @@ int frame_univar_d (double *Y, const char iscolmajor, const int R, const int C, 
 int frame_univar_c (float *Y, const char iscolmajor, const int R, const int C, const float *X, const int N, const int dim, const int c0, const float stp)
 {
     const float z[2] = {0.0f,0.0f};
-    const int T = (dim==0) ? C : R;
-    const int L = (dim==0) ? R : C;
+    const int T = (dim==0u) ? C : R;
+    const int L = (dim==0u) ? R : C;
     const int Lpre = L/2;      //nsamps before center samp
     const int istp = (int)stp;
     int ss = c0 - Lpre;        //start samp of current frame
@@ -387,7 +387,7 @@ int frame_univar_c (float *Y, const char iscolmajor, const int R, const int C, c
     if (L>=N) { fprintf(stderr,"error in frame_univar_c: L must be < N (length X)\n"); return 1; }
     if (stp<=0.0f) { fprintf(stderr,"error in frame_univar_c: stp (step size) must be positive\n"); return 1; }
 
-    if (dim==0)
+    if (dim==0u)
     {
         if (iscolmajor)
         {
@@ -458,7 +458,7 @@ int frame_univar_c (float *Y, const char iscolmajor, const int R, const int C, c
             }
         }
     }
-    else if (dim==1)
+    else if (dim==1u)
     {
         if (iscolmajor)
         {
@@ -541,8 +541,8 @@ int frame_univar_c (float *Y, const char iscolmajor, const int R, const int C, c
 int frame_univar_z (double *Y, const char iscolmajor, const int R, const int C, const double *X, const int N, const int dim, const int c0, const double stp)
 {
     const double z[2] = {0.0,0.0};
-    const int T = (dim==0) ? C : R;
-    const int L = (dim==0) ? R : C;
+    const int T = (dim==0u) ? C : R;
+    const int L = (dim==0u) ? R : C;
     const int Lpre = L/2;      //nsamps before center samp
     const int istp = (int)stp;
     int ss = c0 - Lpre;        //start samp of current frame
@@ -560,7 +560,7 @@ int frame_univar_z (double *Y, const char iscolmajor, const int R, const int C, 
     if (L>=N) { fprintf(stderr,"error in frame_univar_z: L must be < N (length X)\n"); return 1; }
     if (stp<=0.0) { fprintf(stderr,"error in frame_univar_z: stp (step size) must be positive\n"); return 1; }
 
-    if (dim==0)
+    if (dim==0u)
     {
         if (iscolmajor)
         {
@@ -631,7 +631,7 @@ int frame_univar_z (double *Y, const char iscolmajor, const int R, const int C, 
             }
         }
     }
-    else if (dim==1)
+    else if (dim==1u)
     {
         if (iscolmajor)
         {

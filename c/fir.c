@@ -18,27 +18,27 @@ int fir_z (double *Y, const double *X, const double *B, const size_t R, const si
 
 int fir_s (float *Y, const float *X, const float *B, const size_t R, const size_t C, const size_t S, const size_t H, const size_t L, const char iscolmajor, const size_t dim)
 {
-    if (dim>3) { fprintf(stderr,"error in fir_s: dim must be in [0 3]\n"); return 1; }
+    if (dim>3u) { fprintf(stderr,"error in fir_s: dim must be in [0 3]\n"); return 1; }
 
     const size_t N = R*C*S*H;
-    const size_t T = (dim==0) ? R : (dim==1) ? C : (dim==2) ? S : H;
+    const size_t T = (dim==0u) ? R : (dim==1u) ? C : (dim==2u) ? S : H;
 
     //Initialize Y to 0
-    for (size_t n=0; n<N; ++n, ++Y) { *Y = 0.0f; }
+    for (size_t n=0u; n<N; ++n, ++Y) { *Y = 0.0f; }
     Y -= N;
 
-    if (N==0 || L==0) {}
-    else if (T==1)
+    if (N==0u || L==0u) {}
+    else if (T==1u)
     {
         const float b = *B;
-        for (size_t n=0; n<N; ++n, ++X, ++Y) { *Y = b * *X; }
+        for (size_t n=0u; n<N; ++n, ++X, ++Y) { *Y = b * *X; }
     }
     else if (T==N)
     {
-        if (T<30000)
+        if (T<30000u)
         {
             float b;
-            for (size_t l=0; l<L; ++l, X-=T-l+1, ++B, Y-=T-l)
+            for (size_t l=0u; l<L; ++l, X-=T-l+1u, ++B, Y-=T-l)
             {
                 b = *B;
                 for (size_t t=l; t<T; ++t, ++X, ++Y) { *Y = fmaf(b,*X,*Y); }
@@ -46,45 +46,45 @@ int fir_s (float *Y, const float *X, const float *B, const size_t R, const size_
         }
         else
         {
-            for (size_t l=0; l<L; ++l, ++B, ++Y) { cblas_saxpy((int)(T-l),*B,X,1,Y,1); }
+            for (size_t l=0u; l<L; ++l, ++B, ++Y) { cblas_saxpy((int)(T-l),*B,X,1,Y,1); }
         }
     }
     else
     {
-        const size_t K = (iscolmajor) ? ((dim==0) ? 1 : (dim==1) ? R : (dim==2) ? R*C : R*C*S) : ((dim==0) ? C*S*H : (dim==1) ? S*H : (dim==2) ? H : 1);
-        const size_t BS = (iscolmajor && dim==0) ? C*S*H : K;
+        const size_t K = (iscolmajor) ? ((dim==0u) ? 1u : (dim==1u) ? R : (dim==2u) ? R*C : R*C*S) : ((dim==0u) ? C*S*H : (dim==1u) ? S*H : (dim==2u) ? H : 1u);
+        const size_t BS = (iscolmajor && dim==0u) ? C*S*H : K;
         const size_t V = N/T, G = V/BS;
 
-        if (K==1 && (G==1 || BS==1))
+        if (K==1u && (G==1u || BS==1u))
         {
-            if (T<30000)
+            if (T<30000u)
             {
                 float b;
-                for (size_t v=0; v<V; ++v, X+=L-1, B-=L)
+                for (size_t v=0u; v<V; ++v, X+=L-1u, B-=L)
                 {
-                    for (size_t l=0; l<L; ++l, ++B)
+                    for (size_t l=0u; l<L; ++l, ++B)
                     {
                         b = *B;
                         for (size_t t=l; t<T; ++t, ++X, ++Y) { *Y = fmaf(b,*X,*Y); }
-                        if (l<L-1) { X -= T-l; Y -= T-l-1; }
+                        if (l<L-1u) { X -= T-l; Y -= T-l-1u; }
                     }
                 }
             }
             else
             {
-                for (size_t v=0; v<V; ++v, X+=T, B-=L, Y+=T-L)
+                for (size_t v=0u; v<V; ++v, X+=T, B-=L, Y+=T-L)
                 {
-                    for (size_t l=0; l<L; ++l, ++B, ++Y) { cblas_saxpy((int)(T-l),*B,X,1,Y,1); }
+                    for (size_t l=0u; l<L; ++l, ++B, ++Y) { cblas_saxpy((int)(T-l),*B,X,1,Y,1); }
                 }
             }
         }
         else
         {
-            for (size_t g=0; g<G; ++g, X+=BS*(T-1), Y+=BS*(T-1))
+            for (size_t g=0u; g<G; ++g, X+=BS*(T-1u), Y+=BS*(T-1u))
             {
-                for (size_t b=0; b<BS; ++b, ++X, B-=L, Y-=K*L-1)
+                for (size_t b=0u; b<BS; ++b, ++X, B-=L, Y-=K*L-1u)
                 {
-                    for (size_t l=0; l<L; ++l, ++B, Y+=K) { cblas_saxpy((int)(T-l),*B,X,(int)K,Y,(int)K); }
+                    for (size_t l=0u; l<L; ++l, ++B, Y+=K) { cblas_saxpy((int)(T-l),*B,X,(int)K,Y,(int)K); }
                 }
             }
         }
@@ -96,27 +96,27 @@ int fir_s (float *Y, const float *X, const float *B, const size_t R, const size_
 
 int fir_d (double *Y, const double *X, const double *B, const size_t R, const size_t C, const size_t S, const size_t H, const size_t L, const char iscolmajor, const size_t dim)
 {
-    if (dim>3) { fprintf(stderr,"error in fir_d: dim must be in [0 3]\n"); return 1; }
+    if (dim>3u) { fprintf(stderr,"error in fir_d: dim must be in [0 3]\n"); return 1; }
 
     const size_t N = R*C*S*H;
-    const size_t T = (dim==0) ? R : (dim==1) ? C : (dim==2) ? S : H;
+    const size_t T = (dim==0u) ? R : (dim==1u) ? C : (dim==2u) ? S : H;
 
     //Initialize Y to 0
-    for (size_t n=0; n<N; ++n, ++Y) { *Y = 0.0; }
+    for (size_t n=0u; n<N; ++n, ++Y) { *Y = 0.0; }
     Y -= N;
 
-    if (N==0 || L==0) {}
-    else if (T==1)
+    if (N==0u || L==0u) {}
+    else if (T==1u)
     {
         const double b = *B;
-        for (size_t n=0; n<N; ++n, ++X, ++Y) { *Y = b * *X; }
+        for (size_t n=0u; n<N; ++n, ++X, ++Y) { *Y = b * *X; }
     }
     else if (T==N)
     {
-        if (T<30000)
+        if (T<30000u)
         {
             double b;
-            for (size_t l=0; l<L; ++l, X-=T-l+1, ++B, Y-=T-l)
+            for (size_t l=0u; l<L; ++l, X-=T-l+1u, ++B, Y-=T-l)
             {
                 b = *B;
                 for (size_t t=l; t<T; ++t, ++X, ++Y) { *Y = fma(b,*X,*Y); }
@@ -124,45 +124,45 @@ int fir_d (double *Y, const double *X, const double *B, const size_t R, const si
         }
         else
         {
-            for (size_t l=0; l<L; ++l, ++B, ++Y) { cblas_daxpy((int)(T-l),*B,X,1,Y,1); }
+            for (size_t l=0u; l<L; ++l, ++B, ++Y) { cblas_daxpy((int)(T-l),*B,X,1,Y,1); }
         }
     }
     else
     {
-        const size_t K = (iscolmajor) ? ((dim==0) ? 1 : (dim==1) ? R : (dim==2) ? R*C : R*C*S) : ((dim==0) ? C*S*H : (dim==1) ? S*H : (dim==2) ? H : 1);
-        const size_t BS = (iscolmajor && dim==0) ? C*S*H : K;
+        const size_t K = (iscolmajor) ? ((dim==0u) ? 1u : (dim==1u) ? R : (dim==2u) ? R*C : R*C*S) : ((dim==0u) ? C*S*H : (dim==1u) ? S*H : (dim==2u) ? H : 1u);
+        const size_t BS = (iscolmajor && dim==0u) ? C*S*H : K;
         const size_t V = N/T, G = V/BS;
 
-        if (K==1 && (G==1 || BS==1))
+        if (K==1u && (G==1u || BS==1u))
         {
-            if (T<30000)
+            if (T<30000u)
             {
                 double b;
-                for (size_t v=0; v<V; ++v, X+=L-1, B-=L)
+                for (size_t v=0u; v<V; ++v, X+=L-1u, B-=L)
                 {
-                    for (size_t l=0; l<L; ++l, ++B)
+                    for (size_t l=0u; l<L; ++l, ++B)
                     {
                         b = *B;
                         for (size_t t=l; t<T; ++t, ++X, ++Y) { *Y = fma(b,*X,*Y); }
-                        if (l<L-1) { X -= T-l; Y -= T-l-1; }
+                        if (l<L-1u) { X -= T-l; Y -= T-l-1u; }
                     }
                 }
             }
             else
             {
-                for (size_t v=0; v<V; ++v, X+=T, B-=L, Y+=T-L)
+                for (size_t v=0u; v<V; ++v, X+=T, B-=L, Y+=T-L)
                 {
-                    for (size_t l=0; l<L; ++l, ++B, ++Y) { cblas_daxpy((int)(T-l),*B,X,1,Y,1); }
+                    for (size_t l=0u; l<L; ++l, ++B, ++Y) { cblas_daxpy((int)(T-l),*B,X,1,Y,1); }
                 }
             }
         }
         else
         {
-            for (size_t g=0; g<G; ++g, X+=BS*(T-1), Y+=BS*(T-1))
+            for (size_t g=0u; g<G; ++g, X+=BS*(T-1u), Y+=BS*(T-1u))
             {
-                for (size_t b=0; b<BS; ++b, ++X, B-=L, Y-=K*L-1)
+                for (size_t b=0u; b<BS; ++b, ++X, B-=L, Y-=K*L-1u)
                 {
-                    for (size_t l=0; l<L; ++l, ++B, Y+=K) { cblas_daxpy((int)(T-l),*B,X,(int)K,Y,(int)K); }
+                    for (size_t l=0u; l<L; ++l, ++B, Y+=K) { cblas_daxpy((int)(T-l),*B,X,(int)K,Y,(int)K); }
                 }
             }
         }
@@ -174,21 +174,21 @@ int fir_d (double *Y, const double *X, const double *B, const size_t R, const si
 
 int fir_c (float *Y, const float *X, const float *B, const size_t R, const size_t C, const size_t S, const size_t H, const size_t L, const char iscolmajor, const size_t dim)
 {
-    if (dim>3) { fprintf(stderr,"error in fir_c: dim must be in [0 3]\n"); return 1; }
+    if (dim>3u) { fprintf(stderr,"error in fir_c: dim must be in [0 3]\n"); return 1; }
 
     const size_t N = R*C*S*H;
-    const size_t T = (dim==0) ? R : (dim==1) ? C : (dim==2) ? S : H;
+    const size_t T = (dim==0u) ? R : (dim==1u) ? C : (dim==2u) ? S : H;
     float xr, xi, br, bi;
 
     //Initialize Y to 0
-    for (size_t n=0; n<2*N; ++n, ++Y) { *Y = 0.0f; }
-    Y -= 2*N;
+    for (size_t n=0u; n<2u*N; ++n, ++Y) { *Y = 0.0f; }
+    Y -= 2u*N;
 
-    if (N==0 || L==0) {}
-    else if (T==1)
+    if (N==0u || L==0u) {}
+    else if (T==1u)
     {
         br = *B; bi = *++B;
-        for (size_t n=0; n<2*N; ++n, ++X, ++Y)
+        for (size_t n=0u; n<2u*N; ++n, ++X, ++Y)
         {
             xr = *X; xi = *++X;
             *Y = br*xr - bi*xi;
@@ -197,9 +197,9 @@ int fir_c (float *Y, const float *X, const float *B, const size_t R, const size_
     }
     else if (T==N)
     {
-        if (T<30000)
+        if (T<30000u)
         {
-            for (size_t l=0; l<L; ++l, X-=2*(T-l+1), ++B, Y-=2*(T-l))
+            for (size_t l=0u; l<L; ++l, X-=2u*(T-l+1u), ++B, Y-=2u*(T-l))
             {
                 br = *B; bi = *++B;
                 for (size_t t=l; t<T; ++t, ++X, ++Y)
@@ -212,22 +212,22 @@ int fir_c (float *Y, const float *X, const float *B, const size_t R, const size_
         }
         else
         {
-            for (size_t l=0; l<L; ++l, B+=2, Y+=2) { cblas_caxpy((int)(T-l),B,X,1,Y,1); }
+            for (size_t l=0u; l<L; ++l, B+=2u, Y+=2u) { cblas_caxpy((int)(T-l),B,X,1,Y,1); }
         }
     }
     else
     {
-        const size_t K = (iscolmajor) ? ((dim==0) ? 1 : (dim==1) ? R : (dim==2) ? R*C : R*C*S) : ((dim==0) ? C*S*H : (dim==1) ? S*H : (dim==2) ? H : 1);
-        const size_t BS = (iscolmajor && dim==0) ? C*S*H : K;
+        const size_t K = (iscolmajor) ? ((dim==0u) ? 1u : (dim==1u) ? R : (dim==2u) ? R*C : R*C*S) : ((dim==0u) ? C*S*H : (dim==1u) ? S*H : (dim==2u) ? H : 1u);
+        const size_t BS = (iscolmajor && dim==0u) ? C*S*H : K;
         const size_t V = N/T, G = V/BS;
 
-        if (K==1 && (G==1 || BS==1))
+        if (K==1u && (G==1u || BS==1u))
         {
-            if (T<30000)
+            if (T<30000u)
             {
-                for (size_t v=0; v<V; ++v, X+=2*L-2, B-=2*L)
+                for (size_t v=0u; v<V; ++v, X+=2u*L-2u, B-=2u*L)
                 {
-                    for (size_t l=0; l<L; ++l, ++B)
+                    for (size_t l=0u; l<L; ++l, ++B)
                     {
                         br = *B; bi = *++B;
                         for (size_t t=l; t<T; ++t, ++X, ++Y)
@@ -236,25 +236,25 @@ int fir_c (float *Y, const float *X, const float *B, const size_t R, const size_
                             *Y += br*xr - bi*xi;
                             *++Y += br*xi + bi*xr;
                         }
-                        if (l<L-1) { X -= 2*(T-l); Y -= 2*(T-l-1); }
+                        if (l<L-1u) { X -= 2u*(T-l); Y -= 2u*(T-l-1u); }
                     }
                 }
             }
             else
             {
-                for (size_t v=0; v<V; ++v, X+=2*T, B-=2*L, Y+=2*(T-L))
+                for (size_t v=0u; v<V; ++v, X+=2u*T, B-=2u*L, Y+=2u*(T-L))
                 {
-                    for (size_t l=0; l<L; ++l, B+=2, Y+=2) { cblas_caxpy((int)(T-l),B,X,1,Y,1); }
+                    for (size_t l=0u; l<L; ++l, B+=2u, Y+=2u) { cblas_caxpy((int)(T-l),B,X,1,Y,1); }
                 }
             }
         }
         else
         {
-            for (size_t g=0; g<G; ++g, X+=2*BS*(T-1), Y+=2*BS*(T-1))
+            for (size_t g=0u; g<G; ++g, X+=2u*BS*(T-1u), Y+=2u*BS*(T-1u))
             {
-                for (size_t b=0; b<BS; ++b, X+=2, B-=2*L, Y-=2*K*L-2)
+                for (size_t b=0u; b<BS; ++b, X+=2u, B-=2u*L, Y-=2u*K*L-2u)
                 {
-                    for (size_t l=0; l<L; ++l, B+=2, Y+=2*K) { cblas_caxpy((int)(T-l),B,X,(int)K,Y,(int)K); }
+                    for (size_t l=0u; l<L; ++l, B+=2u, Y+=2u*K) { cblas_caxpy((int)(T-l),B,X,(int)K,Y,(int)K); }
                 }
             }
         }
@@ -266,21 +266,21 @@ int fir_c (float *Y, const float *X, const float *B, const size_t R, const size_
 
 int fir_z (double *Y, const double *X, const double *B, const size_t R, const size_t C, const size_t S, const size_t H, const size_t L, const char iscolmajor, const size_t dim)
 {
-    if (dim>3) { fprintf(stderr,"error in fir_z: dim must be in [0 3]\n"); return 1; }
+    if (dim>3u) { fprintf(stderr,"error in fir_z: dim must be in [0 3]\n"); return 1; }
 
     const size_t N = R*C*S*H;
-    const size_t T = (dim==0) ? R : (dim==1) ? C : (dim==2) ? S : H;
+    const size_t T = (dim==0u) ? R : (dim==1u) ? C : (dim==2u) ? S : H;
     double xr, xi, br, bi;
 
     //Initialize Y to 0
-    for (size_t n=0; n<2*N; ++n, ++Y) { *Y = 0.0; }
-    Y -= 2*N;
+    for (size_t n=0u; n<2u*N; ++n, ++Y) { *Y = 0.0; }
+    Y -= 2u*N;
 
-    if (N==0 || L==0) {}
-    else if (T==1)
+    if (N==0u || L==0u) {}
+    else if (T==1u)
     {
         br = *B; bi = *++B;
-        for (size_t n=0; n<2*N; ++n, ++X, ++Y)
+        for (size_t n=0u; n<2u*N; ++n, ++X, ++Y)
         {
             xr = *X; xi = *++X;
             *Y = br*xr - bi*xi;
@@ -289,9 +289,9 @@ int fir_z (double *Y, const double *X, const double *B, const size_t R, const si
     }
     else if (T==N)
     {
-        if (T<30000)
+        if (T<30000u)
         {
-            for (size_t l=0; l<L; ++l, X-=2*(T-l+1), ++B, Y-=2*(T-l))
+            for (size_t l=0u; l<L; ++l, X-=2u*(T-l+1u), ++B, Y-=2u*(T-l))
             {
                 br = *B; bi = *++B;
                 for (size_t t=l; t<T; ++t, ++X, ++Y)
@@ -304,22 +304,22 @@ int fir_z (double *Y, const double *X, const double *B, const size_t R, const si
         }
         else
         {
-            for (size_t l=0; l<L; ++l, B+=2, Y+=2) { cblas_zaxpy((int)(T-l),B,X,1,Y,1); }
+            for (size_t l=0u; l<L; ++l, B+=2u, Y+=2u) { cblas_zaxpy((int)(T-l),B,X,1,Y,1); }
         }
     }
     else
     {
-        const size_t K = (iscolmajor) ? ((dim==0) ? 1 : (dim==1) ? R : (dim==2) ? R*C : R*C*S) : ((dim==0) ? C*S*H : (dim==1) ? S*H : (dim==2) ? H : 1);
-        const size_t BS = (iscolmajor && dim==0) ? C*S*H : K;
+        const size_t K = (iscolmajor) ? ((dim==0u) ? 1u : (dim==1u) ? R : (dim==2u) ? R*C : R*C*S) : ((dim==0u) ? C*S*H : (dim==1u) ? S*H : (dim==2u) ? H : 1u);
+        const size_t BS = (iscolmajor && dim==0u) ? C*S*H : K;
         const size_t V = N/T, G = V/BS;
 
-        if (K==1 && (G==1 || BS==1))
+        if (K==1u && (G==1u || BS==1u))
         {
-            if (T<30000)
+            if (T<30000u)
             {
-                for (size_t v=0; v<V; ++v, X+=2*L-2, B-=2*L)
+                for (size_t v=0u; v<V; ++v, X+=2u*L-2u, B-=2u*L)
                 {
-                    for (size_t l=0; l<L; ++l, ++B)
+                    for (size_t l=0u; l<L; ++l, ++B)
                     {
                         br = *B; bi = *++B;
                         for (size_t t=l; t<T; ++t, ++X, ++Y)
@@ -328,25 +328,25 @@ int fir_z (double *Y, const double *X, const double *B, const size_t R, const si
                             *Y += br*xr - bi*xi;
                             *++Y += br*xi + bi*xr;
                         }
-                        if (l<L-1) { X -= 2*(T-l); Y -= 2*(T-l-1); }
+                        if (l<L-1u) { X -= 2u*(T-l); Y -= 2u*(T-l-1u); }
                     }
                 }
             }
             else
             {
-                for (size_t v=0; v<V; ++v, X+=2*T, B-=2*L, Y+=2*(T-L))
+                for (size_t v=0u; v<V; ++v, X+=2u*T, B-=2u*L, Y+=2u*(T-L))
                 {
-                    for (size_t l=0; l<L; ++l, B+=2, Y+=2) { cblas_zaxpy((int)(T-l),B,X,1,Y,1); }
+                    for (size_t l=0u; l<L; ++l, B+=2u, Y+=2u) { cblas_zaxpy((int)(T-l),B,X,1,Y,1); }
                 }
             }
         }
         else
         {
-            for (size_t g=0; g<G; ++g, X+=2*BS*(T-1), Y+=2*BS*(T-1))
+            for (size_t g=0u; g<G; ++g, X+=2u*BS*(T-1u), Y+=2u*BS*(T-1u))
             {
-                for (size_t b=0; b<BS; ++b, X+=2, B-=2*L, Y-=2*K*L-2)
+                for (size_t b=0u; b<BS; ++b, X+=2u, B-=2u*L, Y-=2u*K*L-2u)
                 {
-                    for (size_t l=0; l<L; ++l, B+=2, Y+=2*K) { cblas_zaxpy((int)(T-l),B,X,(int)K,Y,(int)K); }
+                    for (size_t l=0u; l<L; ++l, B+=2u, Y+=2u*K) { cblas_zaxpy((int)(T-l),B,X,(int)K,Y,(int)K); }
                 }
             }
         }
