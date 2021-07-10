@@ -25,7 +25,7 @@
 #include <stdio.h>
 
 #ifdef __cplusplus
-namespace ov {
+namespace codee {
 extern "C" {
 #endif
 
@@ -72,7 +72,7 @@ int frame_univar_s (float *Y, const float *X, const size_t N, const size_t W, co
                 for (size_t l=0u; l<Lpre-cs; ++l, --X, ++Y) { *Y = *X; }
                 //for (size_t l=0u; l<Lpre-cs; ++l, ++Y) { *Y = 0.0f; }
                 for (size_t l=Lpre-cs; l<L; ++l, ++X, ++Y) { *Y = *X; }
-                X -= L-Lpre+cs; X += stp; cs += stp; ++w;
+                X -= 1u+L-Lpre+cs; X += stp; cs += stp; ++w;
             }
             while(cs+Lpost<N && w<W)
             {
@@ -81,10 +81,10 @@ int frame_univar_s (float *Y, const float *X, const size_t N, const size_t W, co
             }
             while(cs<N+Lpre && w<W)
             {
-                for (size_t l=0u; l<L-(N+Lpre-cs); ++l, ++X, ++Y) { *Y = *X; }
-                //for (size_t l=N+Lpre-cs; l<L; ++l, ++Y) { *Y = 0.0f; }
-                for (size_t l=L-(N+Lpre-cs); l<L; ++l, ++Y) { *Y = *--X; }
-                X -= L-(N+Lpre-cs); X += N+Lpre-cs; X += stp; cs += stp; ++w;
+                for (size_t l=0u; l<L-(N+Lpre-cs-1u); ++l, ++X, ++Y) { *Y = *X; }
+                --X;
+                for (size_t l=L-(N+Lpre-cs-1u); l<L; ++l, ++Y) { *Y = *--X; }
+                X -= L-(N+Lpre-cs-1u); X += N+Lpre-cs-1u; X += stp; cs += stp; ++w;
             }
             while (w<W) //this should not occur in general
             {
