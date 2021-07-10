@@ -11,6 +11,7 @@
 //Also for compatibility to Kaldi and Librosa,
 //frames that overlap the edge of X are filled in by flipping the edge of X,
 //e.g., Y <- X[3] X[2] X[1] X[0] X[1] X[2] X[3] X[4] X[5] ... X[N-1]
+//Use frame_univar_float to use zeros outside of [0 N-1].
 
 //The following framing convention is forced here:
 //Samples from one frame are always contiguous in memory, regardless of row- vs. col-major.

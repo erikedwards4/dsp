@@ -155,8 +155,9 @@ ac2mvdr: ac2mvdr.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 
 
 #Frame: get frames and apply windows for univariate signal to put into matrix
-Frame: frame_univar apply_win window_univar
+Frame: frame_univar frame_univar_float apply_win window_univar
 frame_univar: frame_univar.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+frame_univar_float: frame_univar_float.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 apply_win: apply_win.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 window_univar: window_univar.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 
