@@ -28,7 +28,7 @@ CFLAGS=$(WFLAG) $(STD) -O3 -march=native -fPIC
 
 
 All: all
-all: Dirs Generate Wins Interp Filter Conv Transform AR_Poly AC_LP Clean
+all: Dirs Generate Transform Filter Conv Interp ZCs_LCs AR_Poly AC_LP Frame Freqs STFT Wavelets Clean
 
 Dirs:
 	mkdir -pm 777 obj
