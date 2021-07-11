@@ -36,7 +36,7 @@ int main(int argc, char *argv[])
     int8_t stdi1, stdo1, wo1;
     ioinfo i1, o1;
     size_t L, stp, W;
-    char snip;
+    int snip_edges;
 
 
     //Description
@@ -60,12 +60,11 @@ int main(int argc, char *argv[])
     descr += "\n";
     descr += "If snip-edges=true, the first frame starts at samp 0,\n";
     descr += "and the last frame fits entirely within the length of X..\n";
-    descr += "If snip-edges=false, the first frame is centered at samp 0,\n";
-    descr += "and the last frame overlaps the end of X.\n";
+    descr += "If snip-edges=false, the first frame is centered at samp stp/2,\n";
+    descr += "and the last frame can overlap the end of X.\n";
     descr += "\n";
     descr += "Also following Kaldi for compatibility, X is extrapolated by\n";
     descr += "by reversing the edge samples of X, if snip-edges=false. \n";
-    descr += "\n";
     descr += "\n";
     descr += "The following framing convention is used here:\n";
     descr += "Samples from one frame are contiguous in memory, for row- and col-major.\n";
@@ -139,7 +138,7 @@ int main(int argc, char *argv[])
     else { stp = size_t(a_stp->ival[0]); }
 
     //Get snip-edges
-    snip = (a_sne->count>0);
+    snip_edges = (a_sne->count>0);
 
 
     //Checks
@@ -148,7 +147,7 @@ int main(int argc, char *argv[])
 
 
     //Set output header info
-    W = (snip) ? 1u+(i1.N()-L)/stp : (i1.N()+stp/2u)/stp;
+    W = (snip_edges) ? 1u+(i1.N()-L)/stp : (i1.N()+stp/2u)/stp;
     o1.F = i1.F; o1.T = i1.T;
     o1.R = (i1.isrowmajor()) ? W : L;
     o1.C = (i1.isrowmajor()) ? L : W;
@@ -180,7 +179,7 @@ int main(int argc, char *argv[])
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for output file (Y)" << endl; return 1; }
         try { ifs1.read(reinterpret_cast<char*>(X),i1.nbytes()); }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file (X)" << endl; return 1; }
-        if (codee::frame_univar_s(Y,X,i1.N(),W,L,stp))
+        if (codee::frame_univar_s(Y,X,i1.N(),L,stp,snip_edges))
         { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
         if (wo1)
         {
@@ -198,7 +197,7 @@ int main(int argc, char *argv[])
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for output file (Y)" << endl; return 1; }
         try { ifs1.read(reinterpret_cast<char*>(X),i1.nbytes()); }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file (X)" << endl; return 1; }
-        if (codee::frame_univar_d(Y,X,i1.N(),W,L,stp))
+        if (codee::frame_univar_d(Y,X,i1.N(),L,stp,snip_edges))
         { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
         if (wo1)
         {
@@ -216,7 +215,7 @@ int main(int argc, char *argv[])
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for output file (Y)" << endl; return 1; }
         try { ifs1.read(reinterpret_cast<char*>(X),i1.nbytes()); }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file (X)" << endl; return 1; }
-        if (codee::frame_univar_c(Y,X,i1.N(),W,L,stp))
+        if (codee::frame_univar_c(Y,X,i1.N(),L,stp,snip_edges))
         { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
         if (wo1)
         {
@@ -234,7 +233,7 @@ int main(int argc, char *argv[])
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for output file (Y)" << endl; return 1; }
         try { ifs1.read(reinterpret_cast<char*>(X),i1.nbytes()); }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file (X)" << endl; return 1; }
-        if (codee::frame_univar_z(Y,X,i1.N(),W,L,stp))
+        if (codee::frame_univar_z(Y,X,i1.N(),L,stp,snip_edges))
         { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
         if (wo1)
         {
