@@ -63,7 +63,7 @@ int main(int argc, char *argv[])
     descr += "If snip-edges=false, the first frame is centered at samp stp/2,\n";
     descr += "and the last frame can overlap the end of X.\n";
     descr += "\n";
-    descr += "Also following Kaldi for compatibility, X is extrapolated by\n";
+    descr += "Also following Kaldi for compatibility, X is extrapolated \n";
     descr += "by reversing the edge samples of X, if snip-edges=false. \n";
     descr += "\n";
     descr += "The following framing convention is used here:\n";
@@ -73,21 +73,20 @@ int main(int argc, char *argv[])
     descr += "\n";
     descr += "Examples:\n";
     descr += "$ frame_univar -l255 -s65 X -o Y \n";
-    descr += "$ frame_univar -l255 -d1 X > Y \n";
-    descr += "$ cat X | frame_univar -l127 -r200 > Y \n";
+    descr += "$ frame_univar -l255 -e X > Y \n";
+    descr += "$ cat X | frame_univar -l127 -e > Y \n";
 
 
     //Argtable
     int nerrs;
     struct arg_file  *a_fi = arg_filen(nullptr,nullptr,"<file>",I-1,I,"input file (X)");
-    struct arg_int   *a_wl = arg_intn("l","winlength","<uint>",0,1,"length in samps of each frame [default=400]");
+    struct arg_int   *a_wl = arg_intn("l","winlength","<uint>",0,1,"length in samps of each frame [default=401]");
     struct arg_int  *a_stp = arg_intn("s","step","<uint>",0,1,"step in samps between each frame [default=160]");
     struct arg_lit  *a_sne = arg_litn("e","snip-edges",0,1,"include to snip edges [default=false]");
-    struct arg_int    *a_d = arg_intn("d","dim","<uint>",0,1,"time dimension of Y [default=0]");
     struct arg_file  *a_fo = arg_filen("o","ofile","<file>",0,O,"output file (Y)");
     struct arg_lit *a_help = arg_litn("h","help",0,1,"display this help and exit");
     struct arg_end  *a_end = arg_end(5);
-    void *argtable[] = {a_fi, a_wl, a_stp, a_sne, a_d, a_fo, a_help, a_end};
+    void *argtable[] = {a_fi, a_wl, a_stp, a_sne, a_fo, a_help, a_end};
     if (arg_nullcheck(argtable)!=0) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating argtable" << endl; return 1; }
     nerrs = arg_parse(argc, argv, argtable);
     if (a_help->count>0)
@@ -128,7 +127,7 @@ int main(int argc, char *argv[])
     //Get options
 
     //Get L
-    if (a_wl->count==0) { L = 400u; }
+    if (a_wl->count==0) { L = 401u; }
     else if (a_wl->ival[0]<1) { cerr << progstr+": " << __LINE__ << errstr << "L must be positive" << endl; return 1; }
     else { L = size_t(a_wl->ival[0]); }
 

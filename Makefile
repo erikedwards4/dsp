@@ -150,7 +150,7 @@ conv1_fft: srci/conv1_fft.cpp c/conv1_fft.c
 
 
 #Interp: 1-D interpolation
-Interp: #interp1q interp1t
+Interp: interp1q #interp1t
 interp1q: srci/interp1q.cpp c/interp1q.c
 	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2
 interp1t: srci/interp1t.cpp c/interp1t.c
@@ -234,12 +234,11 @@ ac2mvdr: srci/ac2mvdr.cpp c/ac2mvdr.c
 #Frame: get frames and apply windows for univariate signal to put into matrix
 Frame: frame_univar apply_win window_univar
 frame_univar: srci/frame_univar.cpp c/frame_univar.c
-	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lopenblas -lm
+	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2
 apply_win: srci/apply_win.cpp c/apply_win.c
-	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lopenblas
+	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2
 window_univar: srci/window_univar.cpp c/window_univar.c
-	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lopenblas -lm
-
+	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2
 
 #Freqs: gets center frequencies or STFT frequencies, and converts btwn frequency scales
 Freqs: convert_freqs get_cfs get_stft_freqs get_cfs_T #get_cns

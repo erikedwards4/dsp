@@ -57,38 +57,31 @@ int frame_univar_s (float *Y, const float *X, const size_t N, const size_t L, co
     }
     else
     {
-        const int xd = (int)L - (int)stp;
+        const int xd = (int)L - (int)stp;           //X inc after each frame
         const size_t Lpre = L/2u;                   //nsamps before center samp
-        const size_t Lpost = L-L/2u-1u;             //nsamps after center samp
-        size_t cs = stp/2u, w = 0u;                 //current center-samp and frame
+        int ss = (int)(stp/2u) - (int)Lpre;         //start-samp of current frame
+        int n, prev_n = 0;                          //current/prev samps in X
 
-        while (cs<Lpre && w<W)
+        for (size_t w=0u; w<W; ++w, ss+=stp)
         {
-            X += Lpre - cs;
-            for (size_t l=0u; l<Lpre-cs; ++l, --X, ++Y) { *Y = *X; }
-            //for (size_t l=0u; l<Lpre-cs; ++l, ++Y) { *Y = 0.0f; }
-            for (size_t l=Lpre-cs; l<L; ++l, ++X, ++Y) { *Y = *X; }
-            X -= 1u+L-Lpre+cs; X += stp; cs += stp; ++w;
+            if (ss<0 || ss>(int)N-(int)L)
+            {
+                for (int s=ss; s<ss+(int)L; ++s, ++Y)
+                {
+                    n = s; //This ensures extrapolation by signal reversal to any length
+                    while (n<0 || n>=(int)N) { n = (n<0) ? -n : (n<(int)N) ? n : 2*(int)N-2-n; }
+                    X += n - prev_n;
+                    *Y = *X;
+                    prev_n = n;
+                }
+            }
+            else
+            {
+                X += ss - prev_n;
+                for (size_t l=0u; l<L; ++l, ++X, ++Y) { *Y = *X; }
+                X -= xd; prev_n = ss + stp;
+            }
         }
-        while (cs+Lpost<N && w<W)
-        {
-            fprintf(stderr,"w==%lu, cs=%lu \n",w,cs);
-            for (size_t l=0u; l<L; ++l, ++X, ++Y) { *Y = *X; }
-            X -= xd; cs += stp; ++w;
-        }
-        // while(cs<N+Lpre && w<W)
-        // {
-        //     for (size_t l=0u; l<L-(N+Lpre-cs); ++l, ++X, ++Y) { *Y = *X; }
-        //     //for (size_t l=0u; l<L-(N+Lpre-cs-1u); ++l, ++X, ++Y) { *Y = *X; }
-        //     --X;
-        //     for (size_t l=L-(N+Lpre-cs-1u); l<L; ++l, ++Y) { *Y = *--X; }
-        //     X -= L-(N+Lpre-cs-1u); X += N+Lpre-cs-1u; X += stp; cs += stp; ++w;
-        // }
-        // while (w<W) //this should not occur in general
-        // {
-        //     for (size_t l=0u; l<L; ++l, ++Y) { *Y = 0.0f; }
-        //     ++w;
-        // }
     }
 
     return 0;
@@ -115,33 +108,30 @@ int frame_univar_d (double *Y, const double *X, const size_t N, const size_t L, 
     }
     else
     {
-        const int xd = (int)L - (int)stp;
+        const int xd = (int)L - (int)stp;           //X inc after each frame
         const size_t Lpre = L/2u;                   //nsamps before center samp
-        const size_t Lpost = L-L/2u-1u;             //nsamps after center samp
-        size_t cs = stp/2u, w = 0u;                 //current center-samp and frame
-        
-        while (cs<Lpre && w<W)
+        int ss = (int)(stp/2u) - (int)Lpre;         //start-samp of current frame
+        int n, prev_n = 0;                          //current/prev samps in X
+
+        for (size_t w=0u; w<W; ++w, ss+=stp)
         {
-            for (size_t l=0u; l<Lpre-cs; ++l, --X, ++Y) { *Y = *X; }
-            //for (size_t l=0u; l<Lpre-cs; ++l, ++Y) { *Y = 0.0; }
-            for (size_t l=Lpre-cs; l<L; ++l, ++X, ++Y) { *Y = *X; }
-            X -= L-Lpre+cs; X += stp; cs += stp; ++w;
-        }
-        while (cs+Lpost<N && w<W)
-        {
-            for (size_t l=0u; l<L; ++l, ++X, ++Y) { *Y = *X; }
-            X -= xd; cs += stp; ++w;
-        }
-        while (cs<N+Lpre && w<W)
-        {
-            for (size_t l=0u; l<N+Lpre-cs; ++l, ++X, ++Y) { *Y = *X; }
-            for (size_t l=N+Lpre-cs; l<L; ++l, ++Y) { *Y = 0.0; }
-            X -= N+Lpre-cs; X += stp; cs += stp; ++w;
-        }
-        while (w<W)
-        {
-            for (size_t l=0u; l<L; ++l, ++Y) { *Y = 0.0; }
-            ++w;
+            if (ss<0 || ss>(int)N-(int)L)
+            {
+                for (int s=ss; s<ss+(int)L; ++s, ++Y)
+                {
+                    n = s; //This ensures extrapolation by signal reversal to any length
+                    while (n<0 || n>=(int)N) { n = (n<0) ? -n : (n<(int)N) ? n : 2*(int)N-2-n; }
+                    X += n - prev_n;
+                    *Y = *X;
+                    prev_n = n;
+                }
+            }
+            else
+            {
+                X += ss - prev_n;
+                for (size_t l=0u; l<L; ++l, ++X, ++Y) { *Y = *X; }
+                X -= xd; prev_n = ss + stp;
+            }
         }
     }
 
@@ -169,32 +159,30 @@ int frame_univar_c (float *Y, const float *X, const size_t N, const size_t L, co
     }
     else
     {
-        const int xd = 2*((int)L-(int)stp);
+        const int xd = 2*((int)L-(int)stp);         //X inc after each frame
         const size_t Lpre = L/2u;                   //nsamps before center samp
-        const size_t Lpost = L-L/2u-1u;             //nsamps after center samp
-        size_t cs = stp/2u, w = 0u;                 //current center-samp and frame
-        
-        while (cs<Lpre && w<W)
+        int ss = (int)(stp/2u) - (int)Lpre;         //start-samp of current frame
+        int n, prev_n = 0;                          //current/prev samps in X
+
+        for (size_t w=0u; w<W; ++w, ss+=stp)
         {
-            for (size_t l=0u; l<Lpre-cs; ++l, ++Y) { *Y = 0.0f; *++Y = 0.0f; }
-            for (size_t l=Lpre-cs; l<L; ++l, ++X, ++Y) { *Y = *X; *++Y = *++X; }
-            X -= 2u*(L-Lpre+cs); X += 2u*stp; cs += stp; ++w;
-        }
-        while (cs+Lpost<N && w<W)
-        {
-            for (size_t l=0u; l<L; ++l, ++X, ++Y) { *Y = *X; *++Y = *++X; }
-            X -= xd; cs += stp; ++w;
-        }
-        while (cs<N+Lpre && w<W)
-        {
-            for (size_t l=0u; l<N+Lpre-cs; ++l, ++X, ++Y) { *Y = *X; *++Y = *++X; }
-            for (size_t l=N+Lpre-cs; l<L; ++l, ++Y) { *Y = 0.0f; *++Y = 0.0f; }
-            X -= 2u*(N+Lpre-cs); X += 2u*stp; cs += stp; ++w;
-        }
-        while (w<W)
-        {
-            for (size_t l=0u; l<L; ++l, ++Y) { *Y = 0.0f; *++Y = 0.0f; }
-            ++w;
+            if (ss<0 || ss>(int)N-(int)L)
+            {
+                for (int s=ss; s<ss+(int)L; ++s, ++Y)
+                {
+                    n = s; //This ensures extrapolation by signal reversal to any length
+                    while (n<0 || n>=(int)N) { n = (n<0) ? -n : (n<(int)N) ? n : 2*(int)N-2-n; }
+                    X += 2*(n-prev_n);
+                    *Y = *X; *++Y = *(X+1);
+                    prev_n = n;
+                }
+            }
+            else
+            {
+                X += 2*(ss-prev_n);
+                for (size_t l=0u; l<L; ++l, ++X, ++Y) { *Y = *X; *++Y = *++X; }
+                X -= xd; prev_n = ss + stp;
+            }
         }
     }
 
@@ -222,32 +210,30 @@ int frame_univar_z (double *Y, const double *X, const size_t N, const size_t L, 
     }
     else
     {
-        const int xd = 2*((int)L-(int)stp);
+        const int xd = 2*((int)L-(int)stp);         //X inc after each frame
         const size_t Lpre = L/2u;                   //nsamps before center samp
-        const size_t Lpost = L-L/2u-1u;             //nsamps after center samp
-        size_t cs = stp/2u, w = 0u;                 //current center-samp and frame
-        
-        while (cs<Lpre && w<W)
+        int ss = (int)(stp/2u) - (int)Lpre;         //start-samp of current frame
+        int n, prev_n = 0;                          //current/prev samps in X
+
+        for (size_t w=0u; w<W; ++w, ss+=stp)
         {
-            for (size_t l=0u; l<Lpre-cs; ++l, ++Y) { *Y = 0.0; *++Y = 0.0; }
-            for (size_t l=Lpre-cs; l<L; ++l, ++X, ++Y) { *Y = *X; *++Y = *++X; }
-            X -= 2u*(L-Lpre+cs); X += 2u*stp; cs += stp; ++w;
-        }
-        while (cs+Lpost<N && w<W)
-        {
-            for (size_t l=0u; l<L; ++l, ++X, ++Y) { *Y = *X; *++Y = *++X; }
-            X -= xd; cs += stp; ++w;
-        }
-        while (cs<N+Lpre && w<W)
-        {
-            for (size_t l=0u; l<N+Lpre-cs; ++l, ++X, ++Y) { *Y = *X; *++Y = *++X; }
-            for (size_t l=N+Lpre-cs; l<L; ++l, ++Y) { *Y = 0.0; *++Y = 0.0; }
-            X -= 2u*(N+Lpre-cs); X += 2u*stp; cs += stp; ++w;
-        }
-        while (w<W)
-        {
-            for (size_t l=0u; l<L; ++l, ++Y) { *Y = 0.0; *++Y = 0.0; }
-            ++w;
+            if (ss<0 || ss>(int)N-(int)L)
+            {
+                for (int s=ss; s<ss+(int)L; ++s, ++Y)
+                {
+                    n = s; //This ensures extrapolation by signal reversal to any length
+                    while (n<0 || n>=(int)N) { n = (n<0) ? -n : (n<(int)N) ? n : 2*(int)N-2-n; }
+                    X += 2*(n-prev_n);
+                    *Y = *X; *++Y = *(X+1);
+                    prev_n = n;
+                }
+            }
+            else
+            {
+                X += 2*(ss-prev_n);
+                for (size_t l=0u; l<L; ++l, ++X, ++Y) { *Y = *X; *++Y = *++X; }
+                X -= xd; prev_n = ss + stp;
+            }
         }
     }
 

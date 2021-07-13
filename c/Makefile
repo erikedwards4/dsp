@@ -9,7 +9,7 @@
 #It is not necessary to run this when making the C++ command-line tools.
 
 SHELL=/bin/bash
-CC=gcc
+CC=clang
 
 ifeq ($(CC),$(filter $(CC),clang gcc))
 	STD=-std=c11
@@ -105,7 +105,7 @@ conv2d_fft: conv2d_fft.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 
 
 #Interp: interpolation
-Interp: #interp1q interp1t
+Interp: interp1q #interp1t
 interp1q: interp1q.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 interp1t: interp1t.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 
