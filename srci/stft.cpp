@@ -5,8 +5,8 @@
 //Declarations
 const valarray<size_t> oktypes = {1u,2u};
 const size_t I = 2u, O = 1u;
-size_t L, stp, W;
-int snip_edges;
+size_t L, stp, W, nfft, F;
+int snip_edges, mn0;
 
 //Description
 string descr;
@@ -54,6 +54,7 @@ descr += "$ stft -e -s160 X1 <(hamming -l401) > Y \n";
 struct arg_file  *a_fi = arg_filen(nullptr,nullptr,"<file>",I-1,I,"input files (X1,X2)");
 struct arg_int  *a_stp = arg_intn("s","step","<uint>",0,1,"step in samps between each frame [default=160]");
 struct arg_lit  *a_sne = arg_litn("e","snip-edges",0,1,"include to snip edges [default=false]");
+struct arg_lit  *a_mnz = arg_litn("z","mean-zero",0,1,"include to zero the mean of each frame [default=false]");
 struct arg_file  *a_fo = arg_filen("o","ofile","<file>",0,O,"output file (Y)");
 
 //Get options
@@ -66,6 +67,9 @@ else { stp = size_t(a_stp->ival[0]); }
 //Get snip_edges
 snip_edges = (a_sne->count>0);
 
+//Get mn0
+mn0 = (a_mnz->count>0);
+
 //Checks
 if (i1.iscomplex()) { cerr << progstr+": " << __LINE__ << errstr << "input 1 (X1) must be real-valued" << endl; return 1; }
 if (i2.iscomplex()) { cerr << progstr+": " << __LINE__ << errstr << "input 2 (X2) must be real-valued" << endl; return 1; }
@@ -77,10 +81,13 @@ if (i2.isempty()) { cerr << progstr+": " << __LINE__ << errstr << "input 2 (X2) 
 
 //Set output header
 L = i2.N();
+nfft = 1u;
+while (nfft<L) { nfft *= 2u; }
+F = nfft/2u + 1u;
 W = (snip_edges) ? 1u+(i1.N()-L)/stp : (i1.N()+stp/2u)/stp;
 o1.F = i1.F; o1.T = i1.T;
-o1.R = (i1.isrowmajor()) ? W : L;
-o1.C = (i1.isrowmajor()) ? L : W;
+o1.R = (i1.isrowmajor()) ? W : F;
+o1.C = (i1.isrowmajor()) ? F : W;
 o1.S = i1.S; o1.H = i1.H;
 
 //Other prep
@@ -99,7 +106,7 @@ if (o1.T==1u)
     catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file (X)" << endl; return 1; }
     try { ifs2.read(reinterpret_cast<char*>(X2),i2.nbytes()); }
     catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 2 (X2)" << endl; return 1; }
-    if (codee::stft_s(Y,X1,X2,i1.N(),L,stp,snip_edges))
+    if (codee::stft_s(Y,X1,X2,i1.N(),L,nfft,stp,snip_edges,mn0))
     { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
     if (wo1)
     {

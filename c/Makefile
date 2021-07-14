@@ -9,7 +9,7 @@
 #It is not necessary to run this when making the C++ command-line tools.
 
 SHELL=/bin/bash
-CC=clang
+CC=g++
 
 ifeq ($(CC),$(filter $(CC),clang gcc))
 	STD=-std=c11
@@ -172,11 +172,10 @@ get_cfs_T: get_cfs_T.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 
 
 #STFT: steps to do the STFT (short-term Fourier transform)
-STFT: fft_hc hc_square fft_squared stft
-fft_hc: fft_hc.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
-hc_square: hc_square.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
-fft_squared: fft_squared.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+STFT: fft_power stft #get_stft_freqs
+fft_power: fft_power.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 stft: stft.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+#get_stft_freqs: get_stft_freqs.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 
 
 #Wavelets: a couple of my most often-used wavelets

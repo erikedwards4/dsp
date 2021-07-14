@@ -255,12 +255,8 @@ get_cfs_T: srci/get_cfs_T.cpp c/get_cfs_T.c c/convert_freqs.c
 
 
 #STFT: steps to do the STFT (short-term Fourier transform)
-STFT: fft_hc hc_square fft_squared stft
-fft_hc: srci/fft_hc.cpp c/fft_hc.c
-	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lopenblas -lfftw3f -lfftw3 -lm
-hc_square: srci/hc_square.cpp c/hc_square.c
-	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lfftw3f -lfftw3 -lm
-fft_squared: srci/fft_squared.cpp c/fft_squared.c
+STFT: fft_power stft
+fft_power: srci/fft_power.cpp c/fft_power.c
 	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lopenblas -lfftw3f -lfftw3 -lm
 stft: srci/stft.cpp c/stft.c
 	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lopenblas -lfftw3f -lfftw3 -lm
