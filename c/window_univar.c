@@ -1,4 +1,4 @@
-//This takes a continuous univariate time series (vector X1),
+//This takes a continuous univariate time series (vector X1) of length N,
 //and a window (vector X2) of length L,
 //and outputs a set of windowed frames (matrix Y).
 

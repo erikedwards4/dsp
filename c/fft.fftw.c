@@ -34,7 +34,7 @@ int fft_fftw_z (double *Y, const double *X, const size_t R, const size_t C, cons
 int fft_fftw_s (float *Y, const float *X, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim, const size_t nfft, const char sc)
 {
     if (dim>3u) { fprintf(stderr,"error in fft_fftw_s: dim must be in [0 3]\n"); return 1; }
-    //struct timespec tic, toc; clock_gettime(CLOCK_REALTIME,&tic);
+    struct timespec tic, toc; clock_gettime(CLOCK_REALTIME,&tic);
     
     const size_t N = R*C*S*H;
     const size_t Lx = (dim==0u) ? R : (dim==1u) ? C : (dim==2u) ? S : H;
@@ -55,12 +55,13 @@ int fft_fftw_s (float *Y, const float *X, const size_t R, const size_t C, const 
         Y1 = (float *)fftwf_malloc(2u*Ly*sizeof(float));
         fftwf_plan plan = fftwf_plan_dft_r2c_1d((int)nfft,X1,(fftwf_complex *)Y1,FFTW_ESTIMATE);
         if (!plan) { fprintf(stderr,"error in fft_fftw_s: problem creating fftw plan"); return 1; }
+        for (size_t l=0u; l<nfft; ++l, ++X1) { *X1 = 0.0f; }
+        X1 -= nfft;
 
         if (Lx==N)
         {
             for (size_t l=0u; l<Lx; ++l, ++X, ++X1) { *X1 = *X; }
-            for (size_t l=Lx; l<nfft; ++l, ++X1) { *X1 = 0.0f; }
-            X1 -= nfft;
+            X1 -= Lx;
             fftwf_execute(plan);
             for (size_t l=0u; l<2u*Ly; ++l, ++Y1, ++Y) { *Y = *Y1; }
             Y1 -= 2u*Ly; Y -= 2u*Ly;
@@ -73,13 +74,7 @@ int fft_fftw_s (float *Y, const float *X, const size_t R, const size_t C, const 
 
             if (K==1u && (G==1u || B==1u))
             {
-                for (size_t l=0u; l<Lx; ++l, ++X, ++X1) { *X1 = *X; }
-                for (size_t l=Lx; l<nfft; ++l, ++X1) { *X1 = 0.0f; }
-                X1 -= nfft;
-                fftwf_execute(plan);
-                for (size_t l=0u; l<2u*Ly; ++l, ++Y1, ++Y) { *Y = *Y1; }
-                Y1 -= 2u*Ly;
-                for (size_t v=1u; v<V; ++v, Y1-=2u*Ly)
+                for (size_t v=0u; v<V; ++v, Y1-=2u*Ly)
                 {
                     for (size_t l=0u; l<Lx; ++l, ++X, ++X1) { *X1 = *X; }
                     X1 -= Lx;
@@ -90,9 +85,6 @@ int fft_fftw_s (float *Y, const float *X, const size_t R, const size_t C, const 
             }
             else
             {
-                X1 += Lx;
-                for (size_t l=Lx; l<nfft; ++l, ++X1) { *X1 = 0.0f; }
-                X1 -= nfft;
                 for (size_t g=0u; g<G; ++g, X+=B*(Lx-1u), Y+=2u*B*(Ly-1u))
                 {
                     for (size_t b=0u; b<B; ++b, X-=K*Lx-1u, Y1-=2u*Ly, Y-=2u*K*Ly-2u)
@@ -116,7 +108,7 @@ int fft_fftw_s (float *Y, const float *X, const size_t R, const size_t C, const 
         for (size_t l=0u; l<2u*Ly*N/Lx; ++l, ++Y) { *Y *= s; }
     }
 
-    //clock_gettime(CLOCK_REALTIME,&toc); fprintf(stderr,"elapsed time = %.6f ms\n",(toc.tv_sec-tic.tv_sec)*1e3+(toc.tv_nsec-tic.tv_nsec)/1e6);
+    clock_gettime(CLOCK_REALTIME,&toc); fprintf(stderr,"elapsed time = %.6f ms\n",(toc.tv_sec-tic.tv_sec)*1e3+(toc.tv_nsec-tic.tv_nsec)/1e6);
     return 0;
 }
 
@@ -144,11 +136,12 @@ int fft_fftw_d (double *Y, const double *X, const size_t R, const size_t C, cons
         Y1 = (double *)fftw_malloc(2u*Ly*sizeof(double));
         fftw_plan plan = fftw_plan_dft_r2c_1d((int)nfft,X1,(fftw_complex *)Y1,FFTW_ESTIMATE);
         if (!plan) { fprintf(stderr,"error in fft_fftw_d: problem creating fftw plan"); return 1; }
+        for (size_t l=0u; l<nfft; ++l, ++X1) { *X1 = 0.0; }
+        X1 -= nfft;
 
         if (Lx==N)
         {
             for (size_t l=0u; l<Lx; ++l, ++X, ++X1) { *X1 = *X; }
-            for (size_t l=Lx; l<nfft; ++l, ++X1) { *X1 = 0.0; }
             X1 -= nfft;
             fftw_execute(plan);
             for (size_t l=0u; l<2u*Ly; ++l, ++Y1, ++Y) { *Y = *Y1; }
@@ -162,13 +155,7 @@ int fft_fftw_d (double *Y, const double *X, const size_t R, const size_t C, cons
 
             if (K==1u && (G==1u || B==1u))
             {
-                for (size_t l=0u; l<Lx; ++l, ++X, ++X1) { *X1 = *X; }
-                for (size_t l=Lx; l<nfft; ++l, ++X1) { *X1 = 0.0; }
-                X1 -= nfft;
-                fftw_execute(plan);
-                for (size_t l=0u; l<2u*Ly; ++l, ++Y1, ++Y) { *Y = *Y1; }
-                Y1 -= 2u*Ly;
-                for (size_t v=1u; v<V; ++v, Y1-=2u*Ly)
+                for (size_t v=0u; v<V; ++v, Y1-=2u*Ly)
                 {
                     for (size_t l=0u; l<Lx; ++l, ++X, ++X1) { *X1 = *X; }
                     X1 -= Lx;
@@ -179,9 +166,6 @@ int fft_fftw_d (double *Y, const double *X, const size_t R, const size_t C, cons
             }
             else
             {
-                X1 += Lx;
-                for (size_t l=Lx; l<nfft; ++l, ++X1) { *X1 = 0.0; }
-                X1 -= nfft;
                 for (size_t g=0u; g<G; ++g, X+=B*(Lx-1u), Y+=2u*B*(Ly-1u))
                 {
                     for (size_t b=0u; b<B; ++b, X-=K*Lx-1u, Y1-=2u*Ly, Y-=2u*K*Ly-2u)
@@ -231,12 +215,13 @@ int fft_fftw_c (float *Y, const float *X, const size_t R, const size_t C, const 
         Y1 = (float *)fftwf_malloc(2u*nfft*sizeof(float));
         fftwf_plan plan = fftwf_plan_dft_1d((int)nfft,(fftwf_complex *)X1,(fftwf_complex *)Y1,FFTW_FORWARD,FFTW_ESTIMATE);
         if (!plan) { fprintf(stderr,"error in fft_fftw_c: problem creating fftw plan"); return 1; }
+        for (size_t l=0u; l<2u*nfft; ++l, ++X1) { *X1 = 0.0f; }
+        X1 -= 2u*nfft;
 
         if (Lx==N)
         {
             for (size_t l=0u; l<2u*Lx; ++l, ++X, ++X1) { *X1 = *X; }
-            for (size_t l=2u*Lx; l<2u*nfft; ++l, ++X1) { *X1 = 0.0f; }
-            X1 -= 2u*nfft;
+            X1 -= 2u*Lx;
             fftwf_execute(plan);
             for (size_t l=0u; l<2u*nfft; ++l, ++Y1, ++Y) { *Y = *Y1; }
             Y1 -= 2u*nfft; Y -= 2u*nfft;
@@ -252,8 +237,7 @@ int fft_fftw_c (float *Y, const float *X, const size_t R, const size_t C, const 
                 for (size_t v=0u; v<V; ++v, Y1-=2u*nfft)
                 {
                     for (size_t l=0u; l<2u*Lx; ++l, ++X, ++X1) { *X1 = *X; }
-                    for (size_t l=2u*Lx; l<2u*nfft; ++l, ++X1) { *X1 = 0.0f; }
-                    X1 -= 2u*nfft;
+                    X1 -= 2u*Lx;
                     fftwf_execute(plan);
                     for (size_t l=0u; l<2u*nfft; ++l, ++Y1, ++Y) { *Y = *Y1; }
                 }
@@ -266,8 +250,7 @@ int fft_fftw_c (float *Y, const float *X, const size_t R, const size_t C, const 
                     for (size_t b=0u; b<B; ++b, X-=2u*K*Lx-1u, Y1-=2u*nfft, Y-=2u*K*nfft-2u)
                     {
                         for (size_t l=0u; l<Lx; ++l, X+=2u*K-1u, ++X1) { *X1 = *X; *++X1 = *++X; }
-                        for (size_t l=2u*Lx; l<2u*nfft; ++l, ++X1) { *X1 = 0.0f; }
-                        X1 -= 2u*nfft;
+                        X1 -= 2u*Lx;
                         fftwf_execute(plan);
                         for (size_t l=0u; l<nfft; ++l, ++Y1, Y+=2u*K-1u) { *Y = *Y1; *++Y = *++Y1; }
                     }
@@ -311,12 +294,13 @@ int fft_fftw_z (double *Y, const double *X, const size_t R, const size_t C, cons
         Y1 = (double *)fftw_malloc(2u*nfft*sizeof(double));
         fftw_plan plan = fftw_plan_dft_1d((int)nfft,(fftw_complex *)X1,(fftw_complex *)Y1,FFTW_FORWARD,FFTW_ESTIMATE);
         if (!plan) { fprintf(stderr,"error in fft_fftw_z: problem creating fftw plan"); return 1; }
+        for (size_t l=0u; l<2u*nfft; ++l, ++X1) { *X1 = 0.0; }
+        X1 -= 2u*nfft;
 
         if (Lx==N)
         {
             for (size_t l=0u; l<2u*Lx; ++l, ++X, ++X1) { *X1 = *X; }
-            for (size_t l=2u*Lx; l<2u*nfft; ++l, ++X1) { *X1 = 0.0; }
-            X1 -= 2u*nfft;
+            X1 -= 2u*Lx;
             fftw_execute(plan);
             for (size_t l=0u; l<2u*nfft; ++l, ++Y1, ++Y) { *Y = *Y1; }
             Y1 -= 2u*nfft; Y -= 2u*nfft;
@@ -332,8 +316,7 @@ int fft_fftw_z (double *Y, const double *X, const size_t R, const size_t C, cons
                 for (size_t v=0u; v<V; ++v, Y1-=2u*nfft)
                 {
                     for (size_t l=0u; l<2u*Lx; ++l, ++X, ++X1) { *X1 = *X; }
-                    for (size_t l=2u*Lx; l<2u*nfft; ++l, ++X1) { *X1 = 0.0; }
-                    X1 -= 2u*nfft;
+                    X1 -= 2u*Lx;
                     fftw_execute(plan);
                     for (size_t l=0u; l<2u*nfft; ++l, ++Y1, ++Y) { *Y = *Y1; }
                 }
@@ -346,8 +329,7 @@ int fft_fftw_z (double *Y, const double *X, const size_t R, const size_t C, cons
                     for (size_t b=0u; b<B; ++b, X-=2u*K*Lx-1u, Y1-=2u*nfft, Y-=2u*K*nfft-2u)
                     {
                         for (size_t l=0u; l<Lx; ++l, X+=2u*K-1u, ++X1) { *X1 = *X; *++X1 = *++X; }
-                        for (size_t l=2u*Lx; l<2u*nfft; ++l, ++X1) { *X1 = 0.0; }
-                        X1 -= 2u*nfft;
+                        X1 -= 2u*Lx;
                         fftw_execute(plan);
                         for (size_t l=0u; l<nfft; ++l, ++Y1, Y+=2u*K-1u) { *Y = *Y1; *++Y = *++Y1; }
                     }
