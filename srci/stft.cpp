@@ -6,7 +6,7 @@
 const valarray<size_t> oktypes = {1u,2u};
 const size_t I = 2u, O = 1u;
 size_t L, stp, W, nfft, F;
-int snip_edges, mn0;
+int snip_edges, mn0, amp, lg;
 
 //Description
 string descr;
@@ -43,6 +43,15 @@ descr += "Samples from one frame are contiguous in memory, for row- and col-majo
 descr += "So, if Y is row-major, then it has size W x F; \n";
 descr += "but if Y is col-major, then it has size F x W. \n";
 descr += "\n";
+descr += "Include -z (--zero-mean) to subtract the mean from each frame [default=false].\n";
+descr += "This is applied just after windowing.\n";
+descr += "\n";
+descr += "Include -a (--amplitude) to output amplitude rather than power [default=false].\n";
+descr += "This simply takes the sqrt of each element of Y before output.\n";
+descr += "\n";
+descr += "Include -l (--log) to output log amplitude or power [default=false].\n";
+descr += "This simply takes the log of each element of Y before output.\n";
+descr += "\n";
 descr += "Examples:\n";
 descr += "$ stft -s65 X1 X2 -o Y \n";
 descr += "$ stft -e X1 X2 > Y \n";
@@ -54,7 +63,9 @@ descr += "$ stft -e -s160 X1 <(hamming -l401) > Y \n";
 struct arg_file  *a_fi = arg_filen(nullptr,nullptr,"<file>",I-1,I,"input files (X1,X2)");
 struct arg_int  *a_stp = arg_intn("s","step","<uint>",0,1,"step in samps between each frame [default=160]");
 struct arg_lit  *a_sne = arg_litn("e","snip-edges",0,1,"include to snip edges [default=false]");
-struct arg_lit  *a_mnz = arg_litn("z","mean-zero",0,1,"include to zero the mean of each frame [default=false]");
+struct arg_lit  *a_mnz = arg_litn("z","zero-mean",0,1,"include to zero the mean of each frame [default=false]");
+struct arg_lit  *a_amp = arg_litn("a","amplitude",0,1,"include to output amplitude (sqrt of power) [default=false]");
+struct arg_lit  *a_log = arg_litn("l","log",0,1,"include to output log of amplitude or power [default=false]");
 struct arg_file  *a_fo = arg_filen("o","ofile","<file>",0,O,"output file (Y)");
 
 //Get options
@@ -69,6 +80,12 @@ snip_edges = (a_sne->count>0);
 
 //Get mn0
 mn0 = (a_mnz->count>0);
+
+//Get amp
+amp = (a_amp->count>0);
+
+//Get lg
+lg = (a_log->count>0);
 
 //Checks
 if (i1.iscomplex()) { cerr << progstr+": " << __LINE__ << errstr << "input 1 (X1) must be real-valued" << endl; return 1; }
@@ -106,7 +123,7 @@ if (o1.T==1u)
     catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file (X)" << endl; return 1; }
     try { ifs2.read(reinterpret_cast<char*>(X2),i2.nbytes()); }
     catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 2 (X2)" << endl; return 1; }
-    if (codee::stft_s(Y,X1,X2,i1.N(),L,nfft,stp,snip_edges,mn0))
+    if (codee::stft_s(Y,X1,X2,i1.N(),L,nfft,stp,snip_edges,mn0,amp,lg))
     { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
     if (wo1)
     {

@@ -243,13 +243,11 @@ window_univar: srci/window_univar.cpp c/window_univar.c
 	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2
 
 #Freqs: gets center frequencies or STFT frequencies, and converts btwn frequency scales
-Freqs: convert_freqs get_cfs get_stft_freqs get_cfs_T #get_cns
+Freqs: #convert_freqs get_cfs get_stft_freqs get_cfs_T #get_cns
 convert_freqs: srci/convert_freqs.cpp c/convert_freqs.c
 	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lopenblas -lm
 get_cfs: srci/get_cfs.cpp c/get_cfs.c c/convert_freqs.c
 	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lopenblas -lm
-get_stft_freqs: srci/get_stft_freqs.cpp c/get_stft_freqs.c
-	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2
 get_cfs_T: srci/get_cfs_T.cpp c/get_cfs_T.c c/convert_freqs.c
 	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lopenblas -lm
 
@@ -260,6 +258,8 @@ fft_power: srci/fft_power.cpp c/fft_power.c
 	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lopenblas -lfftw3f -lfftw3 -lm
 stft: srci/stft.cpp c/stft.c
 	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lopenblas -lfftw3f -lfftw3 -lm
+get_stft_freqs: srci/get_stft_freqs.cpp c/get_stft_freqs.c
+	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2
 
 
 #Wavelets: a couple of my most often-used wavelets

@@ -22,11 +22,11 @@ namespace codee {
 extern "C" {
 #endif
 
-int stft_s (float *Y, const float *X1, const float *X2, const size_t N, const size_t L, const size_t nfft, const size_t stp, const int snip_edges, const int mn0);
-int stft_d (double *Y, const double *X1, const double *X2, const size_t N, const size_t L, const size_t nfft, const size_t stp, const int snip_edges, const int mn0);
+int stft_s (float *Y, const float *X1, const float *X2, const size_t N, const size_t L, const size_t nfft, const size_t stp, const int snip_edges, const int mn0, const int amp, const int lg);
+int stft_d (double *Y, const double *X1, const double *X2, const size_t N, const size_t L, const size_t nfft, const size_t stp, const int snip_edges, const int mn0, const int amp, const int lg);
 
 
-int stft_s (float *Y, const float *X1, const float *X2, const size_t N, const size_t L, const size_t nfft, const size_t stp, const int snip_edges, const int mn0)
+int stft_s (float *Y, const float *X1, const float *X2, const size_t N, const size_t L, const size_t nfft, const size_t stp, const int snip_edges, const int mn0, const int amp, const int lg)
 {
     if (L<1u) { fprintf(stderr,"error in stft_s: L must be positive\n"); return 1; }
     if (stp<1u) { fprintf(stderr,"error in stft_s: stp must be positive\n"); return 1; }
@@ -76,7 +76,19 @@ int stft_s (float *Y, const float *X1, const float *X2, const size_t N, const si
                 for (size_t f=0u; f<F; ++f, ++Yw, ++Y) { *Y = *Yw * *Yw; }
                 Y -= 2u;
                 for (size_t f=1u; f<F-1u; ++f, ++Yw, --Y) { *Y += *Yw * *Yw; }
-                Yw -= nfft; Y += F;
+                Yw -= nfft;
+
+                //Amplitude and/or log
+                if (amp)
+                {
+                    if (lg) { for (size_t f=0u; f<F; ++f, ++Y) { *Y = logf(sqrtf(*Y)); } }
+                    else { for (size_t f=0u; f<F; ++f, ++Y) { *Y = sqrtf(*Y); } }
+                }
+                else if (lg)
+                {
+                    for (size_t f=0u; f<F; ++f, ++Y) { *Y = logf(*Y); }
+                }
+                else { Y += F; }
             }
         }
         else
@@ -124,7 +136,19 @@ int stft_s (float *Y, const float *X1, const float *X2, const size_t N, const si
                 for (size_t f=0u; f<F; ++f, ++Yw, ++Y) { *Y = *Yw * *Yw; }
                 Y -= 2u;
                 for (size_t f=1u; f<F-1u; ++f, ++Yw, --Y) { *Y += *Yw * *Yw; }
-                Yw -= nfft; Y += F;
+                Yw -= nfft;
+                
+                //Amplitude and/or log
+                if (amp)
+                {
+                    if (lg) { for (size_t f=0u; f<F; ++f, ++Y) { *Y = logf(sqrtf(*Y)); } }
+                    else { for (size_t f=0u; f<F; ++f, ++Y) { *Y = sqrtf(*Y); } }
+                }
+                else if (lg)
+                {
+                    for (size_t f=0u; f<F; ++f, ++Y) { *Y = logf(*Y); }
+                }
+                else { Y += F; }
             }
         }
     }
@@ -133,7 +157,7 @@ int stft_s (float *Y, const float *X1, const float *X2, const size_t N, const si
 }
 
 
-int stft_d (double *Y, const double *X1, const double *X2, const size_t N, const size_t L, const size_t nfft, const size_t stp, const int snip_edges, const int mn0)
+int stft_d (double *Y, const double *X1, const double *X2, const size_t N, const size_t L, const size_t nfft, const size_t stp, const int snip_edges, const int mn0, const int amp, const int lg)
 {
     if (L<1u) { fprintf(stderr,"error in stft_d: L must be positive\n"); return 1; }
     if (stp<1u) { fprintf(stderr,"error in stft_d: stp must be positive\n"); return 1; }
@@ -184,12 +208,24 @@ int stft_d (double *Y, const double *X1, const double *X2, const size_t N, const
                 for (size_t f=0u; f<F; ++f, ++Yw, ++Y) { *Y = *Yw * *Yw; }
                 Y -= 2u;
                 for (size_t f=1u; f<F-1u; ++f, ++Yw, --Y) { *Y += *Yw * *Yw; }
-                Yw -= nfft; Y += F;
+                Yw -= nfft;
                 // for (size_t n=0u; n<nfft; ++n, ++Yw) { *Yw *= *Yw; }
                 // for (size_t f=0u; f<F-1u; ++f) { *++Y = *--Yw; }
                 // *Y-- = *Yw--;
                 // for (size_t f=1u; f<F-1u; ++f, --Yw, --Y) { *Y += *Yw; }
-                // *Y = *Yw; Y += F;
+                // *Y = *Yw;
+
+                //Amplitude and/or log
+                if (amp)
+                {
+                    if (lg) { for (size_t f=0u; f<F; ++f, ++Y) { *Y = log(sqrt(*Y)); } }
+                    else { for (size_t f=0u; f<F; ++f, ++Y) { *Y = sqrt(*Y); } }
+                }
+                else if (lg)
+                {
+                    for (size_t f=0u; f<F; ++f, ++Y) { *Y = log(*Y); }
+                }
+                else { Y += F; }
             }
             //clock_gettime(CLOCK_REALTIME,&toc); fprintf(stderr,"elapsed time = %.6f ms\n",(toc.tv_sec-tic.tv_sec)*1e3+(toc.tv_nsec-tic.tv_nsec)/1e6);
         }
@@ -238,7 +274,19 @@ int stft_d (double *Y, const double *X1, const double *X2, const size_t N, const
                 for (size_t f=0u; f<F; ++f, ++Yw, ++Y) { *Y = *Yw * *Yw; }
                 Y -= 2u;
                 for (size_t f=1u; f<F-1u; ++f, ++Yw, --Y) { *Y += *Yw * *Yw; }
-                Yw -= nfft; Y += F;
+                Yw -= nfft;
+
+                //Amplitude and/or log
+                if (amp)
+                {
+                    if (lg) { for (size_t f=0u; f<F; ++f, ++Y) { *Y = log(sqrt(*Y)); } }
+                    else { for (size_t f=0u; f<F; ++f, ++Y) { *Y = sqrt(*Y); } }
+                }
+                else if (lg)
+                {
+                    for (size_t f=0u; f<F; ++f, ++Y) { *Y = log(*Y); }
+                }
+                else { Y += F; }
             }
         }
     }

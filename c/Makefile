@@ -28,7 +28,7 @@ CFLAGS=$(WFLAG) $(STD) -O3 -march=native -fPIC
 
 
 All: all
-all: Dirs Generate Transform Filter Conv Interp ZCs_LCs AR_Poly AC_LP Frame Freqs STFT Wavelets Clean
+all: Dirs Generate Transform Filter Conv Interp ZCs_LCs AR_Poly AC_LP Frame STFT Wavelets Clean
 
 Dirs:
 	mkdir -pm 777 obj
@@ -163,19 +163,11 @@ apply_win: apply_win.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 window_univar: window_univar.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 
 
-#Freqs: gets center frequencies or STFT frequencies, and converts btwn frequency scales
-Freqs: convert_freqs get_cfs get_stft_freqs get_cfs_T #get_cns
-convert_freqs: convert_freqs.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
-get_cfs: get_cfs.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
-get_stft_freqs: get_stft_freqs.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
-get_cfs_T: get_cfs_T.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
-
-
 #STFT: steps to do the STFT (short-term Fourier transform)
 STFT: fft_power stft #get_stft_freqs
 fft_power: fft_power.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 stft: stft.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
-#get_stft_freqs: get_stft_freqs.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+get_stft_freqs: get_stft_freqs.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 
 
 #Wavelets: a couple of my most often-used wavelets

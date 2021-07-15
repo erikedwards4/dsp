@@ -36,7 +36,7 @@ int main(int argc, char *argv[])
     int8_t stdi1, stdi2, stdo1, wo1;
     ioinfo i1, i2, o1;
     size_t L, stp, W, nfft, F;
-    int snip_edges, mn0;
+    int snip_edges, mn0, amp, lg;
 
 
     //Description
@@ -74,6 +74,15 @@ int main(int argc, char *argv[])
     descr += "So, if Y is row-major, then it has size W x F; \n";
     descr += "but if Y is col-major, then it has size F x W. \n";
     descr += "\n";
+    descr += "Include -z (--zero-mean) to subtract the mean from each frame [default=false].\n";
+    descr += "This is applied just after windowing.\n";
+    descr += "\n";
+    descr += "Include -a (--amplitude) to output amplitude rather than power [default=false].\n";
+    descr += "This simply takes the sqrt of each element of Y before output.\n";
+    descr += "\n";
+    descr += "Include -l (--log) to output log amplitude or power [default=false].\n";
+    descr += "This simply takes the log of each element of Y before output.\n";
+    descr += "\n";
     descr += "Examples:\n";
     descr += "$ stft -s65 X1 X2 -o Y \n";
     descr += "$ stft -e X1 X2 > Y \n";
@@ -87,11 +96,13 @@ int main(int argc, char *argv[])
     struct arg_file  *a_fi = arg_filen(nullptr,nullptr,"<file>",I-1,I,"input files (X1,X2)");
     struct arg_int  *a_stp = arg_intn("s","step","<uint>",0,1,"step in samps between each frame [default=160]");
     struct arg_lit  *a_sne = arg_litn("e","snip-edges",0,1,"include to snip edges [default=false]");
-    struct arg_lit  *a_mnz = arg_litn("z","mean-zero",0,1,"include to zero the mean of each frame [default=false]");
+    struct arg_lit  *a_mnz = arg_litn("z","zero-mean",0,1,"include to zero the mean of each frame [default=false]");
+    struct arg_lit  *a_amp = arg_litn("a","amplitude",0,1,"include to output amplitude (sqrt of power) [default=false]");
+    struct arg_lit  *a_log = arg_litn("l","log",0,1,"include to output log of amplitude or power [default=false]");
     struct arg_file  *a_fo = arg_filen("o","ofile","<file>",0,O,"output file (Y)");
     struct arg_lit *a_help = arg_litn("h","help",0,1,"display this help and exit");
     struct arg_end  *a_end = arg_end(5);
-    void *argtable[] = {a_fi, a_stp, a_sne, a_mnz, a_fo, a_help, a_end};
+    void *argtable[] = {a_fi, a_stp, a_sne, a_mnz, a_amp, a_log, a_fo, a_help, a_end};
     if (arg_nullcheck(argtable)!=0) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating argtable" << endl; return 1; }
     nerrs = arg_parse(argc, argv, argtable);
     if (a_help->count>0)
@@ -147,6 +158,12 @@ int main(int argc, char *argv[])
     //Get mn0
     mn0 = (a_mnz->count>0);
 
+    //Get amp
+    amp = (a_amp->count>0);
+
+    //Get lg
+    lg = (a_log->count>0);
+
 
     //Checks
     if (i1.iscomplex()) { cerr << progstr+": " << __LINE__ << errstr << "input 1 (X1) must be real-valued" << endl; return 1; }
@@ -199,7 +216,7 @@ int main(int argc, char *argv[])
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file (X)" << endl; return 1; }
         try { ifs2.read(reinterpret_cast<char*>(X2),i2.nbytes()); }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 2 (X2)" << endl; return 1; }
-        if (codee::stft_s(Y,X1,X2,i1.N(),L,nfft,stp,snip_edges,mn0))
+        if (codee::stft_s(Y,X1,X2,i1.N(),L,nfft,stp,snip_edges,mn0,amp,lg))
         { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
         if (wo1)
         {
@@ -221,7 +238,7 @@ int main(int argc, char *argv[])
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file (X)" << endl; return 1; }
         try { ifs2.read(reinterpret_cast<char*>(X2),i2.nbytes()); }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 2 (X2)" << endl; return 1; }
-        if (codee::stft_d(Y,X1,X2,i1.N(),L,nfft,stp,snip_edges,mn0))
+        if (codee::stft_d(Y,X1,X2,i1.N(),L,nfft,stp,snip_edges,mn0,amp,lg))
         { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
         if (wo1)
         {
