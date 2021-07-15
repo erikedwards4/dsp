@@ -12,6 +12,11 @@
 //For framing conventions, see window_univar.c.
 //For more flexibility, see also window_univar_float.c.
 
+//The following boolean (int) options are added:
+//mn0: subtract mean from each frame just after windowing.
+//amp: take sqrt of each element of Y just after getting power.
+//lg:  take log of each element of Y just before output.
+
 #include <stdio.h>
 #include <math.h>
 #include <fftw3.h>

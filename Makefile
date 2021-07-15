@@ -27,7 +27,7 @@ CFLAGS=$(WFLAG) $(STD) -O2 -ffast-math -march=native $(INCLS)
 
 
 All: all
-all: Dirs Generate Wins Transform Conv Filter Interp ZCs_LCs AR_Poly AC_LP Freqs Frame STFT Clean
+all: Dirs Generate Wins Transform Filter Conv Interp ZCs_LCs AR_Poly AC_LP Frame STFT Clean
 	rm -f 7 obj/*.o
 
 Dirs:
@@ -241,15 +241,6 @@ apply_win: srci/apply_win.cpp c/apply_win.c
 	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2
 window_univar: srci/window_univar.cpp c/window_univar.c
 	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2
-
-#Freqs: gets center frequencies or STFT frequencies, and converts btwn frequency scales
-Freqs: #convert_freqs get_cfs get_stft_freqs get_cfs_T #get_cns
-convert_freqs: srci/convert_freqs.cpp c/convert_freqs.c
-	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lopenblas -lm
-get_cfs: srci/get_cfs.cpp c/get_cfs.c c/convert_freqs.c
-	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lopenblas -lm
-get_cfs_T: srci/get_cfs_T.cpp c/get_cfs_T.c c/convert_freqs.c
-	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lopenblas -lm
 
 
 #STFT: steps to do the STFT (short-term Fourier transform)
