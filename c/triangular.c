@@ -19,9 +19,9 @@ int triangular_s (float *Y, const size_t L, const size_t norm)
 {
     if (norm>3u) { fprintf(stderr,"error in triangular_s: norm must be in {0,1,2,3}\n"); return 1; }
 
-    const float p = 1.0f/(L-(L%2u)*(L/2u));
+    const float p = 1.0f/(float)(L-(L%2u)*(L/2u));
 
-    for (size_t l=0u; l<L/2u; ++l, ++Y) { *Y = (l*(2u-L%2u)+1u)*p; }
+    for (size_t l=0u; l<L/2u; ++l, ++Y) { *Y = (float)(l*(2u-L%2u)+1u)*p; }
     if (L%2u) { *Y++ = 1.0f; }
     for (size_t l=0u; l<L/2u; ++l, ++Y) { *Y = *(Y-(2u*l+1u+L%2u)); }
     
@@ -42,9 +42,9 @@ int triangular_d (double *Y, const size_t L, const size_t norm)
 {
     if (norm>3u) { fprintf(stderr,"error in triangular_d: norm must be in {0,1,2,3}\n"); return 1; }
 
-    const double p = 1.0/(L-(L%2u)*(L/2u));
+    const double p = 1.0/(double)(L-(L%2u)*(L/2u));
     
-    for (size_t l=0u; l<L/2u; ++l, ++Y) { *Y = (l*(2u-L%2u)+1u)*p; }
+    for (size_t l=0u; l<L/2u; ++l, ++Y) { *Y = (double)(l*(2u-L%2u)+1u)*p; }
     if (L%2u) { *Y++ = 1.0; }
     for (size_t l=0u; l<L/2u; ++l, ++Y) { *Y = *(Y-(2u*l+1u+L%2u)); }
     
@@ -65,9 +65,9 @@ int triangular_c (float *Y, const size_t L, const size_t norm)
 {
     if (norm>3u) { fprintf(stderr,"error in triangular_c: norm must be in {0,1,2,3}\n"); return 1; }
 
-    const float p = 1.0f/(L-(L%2u)*(L/2u));
+    const float p = 1.0f/(float)(L-(L%2u)*(L/2u));
 
-    for (size_t l=0u; l<L/2u; ++l, ++Y) { *Y = (l*(2u-L%2u)+1u)*p; *++Y = 0.0f; }
+    for (size_t l=0u; l<L/2u; ++l, ++Y) { *Y = (float)(l*(2u-L%2u)+1u)*p; *++Y = 0.0f; }
     if (L%2u) { *Y++ = 1.0f; *Y++ = 0.0f; }
     for (size_t l=0u; l<L/2u; ++l, ++Y) { *Y = *(Y-(4u*l+2u+2u*(L%2u))); *++Y = 0.0f; }
     
@@ -88,9 +88,9 @@ int triangular_z (double *Y, const size_t L, const size_t norm)
 {
     if (norm>3u) { fprintf(stderr,"error in triangular_z: norm must be in {0,1,2,3}\n"); return 1; }
 
-    const double p = 1.0/(L-(L%2u)*(L/2u));
+    const double p = 1.0/(double)(L-(L%2u)*(L/2u));
     
-    for (size_t l=0u; l<L/2u; ++l, ++Y) { *Y = (l*(2u-L%2u)+1u)*p; *++Y = 0.0; }
+    for (size_t l=0u; l<L/2u; ++l, ++Y) { *Y = (double)(l*(2u-L%2u)+1u)*p; *++Y = 0.0; }
     if (L%2u) { *Y++ = 1.0; *Y++ = 0.0; }
     for (size_t l=0u; l<L/2u; ++l, ++Y) { *Y = *(Y-(4u*l+2u+2u*(L%2u))); *++Y = 0.0; }
     

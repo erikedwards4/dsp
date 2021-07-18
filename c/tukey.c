@@ -28,9 +28,10 @@ int tukey_s (float *Y, const size_t L, const float r, const size_t norm)
     else if (L==2u) { *Y++ = 1.0f; *Y++ = 1.0f; }
     else
     {
-        const float p = (float)(2.0*M_PI/((L-1u)*(double)r));
-        for (size_t l=0u; l<0.5f*r*L; ++l, ++Y) { *Y = 0.5f - 0.5f*cosf(l*p); }
-        for (size_t l=(size_t)ceilf(0.5f*r*L); l<L/2u+L%2u; ++l, ++Y) { *Y = 1.0f; }
+        const float p = (float)(2.0*M_PI/((double)(L-1u)*(double)r));
+        const size_t Lr = (size_t)ceilf(0.5f*r*(float)L);
+        for (size_t l=0u; l<Lr; ++l, ++Y) { *Y = 0.5f - 0.5f*cosf((float)l*p); }
+        for (size_t l=Lr; l<L/2u+L%2u; ++l, ++Y) { *Y = 1.0f; }
         for (size_t l=0u; l<L/2u; ++l, ++Y) { *Y = *(Y-(2u*l+1u+L%2u)); }
     }
 
@@ -57,9 +58,10 @@ int tukey_d (double *Y, const size_t L, const double r, const size_t norm)
     else if (L==2u) { *Y++ = 1.0; *Y++ = 1.0; }
     else
     {
-        const double p = 2.0*M_PI/((L-1u)*r);
-        for (size_t l=0u; l<0.5*r*L; ++l, ++Y) { *Y = 0.5 - 0.5*cos(l*p); }
-        for (size_t l=(size_t)ceil(0.5*r*L); l<L/2u+L%2u; ++l, ++Y) { *Y = 1.0; }
+        const double p = 2.0*M_PI/((double)(L-1u)*r);
+        const size_t Lr = (size_t)ceil(0.5*r*(double)L);
+        for (size_t l=0u; l<Lr; ++l, ++Y) { *Y = 0.5 - 0.5*cos((double)l*p); }
+        for (size_t l=Lr; l<L/2u+L%2u; ++l, ++Y) { *Y = 1.0; }
         for (size_t l=0u; l<L/2u; ++l, ++Y) { *Y = *(Y-(2u*l+1u+L%2u)); }
     }
 
@@ -86,9 +88,10 @@ int tukey_c (float *Y, const size_t L, const float r, const size_t norm)
     else if (L==2u) { *Y++ = 1.0; *Y++ = 0.0; *Y++ = 1.0; *Y++ = 0.0; }
     else
     {
-        const float p = (float)(2.0*M_PI/((L-1u)*(double)r));
-        for (size_t l=0u; l<0.5f*r*L; ++l, ++Y) { *Y = 0.5f - 0.5f*cosf(l*p); *++Y = 0.0f; }
-        for (size_t l=(size_t)ceilf(0.5f*r*L); l<L/2u+L%2u; ++l, ++Y) { *Y = 1.0f; *++Y = 0.0f; }
+        const float p = (float)(2.0*M_PI/((double)(L-1u)*(double)r));
+        const size_t Lr = (size_t)ceilf(0.5f*r*(float)L);
+        for (size_t l=0u; l<Lr; ++l, ++Y) { *Y = 0.5f - 0.5f*cosf((float)l*p); *++Y = 0.0f; }
+        for (size_t l=Lr; l<L/2u+L%2u; ++l, ++Y) { *Y = 1.0f; *++Y = 0.0f; }
         for (size_t l=0u; l<L/2u; ++l, ++Y) { *Y = *(Y-(4u*l+2u+2u*(L%2u))); *++Y = 0.0f; }
     }
 
@@ -115,9 +118,10 @@ int tukey_z (double *Y, const size_t L, const double r, const size_t norm)
     else if (L==2u) { *Y++ = 1.0; *Y++ = 0.0; *Y++ = 1.0; *Y++ = 0.0; }
     else
     {
-        const double p = 2.0*M_PI/((L-1u)*r);
-        for (size_t l=0u; l<0.5*r*L; ++l, ++Y) { *Y = 0.5 - 0.5*cos(l*p); *++Y = 0.0; }
-        for (size_t l=(size_t)ceil(0.5*r*L); l<L/2u+L%2u; ++l, ++Y) { *Y = 1.0; *++Y = 0.0; }
+        const double p = 2.0*M_PI/((double)(L-1u)*r);
+        const size_t Lr = (size_t)ceil(0.5*r*(double)L);
+        for (size_t l=0u; l<Lr; ++l, ++Y) { *Y = 0.5 - 0.5*cos((double)l*p); *++Y = 0.0; }
+        for (size_t l=Lr; l<L/2u+L%2u; ++l, ++Y) { *Y = 1.0; *++Y = 0.0; }
         for (size_t l=0u; l<L/2u; ++l, ++Y) { *Y = *(Y-(4u*l+2u+2u*(L%2u))); *++Y = 0.0; }
     }
 

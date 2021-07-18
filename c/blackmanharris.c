@@ -23,9 +23,9 @@ int blackmanharris_s (float *Y, const size_t L, const size_t norm)
 {
     if (norm>3u) { fprintf(stderr,"error in blackmanharris_s: norm must be in {0,1,2,3}\n"); return 1; }
 
-    const float p = (float)(2.0*M_PI/(L-1u));
+    const float p = (float)(2.0*M_PI/(double)(L-1u));
 
-    for (size_t l=0u; l<L/2u; ++l, ++Y) { *Y = 0.35875f - 0.48829f*cosf(l*p) + 0.14128f*cosf(2u*l*p) - 0.01168f*cosf(3*l*p); }
+    for (size_t l=0u; l<L/2u; ++l, ++Y) { *Y = 0.35875f - 0.48829f*cosf((float)l*p) + 0.14128f*cosf((float)(2u*l)*p) - 0.01168f*cosf((float)(3u*l)*p); }
     if (L%2u) { *Y++ = 1.0f; }
     for (size_t l=0u; l<L/2u; ++l, ++Y) { *Y = *(Y-(2u*l+1u+L%2u)); }
 
@@ -46,9 +46,9 @@ int blackmanharris_d (double *Y, const size_t L, const size_t norm)
 {
     if (norm>3u) { fprintf(stderr,"error in blackmanharris_d: norm must be in {0,1,2,3}\n"); return 1; }
 
-    const double p = 2.0*M_PI/(L-1.0);
+    const double p = 2.0*M_PI/(double)(L-1u);
     
-    for (size_t l=0u; l<L/2u; ++l, ++Y) { *Y = 0.35875 - 0.48829*cos(l*p) + 0.14128*cos(2u*l*p) - 0.01168*cos(3*l*p); }
+    for (size_t l=0u; l<L/2u; ++l, ++Y) { *Y = 0.35875 - 0.48829*cos((double)l*p) + 0.14128*cos((double)(2u*l)*p) - 0.01168*cos((double)(3u*l)*p); }
     if (L%2u) { *Y++ = 1.0; }
     for (size_t l=0u; l<L/2u; ++l, ++Y) { *Y = *(Y-(2u*l+1u+L%2u)); }
 
@@ -69,9 +69,9 @@ int blackmanharris_c (float *Y, const size_t L, const size_t norm)
 {
     if (norm>3u) { fprintf(stderr,"error in blackmanharris_c: norm must be in {0,1,2,3}\n"); return 1; }
 
-    const float p = (float)(2.0*M_PI/(L-1u));
+    const float p = (float)(2.0*M_PI/(double)(L-1u));
     
-    for (size_t l=0u; l<L/2u; ++l, ++Y) { *Y = 0.35875f - 0.48829f*cosf(l*p) + 0.14128f*cosf(2u*l*p) - 0.01168f*cosf(3*l*p); *++Y = 0.0f; }
+    for (size_t l=0u; l<L/2u; ++l, ++Y) { *Y = 0.35875f - 0.48829f*cosf((float)l*p) + 0.14128f*cosf((float)(2u*l)*p) - 0.01168f*cosf((float)(3u*l)*p); *++Y = 0.0f; }
     if (L%2u) { *Y++ = 1.0f; *Y++ = 0.0f; }
     for (size_t l=0u; l<L/2u; ++l, ++Y) { *Y = *(Y-(4u*l+2u+2u*(L%2u))); *++Y = 0.0f; }
 
@@ -92,9 +92,9 @@ int blackmanharris_z (double *Y, const size_t L, const size_t norm)
 {
     if (norm>3u) { fprintf(stderr,"error in blackmanharris_z: norm must be in {0,1,2,3}\n"); return 1; }
 
-    const double p = 2.0*M_PI/(L-1.0);
+    const double p = 2.0*M_PI/(double)(L-1u);
     
-    for (size_t l=0u; l<L/2u; ++l, ++Y) { *Y = 0.35875 - 0.48829*cos(l*p) + 0.14128*cos(2u*l*p) - 0.01168*cos(3*l*p); *++Y = 0.0; }
+    for (size_t l=0u; l<L/2u; ++l, ++Y) { *Y = 0.35875 - 0.48829*cos((double)l*p) + 0.14128*cos((double)(2u*l)*p) - 0.01168*cos((double)(3u*l)*p); *++Y = 0.0; }
     if (L%2u) { *Y++ = 1.0; *Y++ = 0.0; }
     for (size_t l=0u; l<L/2u; ++l, ++Y) { *Y = *(Y-(4u*l+2u+2u*(L%2u))); *++Y = 0.0; }
 

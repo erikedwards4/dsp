@@ -515,7 +515,7 @@ int ifft_rad2_c (float *Y, const float *X, const size_t R, const size_t C, const
     if (nfft==0u || N==0u) {}
     else if (nfft==1u)
     {
-        for (size_t n=0; n<2u*N; ++n, ++X, ++Y) { *Y = *X * s; }
+        for (size_t n=0u; n<2u*N; ++n, ++X, ++Y) { *Y = *X * s; }
     }
     else
     {
@@ -587,7 +587,7 @@ int ifft_rad2_z (double *Y, const double *X, const size_t R, const size_t C, con
     if (nfft==0u || N==0u) {}
     else if (nfft==1u)
     {
-        for (size_t n=0; n<2u*N; ++n, ++X, ++Y) { *Y = *X * s; }
+        for (size_t n=0u; n<2u*N; ++n, ++X, ++Y) { *Y = *X * s; }
     }
     else
     {

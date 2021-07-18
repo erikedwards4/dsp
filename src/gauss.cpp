@@ -11,7 +11,7 @@
 #include <valarray>
 #include <unordered_map>
 #include <argtable2.h>
-#include "../util/cmli.hpp"
+#include "cmli.hpp"
 #include "gauss.c"
 
 #ifdef I
@@ -52,6 +52,7 @@ int main(int argc, char *argv[])
     descr += "Use -d (--dim) to give the nonsingleton dim of the output vec.\n";
     descr += "If d=0, then Y is a column vector [default].\n";
     descr += "If d=1, then Y is a row vector.\n";
+    descr += "(d=2 and d=3 are also possible, but rarely used.)\n";
     descr += "\n";
     descr += "Use -n (--norm) to normalize (divide) the output by a norm:\n";
     descr += "Use -n0 to do no normalization [default].\n";
@@ -59,9 +60,8 @@ int main(int argc, char *argv[])
     descr += "Use -n2 to normalize by the L2-norm (root-sum-of-squares).\n";
     descr += "Use -n3 to normalize by the Inf-norm (maximum).\n";
     descr += "\n";
-    descr += "Since this is a generating function (no inputs),\n";
-    descr += "the output data type and file format can be specified by\n";
-    descr += "-t and -f, respectively (these are the usual CMLI opts).\n";
+    descr += "Since this is a generating function (no inputs), the output data type\n";
+    descr += "and file format can be specified by -t and -f, respectively. \n";
     descr += "\n";
     descr += "Examples:\n";
     descr += "$ gauss -l255 -o Y \n";

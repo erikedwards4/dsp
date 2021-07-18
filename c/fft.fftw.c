@@ -34,7 +34,7 @@ int fft_fftw_z (double *Y, const double *X, const size_t R, const size_t C, cons
 int fft_fftw_s (float *Y, const float *X, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim, const size_t nfft, const char sc)
 {
     if (dim>3u) { fprintf(stderr,"error in fft_fftw_s: dim must be in [0 3]\n"); return 1; }
-    struct timespec tic, toc; clock_gettime(CLOCK_REALTIME,&tic);
+    //struct timespec tic, toc; clock_gettime(CLOCK_REALTIME,&tic);
     
     const size_t N = R*C*S*H;
     const size_t Lx = (dim==0u) ? R : (dim==1u) ? C : (dim==2u) ? S : H;
@@ -108,7 +108,7 @@ int fft_fftw_s (float *Y, const float *X, const size_t R, const size_t C, const 
         for (size_t l=0u; l<2u*Ly*N/Lx; ++l, ++Y) { *Y *= s; }
     }
 
-    clock_gettime(CLOCK_REALTIME,&toc); fprintf(stderr,"elapsed time = %.6f ms\n",(toc.tv_sec-tic.tv_sec)*1e3+(toc.tv_nsec-tic.tv_nsec)/1e6);
+    //clock_gettime(CLOCK_REALTIME,&toc); fprintf(stderr,"elapsed time = %.6f ms\n",(toc.tv_sec-tic.tv_sec)*1e3+(toc.tv_nsec-tic.tv_nsec)/1e6);
     return 0;
 }
 

@@ -22,9 +22,9 @@ int hamming_s (float *Y, const size_t L, const size_t norm)
 {
     if (norm>3u) { fprintf(stderr,"error in hamming_s: norm must be in {0,1,2,3}\n"); return 1; }
 
-    const float p = (float)(2.0*M_PI/(L-1u));
+    const float p = (float)(2.0*M_PI/(double)(L-1u));
     
-    for (size_t l=0u; l<L/2u; ++l, ++Y) { *Y = 0.54f - 0.46f*cosf(l*p); }
+    for (size_t l=0u; l<L/2u; ++l, ++Y) { *Y = 0.54f - 0.46f*cosf((float)l*p); }
     if (L%2u) { *Y++ = 1.0f; }
     for (size_t l=0u; l<L/2u; ++l, ++Y) { *Y = *(Y-(2u*l+1u+L%2u)); }
 
@@ -45,9 +45,9 @@ int hamming_d (double *Y, const size_t L, const size_t norm)
 {
     if (norm>3u) { fprintf(stderr,"error in hamming_d: norm must be in {0,1,2,3}\n"); return 1; }
 
-    const double p = 2.0*M_PI/(L-1.0);
+    const double p = 2.0*M_PI/(double)(L-1u);
     
-    for (size_t l=0u; l<L/2u; ++l, ++Y) { *Y = 0.54 - 0.46*cos(l*p); }
+    for (size_t l=0u; l<L/2u; ++l, ++Y) { *Y = 0.54 - 0.46*cos((double)l*p); }
     if (L%2u) { *Y++ = 1.0; }
     for (size_t l=0u; l<L/2u; ++l, ++Y) { *Y = *(Y-(2u*l+1u+L%2u)); }
 
@@ -68,9 +68,9 @@ int hamming_c (float *Y, const size_t L, const size_t norm)
 {
     if (norm>3u) { fprintf(stderr,"error in hamming_c: norm must be in {0,1,2,3}\n"); return 1; }
 
-    const float p = (float)(2.0*M_PI/(L-1u));
+    const float p = (float)(2.0*M_PI/(double)(L-1u));
     
-    for (size_t l=0u; l<L/2u; ++l, ++Y) { *Y = 0.54f - 0.46f*cosf(l*p); *++Y = 0.0f; }
+    for (size_t l=0u; l<L/2u; ++l, ++Y) { *Y = 0.54f - 0.46f*cosf((float)l*p); *++Y = 0.0f; }
     if (L%2u) { *Y++ = 1.0f; *Y++ = 0.0f; }
     for (size_t l=0u; l<L/2u; ++l, ++Y) { *Y = *(Y-(4u*l+2u+2u*(L%2u))); *++Y = 0.0f; }
 
@@ -91,9 +91,9 @@ int hamming_z (double *Y, const size_t L, const size_t norm)
 {
     if (norm>3u) { fprintf(stderr,"error in hamming_z: norm must be in {0,1,2,3}\n"); return 1; }
 
-    const double p = 2.0*M_PI/(L-1.0);
+    const double p = 2.0*M_PI/(double)(L-1u);
     
-    for (size_t l=0u; l<L/2u; ++l, ++Y) { *Y = 0.54 - 0.46*cos(l*p); *++Y = 0.0; }
+    for (size_t l=0u; l<L/2u; ++l, ++Y) { *Y = 0.54 - 0.46*cos((double)l*p); *++Y = 0.0; }
     if (L%2u) { *Y++ = 1.0; *Y++ = 0.0; }
     for (size_t l=0u; l<L/2u; ++l, ++Y) { *Y = *(Y-(4u*l+2u+2u*(L%2u))); *++Y = 0.0; }
 

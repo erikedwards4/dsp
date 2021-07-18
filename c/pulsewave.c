@@ -17,16 +17,8 @@
     #define M_PI 3.14159265358979323846
 #endif
 
-#ifndef M_PIf
-    #define M_PIf 3.14159265358979323846f
-#endif
-
 #ifndef M_PI_2
     #define M_PI_2 1.57079632679489661923
-#endif
-
-#ifndef M_PI_2f
-    #define M_PI_2f 1.57079632679489661923f
 #endif
 
 #ifdef __cplusplus
@@ -58,10 +50,10 @@ int pulsewave_s (float *Y, const size_t N, const float amp, const float frq, con
     {
         const float M_2PI = (float)(2.0*M_PI);
         const float f2pi = frq * M_2PI;
-        const float dtypi = dty * M_PIf;
+        const float dtypi = dty * (float)(M_PI);
         float arg;
 
-        for (size_t n=0; n<N; ++n, ++Y)
+        for (size_t n=0u; n<N; ++n, ++Y)
         {
             arg = fmodf(fmaf((float)n,f2pi,phs),M_2PI);
             if (arg>dtypi && arg<M_2PI-dtypi) { *Y = 0.0f; }
@@ -91,10 +83,10 @@ int pulsewave_d (double *Y, const size_t N, const double amp, const double frq, 
     {
         const double M_2PI = 2.0 * M_PI;
         const double f2pi = frq * M_2PI;
-        const double dtypi = dty * M_PIf;
-        float arg;
+        const double dtypi = dty * M_PI;
+        double arg;
 
-        for (size_t n=0; n<N; ++n, ++Y)
+        for (size_t n=0u; n<N; ++n, ++Y)
         {
             arg = fmod(fma((double)n,f2pi,phs),M_2PI);
             if (arg>dtypi && arg<M_2PI-dtypi) { *Y = 0.0; }
@@ -125,15 +117,15 @@ int pulsewave_c (float *Y, const size_t N, const float amp, const float frq, con
     {
         const float M_2PI = (float)(2.0*M_PI);
         const float f2pi = frq * M_2PI;
-        const float dtypi = dty * M_PIf;
+        const float dtypi = dty * (float)(M_PI);
         float arg;
 
-        for (size_t n=0; n<N; ++n, ++Y)
+        for (size_t n=0u; n<N; ++n, ++Y)
         {
             arg = fmodf(fmaf((float)n,f2pi,phs),M_2PI);
             if (arg>dtypi && arg<M_2PI-dtypi) { *Y++ = 0.0f; }
             else { *Y++ = amp; }
-            arg = fmodf(M_PI_2f-arg,M_2PI);
+            arg = fmodf((float)(M_PI_2)-arg,M_2PI);
             if (arg>dtypi && arg<M_2PI-dtypi) { *Y++ = 0.0f; }
             else { *Y++ = amp; }
         }
@@ -162,10 +154,10 @@ int pulsewave_z (double *Y, const size_t N, const double amp, const double frq, 
     {
         const double M_2PI = 2.0 * M_PI;
         const double f2pi = frq * M_2PI;
-        const double dtypi = dty * M_PIf;
-        float arg;
+        const double dtypi = dty * M_PI;
+        double arg;
 
-        for (size_t n=0; n<N; ++n)
+        for (size_t n=0u; n<N; ++n)
         {
             arg = fmod(fma((double)n,f2pi,phs),M_2PI);
             if (arg>dtypi && arg<M_2PI-dtypi) { *Y++ = 0.0; }

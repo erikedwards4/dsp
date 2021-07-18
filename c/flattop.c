@@ -24,9 +24,9 @@ int flattop_s (float *Y, const size_t L, const size_t norm)
 {
     if (norm>3u) { fprintf(stderr,"error in flattop_s: norm must be in {0,1,2,3}\n"); return 1; }
 
-    const float p = (float)(2.0*M_PI/(L-1u));
+    const float p = (float)(2.0*M_PI/(double)(L-1u));
     
-    for (size_t l=0u; l<L/2u; ++l, ++Y) { *Y = 0.21557895f - 0.41663158f*cosf(l*p) + 0.277263158f*cosf(2u*l*p) - 0.083578947f*cosf(3*l*p) + 0.006947368f*cosf(4u*l*p); }
+    for (size_t l=0u; l<L/2u; ++l, ++Y) { *Y = 0.21557895f - 0.41663158f*cosf((float)l*p) + 0.277263158f*cosf((float)(2u*l)*p) - 0.083578947f*cosf((float)(3u*l)*p) + 0.006947368f*cosf((float)(4u*l)*p); }
     if (L%2u) { *Y++ = 1.0f; }
     for (size_t l=0u; l<L/2u; ++l, ++Y) { *Y = *(Y-(2u*l+1u+L%2u)); }
 
@@ -47,9 +47,9 @@ int flattop_d (double *Y, const size_t L, const size_t norm)
 {
     if (norm>3u) { fprintf(stderr,"error in flattop_d: norm must be in {0,1,2,3}\n"); return 1; }
 
-    const double p = 2.0*M_PI/(L-1.0);
+    const double p = 2.0*M_PI/(double)(L-1u);
     
-    for (size_t l=0u; l<L/2u; ++l, ++Y) { *Y = 0.21557895 - 0.41663158*cos(l*p) + 0.277263158*cos(2u*l*p) - 0.083578947*cos(3*l*p) + 0.006947368*cos(4u*l*p); }
+    for (size_t l=0u; l<L/2u; ++l, ++Y) { *Y = 0.21557895 - 0.41663158*cos((double)l*p) + 0.277263158*cos((double)(2u*l)*p) - 0.083578947*cos((double)(3u*l)*p) + 0.006947368*cos((double)(4u*l)*p); }
     if (L%2u) { *Y++ = 1.0; }
     for (size_t l=0u; l<L/2u; ++l, ++Y) { *Y = *(Y-(2u*l+1u+L%2u)); }
 
@@ -70,9 +70,9 @@ int flattop_c (float *Y, const size_t L, const size_t norm)
 {
     if (norm>3u) { fprintf(stderr,"error in flattop_c: norm must be in {0,1,2,3}\n"); return 1; }
 
-    const float p = (float)(2.0*M_PI/(L-1u));
+    const float p = (float)(2.0*M_PI/(double)(L-1u));
     
-    for (size_t l=0u; l<L/2u; ++l, ++Y) { *Y = 0.21557895f - 0.41663158f*cosf(l*p) + 0.277263158f*cosf(2u*l*p) - 0.083578947f*cosf(3*l*p) + 0.006947368f*cosf(4u*l*p); *++Y = 0.0f; }
+    for (size_t l=0u; l<L/2u; ++l, ++Y) { *Y = 0.21557895f - 0.41663158f*cosf((float)l*p) + 0.277263158f*cosf((float)(2u*l)*p) - 0.083578947f*cosf((float)(3u*l)*p) + 0.006947368f*cosf((float)(4u*l)*p); *++Y = 0.0f; }
     if (L%2u) { *Y++ = 1.0f; *Y++ = 0.0f; }
     for (size_t l=0u; l<L/2u; ++l, ++Y) { *Y = *(Y-(4u*l+2u+2u*(L%2u))); *++Y = 0.0f; }
 
@@ -93,9 +93,9 @@ int flattop_z (double *Y, const size_t L, const size_t norm)
 {
     if (norm>3u) { fprintf(stderr,"error in flattop_z: norm must be in {0,1,2,3}\n"); return 1; }
 
-    const double p = 2.0*M_PI/(L-1.0);
+    const double p = 2.0*M_PI/(double)(L-1u);
     
-    for (size_t l=0u; l<L/2u; ++l, ++Y) { *Y = 0.21557895 - 0.41663158*cos(l*p) + 0.277263158*cos(2u*l*p) - 0.083578947*cos(3*l*p) + 0.006947368*cos(4u*l*p); *++Y = 0.0; }
+    for (size_t l=0u; l<L/2u; ++l, ++Y) { *Y = 0.21557895 - 0.41663158*cos((double)l*p) + 0.277263158*cos((double)(2u*l)*p) - 0.083578947*cos((double)(3u*l)*p) + 0.006947368*cos((double)(4u*l)*p); *++Y = 0.0; }
     if (L%2u) { *Y++ = 1.0; *Y++ = 0.0; }
     for (size_t l=0u; l<L/2u; ++l, ++Y) { *Y = *(Y-(4u*l+2u+2u*(L%2u))); *++Y = 0.0; }
 

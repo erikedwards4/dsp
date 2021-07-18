@@ -24,12 +24,12 @@ int rectangular_s (float *Y, const size_t L, const size_t norm)
     }
     else if (norm==1u)
     {
-        const float y = 1.0f/L;
+        const float y = 1.0f/(float)L;
         for (size_t l=0u; l<L; ++l, ++Y) { *Y = y; }
     }
     else if (norm==2u)
     {
-        const float y = 1.0f/sqrtf(L);
+        const float y = 1.0f/sqrtf((float)L);
         for (size_t l=0u; l<L; ++l, ++Y) { *Y = y; }
     }
 
@@ -47,12 +47,12 @@ int rectangular_d (double *Y, const size_t L, const size_t norm)
     }
     else if (norm==1u)
     {
-        const double y = 1.0/L;
+        const double y = 1.0/(double)L;
         for (size_t l=0u; l<L; ++l, ++Y) { *Y = y; }
     }
     else if (norm==2u)
     {
-        const double y = 1.0/sqrt(L);
+        const double y = 1.0/sqrt((double)L);
         for (size_t l=0u; l<L; ++l, ++Y) { *Y = y; }
     }
 
@@ -70,12 +70,12 @@ int rectangular_c (float *Y, const size_t L, const size_t norm)
     }
     else if (norm==1u)
     {
-        const float y = 1.0f/L;
+        const float y = 1.0f/(float)L;
         for (size_t l=0u; l<L; ++l, ++Y) { *Y = y; *++Y = 0.0f; }
     }
     else if (norm==2u)
     {
-        const float y = 1.0f/sqrtf(L);
+        const float y = 1.0f/sqrtf((float)L);
         for (size_t l=0u; l<L; ++l, ++Y) { *Y = y; *++Y = 0.0f; }
     }
 
@@ -93,12 +93,12 @@ int rectangular_z (double *Y, const size_t L, const size_t norm)
     }
     else if (norm==1u)
     {
-        const double y = 1.0/L;
+        const double y = 1.0/(double)L;
         for (size_t l=0u; l<L; ++l, ++Y) { *Y = y; *++Y = 0.0; }
     }
     else if (norm==2u)
     {
-        const double y = 1.0/sqrt(L);
+        const double y = 1.0/sqrt((double)L);
         for (size_t l=0u; l<L; ++l, ++Y) { *Y = y; *++Y = 0.0; }
     }
     

@@ -24,10 +24,11 @@ int planck_s (float *Y, const size_t L, const float epsilon, const size_t norm)
     else if (L==2u) { *Y++ = 1.0f; *Y++ = 1.0f; }
     else
     {
-        const float p = epsilon*L;
+        const float p = epsilon*(float)L;
+        const size_t Lp = (size_t)ceilf(p);
         *Y++ = 0.0f;
-        for (size_t l=1u; l<p && l<L/2u; ++l, ++Y) { *Y = 1.0f/(1.0f+expf(p/l-p/(p-l))); }
-        for (size_t l=(size_t)ceilf(p); l<L/2u+L%2u; ++l, ++Y) { *Y = 1.0f; }
+        for (size_t l=1u; l<Lp && l<L/2u; ++l, ++Y) { *Y = 1.0f/(1.0f+expf(p/(float)l-p/(p-(float)l))); }
+        for (size_t l=Lp; l<L/2u+L%2u; ++l, ++Y) { *Y = 1.0f; }
         for (size_t l=0u; l<L/2u; ++l, ++Y) { *Y = *(Y-(2u*l+1u+L%2u)); }
     }
 
@@ -54,10 +55,11 @@ int planck_d (double *Y, const size_t L, const double epsilon, const size_t norm
     else if (L==2u) { *Y++ = 1.0; *Y++ = 1.0; }
     else
     {
-        const double p = epsilon*L;
+        const double p = epsilon*(double)L;
+        const size_t Lp = (size_t)ceil(p);
         *Y++ = 0.0;
-        for (size_t l=1u; l<p && l<L/2u; ++l, ++Y) { *Y = 1.0/(1.0+exp(p/l-p/(p-l))); }
-        for (size_t l=(size_t)ceil(p); l<L/2u+L%2u; ++l, ++Y) { *Y = 1.0; }
+        for (size_t l=1u; l<Lp && l<L/2u; ++l, ++Y) { *Y = 1.0/(1.0+exp(p/(double)l-p/(p-(double)l))); }
+        for (size_t l=Lp; l<L/2u+L%2u; ++l, ++Y) { *Y = 1.0; }
         for (size_t l=0u; l<L/2u; ++l, ++Y) { *Y = *(Y-(2u*l+1u+L%2u)); }
     }
 
@@ -84,10 +86,11 @@ int planck_c (float *Y, const size_t L, const float epsilon, const size_t norm)
     else if (L==2u) { *Y++ = 1.0f; *Y++ = 0.0f; *Y++ = 1.0f; *Y++ = 0.0f; }
     else
     {
-        const float p = epsilon*L;
+        const float p = epsilon*(float)L;
+        const size_t Lp = (size_t)ceilf(p);
         *Y++ = 0.0f; *Y++ = 0.0f;
-        for (size_t l=1u; l<p && l<L/2u; ++l, ++Y) { *Y = 1.0f/(1.0f+expf(p/l-p/(p-l))); *++Y = 0.0f; }
-        for (size_t l=(size_t)ceilf(p); l<L/2u+L%2u; ++l, ++Y) { *Y = 1.0f; *++Y = 0.0f; }
+        for (size_t l=1u; l<Lp && l<L/2u; ++l, ++Y) { *Y = 1.0f/(1.0f+expf(p/(float)l-p/(p-(float)l))); *++Y = 0.0f; }
+        for (size_t l=Lp; l<L/2u+L%2u; ++l, ++Y) { *Y = 1.0f; *++Y = 0.0f; }
         for (size_t l=0u; l<L/2u; ++l, ++Y) { *Y = *(Y-(4u*l+2u+2u*(L%2u))); *++Y = 0.0f; }
     }
 
@@ -114,10 +117,11 @@ int planck_z (double *Y, const size_t L, const double epsilon, const size_t norm
     else if (L==2u) { *Y++ = 1.0; *Y++ = 0.0; *Y++ = 1.0; *Y++ = 0.0; }
     else
     {
-        const double p = epsilon*L;
+        const double p = epsilon*(double)L;
+        const size_t Lp = (size_t)ceil(p);
         *Y++ = 0.0; *Y++ = 0.0;
-        for (size_t l=1u; l<p && l<L/2u; ++l, ++Y) { *Y = 1.0/(1.0+exp(p/l-p/(p-l))); *++Y = 0.0; }
-        for (size_t l=(size_t)ceil(p); l<L/2u+L%2u; ++l, ++Y) { *Y = 1.0; *++Y = 0.0; }
+        for (size_t l=1u; l<Lp && l<L/2u; ++l, ++Y) { *Y = 1.0/(1.0+exp(p/(double)l-p/(p-(double)l))); *++Y = 0.0; }
+        for (size_t l=Lp; l<L/2u+L%2u; ++l, ++Y) { *Y = 1.0; *++Y = 0.0; }
         for (size_t l=0u; l<L/2u; ++l, ++Y) { *Y = *(Y-(4u*l+2u+2u*(L%2u))); *++Y = 0.0; }
     }
 

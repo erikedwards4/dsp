@@ -27,16 +27,16 @@ int blackman_s (float *Y, const size_t L, const char exact, const size_t norm)
 {
     if (norm>3u) { fprintf(stderr,"error in blackman_s: norm must be in {0,1,2,3}\n"); return 1; }
 
-    const float p = (float)(2.0*M_PI/(L-1u));
+    const float p = (float)(2.0*M_PI/(double)(L-1u));
 
     if (exact)
     {
         const float a0 = 7938.0f/18608.0f, a1 = 9240.0f/18608.0f, a2 = 1430.0f/18608.0f;
-        for (size_t l=0u; l<L/2u; ++l, ++Y) { *Y = a0 - a1*cosf(l*p) + a2*cosf(2u*l*p); }
+        for (size_t l=0u; l<L/2u; ++l, ++Y) { *Y = a0 - a1*cosf((float)l*p) + a2*cosf((float)(2u*l)*p); }
     }
     else
     {
-        for (size_t l=0u; l<L/2u; ++l, ++Y) { *Y = 0.42f - 0.5f*cosf(l*p) + 0.08f*cosf(2u*l*p); }
+        for (size_t l=0u; l<L/2u; ++l, ++Y) { *Y = 0.42f - 0.5f*cosf((float)l*p) + 0.08f*cosf((float)(2u*l)*p); }
     }
     if (L%2u) { *Y++ = 1.0f; }
     for (size_t l=0u; l<L/2u; ++l, ++Y) { *Y = *(Y-(2u*l+1u+L%2u)); }
@@ -58,16 +58,16 @@ int blackman_d (double *Y, const size_t L, const char exact, const size_t norm)
 {
     if (norm>3u) { fprintf(stderr,"error in blackman_d: norm must be in {0,1,2,3}\n"); return 1; }
 
-    const double p = 2.0*M_PI/(L-1.0);
+    const double p = 2.0*M_PI/(double)(L-1u);
     
     if (exact)
     {
         const double a0 = 7938.0/18608.0, a1 = 9240.0/18608.0, a2 = 1430.0/18608.0;
-        for (size_t l=0u; l<L/2u; ++l, ++Y) { *Y = a0 - a1*cos(l*p) + a2*cos(2u*l*p); }
+        for (size_t l=0u; l<L/2u; ++l, ++Y) { *Y = a0 - a1*cos((double)l*p) + a2*cos((double)(2u*l)*p); }
     }
     else
     {
-        for (size_t l=0u; l<L/2u; ++l, ++Y) { *Y = 0.42 - 0.5*cos(l*p) + 0.08*cos(2u*l*p); }
+        for (size_t l=0u; l<L/2u; ++l, ++Y) { *Y = 0.42 - 0.5*cos((double)l*p) + 0.08*cos((double)(2u*l)*p); }
     }
     if (L%2u) { *Y++ = 1.0; }
     for (size_t l=0u; l<L/2u; ++l, ++Y) { *Y = *(Y-(2u*l+1u+L%2u)); }
@@ -89,16 +89,16 @@ int blackman_c (float *Y, const size_t L, const char exact, const size_t norm)
 {
     if (norm>3u) { fprintf(stderr,"error in blackman_c: norm must be in {0,1,2,3}\n"); return 1; }
 
-    const float p = (float)(2.0*M_PI/(L-1u));
+    const float p = (float)(2.0*M_PI/(double)(L-1u));
     
     if (exact)
     {
         const float a0 = 7938.0f/18608.0f, a1 = 9240.0f/18608.0f, a2 = 1430.0f/18608.0f;
-        for (size_t l=0u; l<L/2u; ++l, ++Y) { *Y = a0 - a1*cosf(l*p) + a2*cosf(2u*l*p); *++Y = 0.0f; }
+        for (size_t l=0u; l<L/2u; ++l, ++Y) { *Y = a0 - a1*cosf((float)l*p) + a2*cosf((float)(2u*l)*p); *++Y = 0.0f; }
     }
     else
     {
-        for (size_t l=0u; l<L/2u; ++l, ++Y) { *Y = 0.42f - 0.5f*cosf(l*p) + 0.08f*cosf(2u*l*p); *++Y = 0.0f; }
+        for (size_t l=0u; l<L/2u; ++l, ++Y) { *Y = 0.42f - 0.5f*cosf((float)l*p) + 0.08f*cosf((float)(2u*l)*p); *++Y = 0.0f; }
     }
     if (L%2u) { *Y++ = 1.0f; *Y++ = 0.0f; }
     for (size_t l=0u; l<L/2u; ++l, ++Y) { *Y = *(Y-(4u*l+2u+2u*(L%2u))); *++Y = 0.0f; }
@@ -120,16 +120,16 @@ int blackman_z (double *Y, const size_t L, const char exact, const size_t norm)
 {
     if (norm>3u) { fprintf(stderr,"error in blackman_z: norm must be in {0,1,2,3}\n"); return 1; }
 
-    const double p = 2.0*M_PI/(L-1.0);
+    const double p = 2.0*M_PI/(double)(L-1u);
     
     if (exact)
     {
         const double a0 = 7938.0/18608.0, a1 = 9240.0/18608.0, a2 = 1430.0/18608.0;
-        for (size_t l=0u; l<L/2u; ++l, ++Y) { *Y = a0 - a1*cos(l*p) + a2*cos(2u*l*p); *++Y = 0.0; }
+        for (size_t l=0u; l<L/2u; ++l, ++Y) { *Y = a0 - a1*cos((double)l*p) + a2*cos((double)(2u*l)*p); *++Y = 0.0; }
     }
     else
     {
-        for (size_t l=0u; l<L/2u; ++l, ++Y) { *Y = 0.42 - 0.5*cos(l*p) + 0.08*cos(2u*l*p); *++Y = 0.0; }
+        for (size_t l=0u; l<L/2u; ++l, ++Y) { *Y = 0.42 - 0.5*cos((double)l*p) + 0.08*cos((double)(2u*l)*p); *++Y = 0.0; }
     }
     if (L%2u) { *Y++ = 1.0; *Y++ = 0.0; }
     for (size_t l=0u; l<L/2u; ++l, ++Y) { *Y = *(Y-(4u*l+2u+2u*(L%2u))); *++Y = 0.0; }

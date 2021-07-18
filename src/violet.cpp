@@ -11,7 +11,7 @@
 #include <valarray>
 #include <unordered_map>
 #include <argtable2.h>
-#include "../util/cmli.hpp"
+#include "cmli.hpp"
 #include <cfloat>
 #include "violet.c"
 

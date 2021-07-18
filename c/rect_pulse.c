@@ -15,9 +15,9 @@ extern "C" {
 #endif
 
 int rect_pulse_s (float *Y, const size_t N, const size_t samp, const size_t width, const float amp);
-int rect_pulse_d (double *Y, const size_t N, const size_t samp, const size_t width, const float amp);
+int rect_pulse_d (double *Y, const size_t N, const size_t samp, const size_t width, const double amp);
 int rect_pulse_c (float *Y, const size_t N, const size_t samp, const size_t width, const float amp);
-int rect_pulse_z (double *Y, const size_t N, const size_t samp, const size_t width, const float amp);
+int rect_pulse_z (double *Y, const size_t N, const size_t samp, const size_t width, const double amp);
 
 
 int rect_pulse_s (float *Y, const size_t N, const size_t samp, const size_t width, const float amp)
@@ -32,7 +32,7 @@ int rect_pulse_s (float *Y, const size_t N, const size_t samp, const size_t widt
 }
 
 
-int rect_pulse_d (double *Y, const size_t N, const size_t samp, const size_t width, const float amp)
+int rect_pulse_d (double *Y, const size_t N, const size_t samp, const size_t width, const double amp)
 {
     if (samp>=N) { fprintf(stderr, "error in rect_pulse_d: samp (delay) must be less than N\n"); return 1; }
 
@@ -56,7 +56,7 @@ int rect_pulse_c (float *Y, const size_t N, const size_t samp, const size_t widt
 }
 
 
-int rect_pulse_z (double *Y, const size_t N, const size_t samp, const size_t width, const float amp)
+int rect_pulse_z (double *Y, const size_t N, const size_t samp, const size_t width, const double amp)
 {
     if (samp>=N) { fprintf(stderr, "error in rect_pulse_z: samp (delay) must be less than N\n"); return 1; }
 

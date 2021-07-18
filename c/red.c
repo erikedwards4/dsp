@@ -170,9 +170,9 @@ int red_s (float *Y, const size_t N, const float std, const char zmn)
     if (zmn)
     {
         float sm = 0.0f;
-        for (size_t n=0; n<N; ++n) { sm += *--Y; }
+        for (size_t n=0u; n<N; ++n) { sm += *--Y; }
         sm /= (float)N;
-        for (size_t n=0; n<N; ++n, ++Y) { *Y -= sm; }
+        for (size_t n=0u; n<N; ++n, ++Y) { *Y -= sm; }
     }
     
     return 0;
@@ -320,9 +320,9 @@ int red_d (double *Y, const size_t N, const double std, const char zmn)
     if (zmn)
     {
         double sm = 0.0;
-        for (size_t n=0; n<N; ++n) { sm += *--Y; }
+        for (size_t n=0u; n<N; ++n) { sm += *--Y; }
         sm /= (double)N;
-        for (size_t n=0; n<N; ++n, ++Y) { *Y -= sm; }
+        for (size_t n=0u; n<N; ++n, ++Y) { *Y -= sm; }
     }
 
     return 0;
@@ -440,9 +440,9 @@ int red_c (float *Y, const size_t N, const float std, const char zmn)
     if (zmn)
     {
         float smr=0.0f, smi=0.0f;
-        for (size_t n=0; n<N; ++n) { smi += *--Y; smr += *--Y; }
+        for (size_t n=0u; n<N; ++n) { smi += *--Y; smr += *--Y; }
         smr /= (float)N; smi /= (float)N;
-        for (size_t n=0; n<N; ++n) { *Y++ -= smr; *Y++ -= smi; }
+        for (size_t n=0u; n<N; ++n) { *Y++ -= smr; *Y++ -= smi; }
     }
 
     return 0;
@@ -560,9 +560,9 @@ int red_z (double *Y, const size_t N, const double std, const char zmn)
     if (zmn)
     {
         double smr=0.0, smi = 0.0;
-        for (size_t n=0; n<N; ++n) { smi += *--Y; smr += *--Y; }
+        for (size_t n=0u; n<N; ++n) { smi += *--Y; smr += *--Y; }
         smr /= (double)N; smi /= (double)N;
-        for (size_t n=0; n<N; ++n) { *Y++ -= smr; *Y++ -= smi; }
+        for (size_t n=0u; n<N; ++n) { *Y++ -= smr; *Y++ -= smi; }
     }
 
     return 0;

@@ -12,7 +12,7 @@
 
 SHELL=/bin/bash
 ss=../util/bin/srci2src
-CC=g++
+CC=clang++
 
 ifeq ($(CC),clang++)
 	STD=-std=c++11
@@ -32,6 +32,7 @@ all: Dirs Generate Wins Transform Filter Conv Interp ZCs_LCs AR_Poly AC_LP Frame
 
 Dirs:
 	mkdir -pm 777 bin obj
+	ln -s ../util/cmli.hpp src/cmli.hpp
 
 
 #Generate: generate noise, simple waveforms, windows

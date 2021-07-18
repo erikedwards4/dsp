@@ -62,7 +62,7 @@ int triwave_s (float *Y, const size_t N, const float amp, const float frq, const
         const float f2pi = frq * M_2PI;
         float arg;
 
-        for (size_t n=0; n<N; ++n, ++Y)
+        for (size_t n=0u; n<N; ++n, ++Y)
         {
             arg = fmodf(fmaf((float)n,f2pi,phs),M_2PI);
             if (arg>M_3PI_2 && arg<M_2PI) { *Y = M_2_PIf*arg - 4.0f; }
@@ -79,7 +79,7 @@ int triwave_s (float *Y, const size_t N, const float amp, const float frq, const
         const float a2pi = amp * M_2_PIf;
         float arg;
 
-        for (size_t n=0; n<N; ++n, ++Y)
+        for (size_t n=0u; n<N; ++n, ++Y)
         {
             arg = fmodf(fmaf((float)n,f2pi,phs),M_2PI);
             if (arg>M_3PI_2 && arg<M_2PI) { *Y = a2pi*arg - 4.0f*amp; }
@@ -110,7 +110,7 @@ int triwave_d (double *Y, const size_t N, const double amp, const double frq, co
         const double f2pi = M_2PI * frq;
         double arg;
 
-        for (size_t n=0; n<N; ++n, ++Y)
+        for (size_t n=0u; n<N; ++n, ++Y)
         {
             arg = fmod(fma((double)n,f2pi,phs),M_2PI);
             if (arg>M_3PI_2 && arg<M_2PI) { *Y = M_2_PI*arg - 4.0; }
@@ -127,7 +127,7 @@ int triwave_d (double *Y, const size_t N, const double amp, const double frq, co
         const double a2pi = amp * M_2_PI;
         double arg;
 
-        for (size_t n=0; n<N; ++n, ++Y)
+        for (size_t n=0u; n<N; ++n, ++Y)
         {
             arg = fmod(fma((double)n,f2pi,phs),M_2PI);
             if (arg>M_3PI_2 && arg<M_2PI) { *Y = a2pi*arg - 4.0*amp; }
@@ -159,7 +159,7 @@ int triwave_c (float *Y, const size_t N, const float amp, const float frq, const
         const float a2pi = amp * M_2_PIf;
         float arg;
 
-        for (size_t n=0; n<N; ++n)
+        for (size_t n=0u; n<N; ++n)
         {
             arg = fmodf(fmaf((float)n,f2pi,phs),M_2PI);
 
@@ -196,7 +196,7 @@ int triwave_z (double *Y, const size_t N, const double amp, const double frq, co
         const double a2pi = amp * M_2_PI;
         double arg;
 
-        for (size_t n=0; n<N; ++n)
+        for (size_t n=0u; n<N; ++n)
         {
             arg = fmod(fma((double)n,f2pi,phs),M_2PI);
 

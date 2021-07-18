@@ -52,7 +52,7 @@ int squarewave_s (float *Y, const size_t N, const float amp, const float frq, co
         const float f2pi = frq * M_2PI;
         float arg;
 
-        for (size_t n=0; n<N; ++n, ++Y)
+        for (size_t n=0u; n<N; ++n, ++Y)
         {
             arg = fmodf(fmaf((float)n,f2pi,phs),M_2PI);
             if (arg>M_PIf && arg<M_2PI) { *Y = -amp; }
@@ -81,7 +81,7 @@ int squarewave_d (double *Y, const size_t N, const double amp, const double frq,
         const double f2pi = frq * M_2PI;
         double arg;
 
-        for (size_t n=0; n<N; ++n, ++Y)
+        for (size_t n=0u; n<N; ++n, ++Y)
         {
             arg = fmod(fma((double)n,f2pi,phs),M_2PI);
             if (arg>M_PI && arg<M_2PI) { *Y = -amp; }
@@ -111,7 +111,7 @@ int squarewave_c (float *Y, const size_t N, const float amp, const float frq, co
         const float f2pi = frq * M_2PI;
         float arg;
 
-        for (size_t n=0; n<N; ++n)
+        for (size_t n=0u; n<N; ++n)
         {
             arg = fmodf(fmaf((float)n,f2pi,phs),M_2PI);
 
@@ -146,7 +146,7 @@ int squarewave_z (double *Y, const size_t N, const double amp, const double frq,
         const double f2pi = frq * M_2PI;
         double arg;
 
-        for (size_t n=0; n<N; ++n)
+        for (size_t n=0u; n<N; ++n)
         {
             arg = fmod(fma((double)n,f2pi,phs),M_2PI);
 
