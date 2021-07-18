@@ -49,8 +49,8 @@ struct arg_dbl  *a_phs = arg_dbln("p","phase","<dbl>",0,1,"phase in radians [def
 struct arg_dbl  *a_dty = arg_dbln("c","duty-cycle","<dbl>",0,1,"duty cycle in [0.0 1.0] [default=0.5]");
 struct arg_int    *a_n = arg_intn("n","N","<uint>",0,1,"num samples in output [default=1]");
 struct arg_int    *a_d = arg_intn("d","dim","<uint>",0,1,"nonsingleton dimension [default=0 -> col vec]");
-struct arg_int *a_otyp = arg_intn("t","type","<uint>",0,1,"output data type [default=2 -> double]");
-struct arg_int *a_ofmt = arg_intn("f","fmt","<uint>",0,1,"output file format [default=102 -> colmajor]");
+struct arg_int *a_otyp = arg_intn("t","type","<uint>",0,1,"output data type [default=1]");
+struct arg_int *a_ofmt = arg_intn("f","fmt","<uint>",0,1,"output file format [default=147]");
 struct arg_file  *a_fo = arg_filen("o","ofile","<file>",0,O,"output file (Y)");
 
 //Get options
@@ -86,7 +86,7 @@ if (dim>3u) { cerr << progstr+": " << __LINE__ << errstr << "dim must be in {0,1
 //Get amp
 amp = (a_amp->count>0) ? a_amp->dval[0] : 1.0;
 if (amp<0.0) { cerr << progstr+": " << __LINE__ << errstr << "amplitude must be nonnegative" << endl; return 1; }
-if (o1.T==1 && amp>=double(FLT_MAX)) { cerr << progstr+": " << __LINE__ << errstr << "amplitude must be < " << double(FLT_MAX) << endl; return 1; }
+if (o1.T==1u && amp>=double(FLT_MAX)) { cerr << progstr+": " << __LINE__ << errstr << "amplitude must be < " << double(FLT_MAX) << endl; return 1; }
 
 //Get frq
 frq = (a_frq->count>0) ? a_frq->dval[0] : 0.5;

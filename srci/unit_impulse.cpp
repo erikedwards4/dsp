@@ -35,8 +35,8 @@ descr += "$ unit_impulse -n32 -s1 -d1 -t1 -f101 > Y \n";
 struct arg_int    *a_s = arg_intn("s","samp","<uint>",0,1,"sample number of impulse [default=0]");
 struct arg_int    *a_n = arg_intn("n","N","<uint>",0,1,"num samples in output [default=1]");
 struct arg_int    *a_d = arg_intn("d","dim","<uint>",0,1,"nonsingleton dimension [default=0 -> col vec]");
-struct arg_int *a_otyp = arg_intn("t","type","<uint>",0,1,"output data type [default=2 -> double]");
-struct arg_int *a_ofmt = arg_intn("f","fmt","<uint>",0,1,"output file format [default=102 -> colmajor]");
+struct arg_int *a_otyp = arg_intn("t","type","<uint>",0,1,"output data type [default=1]");
+struct arg_int *a_ofmt = arg_intn("f","fmt","<uint>",0,1,"output file format [default=147]");
 struct arg_file  *a_fo = arg_filen("o","ofile","<file>",0,O,"output file (Y)");
 
 //Get options

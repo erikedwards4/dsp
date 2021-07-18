@@ -35,8 +35,8 @@ descr += "$ blackmanharris -l127 -d1 -t1 -f101 > Y \n";
 struct arg_int   *a_wl = arg_intn("l","winlength","<uint>",0,1,"window length [default=7]");
 struct arg_int  *a_nrm = arg_intn("n","norm","<uint>",0,1,"normalize output by norm [default=0]");
 struct arg_int    *a_d = arg_intn("d","dim","<uint>",0,1,"nonsingleton dimension [default=0 -> col vec]");
-struct arg_int *a_otyp = arg_intn("t","type","<uint>",0,1,"output data type [default=2 -> double]");
-struct arg_int *a_ofmt = arg_intn("f","fmt","<uint>",0,1,"output file format [default=102 -> colmajor]");
+struct arg_int *a_otyp = arg_intn("t","type","<uint>",0,1,"output data type [default=1]");
+struct arg_int *a_ofmt = arg_intn("f","fmt","<uint>",0,1,"output file format [default=147]");
 struct arg_file  *a_fo = arg_filen("o","ofile","<file>",0,O,"output file (Y)");
 
 //Get options
@@ -73,7 +73,7 @@ if (dim>3u) { cerr << progstr+": " << __LINE__ << errstr << "dim must be in {0,1
 if (a_nrm->count==0) { norm = 0u; }
 else if (a_nrm->ival[0]<0) { cerr << progstr+": " << __LINE__ << errstr << "norm must be nonnegative" << endl; return 1; }
 else { norm = size_t(a_nrm->ival[0]); }
-if (norm>3) { cerr << progstr+": " << __LINE__ << errstr << "norm must be in {0,1,2,3}" << endl; return 1; }
+if (norm>3u) { cerr << progstr+": " << __LINE__ << errstr << "norm must be in {0,1,2,3}" << endl; return 1; }
 
 //Checks
 
