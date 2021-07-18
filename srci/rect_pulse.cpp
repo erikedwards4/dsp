@@ -40,8 +40,8 @@ struct arg_int    *a_s = arg_intn("s","samp","<uint>",0,1,"sample number of puls
 struct arg_int    *a_w = arg_intn("w","width","<uint>",0,1,"width of pulse in samples [default=1]");
 struct arg_int    *a_n = arg_intn("n","N","<uint>",0,1,"num samples in output [default=1]");
 struct arg_int    *a_d = arg_intn("d","dim","<uint>",0,1,"nonsingleton dimension [default=0 -> col vec]");
-struct arg_int *a_otyp = arg_intn("t","type","<uint>",0,1,"output data type [default=2 -> double]");
-struct arg_int *a_ofmt = arg_intn("f","fmt","<uint>",0,1,"output file format [default=102 -> colmajor]");
+struct arg_int *a_otyp = arg_intn("t","type","<uint>",0,1,"output data type [default=1]");
+struct arg_int *a_ofmt = arg_intn("f","fmt","<uint>",0,1,"output file format [default=147]");
 struct arg_file  *a_fo = arg_filen("o","ofile","<file>",0,O,"output file (Y)");
 
 //Get options
@@ -59,7 +59,7 @@ else { o1.T = size_t(a_otyp->ival[0]); }
 if ((o1.T==oktypes).sum()==0)
 {
     cerr << progstr+": " << __LINE__ << errstr << "output data type must be in " << "{";
-    for (auto o : oktypes) { cerr << int(o) << ((o==oktypes[oktypes.size()-1]) ? "}" : ","); }
+    for (auto o : oktypes) { cerr << int(o) << ((o==oktypes[oktypes.size()-1u]) ? "}" : ","); }
     cerr << endl; return 1;
 }
 
@@ -88,8 +88,8 @@ if (w>=N) { cerr << progstr+": " << __LINE__ << errstr << "w must be < N" << end
 
 //Get amp
 amp = (a_amp->count>0) ? a_amp->dval[0] : 1.0;
-if (o1.T==1 && amp<=-double(FLT_MAX)) { cerr << progstr+": " << __LINE__ << errstr << "amplitude must be > " << -double(FLT_MAX) << endl; return 1; }
-if (o1.T==1 && amp>=double(FLT_MAX)) { cerr << progstr+": " << __LINE__ << errstr << "amplitude must be < " << double(FLT_MAX) << endl; return 1; }
+if (o1.T==1u && amp<=-double(FLT_MAX)) { cerr << progstr+": " << __LINE__ << errstr << "amplitude must be > " << -double(FLT_MAX) << endl; return 1; }
+if (o1.T==1u && amp>=double(FLT_MAX)) { cerr << progstr+": " << __LINE__ << errstr << "amplitude must be < " << double(FLT_MAX) << endl; return 1; }
 
 //Checks
 

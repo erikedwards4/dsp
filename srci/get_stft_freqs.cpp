@@ -38,8 +38,8 @@ struct arg_int    *a_n = arg_intn("n","nfft","<uint>",0,1,"STFT transform length
 struct arg_int    *a_f = arg_intn("f","F","<uint>",0,1,"number of freqs to output [default=nfft/2+1]");
 struct arg_dbl   *a_sr = arg_dbln("r","srate","<dbl>",0,1,"sample rate in Hz [default=1]");
 struct arg_int    *a_d = arg_intn("d","dim","<uint>",0,1,"nonsingleton dimension [default=0 -> col vec]");
-struct arg_int *a_otyp = arg_intn("t","type","<uint>",0,1,"output data type [default=2 -> double]");
-struct arg_int *a_ofmt = arg_intn("f","fmt","<uint>",0,1,"output file format [default=102 -> colmajor]");
+struct arg_int *a_otyp = arg_intn("t","type","<uint>",0,1,"output data type [default=1]");
+struct arg_int *a_ofmt = arg_intn("f","fmt","<uint>",0,1,"output file format [default=147]");
 struct arg_file  *a_fo = arg_filen("o","ofile","<file>",0,O,"output file (Y)");
 
 //Get options
@@ -57,7 +57,7 @@ else { o1.T = size_t(a_otyp->ival[0]); }
 if ((o1.T==oktypes).sum()==0)
 {
     cerr << progstr+": " << __LINE__ << errstr << "output data type must be in " << "{";
-    for (auto o : oktypes) { cerr << int(o) << ((o==oktypes[oktypes.size()-1]) ? "}" : ","); }
+    for (auto o : oktypes) { cerr << int(o) << ((o==oktypes[oktypes.size()-1u]) ? "}" : ","); }
     cerr << endl; return 1;
 }
 
