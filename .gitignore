@@ -5,6 +5,7 @@ b2t
 *.o
 **/c/old/
 **/c/old2/
+**/c_old/
 **/bin/
 **/obj/
 **/srci/old/
