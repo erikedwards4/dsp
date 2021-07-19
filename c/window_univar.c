@@ -80,7 +80,7 @@ int window_univar_s (float *Y, const float *X1, const float *X2, const size_t N,
             {
                 X1 += ss - prev_n;
                 for (size_t l=0u; l<L; ++l, ++X1, ++X2, ++Y) { *Y = *X1 * *X2; }
-                X1 -= xd; prev_n = ss + stp;
+                X1 -= xd; prev_n = ss + (int)stp;
             }
         }
     }
@@ -131,7 +131,7 @@ int window_univar_d (double *Y, const double *X1, const double *X2, const size_t
             {
                 X1 += ss - prev_n;
                 for (size_t l=0u; l<L; ++l, ++X1, ++X2, ++Y) { *Y = *X1 * *X2; }
-                X1 -= xd; prev_n = ss + stp;
+                X1 -= xd; prev_n = ss + (int)stp;
             }
         }
     }
@@ -182,7 +182,7 @@ int window_univar_c (float *Y, const float *X1, const float *X2, const size_t N,
             {
                 X1 += 2*(ss-prev_n);
                 for (size_t l=0u; l<L; ++l, ++X1, ++X2, ++Y) { *Y = *X1 * *X2; *++Y = *++X1 * *X2; }
-                X1 -= xd; prev_n = ss + stp;
+                X1 -= xd; prev_n = ss + (int)stp;
             }
         }
     }
@@ -233,7 +233,7 @@ int window_univar_z (double *Y, const double *X1, const double *X2, const size_t
             {
                 X1 += 2*(ss-prev_n);
                 for (size_t l=0u; l<L; ++l, ++X1, ++X2, ++Y) { *Y = *X1 * *X2; *++Y = *++X1 * *X2; }
-                X1 -= xd; prev_n = ss + stp;
+                X1 -= xd; prev_n = ss + (int)stp;
             }
         }
     }

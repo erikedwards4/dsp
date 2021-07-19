@@ -36,7 +36,7 @@ int idct_s (float *Y, const float *X, const size_t R, const size_t C, const size
     else
     {
         const float xsc = (sc) ? (float)(2.0*M_SQRT1_2) : 1.0f;
-        const float ysc = (sc) ? (float)(1.0/sqrt(2u*ndct)) : 1.0f/(2u*ndct);
+        const float ysc = (sc) ? 1.0f/sqrtf((float)(2u*ndct)) : 1.0f/(float)(2u*ndct);
 
         //Initialize fftwf
         float *X1, *Y1;
@@ -120,7 +120,7 @@ int idct_d (double *Y, const double *X, const size_t R, const size_t C, const si
     else
     {
         const double xsc = (sc) ? 2.0*M_SQRT1_2 : 1.0;
-        const double ysc = (sc) ? 1.0/sqrt(2u*ndct) : 1.0/(2u*ndct);
+        const double ysc = (sc) ? 1.0/sqrt((double)(2u*ndct)) : 1.0/(double)(2u*ndct);
 
         //Initialize fftw
         double *X1, *Y1;
@@ -204,7 +204,7 @@ int idct_c (float *Y, const float *X, const size_t R, const size_t C, const size
     else
     {
         const float xsc = (sc) ? (float)(2.0*M_SQRT1_2) : 1.0f;
-        const float ysc = (sc) ? (float)(1.0/sqrt(2u*ndct)) : 1.0f/(2u*ndct);
+        const float ysc = (sc) ? 1.0f/sqrtf((float)(2u*ndct)) : 1.0f/(float)(2u*ndct);
 
         //Initialize fftwf
         float *X1r, *Y1r, *X1i, *Y1i;
@@ -293,7 +293,7 @@ int idct_z (double *Y, const double *X, const size_t R, const size_t C, const si
     else
     {
         const double xsc = (sc) ? 2.0*M_SQRT1_2 : 1.0;
-        const double ysc = (sc) ? 1.0/sqrt(2u*ndct) : 1.0/(2u*ndct);
+        const double ysc = (sc) ? 1.0/sqrt((double)(2u*ndct)) : 1.0/(double)(2u*ndct);
 
         //Initialize fftw
         double *X1r, *Y1r, *X1i, *Y1i;

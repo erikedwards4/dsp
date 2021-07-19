@@ -33,6 +33,9 @@ int dst_s (float *Y, const float *X, const size_t R, const size_t C, const size_
     }
     else
     {
+        const float s = sc ? 0.5f : 1.0f;
+        const float dcsc = sc ? 0.5f : 1.0f;
+
         //Initialize fftwf
         float *X1, *Y1;
         X1 = (float *)fftwf_malloc(ndst*sizeof(float));
@@ -48,8 +51,7 @@ int dst_s (float *Y, const float *X, const size_t R, const size_t C, const size_
             fftwf_execute(plan);
             if (sc)
             {
-                const float s = 0.5f; //(float)(1.0/sqrt(ndst))
-                *Y++ = *Y1++ * 0.5f;
+                *Y++ = *Y1++ * dcsc;
                 for (size_t l=1u; l<ndst; ++l, ++Y1, ++Y) { *Y = *Y1 * s; }
             }
             else
@@ -72,7 +74,6 @@ int dst_s (float *Y, const float *X, const size_t R, const size_t C, const size_
                 fftwf_execute(plan);
                 if (sc)
                 {
-                    const float s = 0.5f, dcsc = 0.5f;
                     *Y++ = *Y1++ * dcsc;
                     for (size_t l=1u; l<ndst; ++l, ++Y1, ++Y) { *Y = *Y1 * s; }
                     Y1 -= ndst;
@@ -100,8 +101,6 @@ int dst_s (float *Y, const float *X, const size_t R, const size_t C, const size_
             }
             else
             {
-                const float s = sc ? 0.5f : 1.0f;
-                const float dcsc = sc ? 0.5f : 1.0f;
                 X1 += L;
                 for (size_t l=L; l<ndst; ++l, ++X1) { *X1 = 0.0f; }
                 X1 -= ndst;
@@ -140,6 +139,9 @@ int dst_d (double *Y, const double *X, const size_t R, const size_t C, const siz
     }
     else
     {
+        const double s = sc ? 0.5 : 1.0;
+        const double dcsc = sc ? 0.5 : 1.0;
+
         //Initialize fftw
         double *X1, *Y1;
         X1 = (double *)fftw_malloc(ndst*sizeof(double));
@@ -155,8 +157,7 @@ int dst_d (double *Y, const double *X, const size_t R, const size_t C, const siz
             fftw_execute(plan);
             if (sc)
             {
-                const double s = 0.5;
-                *Y++ = *Y1++ * 0.5;
+                *Y++ = *Y1++ * dcsc;
                 for (size_t l=1u; l<ndst; ++l, ++Y1, ++Y) { *Y = *Y1 * s; }
             }
             else
@@ -179,7 +180,6 @@ int dst_d (double *Y, const double *X, const size_t R, const size_t C, const siz
                 fftw_execute(plan);
                 if (sc)
                 {
-                    const double s = 0.5, dcsc = 0.5;
                     *Y++ = *Y1++ * dcsc;
                     for (size_t l=1u; l<ndst; ++l, ++Y1, ++Y) { *Y = *Y1 * s; }
                     Y1 -= ndst;
@@ -207,8 +207,6 @@ int dst_d (double *Y, const double *X, const size_t R, const size_t C, const siz
             }
             else
             {
-                const double s = sc ? 0.5 : 1.0;
-                const double dcsc = sc ? 0.5 : 1.0;
                 X1 += L;
                 for (size_t l=L; l<ndst; ++l, ++X1) { *X1 = 0.0; }
                 X1 -= ndst;
@@ -247,6 +245,9 @@ int dst_c (float *Y, const float *X, const size_t R, const size_t C, const size_
     }
     else
     {
+        const float s = sc ? 0.5f : 1.0f;
+        const float dcsc = sc ? 0.5f : 1.0f;
+
         //Initialize fftwf
         float *X1r, *X1i, *Y1r, *Y1i;
         X1r = (float *)fftwf_malloc(ndst*sizeof(float));
@@ -266,9 +267,7 @@ int dst_c (float *Y, const float *X, const size_t R, const size_t C, const size_
             fftwf_execute(rplan); fftwf_execute(iplan);
             if (sc)
             {
-                const float s = 0.5f;
-                *Y++ = *Y1r++ * 0.5f;
-                *Y++ = *Y1i++ * 0.5f;
+                *Y++ = *Y1r++ * dcsc; *Y++ = *Y1i++ * dcsc;
                 for (size_t l=1u; l<ndst; ++l, ++Y1r, ++Y1i, ++Y) { *Y = *Y1r * s; *++Y = *Y1i * s; }
             }
             else
@@ -291,7 +290,6 @@ int dst_c (float *Y, const float *X, const size_t R, const size_t C, const size_
                 fftwf_execute(rplan); fftwf_execute(iplan);
                 if (sc)
                 {
-                    const float s = 0.5f, dcsc = 0.5f;
                     *Y++ = *Y1r++ * dcsc; *Y++ = *Y1i++ * dcsc;
                     for (size_t l=1u; l<ndst; ++l, ++Y1r, ++Y1i, ++Y) { *Y = *Y1r * s; *++Y = *Y1i * s; }
                     Y1r -= ndst; Y1i -= ndst;
@@ -319,8 +317,6 @@ int dst_c (float *Y, const float *X, const size_t R, const size_t C, const size_
             }
             else
             {
-                const float s = sc ? 0.5f : 1.0f;
-                const float dcsc = sc ? 0.5f : 1.0f;
                 X1r += L; X1i += L;
                 for (size_t l=L; l<ndst; ++l, ++X1r, ++X1i) { *X1r = *X1i = 0.0f; }
                 X1r -= ndst; X1i -= ndst;
@@ -360,6 +356,9 @@ int dst_z (double *Y, const double *X, const size_t R, const size_t C, const siz
     }
     else
     {
+        const double s = sc ? 0.5 : 1.0;
+        const double dcsc = sc ? 0.5 : 1.0;
+
         //Initialize fftw
         double *X1r, *X1i, *Y1r, *Y1i;
         X1r = (double *)fftw_malloc(ndst*sizeof(double));
@@ -379,9 +378,7 @@ int dst_z (double *Y, const double *X, const size_t R, const size_t C, const siz
             fftw_execute(rplan); fftw_execute(iplan);
             if (sc)
             {
-                const double s = 0.5;
-                *Y++ = *Y1r++ * 0.5;
-                *Y++ = *Y1i++ * 0.5;
+                *Y++ = *Y1r++ * dcsc; *Y++ = *Y1i++ * dcsc;
                 for (size_t l=1u; l<ndst; ++l, ++Y1r, ++Y1i, ++Y) { *Y = *Y1r * s; *++Y = *Y1i * s; }
             }
             else
@@ -404,7 +401,6 @@ int dst_z (double *Y, const double *X, const size_t R, const size_t C, const siz
                 fftw_execute(rplan); fftw_execute(iplan);
                 if (sc)
                 {
-                    const double s = 0.5, dcsc = 0.5;
                     *Y++ = *Y1r++ * dcsc; *Y++ = *Y1i++ * dcsc;
                     for (size_t l=1u; l<ndst; ++l, ++Y1r, ++Y1i, ++Y) { *Y = *Y1r * s; *++Y = *Y1i * s; }
                     Y1r -= ndst; Y1i -= ndst;
@@ -432,8 +428,6 @@ int dst_z (double *Y, const double *X, const size_t R, const size_t C, const siz
             }
             else
             {
-                const double s = sc ? 0.5 : 1.0;
-                const double dcsc = sc ? 0.5 : 1.0;
                 X1r += L; X1i += L;
                 for (size_t l=L; l<ndst; ++l, ++X1r, ++X1i) { *X1r = *X1i = 0.0; }
                 X1r -= ndst; X1i -= ndst;

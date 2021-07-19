@@ -79,7 +79,7 @@ int frame_univar_s (float *Y, const float *X, const size_t N, const size_t L, co
             {
                 X += ss - prev_n;
                 for (size_t l=0u; l<L; ++l, ++X, ++Y) { *Y = *X; }
-                X -= xd; prev_n = ss + stp;
+                X -= xd; prev_n = ss + (int)stp;
             }
         }
     }
@@ -130,7 +130,7 @@ int frame_univar_d (double *Y, const double *X, const size_t N, const size_t L, 
             {
                 X += ss - prev_n;
                 for (size_t l=0u; l<L; ++l, ++X, ++Y) { *Y = *X; }
-                X -= xd; prev_n = ss + stp;
+                X -= xd; prev_n = ss + (int)stp;
             }
         }
     }
@@ -181,7 +181,7 @@ int frame_univar_c (float *Y, const float *X, const size_t N, const size_t L, co
             {
                 X += 2*(ss-prev_n);
                 for (size_t l=0u; l<L; ++l, ++X, ++Y) { *Y = *X; *++Y = *++X; }
-                X -= xd; prev_n = ss + stp;
+                X -= xd; prev_n = ss + (int)stp;
             }
         }
     }
@@ -232,7 +232,7 @@ int frame_univar_z (double *Y, const double *X, const size_t N, const size_t L, 
             {
                 X += 2*(ss-prev_n);
                 for (size_t l=0u; l<L; ++l, ++X, ++Y) { *Y = *X; *++Y = *++X; }
-                X -= xd; prev_n = ss + stp;
+                X -= xd; prev_n = ss + (int)stp;
             }
         }
     }

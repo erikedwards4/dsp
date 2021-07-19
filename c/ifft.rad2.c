@@ -18,16 +18,8 @@
     #define M_PI 3.14159265358979323846
 #endif
 
-#ifndef M_PIf
-    #define M_PIf 3.14159265358979323846f
-#endif
-
 #ifndef M_SQRT1_2
     #define M_SQRT1_2 0.707106781186547524401
-#endif
-
-#ifndef M_SQRT1_2f
-    #define M_SQRT1_2f 0.707106781186547524401f
 #endif
 
 #ifdef __cplusplus
@@ -35,13 +27,13 @@ namespace codee {
 extern "C" {
 #endif
 
-void get_bittbl(size_t* bittbl, const size_t nfft);
-void get_cstbl_s (float* cstbl, const size_t nfft);
-void get_cstbl_d (double* cstbl, const size_t nfft);
-void ifft_1d_s (float *Y, const size_t nfft, const size_t *bittbl, const float *cstbl);
-void ifft_1d_d (double *Y, const size_t nfft, const size_t *bittbl, const double *cstbl);
-void ifft_1d_c (float *Y, const size_t nfft, const size_t *bittbl, const float *cstbl);
-void ifft_1d_z (double *Y, const size_t nfft, const size_t *bittbl, const double *cstbl);
+static void get_bittbl(size_t* bittbl, const size_t nfft);
+static void get_cstbl_s (float* cstbl, const size_t nfft);
+static void get_cstbl_d (double* cstbl, const size_t nfft);
+static void ifft_1d_s (float *Y, const size_t nfft, const size_t *bittbl, const float *cstbl);
+static void ifft_1d_d (double *Y, const size_t nfft, const size_t *bittbl, const double *cstbl);
+static void ifft_1d_c (float *Y, const size_t nfft, const size_t *bittbl, const float *cstbl);
+static void ifft_1d_z (double *Y, const size_t nfft, const size_t *bittbl, const double *cstbl);
 
 int ifft_rad2_s (float *Y, const float *X, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim, const size_t nfft, const char sc);
 int ifft_rad2_d (double *Y, const double *X, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim, const size_t nfft, const char sc);
@@ -49,7 +41,7 @@ int ifft_rad2_c (float *Y, const float *X, const size_t R, const size_t C, const
 int ifft_rad2_z (double *Y, const double *X, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim, const size_t nfft, const char sc);
 
 
-void get_bittbl(size_t* bittbl, const size_t nfft)
+static void get_bittbl(size_t* bittbl, const size_t nfft)
 {
     const size_t nfft2 = nfft/2u;
     size_t j=0u, k;
@@ -65,7 +57,7 @@ void get_bittbl(size_t* bittbl, const size_t nfft)
 }
 
 
-void get_cstbl_s (float* cstbl, const size_t nfft)
+static void get_cstbl_s (float* cstbl, const size_t nfft)
 {
     const size_t nfft2=nfft/2u, nfft4=nfft/4u, nfft8=nfft/8u;
     float c=1.0f, s=0.0f, dc, ds, t;
@@ -76,7 +68,7 @@ void get_cstbl_s (float* cstbl, const size_t nfft)
     ds = sqrtf(t-dc*dc);
 
     for (size_t i=0u; i<nfft8; ++i, ++cstbl, s+=ds, ds-=t*s) { *cstbl = s; }
-    if (nfft8>0u) { *cstbl = M_SQRT1_2f; }
+    if (nfft8>0u) { *cstbl = (float)M_SQRT1_2; }
     cstbl += nfft4 - nfft8;
     for (size_t i=0u; i<nfft8; ++i, --cstbl, c-=dc, dc+=t*c) { *cstbl = c; }
     cstbl -= nfft4 - nfft8;
@@ -85,7 +77,7 @@ void get_cstbl_s (float* cstbl, const size_t nfft)
 }
 
 
-void get_cstbl_d (double* cstbl, const size_t nfft)
+static void get_cstbl_d (double* cstbl, const size_t nfft)
 {
     const size_t nfft2=nfft/2u, nfft4=nfft/4u, nfft8=nfft/8u;
     double c=1.0, s=0.0, dc, ds, t;
@@ -105,7 +97,7 @@ void get_cstbl_d (double* cstbl, const size_t nfft)
 }
 
 
-void ifft_1d_s (float *Y, const size_t nfft, const size_t *bittbl, const float *cstbl)
+static void ifft_1d_s (float *Y, const size_t nfft, const size_t *bittbl, const float *cstbl)
 {
     if (nfft<2u) {}
     else if (nfft==2u)
@@ -159,7 +151,7 @@ void ifft_1d_s (float *Y, const size_t nfft, const size_t *bittbl, const float *
 }
 
 
-void ifft_1d_d (double *Y, const size_t nfft, const size_t *bittbl, const double *cstbl)
+static void ifft_1d_d (double *Y, const size_t nfft, const size_t *bittbl, const double *cstbl)
 {
     if (nfft<2u) {}
     else if (nfft==2u)
@@ -213,7 +205,7 @@ void ifft_1d_d (double *Y, const size_t nfft, const size_t *bittbl, const double
 }
 
 
-void ifft_1d_c (float *Y, const size_t nfft, const size_t *bittbl, const float *cstbl)
+static void ifft_1d_c (float *Y, const size_t nfft, const size_t *bittbl, const float *cstbl)
 {
     if (nfft<2u) {}
     else if (nfft==2u)
@@ -274,7 +266,7 @@ void ifft_1d_c (float *Y, const size_t nfft, const size_t *bittbl, const float *
 }
 
 
-void ifft_1d_z (double *Y, const size_t nfft, const size_t *bittbl, const double *cstbl)
+static void ifft_1d_z (double *Y, const size_t nfft, const size_t *bittbl, const double *cstbl)
 {
     if (nfft<2u) {}
     else if (nfft==2u)
@@ -342,7 +334,7 @@ int ifft_rad2_s (float *Y, const float *X, const size_t R, const size_t C, const
 
     const size_t N = R*C*S*H;
     const size_t Lx = (dim==0u) ? R : (dim==1u) ? C : (dim==2u) ? S : H;
-    const float s = (sc) ? (float)(2.0*sqrt(0.5*nfft)/nfft) : 1.0f/nfft;
+    const float s = (sc) ? 2.0f*sqrtf(0.5f*(float)nfft)/(float)nfft : 1.0f/(float)nfft;
     if (Lx!=nfft/2u+1u) { fprintf(stderr,"error in ifft_rad2_s: nfrqs (vec length in X) must equal nfft/2+1\n"); return 1; }
 
     if (nfft==0u || N==0u) {}
@@ -425,7 +417,7 @@ int ifft_rad2_d (double *Y, const double *X, const size_t R, const size_t C, con
 
     const size_t N = R*C*S*H;
     const size_t Lx = (dim==0u) ? R : (dim==1u) ? C : (dim==2u) ? S : H;
-    const double s = (sc) ? 2.0*sqrt(0.5*nfft)/nfft : 1.0/nfft;
+    const double s = (sc) ? 2.0*sqrt(0.5*(double)nfft)/(double)nfft : 1.0/(double)nfft;
     if (Lx!=nfft/2u+1u) { fprintf(stderr,"error in ifft_rad2_d: nfrqs (vec length in X) must equal nfft/2+1\n"); return 1; }
 
     if (nfft==0u || N==0u) {}
@@ -509,7 +501,7 @@ int ifft_rad2_c (float *Y, const float *X, const size_t R, const size_t C, const
     const size_t N = R*C*S*H;
     const size_t Lx = (dim==0u) ? R : (dim==1u) ? C : (dim==2u) ? S : H;
     const size_t Ly = nfft;
-    const float s = (sc) ? (float)(2.0*sqrt(0.5*nfft)/nfft) : 1.0f/nfft;
+    const float s = (sc) ? 2.0f*sqrtf(0.5f*(float)nfft)/(float)nfft : 1.0f/(float)nfft;
     if (Lx!=nfft) { fprintf(stderr,"error in ifft_rad2_c: nfrqs (vec length in X) must equal nfft\n"); return 1; }
 
     if (nfft==0u || N==0u) {}
@@ -581,7 +573,7 @@ int ifft_rad2_z (double *Y, const double *X, const size_t R, const size_t C, con
     const size_t N = R*C*S*H;
     const size_t Lx = (dim==0u) ? R : (dim==1u) ? C : (dim==2u) ? S : H;
     const size_t Ly = nfft;
-    const double s = (sc) ? 2.0*sqrt(0.5*nfft)/nfft : 1.0/nfft;
+    const double s = (sc) ? 2.0*sqrt(0.5*(double)nfft)/(double)nfft : 1.0/(double)nfft;
     if (Lx!=nfft) { fprintf(stderr,"error in ifft_rad2_z: nfrqs (vec length in X) must equal nfft\n"); return 1; }
 
     if (nfft==0u || N==0u) {}

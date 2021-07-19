@@ -30,7 +30,7 @@ int idst_s (float *Y, const float *X, const size_t R, const size_t C, const size
     }
     else
     {
-        const float ysc = (sc) ? 1.0f/(ndst+1u) : 1.0f/(2u*ndst+2u);
+        const float ysc = (sc) ? 1.0f/(float)(ndst+1u) : 1.0f/(float)(2u*ndst+2u);
         
         //Initialize fftwf
         float *X1, *Y1;
@@ -113,7 +113,7 @@ int idst_d (double *Y, const double *X, const size_t R, const size_t C, const si
     }
     else
     {
-        const double ysc = (sc) ? 1.0/(ndst+1u) : 1.0/(2u*ndst+2u);
+        const double ysc = (sc) ? 1.0/(double)(ndst+1u) : 1.0/(double)(2u*ndst+2u);
 
         //Initialize fftw
         double *X1, *Y1;
@@ -196,7 +196,7 @@ int idst_c (float *Y, const float *X, const size_t R, const size_t C, const size
     }
     else
     {
-        const float ysc = (sc) ? 1.0f/(ndst+1u) : 1.0f/(2u*ndst+2u);
+        const float ysc = (sc) ? 1.0f/(float)(ndst+1u) : 1.0f/(float)(2u*ndst+2u);
 
         //Initialize fftwf
         float *X1r, *Y1r, *X1i, *Y1i;
@@ -284,7 +284,7 @@ int idst_z (double *Y, const double *X, const size_t R, const size_t C, const si
     }
     else
     {
-        const double ysc = (sc) ? 1.0/(ndst+1u) : 1.0/(2u*ndst+2u);
+        const double ysc = (sc) ? 1.0/(double)(ndst+1u) : 1.0/(double)(2u*ndst+2u);
 
         //Initialize fftw
         double *X1r, *Y1r, *X1i, *Y1i;

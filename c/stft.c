@@ -69,7 +69,7 @@ int stft_s (float *Y, const float *X1, const float *X2, const size_t N, const si
                 {
                     mn = 0.0f;
                     for (size_t l=0u; l<L; ++l) { mn += *--Xw; }
-                    mn /= L;
+                    mn /= (float)L;
                     for (size_t l=0u; l<L; ++l, ++Xw) { *Xw -= mn; }
                 }
                 
@@ -120,7 +120,7 @@ int stft_s (float *Y, const float *X1, const float *X2, const size_t N, const si
                 {
                     X1 += ss - prev_n;
                     for (size_t l=0u; l<L; ++l, ++X1, ++X2, ++Xw) { *Xw = *X1 * *X2; }
-                    X1 -= xd; prev_n = ss + stp;
+                    X1 -= xd; prev_n = ss + (int)stp;
                 }
                 ss += stp; X2 -= L;
 
@@ -129,7 +129,7 @@ int stft_s (float *Y, const float *X1, const float *X2, const size_t N, const si
                 {
                     mn = 0.0f;
                     for (size_t l=0u; l<L; ++l) { mn += *--Xw; }
-                    mn /= L;
+                    mn /= (float)L;
                     for (size_t l=0u; l<L; ++l, ++Xw) { *Xw -= mn; }
                 }
 
@@ -201,7 +201,7 @@ int stft_d (double *Y, const double *X1, const double *X2, const size_t N, const
                 {
                     mn = 0.0;
                     for (size_t l=0u; l<L; ++l) { mn += *--Xw; }
-                    mn /= L;
+                    mn /= (double)L;
                     for (size_t l=0u; l<L; ++l, ++Xw) { *Xw -= mn; }
                 }
                 
@@ -258,7 +258,7 @@ int stft_d (double *Y, const double *X1, const double *X2, const size_t N, const
                 {
                     X1 += ss - prev_n;
                     for (size_t l=0u; l<L; ++l, ++X1, ++X2, ++Xw) { *Xw = *X1 * *X2; }
-                    X1 -= xd; prev_n = ss + stp;
+                    X1 -= xd; prev_n = ss + (int)stp;
                 }
                 ss += stp; X2 -= L;
 
@@ -267,7 +267,7 @@ int stft_d (double *Y, const double *X1, const double *X2, const size_t N, const
                 {
                     mn = 0.0;
                     for (size_t l=0u; l<L; ++l) { mn += *--Xw; }
-                    mn /= L;
+                    mn /= (double)L;
                     for (size_t l=0u; l<L; ++l, ++Xw) { *Xw -= mn; }
                 }
 

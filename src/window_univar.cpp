@@ -11,7 +11,7 @@
 #include <valarray>
 #include <unordered_map>
 #include <argtable2.h>
-#include "../util/cmli.hpp"
+#include "cmli.hpp"
 #include <cfloat>
 #include "window_univar.c"
 
@@ -41,11 +41,13 @@ int main(int argc, char *argv[])
 
     //Description
     string descr;
-    descr += "Takes univariate X1 and produces a series of (overlapping) frames.\n";
-    descr += "The output Y has size LxW or WxL, where L is the length of each frame, \n";
-    descr += "and W is the number of frames (a.k.a. windows).\n";
+    descr += "Windows univariate X1 to produces a series of (overlapping) frames.\n";
+    descr += "\n";
     descr += "Each frame of X1 is windowed (element-wise multiplied) by X2,\n";
     descr += "which is a window vector of length L (generated previously).\n";
+    descr += "\n";
+    descr += "The output Y has size LxW or WxL, where L is the length of each frame, \n";
+    descr += "and W is the number of frames (a.k.a. windows).\n";
     descr += "\n";
     descr += "The window (X2) is made by a generating function (hamming, hann, etc.).\n";
     descr += "The window (X2) must be real-valued.\n";
@@ -79,8 +81,9 @@ int main(int argc, char *argv[])
     descr += "Examples:\n";
     descr += "$ window_univar -s65 X1 X2 -o Y \n";
     descr += "$ window_univar -e X1 X2 > Y \n";
-    descr += "$ cat X1 | window_univar -e > Y \n";
-    descr += "$ hamming -l401 | window_univar -r200 > Y \n";
+    descr += "$ cat X1 | window_univar -e - X2 > Y \n";
+    descr += "$ hamming -l401 | window_univar -s160 X1 - > Y \n";
+    descr += "$ window_univar -s160 X1 <(hamming -l401) > Y \n";
 
 
     //Argtable

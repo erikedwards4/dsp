@@ -30,8 +30,7 @@ int ifft_fftw_s (float *Y, const float *X, const size_t R, const size_t C, const
 
     const size_t N = R*C*S*H;
     const size_t Lx = (dim==0u) ? R : (dim==1u) ? C : (dim==2u) ? S : H;
-    const float s = (sc) ? (float)(2.0*sqrt(0.5*nfft)/nfft) : 1.0f/nfft;
-    fprintf(stderr,"Lx=%lu, nfft=%lu, sc=%g, sc*nfft=%g\n",Lx,nfft,s,s*nfft);
+    const float s = (sc) ? 2.0f*sqrtf(0.5f*(float)nfft)/(float)nfft : 1.0f/(float)nfft;
     if (Lx!=nfft/2u+1u) { fprintf(stderr,"error in ifft_fftw_s: nfrqs (vec length in X) must equal nfft/2+1\n"); return 1; }
 
     if (nfft==0u || N==0u) {}
@@ -112,7 +111,7 @@ int ifft_fftw_d (double *Y, const double *X, const size_t R, const size_t C, con
 
     const size_t N = R*C*S*H;
     const size_t Lx = (dim==0u) ? R : (dim==1u) ? C : (dim==2u) ? S : H;
-    const double s = (sc) ? 2.0*sqrt(0.5*nfft)/nfft : 1.0f/nfft;
+    const double s = (sc) ? 2.0*sqrt(0.5*(double)nfft)/(double)nfft : 1.0/(double)nfft;
     if (Lx!=nfft/2u+1u) { fprintf(stderr,"error in ifft_fftw_d: nfrqs (vec length in X) must equal nfft/2+1\n"); return 1; }
 
     if (nfft==0u || N==0u) {}
@@ -193,7 +192,7 @@ int ifft_fftw_c (float *Y, const float *X, const size_t R, const size_t C, const
 
     const size_t N = R*C*S*H;
     const size_t Lx = (dim==0u) ? R : (dim==1u) ? C : (dim==2u) ? S : H;
-    const float s = (sc) ? (float)(2.0*sqrt(0.5*nfft)/nfft) : 1.0f/nfft;
+    const float s = (sc) ? 2.0f*sqrtf(0.5f*(float)nfft)/(float)nfft : 1.0f/(float)nfft;
     if (Lx!=nfft) { fprintf(stderr,"error in ifft_fftw_c: nfrqs (vec length in X) must equal nfft\n"); return 1; }
 
     if (nfft==0u || N==0u) {}
@@ -266,7 +265,7 @@ int ifft_fftw_z (double *Y, const double *X, const size_t R, const size_t C, con
 
     const size_t N = R*C*S*H;
     const size_t Lx = (dim==0u) ? R : (dim==1u) ? C : (dim==2u) ? S : H;
-    const float s = (sc) ? 2.0*sqrt(0.5*nfft)/nfft : 1.0f/nfft;
+    const double s = (sc) ? 2.0*sqrt(0.5*(double)nfft)/(double)nfft : 1.0/(double)nfft;
     if (Lx!=nfft) { fprintf(stderr,"error in ifft_fftw_z: nfrqs (vec length in X) must equal nfft\n"); return 1; }
 
     if (nfft==0u || N==0u) {}

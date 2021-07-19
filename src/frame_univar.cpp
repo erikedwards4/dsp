@@ -11,7 +11,7 @@
 #include <valarray>
 #include <unordered_map>
 #include <argtable2.h>
-#include "../util/cmli.hpp"
+#include "cmli.hpp"
 #include <cfloat>
 #include "frame_univar.c"
 
@@ -136,7 +136,7 @@ int main(int argc, char *argv[])
     else if (a_stp->ival[0]<1) { cerr << progstr+": " << __LINE__ << errstr << "stp must be positive" << endl; return 1; }
     else { stp = size_t(a_stp->ival[0]); }
 
-    //Get snip-edges
+    //Get snip_edges
     snip_edges = (a_sne->count>0);
 
 

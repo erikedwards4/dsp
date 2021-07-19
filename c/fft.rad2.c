@@ -20,16 +20,8 @@
     #define M_PI 3.14159265358979323846
 #endif
 
-#ifndef M_PIf
-    #define M_PIf 3.14159265358979323846f
-#endif
-
 #ifndef M_SQRT1_2
     #define M_SQRT1_2 0.707106781186547524401
-#endif
-
-#ifndef M_SQRT1_2f
-    #define M_SQRT1_2f 0.707106781186547524401f
 #endif
 
 #ifdef __cplusplus
@@ -37,13 +29,14 @@ namespace codee {
 extern "C" {
 #endif
 
-void get_bittbl(size_t* bittbl, const size_t nfft);
-void get_cstbl_s (float* cstbl, const size_t nfft);
-void get_cstbl_d (double* cstbl, const size_t nfft);
-void fft_1d_s (float *Y, const size_t nfft, const size_t *bittbl, const float *cstbl);
-void fft_1d_d (double *Y, const size_t nfft, const size_t *bittbl, const double *cstbl);
-void fft_1d_c (float *Y, const size_t nfft, const size_t *bittbl, const float *cstbl);
-void fft_1d_z (double *Y, const size_t nfft, const size_t *bittbl, const double *cstbl);
+static void get_bittbl (size_t* bittbl, const size_t nfft);
+static void get_bittbl_nyq (size_t* bittbl, const size_t nfft);
+static void get_cstbl_s (float* cstbl, const size_t nfft);
+static void get_cstbl_d (double* cstbl, const size_t nfft);
+static void fft_1d_s (float *Y, const size_t nfft, const size_t *bittbl, const float *cstbl);
+static void fft_1d_d (double *Y, const size_t nfft, const size_t *bittbl, const double *cstbl);
+static void fft_1d_c (float *Y, const size_t nfft, const size_t *bittbl, const float *cstbl);
+static void fft_1d_z (double *Y, const size_t nfft, const size_t *bittbl, const double *cstbl);
 
 int fft_rad2_s (float *Y, const float *X, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim, const size_t nfft, const char sc);
 int fft_rad2_d (double *Y, const double *X, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim, const size_t nfft, const char sc);
@@ -51,7 +44,7 @@ int fft_rad2_c (float *Y, const float *X, const size_t R, const size_t C, const 
 int fft_rad2_z (double *Y, const double *X, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim, const size_t nfft, const char sc);
 
 
-void get_bittbl(size_t* bittbl, const size_t nfft)
+static void get_bittbl (size_t* bittbl, const size_t nfft)
 {
     //struct timespec tic, toc; clock_gettime(CLOCK_REALTIME,&tic);
 
@@ -83,7 +76,7 @@ void get_bittbl(size_t* bittbl, const size_t nfft)
 }
 
 
-void get_bittbl_nyq(size_t* bittbl, const size_t nfft)
+static void get_bittbl_nyq (size_t* bittbl, const size_t nfft)
 {
     //This is for real-valued case, where only up to Nyquist needed
     const size_t nfft2 = nfft/2u;
@@ -100,7 +93,7 @@ void get_bittbl_nyq(size_t* bittbl, const size_t nfft)
 }
 
 
-void get_cstbl_s (float* cstbl, const size_t nfft)
+static void get_cstbl_s (float* cstbl, const size_t nfft)
 {
     const size_t nfft2=nfft/2u, nfft4=nfft/4u, nfft8=nfft/8u;
     float c=1.0f, s=0.0f, dc, ds, t;
@@ -111,7 +104,7 @@ void get_cstbl_s (float* cstbl, const size_t nfft)
     ds = sqrtf(t-dc*dc);
 
     for (size_t i=0u; i<nfft8; ++i, ++cstbl, s+=ds, ds-=t*s) { *cstbl = s; }
-    if (nfft8>0u) { *cstbl = M_SQRT1_2f; }
+    if (nfft8>0u) { *cstbl = (float)M_SQRT1_2; }
     cstbl += nfft4 - nfft8;
     for (size_t i=0u; i<nfft8; ++i, --cstbl, c-=dc, dc+=t*c) { *cstbl = c; }
     cstbl -= nfft4 - nfft8;
@@ -120,7 +113,7 @@ void get_cstbl_s (float* cstbl, const size_t nfft)
 }
 
 
-void get_cstbl_d (double* cstbl, const size_t nfft)
+static void get_cstbl_d (double* cstbl, const size_t nfft)
 {
     const size_t nfft2=nfft/2u, nfft4=nfft/4u, nfft8=nfft/8u;
     double c=1.0, s=0.0, dc, ds, t;
@@ -140,7 +133,7 @@ void get_cstbl_d (double* cstbl, const size_t nfft)
 }
 
 
-void fft_1d_s (float *Y, const size_t nfft, const size_t *bittbl, const float *cstbl)
+static void fft_1d_s (float *Y, const size_t nfft, const size_t *bittbl, const float *cstbl)
 {
     if (nfft<2u) {}
     else if (nfft==2u)
@@ -190,7 +183,7 @@ void fft_1d_s (float *Y, const size_t nfft, const size_t *bittbl, const float *c
 }
 
 
-void fft_1d_d (double *Y, const size_t nfft, const size_t *bittbl, const double *cstbl)
+static void fft_1d_d (double *Y, const size_t nfft, const size_t *bittbl, const double *cstbl)
 {
     if (nfft<2u) {}
     else if (nfft==2u)
@@ -240,7 +233,7 @@ void fft_1d_d (double *Y, const size_t nfft, const size_t *bittbl, const double 
 }
 
 
-void fft_1d_c (float *Y, const size_t nfft, const size_t *bittbl, const float *cstbl)
+static void fft_1d_c (float *Y, const size_t nfft, const size_t *bittbl, const float *cstbl)
 {
     if (nfft<2u) {}
     else if (nfft==2u)
@@ -301,7 +294,7 @@ void fft_1d_c (float *Y, const size_t nfft, const size_t *bittbl, const float *c
 }
 
 
-void fft_1d_z (double *Y, const size_t nfft, const size_t *bittbl, const double *cstbl)
+static void fft_1d_z (double *Y, const size_t nfft, const size_t *bittbl, const double *cstbl)
 {
     if (nfft<2u) {}
     else if (nfft==2u)
@@ -438,7 +431,7 @@ int fft_rad2_s (float *Y, const float *X, const size_t R, const size_t C, const 
     //Scale
     if (sc)
     {
-        const float s = (float)(1.0/sqrt(2u*nfft));
+        const float s = 1.0f/sqrt((float)(2u*nfft));
         for (size_t l=0u; l<2u*Ly*N/Lx; ++l, ++Y) { *Y *= s; }
     }
     
@@ -460,7 +453,7 @@ int fft_rad2_d (double *Y, const double *X, const size_t R, const size_t C, cons
     if (nfft==0u || N==0u) {}
     else if (nfft==1u)
     {
-        for (size_t n=0u; n<N; ++n, ++X) { *Y++ = *X; *Y++ = 0.0f; }
+        for (size_t n=0u; n<N; ++n, ++X) { *Y++ = *X; *Y++ = 0.0; }
         Y -= 2u*N;
     }
     else
@@ -522,7 +515,7 @@ int fft_rad2_d (double *Y, const double *X, const size_t R, const size_t C, cons
     //Scale
     if (sc)
     {
-        const float s = 1.0/sqrt(2u*nfft);
+        const double s = 1.0/sqrt((double)(2u*nfft));
         for (size_t l=0u; l<2u*Ly*N/Lx; ++l, ++Y) { *Y *= s; }
     }
     
@@ -602,7 +595,7 @@ int fft_rad2_c (float *Y, const float *X, const size_t R, const size_t C, const 
     //Scale
     if (sc)
     {
-        const float s = (float)(1.0/sqrt(2u*nfft));
+        const float s = 1.0f/sqrt((float)(2u*nfft));
         for (size_t l=0u; l<2u*Ly*N/Lx; ++l, ++Y) { *Y *= s; }
     }
     
@@ -682,7 +675,7 @@ int fft_rad2_z (double *Y, const double *X, const size_t R, const size_t C, cons
     //Scale
     if (sc)
     {
-        const float s = 1.0/sqrt(2u*nfft);
+        const double s = 1.0/sqrt((double)(2u*nfft));
         for (size_t l=0u; l<2u*Ly*N/Lx; ++l, ++Y) { *Y *= s; }
     }
     

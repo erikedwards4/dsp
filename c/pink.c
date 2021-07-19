@@ -22,10 +22,6 @@
     #define M_SQRT2 1.41421356237309504880
 #endif
 
-#ifndef M_SQRT2f
-    #define M_SQRT2f 1.41421356237309504880f
-#endif
-
 #ifdef __cplusplus
 namespace codee {
 extern "C" {

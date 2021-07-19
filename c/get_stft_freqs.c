@@ -19,11 +19,11 @@ int get_stft_freqs_s (float *Y, const size_t nfft, const size_t F, const float f
     if (F>nfft) { fprintf(stderr,"error in get_stft_freqs_s: F must be <= nfft\n"); return 1; }
 
     const size_t Nyq = nfft/2u + 1u;
-    const float finc = fs/nfft;
+    const float finc = fs/(float)nfft;
 
     *Y++ = 0.0f;
-    for (size_t f=1u; f<F && f<Nyq; ++f, ++Y) { *Y = f*finc; }
-    for (size_t f=Nyq; f<F; ++f, ++Y) { *Y = -finc*(nfft-f); }
+    for (size_t f=1u; f<F && f<Nyq; ++f, ++Y) { *Y = (float)f * finc; }
+    for (size_t f=Nyq; f<F; ++f, ++Y) { *Y = -finc * (float)(nfft-f); }
 
     return 0;
 }
@@ -34,11 +34,11 @@ int get_stft_freqs_d (double *Y, const size_t nfft, const size_t F, const double
     if (F>nfft) { fprintf(stderr,"error in get_stft_freqs_d: F must be <= nfft\n"); return 1; }
 
     const size_t Nyq = nfft/2u + 1u;
-    const double finc = fs/nfft;
+    const double finc = fs/(double)nfft;
 
     *Y++ = 0.0;
-    for (size_t f=1u; f<F && f<Nyq; ++f, ++Y) { *Y = f*finc; }
-    for (size_t f=Nyq; f<F; ++f, ++Y) { *Y = -finc*(nfft-f); }
+    for (size_t f=1u; f<F && f<Nyq; ++f, ++Y) { *Y = (double)f * finc; }
+    for (size_t f=Nyq; f<F; ++f, ++Y) { *Y = -finc * (double)(nfft-f); }
 
     return 0;
 }

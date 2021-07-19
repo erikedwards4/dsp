@@ -9,7 +9,7 @@
 #It is not necessary to run this when making the C++ command-line tools.
 
 SHELL=/bin/bash
-CC=g++
+CC=clang++
 
 ifeq ($(CC),$(filter $(CC),clang gcc))
 	STD=-std=c11
@@ -92,7 +92,7 @@ hilbert: hilbert.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 
 
 #Filter: FIR and IIR filters
-Filter: fir iir #fir_tau iir_tau filter filter_tau filtfilt spencer
+Filter: #fir iir #fir_tau iir_tau filter filter_tau filtfilt spencer
 fir: fir.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 iir: iir.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 
@@ -112,7 +112,7 @@ interp1t: interp1t.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 
 
 #ZC_LCs: zero-crossings, level-crossings and mean-crossings
-ZCs_LCs: zcs lcs mcs zcr lcr mcr zcr_windowed lcr_windowed mcr_windowed
+ZCs_LCs: #zcs lcs mcs zcr lcr mcr zcr_windowed lcr_windowed mcr_windowed
 zcs: zcs.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 lcs: lcs.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 mcs: mcs.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
@@ -126,7 +126,7 @@ mcr_windowed: mcr_windowed.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 
 #AR_Poly: conversion between AR (autoregressive), poly (polynomial),
 #RC (reflection coeff), and PSD (power spectral density) representations
-AR_Poly: poly2roots roots2poly ar2poly poly2ar ar2rc rc2ar poly2rc rc2poly ar2psd poly2psd
+AR_Poly: #poly2roots roots2poly ar2poly poly2ar ar2rc rc2ar poly2rc rc2poly ar2psd poly2psd
 poly2roots: poly2roots.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 roots2poly: roots2poly.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 ar2poly: ar2poly.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
@@ -141,7 +141,7 @@ poly2psd: poly2psd.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 
 #AC_LP: conversions between sig (signal), AC (autocorrelation), LP (linear prediction), and related.
 #For example, ac2rc converts from AC to RCs (reflection coeffs).
-AC_LP: autocorr autocorr_fft sig2ac sig2ac_fft ac2ar_levdurb ac2poly_levdurb sig2ar_levdurb sig2poly_levdurb sig2ar_burg sig2poly_burg ac2rc ac2cc ac2mvdr
+AC_LP: #autocorr autocorr_fft sig2ac sig2ac_fft ac2ar_levdurb ac2poly_levdurb sig2ar_levdurb sig2poly_levdurb sig2ar_burg sig2poly_burg ac2rc ac2cc ac2mvdr
 sig2ac: sig2ac.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 sig2ac_fft: sig2ac_fft.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 ac2ar_levdurb: ac2ar_levdurb.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
@@ -156,9 +156,9 @@ ac2mvdr: ac2mvdr.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 
 
 #Frame: get frames and apply windows for univariate signal to put into matrix
-Frame: frame_univar frame_univar_float apply_win window_univar
+Frame: frame_univar frame_univar_flt apply_win window_univar
 frame_univar: frame_univar.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
-frame_univar_float: frame_univar_float.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+frame_univar_flt: frame_univar_flt.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 apply_win: apply_win.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 window_univar: window_univar.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 

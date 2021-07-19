@@ -10,15 +10,7 @@
 #include <stdio.h>
 #include <math.h>
 #include <fftw3.h>
-#include <time.h>
-
-#ifndef M_SQRT1_2
-    #define M_SQRT1_2 0.707106781186547524401
-#endif
-
-#ifndef M_SQRT1_2f
-    #define M_SQRT1_2f 0.707106781186547524401f
-#endif
+//#include <time.h>
 
 #ifdef __cplusplus
 namespace codee {
@@ -108,7 +100,7 @@ int fft_fftw_r2hc_s (float *Y, const float *X, const size_t R, const size_t C, c
     //Scale
     if (sc)
     {
-        const float s = (float)(1.0/sqrt(2u*nfft));
+        const float s = (float)(1.0/sqrt((double)(2u*nfft)));
         for (size_t l=0u; l<2u*Ly*N/Lx; ++l, ++Y) { *Y *= s; }
     }
 
@@ -197,7 +189,7 @@ int fft_fftw_r2hc_d (double *Y, const double *X, const size_t R, const size_t C,
     //Scale
     if (sc)
     {
-        const double s = 1.0/sqrt(2u*nfft);
+        const double s = 1.0/sqrt((double)(2u*nfft));
         for (size_t l=0u; l<2u*Ly*N/Lx; ++l, ++Y) { *Y *= s; }
     }
 
