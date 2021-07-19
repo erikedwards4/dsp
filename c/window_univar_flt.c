@@ -55,31 +55,29 @@ int window_univar_flt_s (float *Y, const float *X1, const float *X2, const size_
         prev_cs = cs;
         while (ss<0 && w<W)
         {
-            for (size_t l=0u; l<(size_t)(-ss); ++l, ++Y) { *Y = 0.0f; }
-            for (size_t l=(size_t)(-ss); l<L; ++l, ++X, ++Y) { *Y = *X; }
-            X -= L - (size_t)(-ss);
+            for (size_t l=0u; l<(size_t)(-ss); ++l, ++X2, ++Y) { *Y = 0.0f; }
+            for (size_t l=(size_t)(-ss); l<L; ++l, ++X1, ++X2, ++Y) { *Y = *X1 * *X2; }
             ++w; cc += stp; cs = (int)roundf(cc);
-            ss = cs - (int)Lpre;
-            X += cs - prev_cs; prev_cs = cs;
+            X1 -= (int)L + ss; X2 -= L;
+            ss = cs - (int)Lpre; prev_cs = cs;
         }
+        X1 += ss;
         es = cs + (int)Lpost;
         while (es<(int)N && w<W)
         {
-            for (size_t l=0u; l<L; ++l, ++X, ++Y) { *Y = *X; }
-            X -= L;
+            for (size_t l=0u; l<L; ++l, ++X1, ++X2, ++Y) { *Y = *X1 * *X2; }
             ++w; cc += stp; cs = (int)roundf(cc);
-            es = cs + (int)Lpost;
-            X += cs - prev_cs; prev_cs = cs;
+            X1 += cs - prev_cs - (int)L; X2 -= L;
+            es = cs + (int)Lpost; prev_cs = cs;
         }
         ss = cs - (int)Lpre;
         while (ss<(int)N && w<W)
         {
-            for (size_t l=0u; l<N-(size_t)ss; ++l, ++X, ++Y) { *Y = *X; }
-            for (size_t l=N-(size_t)ss; l<L; ++l, ++Y) { *Y = 0.0f; }
-            X -= N - (size_t)ss;
+            for (size_t l=0u; l<N-(size_t)ss; ++l, ++X1, ++X2, ++Y) { *Y = *X1 * *X2; }
+            for (size_t l=N-(size_t)ss; l<L; ++l, ++X2, ++Y) { *Y = 0.0f; }
             ++w; cc += stp; cs = (int)roundf(cc);
-            ss = cs - (int)Lpre;
-            X += cs - prev_cs; prev_cs = cs;
+            X1 += cs - prev_cs - (int)N + ss; X2 -= L;
+            ss = cs - (int)Lpre; prev_cs = cs;
         }
         while (w<W)
         {
@@ -121,31 +119,29 @@ int window_univar_flt_d (double *Y, const double *X1, const double *X2, const si
         prev_cs = cs;
         while (ss<0 && w<W)
         {
-            for (size_t l=0u; l<(size_t)(-ss); ++l, ++Y) { *Y = 0.0; }
-            for (size_t l=(size_t)(-ss); l<L; ++l, ++X, ++Y) { *Y = *X; }
-            X -= L - (size_t)(-ss);
+            for (size_t l=0u; l<(size_t)(-ss); ++l, ++X2, ++Y) { *Y = 0.0; }
+            for (size_t l=(size_t)(-ss); l<L; ++l, ++X1, ++X2, ++Y) { *Y = *X1 * *X2; }
             ++w; cc += stp; cs = (int)round(cc);
-            ss = cs - (int)Lpre;
-            X += cs - prev_cs; prev_cs = cs;
+            X1 -= (int)L + ss; X2 -= L;
+            ss = cs - (int)Lpre; prev_cs = cs;
         }
+        X1 += ss;
         es = cs + (int)Lpost;
         while (es<(int)N && w<W)
         {
-            for (size_t l=0u; l<L; ++l, ++X, ++Y) { *Y = *X; }
-            X -= L;
+            for (size_t l=0u; l<L; ++l, ++X1, ++X2, ++Y) { *Y = *X1 * *X2; }
             ++w; cc += stp; cs = (int)round(cc);
-            es = cs + (int)Lpost;
-            X += cs - prev_cs; prev_cs = cs;
+            X1 += cs - prev_cs - (int)L; X2 -= L;
+            es = cs + (int)Lpost; prev_cs = cs;
         }
         ss = cs - (int)Lpre;
         while (ss<(int)N && w<W)
         {
-            for (size_t l=0u; l<N-(size_t)ss; ++l, ++X, ++Y) { *Y = *X; }
-            for (size_t l=N-(size_t)ss; l<L; ++l, ++Y) { *Y = 0.0; }
-            X -= N - (size_t)ss;
+            for (size_t l=0u; l<N-(size_t)ss; ++l, ++X1, ++X2, ++Y) { *Y = *X1 * *X2; }
+            for (size_t l=N-(size_t)ss; l<L; ++l, ++X2, ++Y) { *Y = 0.0; }
             ++w; cc += stp; cs = (int)round(cc);
-            ss = cs - (int)Lpre;
-            X += cs - prev_cs; prev_cs = cs;
+            X1 += cs - prev_cs - (int)N + ss; X2 -= L;
+            ss = cs - (int)Lpre; prev_cs = cs;
         }
         while (w<W)
         {
@@ -187,31 +183,29 @@ int window_univar_flt_c (float *Y, const float *X1, const float *X2, const size_
         prev_cs = cs;
         while (ss<0 && w<W)
         {
-            for (size_t l=0u; l<(size_t)(-ss); ++l, ++Y) { *Y = 0.0f; *++Y = 0.0f; }
-            for (size_t l=(size_t)(-ss); l<L; ++l, ++X, ++Y) { *Y = *X; *++Y = *++X; }
-            X -= 2u*(L-(size_t)(-ss));
+            for (size_t l=0u; l<(size_t)(-ss); ++l, ++X2, ++Y) { *Y = 0.0f; *++Y = 0.0f; }
+            for (size_t l=(size_t)(-ss); l<L; ++l, ++X1, ++X2, ++Y) { *Y = *X1**X2; *++Y = *++X1**X2; }
             ++w; cc += stp; cs = (int)roundf(cc);
-            ss = cs - (int)Lpre;
-            X += 2*(cs-prev_cs); prev_cs = cs;
+            X1 -= 2*((int)L+ss); X2 -= L;
+            ss = cs - (int)Lpre; prev_cs = cs;
         }
+        X1 += 2*ss;
         es = cs + (int)Lpost;
         while (es<(int)N && w<W)
         {
-            for (size_t l=0u; l<L; ++l, ++X, ++Y) { *Y = *X; *++Y = *++X; }
-            X -= 2u*L;
+            for (size_t l=0u; l<L; ++l, ++X1, ++X2, ++Y) { *Y = *X1**X2; *++Y = *++X1**X2; }
             ++w; cc += stp; cs = (int)roundf(cc);
-            es = cs + (int)Lpost;
-            X += 2*(cs-prev_cs); prev_cs = cs;
+            X1 += 2*(cs-prev_cs-(int)L); X2 -= L;
+            es = cs + (int)Lpost; prev_cs = cs;
         }
         ss = cs - (int)Lpre;
         while (ss<(int)N && w<W)
         {
-            for (size_t l=0u; l<N-(size_t)ss; ++l, ++X, ++Y) { *Y = *X; *++Y = *++X; }
-            for (size_t l=N-(size_t)ss; l<L; ++l, ++Y) { *Y = 0.0f; *++Y = 0.0f; }
-            X -= 2u*(N-(size_t)ss);
+            for (size_t l=0u; l<N-(size_t)ss; ++l, ++X1, ++X2, ++Y) { *Y = *X1**X2; *++Y = *++X1**X2; }
+            for (size_t l=N-(size_t)ss; l<L; ++l, ++X2, ++Y) { *Y = 0.0f; *++Y = 0.0f; }
             ++w; cc += stp; cs = (int)roundf(cc);
-            ss = cs - (int)Lpre;
-            X += 2*(cs-prev_cs); prev_cs = cs;
+            X1 += 2*(cs-prev_cs-(int)N+ss); X2 -=L;
+            ss = cs - (int)Lpre; prev_cs = cs;
         }
         while (w<W)
         {
@@ -253,31 +247,29 @@ int window_univar_flt_z (double *Y, const double *X1, const double *X2, const si
         prev_cs = cs;
         while (ss<0 && w<W)
         {
-            for (size_t l=0u; l<(size_t)(-ss); ++l, ++Y) { *Y = 0.0; *++Y = 0.0; }
-            for (size_t l=(size_t)(-ss); l<L; ++l, ++X, ++Y) { *Y = *X; *++Y = *++X; }
-            X -= 2u*(L-(size_t)(-ss));
+            for (size_t l=0u; l<(size_t)(-ss); ++l, ++X2, ++Y) { *Y = 0.0; *++Y = 0.0; }
+            for (size_t l=(size_t)(-ss); l<L; ++l, ++X1, ++X2, ++Y) { *Y = *X1**X2; *++Y = *++X1**X2; }
             ++w; cc += stp; cs = (int)round(cc);
-            ss = cs - (int)Lpre;
-            X += 2*(cs-prev_cs); prev_cs = cs;
+            X1 -= 2*((int)L+ss); X2 -= L;
+            ss = cs - (int)Lpre; prev_cs = cs;
         }
+        X1 += 2*ss;
         es = cs + (int)Lpost;
         while (es<(int)N && w<W)
         {
-            for (size_t l=0u; l<L; ++l, ++X, ++Y) { *Y = *X; *++Y = *++X; }
-            X -= 2u*L;
+            for (size_t l=0u; l<L; ++l, ++X1, ++X2, ++Y) { *Y = *X1**X2; *++Y = *++X1**X2; }
             ++w; cc += stp; cs = (int)round(cc);
-            es = cs + (int)Lpost;
-            X += 2*(cs-prev_cs); prev_cs = cs;
+            X1 += 2*(cs-prev_cs-(int)L); X2 -= L;
+            es = cs + (int)Lpost; prev_cs = cs;
         }
         ss = cs - (int)Lpre;
         while (ss<(int)N && w<W)
         {
-            for (size_t l=0u; l<N-(size_t)ss; ++l, ++X, ++Y) { *Y = *X; *++Y = *++X; }
-            for (size_t l=N-(size_t)ss; l<L; ++l, ++Y) { *Y = 0.0; *++Y = 0.0; }
-            X -= 2u*(N-(size_t)ss);
+            for (size_t l=0u; l<N-(size_t)ss; ++l, ++X1, ++X2, ++Y) { *Y = *X1**X2; *++Y = *++X1**X2; }
+            for (size_t l=N-(size_t)ss; l<L; ++l, ++X2, ++Y) { *Y = 0.0; *++Y = 0.0; }
             ++w; cc += stp; cs = (int)round(cc);
-            ss = cs - (int)Lpre;
-            X += 2*(cs-prev_cs); prev_cs = cs;
+            X1 += 2*(cs-prev_cs-(int)N+ss); X2 -=L;
+            ss = cs - (int)Lpre; prev_cs = cs;
         }
         while (w<W)
         {

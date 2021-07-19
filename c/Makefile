@@ -156,15 +156,16 @@ ac2mvdr: ac2mvdr.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 
 
 #Frame: get frames and apply windows for univariate signal to put into matrix
-Frame: frame_univar frame_univar_flt apply_win window_univar
+Frame: frame_univar frame_univar_flt apply_win window_univar window_univar_flt
 frame_univar: frame_univar.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 frame_univar_flt: frame_univar_flt.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 apply_win: apply_win.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 window_univar: window_univar.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+window_univar_flt: window_univar_flt.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 
 
 #STFT: steps to do the STFT (short-term Fourier transform)
-STFT: fft_power stft #get_stft_freqs
+STFT: fft_power stft get_stft_freqs
 fft_power: fft_power.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 stft: stft.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 get_stft_freqs: get_stft_freqs.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)

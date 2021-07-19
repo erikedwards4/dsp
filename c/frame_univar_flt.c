@@ -61,6 +61,7 @@ int frame_univar_flt_s (float *Y, const float *X, const size_t N, const size_t L
             X -= (int)L + ss;
             ss = cs - (int)Lpre; prev_cs = cs;
         }
+        X += ss;
         es = cs + (int)Lpost;
         while (es<(int)N && w<W)
         {
@@ -72,10 +73,10 @@ int frame_univar_flt_s (float *Y, const float *X, const size_t N, const size_t L
         ss = cs - (int)Lpre;
         while (ss<(int)N && w<W)
         {
-            for (size_t l=0u; l<N-(size_t)ss+1u; ++l, ++X, ++Y) { *Y = *X; }
-            for (size_t l=N-(size_t)ss+1u; l<L; ++l, ++Y) { *Y = 0.0f; }
+            for (size_t l=0u; l<N-(size_t)ss; ++l, ++X, ++Y) { *Y = *X; }
+            for (size_t l=N-(size_t)ss; l<L; ++l, ++Y) { *Y = 0.0f; }
             ++w; cc += stp; cs = (int)roundf(cc);
-            X += cs - prev_cs - (int)N + ss - 1;
+            X += cs - prev_cs - (int)N + ss;
             ss = cs - (int)Lpre; prev_cs = cs;
         }
         while (w<W)
@@ -124,6 +125,7 @@ int frame_univar_flt_d (double *Y, const double *X, const size_t N, const size_t
             X -= (int)L + ss;
             ss = cs - (int)Lpre; prev_cs = cs;
         }
+        X += ss;
         es = cs + (int)Lpost;
         while (es<(int)N && w<W)
         {
@@ -135,11 +137,10 @@ int frame_univar_flt_d (double *Y, const double *X, const size_t N, const size_t
         ss = cs - (int)Lpre;
         while (ss<(int)N && w<W)
         {
-            fprintf(stderr,"w=%lu, ss=%d, N-(size_t)ss+1u=%lu \n",w,ss,N-(size_t)ss+1u);
-            for (size_t l=0u; l<N-(size_t)ss+1u; ++l, ++X, ++Y) { *Y = *X; }
-            for (size_t l=N-(size_t)ss+1u; l<L; ++l, ++Y) { *Y = 0.0; }
+            for (size_t l=0u; l<N-(size_t)ss; ++l, ++X, ++Y) { *Y = *X; }
+            for (size_t l=N-(size_t)ss; l<L; ++l, ++Y) { *Y = 0.0; }
             ++w; cc += stp; cs = (int)round(cc);
-            X += cs - prev_cs - (int)N + ss - 1;
+            X += cs - prev_cs - (int)N + ss;
             ss = cs - (int)Lpre; prev_cs = cs;
         }
         while (w<W)
@@ -188,6 +189,7 @@ int frame_univar_flt_c (float *Y, const float *X, const size_t N, const size_t L
             X -= 2*((int)L+ss);
             ss = cs - (int)Lpre; prev_cs = cs;
         }
+        X += 2*ss;
         es = cs + (int)Lpost;
         while (es<(int)N && w<W)
         {
@@ -199,10 +201,10 @@ int frame_univar_flt_c (float *Y, const float *X, const size_t N, const size_t L
         ss = cs - (int)Lpre;
         while (ss<(int)N && w<W)
         {
-            for (size_t l=0u; l<N-(size_t)ss+1u; ++l, ++X, ++Y) { *Y = *X; *++Y = *++X; }
-            for (size_t l=N-(size_t)ss+1u; l<L; ++l, ++Y) { *Y = 0.0f; *++Y = 0.0f; }
+            for (size_t l=0u; l<N-(size_t)ss; ++l, ++X, ++Y) { *Y = *X; *++Y = *++X; }
+            for (size_t l=N-(size_t)ss; l<L; ++l, ++Y) { *Y = 0.0f; *++Y = 0.0f; }
             ++w; cc += stp; cs = (int)roundf(cc);
-            X += 2*(cs-prev_cs-(int)N+ss-1); 
+            X += 2*(cs-prev_cs-(int)N+ss);
             ss = cs - (int)Lpre; prev_cs = cs;
         }
         while (w<W)
@@ -251,6 +253,7 @@ int frame_univar_flt_z (double *Y, const double *X, const size_t N, const size_t
             X -= 2*((int)L+ss);
             ss = cs - (int)Lpre; prev_cs = cs;
         }
+        X += 2*ss;
         es = cs + (int)Lpost;
         while (es<(int)N && w<W)
         {
@@ -262,10 +265,10 @@ int frame_univar_flt_z (double *Y, const double *X, const size_t N, const size_t
         ss = cs - (int)Lpre;
         while (ss<(int)N && w<W)
         {
-            for (size_t l=0u; l<N-(size_t)ss+1u; ++l, ++X, ++Y) { *Y = *X; *++Y = *++X; }
-            for (size_t l=N-(size_t)ss+1u; l<L; ++l, ++Y) { *Y = 0.0; *++Y = 0.0; }
+            for (size_t l=0u; l<N-(size_t)ss; ++l, ++X, ++Y) { *Y = *X; *++Y = *++X; }
+            for (size_t l=N-(size_t)ss; l<L; ++l, ++Y) { *Y = 0.0; *++Y = 0.0; }
             ++w; cc += stp; cs = (int)round(cc);
-            X += 2*(cs-prev_cs-(int)N+ss-1); 
+            X += 2*(cs-prev_cs-(int)N+ss);
             ss = cs - (int)Lpre; prev_cs = cs;
         }
         while (w<W)

@@ -235,7 +235,7 @@ ac2mvdr: srci/ac2mvdr.cpp c/ac2mvdr.c
 
 
 #Frame: get frames and apply windows for univariate signal to put into matrix
-Frame: frame_univar frame_univar_flt apply_win window_univar
+Frame: frame_univar frame_univar_flt apply_win window_univar window_univar_flt
 frame_univar: srci/frame_univar.cpp c/frame_univar.c
 	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2
 frame_univar_flt: srci/frame_univar_flt.cpp c/frame_univar_flt.c
@@ -243,6 +243,8 @@ frame_univar_flt: srci/frame_univar_flt.cpp c/frame_univar_flt.c
 apply_win: srci/apply_win.cpp c/apply_win.c
 	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2
 window_univar: srci/window_univar.cpp c/window_univar.c
+	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2
+window_univar_flt: srci/window_univar_flt.cpp c/window_univar_flt.c
 	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2
 
 
