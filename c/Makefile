@@ -165,10 +165,11 @@ window_univar_flt: window_univar_flt.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 
 
 #STFT: steps to do the STFT (short-term Fourier transform)
-STFT: fft_power stft get_stft_freqs
+STFT: fft_power get_stft_freqs stft stft_flt
 fft_power: fft_power.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
-stft: stft.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 get_stft_freqs: get_stft_freqs.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+stft: stft.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+stft_flt: stft_flt.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 
 
 #Wavelets: a couple of my most often-used wavelets

@@ -249,13 +249,15 @@ window_univar_flt: srci/window_univar_flt.cpp c/window_univar_flt.c
 
 
 #STFT: steps to do the STFT (short-term Fourier transform)
-STFT: fft_power stft get_stft_freqs
+STFT: fft_power get_stft_freqs stft stft_flt
 fft_power: srci/fft_power.cpp c/fft_power.c
-	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lopenblas -lfftw3f -lfftw3 -lm
-stft: srci/stft.cpp c/stft.c
 	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lopenblas -lfftw3f -lfftw3 -lm
 get_stft_freqs: srci/get_stft_freqs.cpp c/get_stft_freqs.c
 	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2
+stft: srci/stft.cpp c/stft.c
+	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lopenblas -lfftw3f -lfftw3 -lm
+stft_flt: srci/stft_flt.cpp c/stft_flt.c
+	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lopenblas -lfftw3f -lfftw3 -lm
 
 
 #Wavelets: a couple of my most often-used wavelets

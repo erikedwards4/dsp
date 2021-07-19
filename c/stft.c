@@ -156,6 +156,7 @@ int stft_s (float *Y, const float *X1, const float *X2, const size_t N, const si
                 else { Y += F; }
             }
         }
+        fftwf_destroy_plan(plan); fftwf_free(Xw); fftwf_free(Yw);
     }
 
     return 0;
@@ -294,6 +295,7 @@ int stft_d (double *Y, const double *X1, const double *X2, const size_t N, const
                 else { Y += F; }
             }
         }
+        fftw_destroy_plan(plan); fftw_free(Xw); fftw_free(Yw);
     }
 
     return 0;

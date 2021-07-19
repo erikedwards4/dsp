@@ -13,7 +13,7 @@
 #include <argtable2.h>
 #include "cmli.hpp"
 #include <cfloat>
-#include "window_univar_flt.c"
+#include "stft_flt.c"
 
 #ifdef I
 #undef I
@@ -30,25 +30,31 @@ int main(int argc, char *argv[])
     const string errstr = ": \033[1;31merror:\033[0m ";
     const string warstr = ": \033[1;35mwarning:\033[0m ";
     const string progstr(__FILE__,string(__FILE__).find_last_of("/")+1,strlen(__FILE__)-string(__FILE__).find_last_of("/")-5);
-    const valarray<size_t> oktypes = {1u,2u,101u,102u};
+    const valarray<size_t> oktypes = {1u,2u};
     const size_t I = 2u, O = 1u;
     ifstream ifs1, ifs2; ofstream ofs1;
     int8_t stdi1, stdi2, stdo1, wo1;
     ioinfo i1, i2, o1;
-    size_t L, W;
+    size_t L, W, nfft, F;
     double stp, c0;
+    int mn0, amp, lg;
 
 
     //Description
     string descr;
-    descr += "Windows univariate X1 to produces a series of (overlapping) frames.\n";
+    descr += "Does STFT (short-term Fourier transform) of univariate X1 using window X2.\n";
+    descr += "\n";
+    descr += "The window (X2) is made by a generating function (hamming, hann, etc.).\n";
+    descr += "The signal (X1) and the window (X2) must be real-valued.\n";
     descr += "\n";
     descr += "Each frame of X1 is windowed (element-wise multiplied) by X2,\n";
     descr += "which is a window vector of length L (generated previously).\n";
+    descr += "The FFT is done on each windowed frame, and\n";
+    descr += "the real-valued power at each positive FFT freq is returned as the STFT.\n";
     descr += "\n";
-    descr += "The window (X2) is made by a generating function (hamming, hann, etc.).\n";
-    descr += "The window (X2) must be real-valued.\n";
-    descr += "Other than the window input (X2), this is identical to frame_univar_flt.\n";
+    descr += "The output Y has size FxW or WxF, where F is nfft/2+1, \n";
+    descr += "and nfft is the next-pow-2 of L, \n";
+    descr += "and W is the number of frames (a.k.a. windows).\n";
     descr += "\n";
     descr += "This _float version has different options and conventions;\n";
     descr += "and allows float (non-integer) values for tep size and start samp.\n";
@@ -67,18 +73,26 @@ int main(int argc, char *argv[])
     descr += "\n";
     descr += "X is extrapolated with zeros if the first/last frames overlap the edge.\n";
     descr += "\n";
-    descr += "The output Y has size LxW or WxL, where L is the window length, \n";
-    descr += "and W is the number of frames (a.k.a. windows).\n";
-    descr += "\n";
     descr += "The following framing convention is used here:\n";
     descr += "Samples from one frame are contiguous in memory, for row- and col-major.\n";
-    descr += "So, if Y is row-major, then it has size W x L; \n";
-    descr += "but if Y is col-major, then it has size L x W. \n";
+    descr += "So, if Y is row-major, then it has size W x F; \n";
+    descr += "but if Y is col-major, then it has size F x W. \n";
+    descr += "\n";
+    descr += "Include -z (--zero-mean) to subtract the mean from each frame [default=false].\n";
+    descr += "This is applied just after windowing.\n";
+    descr += "\n";
+    descr += "Include -a (--amplitude) to output amplitude rather than power [default=false].\n";
+    descr += "This simply takes the sqrt of each element of Y before output.\n";
+    descr += "\n";
+    descr += "Include -l (--log) to output log amplitude or power [default=false].\n";
+    descr += "This simply takes the log of each element of Y before output.\n";
     descr += "\n";
     descr += "Examples:\n";
-    descr += "$ window_univar_flt -s65 -c0 X1 X2 -o Y \n";
-    descr += "$ window_univar_flt -w20 -c60.25 -s60.25 X1 <(hamming -l401) > Y \n";
-    descr += "$ hamming -l401 | window_univar_flt X1 - > Y \n";
+    descr += "$ stft_flt -s65 X1 X2 -o Y \n";
+    descr += "$ stft_flt X1 X2 > Y \n";
+    descr += "$ cat X1 | stft_flt - X2 > Y \n";
+    descr += "$ hamming -l401 | stft_flt -s160 X1 > Y \n";
+    descr += "$ stft_flt -s160 X1 <(hamming -l401) > Y \n";
 
 
     //Argtable
@@ -87,10 +101,13 @@ int main(int argc, char *argv[])
     struct arg_dbl   *a_c0 = arg_dbln("c","c0","<dbl>",0,1,"center of first frame in samps [default=0.0]");
     struct arg_dbl  *a_stp = arg_dbln("s","stp","<dbl>",0,1,"step size btwn frames [default=160.0]");
     struct arg_int    *a_w = arg_intn("w","nframes","<uint>",0,1,"number of frames [default=(N-1)/stp]");
+    struct arg_lit  *a_mnz = arg_litn("z","zero-mean",0,1,"include to zero the mean of each frame [default=false]");
+    struct arg_lit  *a_amp = arg_litn("a","amplitude",0,1,"include to output amplitude (sqrt of power) [default=false]");
+    struct arg_lit  *a_log = arg_litn("l","log",0,1,"include to output log of amplitude or power [default=false]");
     struct arg_file  *a_fo = arg_filen("o","ofile","<file>",0,O,"output file (Y)");
     struct arg_lit *a_help = arg_litn("h","help",0,1,"display this help and exit");
     struct arg_end  *a_end = arg_end(5);
-    void *argtable[] = {a_fi, a_c0, a_stp, a_w, a_fo, a_help, a_end};
+    void *argtable[] = {a_fi, a_c0, a_stp, a_w, a_mnz, a_amp, a_log, a_fo, a_help, a_end};
     if (arg_nullcheck(argtable)!=0) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating argtable" << endl; return 1; }
     nerrs = arg_parse(argc, argv, argtable);
     if (a_help->count>0)
@@ -148,21 +165,33 @@ int main(int argc, char *argv[])
     else if (a_w->ival[0]<1) { cerr << progstr+": " << __LINE__ << errstr << "W (nframes) must be positive" << endl; return 1; }
     else { W = size_t(a_w->ival[0]); }
 
+    //Get mn0
+    mn0 = (a_mnz->count>0);
+
+    //Get amp
+    amp = (a_amp->count>0);
+
+    //Get lg
+    lg = (a_log->count>0);
+
 
     //Checks
-    if (i1.T!=i2.T && i1.T-100u!=i2.T) { cerr << progstr+": " << __LINE__ << errstr << "inputs must have compatible data types" << endl; return 1; }
+    if (i1.iscomplex() || i2.iscomplex()) { cerr << progstr+": " << __LINE__ << errstr << "inputs must be real-valued" << endl; return 1; }
+    if (i1.T!=i2.T) { cerr << progstr+": " << __LINE__ << errstr << "inputs must have the same data type" << endl; return 1; }
     if (!i1.isvec()) { cerr << progstr+": " << __LINE__ << errstr << "input 1 (X1) must be a vector" << endl; return 1; }
     if (i1.isempty()) { cerr << progstr+": " << __LINE__ << errstr << "input 1 (X1) found to be empty" << endl; return 1; }
     if (!i2.isvec()) { cerr << progstr+": " << __LINE__ << errstr << "input 2 (X2) must be a vector" << endl; return 1; }
     if (i2.isempty()) { cerr << progstr+": " << __LINE__ << errstr << "input 2 (X2) found to be empty" << endl; return 1; }
-    if (i2.iscomplex()) { cerr << progstr+": " << __LINE__ << errstr << "input 2 (X2) must be real-valued" << endl; return 1; }
 
 
     //Set output header info
     L = i2.N();
+    nfft = 1u;
+    while (nfft<L) { nfft *= 2u; }
+    F = nfft/2u + 1u;
     o1.F = i1.F; o1.T = i1.T;
-    o1.R = (i1.isrowmajor()) ? W : L;
-    o1.C = (i1.isrowmajor()) ? L : W;
+    o1.R = (i1.isrowmajor()) ? W : F;
+    o1.C = (i1.isrowmajor()) ? F : W;
     o1.S = i1.S; o1.H = i1.H;
 
 
@@ -195,7 +224,7 @@ int main(int argc, char *argv[])
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file (X)" << endl; return 1; }
         try { ifs2.read(reinterpret_cast<char*>(X2),i2.nbytes()); }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 2 (X2)" << endl; return 1; }
-        if (codee::window_univar_flt_s(Y,X1,X2,i1.N(),L,W,float(c0),float(stp)))
+        if (codee::stft_flt_s(Y,X1,X2,i1.N(),L,W,nfft,float(c0),float(stp),mn0,amp,lg))
         { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
         if (wo1)
         {
@@ -217,51 +246,7 @@ int main(int argc, char *argv[])
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file (X)" << endl; return 1; }
         try { ifs2.read(reinterpret_cast<char*>(X2),i2.nbytes()); }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 2 (X2)" << endl; return 1; }
-        if (codee::window_univar_flt_d(Y,X1,X2,i1.N(),L,W,double(c0),double(stp)))
-        { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
-        if (wo1)
-        {
-            try { ofs1.write(reinterpret_cast<char*>(Y),o1.nbytes()); }
-            catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem writing output file (Y)" << endl; return 1; }
-        }
-        delete[] X1; delete[] X2; delete[] Y;
-    }
-    else if (o1.T==101u)
-    {
-        float *X1, *X2, *Y;
-        try { X1 = new float[2u*i1.N()]; }
-        catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for input file 1 (X1)" << endl; return 1; }
-        try { X2 = new float[2u*i2.N()]; }
-        catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for input file 2 (X2)" << endl; return 1; }
-        try { Y = new float[2u*o1.N()]; }
-        catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for output file (Y)" << endl; return 1; }
-        try { ifs1.read(reinterpret_cast<char*>(X1),i1.nbytes()); }
-        catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 1 (X1)" << endl; return 1; }
-        try { ifs2.read(reinterpret_cast<char*>(X2),i2.nbytes()); }
-        catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 2 (X2)" << endl; return 1; }
-        if (codee::window_univar_flt_c(Y,X1,X2,i1.N(),L,W,float(c0),float(stp)))
-        { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
-        if (wo1)
-        {
-            try { ofs1.write(reinterpret_cast<char*>(Y),o1.nbytes()); }
-            catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem writing output file (Y)" << endl; return 1; }
-        }
-        delete[] X1; delete[] X2; delete[] Y;
-    }
-    else if (o1.T==102u)
-    {
-        double *X1, *X2, *Y;
-        try { X1 = new double[2u*i1.N()]; }
-        catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for input file 1 (X1)" << endl; return 1; }
-        try { X2 = new double[2u*i2.N()]; }
-        catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for input file 2 (X2)" << endl; return 1; }
-        try { Y = new double[2u*o1.N()]; }
-        catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for output file (Y)" << endl; return 1; }
-        try { ifs1.read(reinterpret_cast<char*>(X1),i1.nbytes()); }
-        catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 1 (X1)" << endl; return 1; }
-        try { ifs2.read(reinterpret_cast<char*>(X2),i2.nbytes()); }
-        catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 2 (X2)" << endl; return 1; }
-        if (codee::window_univar_flt_z(Y,X1,X2,i1.N(),L,W,double(c0),double(stp)))
+        if (codee::stft_flt_d(Y,X1,X2,i1.N(),L,W,nfft,double(c0),double(stp),mn0,amp,lg))
         { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
         if (wo1)
         {

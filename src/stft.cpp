@@ -52,6 +52,7 @@ int main(int argc, char *argv[])
     descr += "the real-valued power at each positive FFT freq is returned as the STFT.\n";
     descr += "\n";
     descr += "The output Y has size FxW or WxF, where F is nfft/2+1, \n";
+    descr += "and nfft is the next-pow-2 of L, \n";
     descr += "and W is the number of frames (a.k.a. windows).\n";
     descr += "\n";
     descr += "Use -s (--step) to give the step-size (frame-shift) in samples [default=160].\n";
@@ -166,8 +167,7 @@ int main(int argc, char *argv[])
 
 
     //Checks
-    if (i1.iscomplex()) { cerr << progstr+": " << __LINE__ << errstr << "input 1 (X1) must be real-valued" << endl; return 1; }
-    if (i2.iscomplex()) { cerr << progstr+": " << __LINE__ << errstr << "input 2 (X2) must be real-valued" << endl; return 1; }
+    if (i1.iscomplex() || i2.iscomplex()) { cerr << progstr+": " << __LINE__ << errstr << "inputs must be real-valued" << endl; return 1; }
     if (i1.T!=i2.T) { cerr << progstr+": " << __LINE__ << errstr << "inputs must have the same data type" << endl; return 1; }
     if (!i1.isvec()) { cerr << progstr+": " << __LINE__ << errstr << "input 1 (X1) must be a vector" << endl; return 1; }
     if (i1.isempty()) { cerr << progstr+": " << __LINE__ << errstr << "input 1 (X1) found to be empty" << endl; return 1; }

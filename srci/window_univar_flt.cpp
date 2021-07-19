@@ -28,9 +28,6 @@ descr += "\n";
 descr += "Use -c (--c0) to give the center-sample of the first frame [default=0].\n";
 descr += "This is a positive floating-point value.\n";
 descr += "\n";
-descr += "Use -l (--winlength) to give L, the length of each frame [default=401].\n";
-descr += "This is a positive int (because a window is a vector of int length).\n";
-descr += "\n";
 descr += "Use -w (--nframes) to give W, the number of frames [default=(N-1)/stp].\n";
 descr += "This is a positive int (use less than default to use only part of X).\n";
 descr += "\n";
@@ -39,7 +36,7 @@ descr += "then the center of each frame is rounded to the nearest integer sample
 descr += "\n";
 descr += "X is extrapolated with zeros if the first/last frames overlap the edge.\n";
 descr += "\n";
-descr += "The output Y has size LxW or WxL, where L is the length of each frame, \n";
+descr += "The output Y has size LxW or WxL, where L is the window length, \n";
 descr += "and W is the number of frames (a.k.a. windows).\n";
 descr += "\n";
 descr += "The following framing convention is used here:\n";

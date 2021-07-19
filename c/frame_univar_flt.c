@@ -28,7 +28,8 @@ int frame_univar_flt_z (double *Y, const double *X, const size_t N, const size_t
 
 int frame_univar_flt_s (float *Y, const float *X, const size_t N, const size_t L, const size_t W, const float c0, const float stp)
 {
-    if (L>=N) { fprintf(stderr,"error in frame_univar_flt_s: L must be < N (length X)\n"); return 1; }
+    if (W>N) { fprintf(stderr,"error in frame_univar_flt_s: W must be <= N (length X)\n"); return 1; }
+    if (L>N) { fprintf(stderr,"error in frame_univar_flt_s: L must be <= N (length X)\n"); return 1; }
     if (L<1u) { fprintf(stderr,"error in frame_univar_flt_s: L must be positive\n"); return 1; }
     if (N<1u) { fprintf(stderr,"error in frame_univar_flt_s: N (length X) must be positive\n"); return 1; }
     if (c0>(float)(N-1u)) { fprintf(stderr,"error in frame_univar_flt_s: c0 (center samp of 1st frame) must be < N (length X)\n"); return 1; }
@@ -92,7 +93,8 @@ int frame_univar_flt_s (float *Y, const float *X, const size_t N, const size_t L
 
 int frame_univar_flt_d (double *Y, const double *X, const size_t N, const size_t L, const size_t W, const double c0, const double stp)
 {
-    if (L>=N) { fprintf(stderr,"error in frame_univar_flt_d: L must be < N (length X)\n"); return 1; }
+    if (W>N) { fprintf(stderr,"error in frame_univar_flt_d: W must be <= N (length X)\n"); return 1; }
+    if (L>N) { fprintf(stderr,"error in frame_univar_flt_d: L must be <= N (length X)\n"); return 1; }
     if (L<1u) { fprintf(stderr,"error in frame_univar_flt_d: L must be positive\n"); return 1; }
     if (N<1u) { fprintf(stderr,"error in frame_univar_flt_d: N (length X) must be positive\n"); return 1; }
     if (c0>(double)(N-1u)) { fprintf(stderr,"error in frame_univar_flt_d: c0 (center samp of 1st frame) must be < N (length X)\n"); return 1; }
@@ -156,7 +158,8 @@ int frame_univar_flt_d (double *Y, const double *X, const size_t N, const size_t
 
 int frame_univar_flt_c (float *Y, const float *X, const size_t N, const size_t L, const size_t W, const float c0, const float stp)
 {
-    if (L>=N) { fprintf(stderr,"error in frame_univar_flt_c: L must be < N (length X)\n"); return 1; }
+    if (W>N) { fprintf(stderr,"error in frame_univar_flt_c: W must be <= N (length X)\n"); return 1; }
+    if (L>N) { fprintf(stderr,"error in frame_univar_flt_c: L must be <= N (length X)\n"); return 1; }
     if (L<1u) { fprintf(stderr,"error in frame_univar_flt_c: L must be positive\n"); return 1; }
     if (N<1u) { fprintf(stderr,"error in frame_univar_flt_c: N (length X) must be positive\n"); return 1; }
     if (c0>(float)(N-1u)) { fprintf(stderr,"error in frame_univar_flt_c: c0 (center samp of 1st frame) must be < N (length X)\n"); return 1; }
@@ -220,7 +223,8 @@ int frame_univar_flt_c (float *Y, const float *X, const size_t N, const size_t L
 
 int frame_univar_flt_z (double *Y, const double *X, const size_t N, const size_t L, const size_t W, const double c0, const double stp)
 {
-    if (L>=N) { fprintf(stderr,"error in frame_univar_flt_z: L must be < N (length X)\n"); return 1; }
+    if (W>N) { fprintf(stderr,"error in frame_univar_flt_z: W must be <= N (length X)\n"); return 1; }
+    if (L>N) { fprintf(stderr,"error in frame_univar_flt_z: L must be <= N (length X)\n"); return 1; }
     if (L<1u) { fprintf(stderr,"error in frame_univar_flt_z: L must be positive\n"); return 1; }
     if (N<1u) { fprintf(stderr,"error in frame_univar_flt_z: N (length X) must be positive\n"); return 1; }
     if (c0>(double)(N-1u)) { fprintf(stderr,"error in frame_univar_flt_z: c0 (center samp of 1st frame) must be < N (length X)\n"); return 1; }
