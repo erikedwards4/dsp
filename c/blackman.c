@@ -17,13 +17,13 @@ namespace codee {
 extern "C" {
 #endif
 
-int blackman_s (float *Y, const size_t L, const char exact, const size_t norm);
-int blackman_d (double *Y, const size_t L, const char exact, const size_t norm);
-int blackman_c (float *Y, const size_t L, const char exact, const size_t norm);
-int blackman_z (double *Y, const size_t L, const char exact, const size_t norm);
+int blackman_s (float *Y, const size_t L, const int exact, const size_t norm);
+int blackman_d (double *Y, const size_t L, const int exact, const size_t norm);
+int blackman_c (float *Y, const size_t L, const int exact, const size_t norm);
+int blackman_z (double *Y, const size_t L, const int exact, const size_t norm);
 
 
-int blackman_s (float *Y, const size_t L, const char exact, const size_t norm)
+int blackman_s (float *Y, const size_t L, const int exact, const size_t norm)
 {
     if (norm>3u) { fprintf(stderr,"error in blackman_s: norm must be in {0,1,2,3}\n"); return 1; }
 
@@ -54,7 +54,7 @@ int blackman_s (float *Y, const size_t L, const char exact, const size_t norm)
 }
 
 
-int blackman_d (double *Y, const size_t L, const char exact, const size_t norm)
+int blackman_d (double *Y, const size_t L, const int exact, const size_t norm)
 {
     if (norm>3u) { fprintf(stderr,"error in blackman_d: norm must be in {0,1,2,3}\n"); return 1; }
 
@@ -85,7 +85,7 @@ int blackman_d (double *Y, const size_t L, const char exact, const size_t norm)
 }
 
 
-int blackman_c (float *Y, const size_t L, const char exact, const size_t norm)
+int blackman_c (float *Y, const size_t L, const int exact, const size_t norm)
 {
     if (norm>3u) { fprintf(stderr,"error in blackman_c: norm must be in {0,1,2,3}\n"); return 1; }
 
@@ -116,7 +116,7 @@ int blackman_c (float *Y, const size_t L, const char exact, const size_t norm)
 }
 
 
-int blackman_z (double *Y, const size_t L, const char exact, const size_t norm)
+int blackman_z (double *Y, const size_t L, const int exact, const size_t norm)
 {
     if (norm>3u) { fprintf(stderr,"error in blackman_z: norm must be in {0,1,2,3}\n"); return 1; }
 

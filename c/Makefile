@@ -172,6 +172,11 @@ stft: stft.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 stft_flt: stft_flt.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 
 
+#Spectrogram: steps to make a spectrogram (frequency-reweighted STFT)
+Spectrogram: convert_freqs
+convert_freqs: convert_freqs.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+
+
 #Wavelets: a couple of my most often-used wavelets
 Wavelets: #gabor analytic
 gabor: gabor.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
