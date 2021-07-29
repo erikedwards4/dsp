@@ -111,7 +111,7 @@ int stft_s (float *Y, const float *X1, const float *X2, const size_t N, const si
                     {
                         //Window
                         n = s; //This ensures extrapolation by signal reversal to any length
-                        while (n<0 || n>=(int)N) { n = (n<0) ? -n : (n<(int)N) ? n : 2*(int)N-2-n; }
+                        while (n<0 || n>=(int)N) { n = (n<0) ? -n-1 : (n<(int)N) ? n : 2*(int)N-1-n; }
                         X1 += n - prev_n; prev_n = n;
                         *Xw = *X1 * *X2;
                     }
@@ -250,7 +250,7 @@ int stft_d (double *Y, const double *X1, const double *X2, const size_t N, const
                     {
                         //Window
                         n = s; //This ensures extrapolation by signal reversal to any length
-                        while (n<0 || n>=(int)N) { n = (n<0) ? -n : (n<(int)N) ? n : 2*(int)N-2-n; }
+                        while (n<0 || n>=(int)N) { n = (n<0) ? -n-1 : (n<(int)N) ? n : 2*(int)N-1-n; }
                         X1 += n - prev_n; prev_n = n;
                         *Xw = *X1 * *X2;
                     }

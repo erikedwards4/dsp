@@ -69,7 +69,7 @@ int frame_univar_s (float *Y, const float *X, const size_t N, const size_t L, co
                 for (int s=ss; s<ss+(int)L; ++s, ++Y)
                 {
                     n = s; //This ensures extrapolation by signal reversal to any length
-                    while (n<0 || n>=(int)N) { n = (n<0) ? -n : (n<(int)N) ? n : 2*(int)N-2-n; }
+                    while (n<0 || n>=(int)N) { n = (n<0) ? -n-1 : (n<(int)N) ? n : 2*(int)N-1-n; }
                     X += n - prev_n;
                     *Y = *X;
                     prev_n = n;
@@ -120,7 +120,7 @@ int frame_univar_d (double *Y, const double *X, const size_t N, const size_t L, 
                 for (int s=ss; s<ss+(int)L; ++s, ++Y)
                 {
                     n = s; //This ensures extrapolation by signal reversal to any length
-                    while (n<0 || n>=(int)N) { n = (n<0) ? -n : (n<(int)N) ? n : 2*(int)N-2-n; }
+                    while (n<0 || n>=(int)N) { n = (n<0) ? -n-1 : (n<(int)N) ? n : 2*(int)N-1-n; }
                     X += n - prev_n;
                     *Y = *X;
                     prev_n = n;
@@ -171,7 +171,7 @@ int frame_univar_c (float *Y, const float *X, const size_t N, const size_t L, co
                 for (int s=ss; s<ss+(int)L; ++s, ++Y)
                 {
                     n = s; //This ensures extrapolation by signal reversal to any length
-                    while (n<0 || n>=(int)N) { n = (n<0) ? -n : (n<(int)N) ? n : 2*(int)N-2-n; }
+                    while (n<0 || n>=(int)N) { n = (n<0) ? -n-1 : (n<(int)N) ? n : 2*(int)N-1-n; }
                     X += 2*(n-prev_n);
                     *Y = *X; *++Y = *(X+1);
                     prev_n = n;
@@ -222,7 +222,7 @@ int frame_univar_z (double *Y, const double *X, const size_t N, const size_t L, 
                 for (int s=ss; s<ss+(int)L; ++s, ++Y)
                 {
                     n = s; //This ensures extrapolation by signal reversal to any length
-                    while (n<0 || n>=(int)N) { n = (n<0) ? -n : (n<(int)N) ? n : 2*(int)N-2-n; }
+                    while (n<0 || n>=(int)N) { n = (n<0) ? -n-1 : (n<(int)N) ? n : 2*(int)N-1-n; }
                     X += 2*(n-prev_n);
                     *Y = *X; *++Y = *(X+1);
                     prev_n = n;
