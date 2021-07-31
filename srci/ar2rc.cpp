@@ -8,8 +8,7 @@ size_t dim;
 
 //Description
 string descr;
-descr += "Gets reflection coeffs (RCs) from autoregressive (AR) params along rows or cols of X.\n";
-descr += "If the polynomial is a0 a1 a2..., then the AR coeffs are -a1/a0 -a2/a0...\n";
+descr += "Gets reflection coeffs (RCs) from autoregressive (AR) params for each vec in X.\n";
 descr += "\n";
 descr += "Use -d (--dim) to give the dimension along which to operate.\n";
 descr += "Default is 0 (along cols), unless X is a row vector.\n";
@@ -18,7 +17,7 @@ descr += "Input (X) and output (Y) have the same size, data type and file format
 descr += "\n";
 descr += "Examples:\n";
 descr += "$ ar2rc X -o Y \n";
-descr += "$ ar2rc X > Y \n";
+descr += "$ ar2rc -d1 X > Y \n";
 descr += "$ cat X | ar2rc > Y \n";
 
 //Argtable
@@ -32,11 +31,10 @@ struct arg_file  *a_fo = arg_filen("o","ofile","<file>",0,O,"output file (Y)");
 if (a_d->count==0) { dim = i1.isrowvec() ? 1u : 0u; }
 else if (a_d->ival[0]<0) { cerr << progstr+": " << __LINE__ << errstr << "dim must be nonnegative" << endl; return 1; }
 else { dim = size_t(a_d->ival[0]); }
-if (dim!=0u && dim!=1u) { cerr << progstr+": " << __LINE__ << errstr << "dim must be 0 or 1" << endl; return 1; }
+if (dim>3u) { cerr << progstr+": " << __LINE__ << errstr << "dim must be in {0,1,2,3}" << endl; return 1; }
 
 //Checks
 if (i1.isempty()) { cerr << progstr+": " << __LINE__ << errstr << "input (X) found to be empty" << endl; return 1; }
-if (!i1.ismat()) { cerr << progstr+": " << __LINE__ << errstr << "input (X) must be a matrix" << endl; return 1; }
 
 //Set output header info
 o1.F = i1.F; o1.T = i1.T;

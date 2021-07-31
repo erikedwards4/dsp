@@ -12,7 +12,7 @@
 #include <unordered_map>
 #include <argtable2.h>
 #include "../util/cmli.hpp"
-#include "poly2ar.c"
+#include "poly2rc.c"
 
 #ifdef I
 #undef I
@@ -39,8 +39,7 @@ int main(int argc, char *argv[])
 
     //Description
     string descr;
-    descr += "Gets autoregressive (AR) parameters from polynomials along rows or cols of X.\n";
-    descr += "If the polynomial is a0 a1 a2..., then the AR coeffs are -a1/a0 -a2/a0...\n";
+    descr += "Gets reflection coeffs (RCs) from polynomials for each vector in X.\n";
     descr += "\n";
     descr += "Use -d (--dim) to give the dimension along which to operate.\n";
     descr += "Default is 0 (along cols), unless X is a row vector.\n";
@@ -51,9 +50,9 @@ int main(int argc, char *argv[])
     descr += "If dim==3, then Y has size R x C x S x (H-1).\n";
     descr += "\n";
     descr += "Examples:\n";
-    descr += "$ poly2ar X -o Y \n";
-    descr += "$ poly2ar -d1 X > Y \n";
-    descr += "$ cat X | poly2ar > Y \n";
+    descr += "$ poly2rc X -o Y \n";
+    descr += "$ poly2rc -d1 X > Y \n";
+    descr += "$ cat X | poly2rc > Y \n";
 
 
     //Argtable
@@ -104,7 +103,7 @@ int main(int argc, char *argv[])
     //Get options
 
     //Get dim
-    if (a_d->count==0) { dim = (i1.isvec() && i1.R==1u) ? 1u : 0u; }
+    if (a_d->count==0) { dim = i1.isrowvec() ? 1u : 0u; }
     else if (a_d->ival[0]<0) { cerr << progstr+": " << __LINE__ << errstr << "dim must be nonnegative" << endl; return 1; }
     else { dim = size_t(a_d->ival[0]); }
     if (dim>3u) { cerr << progstr+": " << __LINE__ << errstr << "dim must be in {0,1,2,3}" << endl; return 1; }
@@ -147,7 +146,7 @@ int main(int argc, char *argv[])
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for output file (Y)" << endl; return 1; }
         try { ifs1.read(reinterpret_cast<char*>(X),i1.nbytes()); }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file (X)" << endl; return 1; }
-        if (codee::poly2ar_s(Y,X,i1.R,i1.C,i1.S,i1.H,i1.iscolmajor(),dim))
+        if (codee::poly2rc_s(Y,X,i1.R,i1.C,i1.S,i1.H,i1.iscolmajor(),dim))
         { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
         if (wo1)
         {
@@ -165,7 +164,7 @@ int main(int argc, char *argv[])
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for output file (Y)" << endl; return 1; }
         try { ifs1.read(reinterpret_cast<char*>(X),i1.nbytes()); }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file (X)" << endl; return 1; }
-        if (codee::poly2ar_d(Y,X,i1.R,i1.C,i1.S,i1.H,i1.iscolmajor(),dim))
+        if (codee::poly2rc_d(Y,X,i1.R,i1.C,i1.S,i1.H,i1.iscolmajor(),dim))
         { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
         if (wo1)
         {
@@ -183,7 +182,7 @@ int main(int argc, char *argv[])
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for output file (Y)" << endl; return 1; }
         try { ifs1.read(reinterpret_cast<char*>(X),i1.nbytes()); }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file (X)" << endl; return 1; }
-        if (codee::poly2ar_c(Y,X,i1.R,i1.C,i1.S,i1.H,i1.iscolmajor(),dim))
+        if (codee::poly2rc_c(Y,X,i1.R,i1.C,i1.S,i1.H,i1.iscolmajor(),dim))
         { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
         if (wo1)
         {
@@ -201,7 +200,7 @@ int main(int argc, char *argv[])
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for output file (Y)" << endl; return 1; }
         try { ifs1.read(reinterpret_cast<char*>(X),i1.nbytes()); }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file (X)" << endl; return 1; }
-        if (codee::poly2ar_z(Y,X,i1.R,i1.C,i1.S,i1.H,i1.iscolmajor(),dim))
+        if (codee::poly2rc_z(Y,X,i1.R,i1.C,i1.S,i1.H,i1.iscolmajor(),dim))
         { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
         if (wo1)
         {

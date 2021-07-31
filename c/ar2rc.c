@@ -1,4 +1,5 @@
-//Gets reflection coefficients (RCs) from polynomials for each vector in X.
+//Gets reflection coefficients (RCs) from autoregressive (AR) coeffs for each vector in X.
+//This is just poly2rc, but no need to normalize by X[0], since AR coeffs assume this.
 
 //This currently matches the sign of Matlab output (see commented code below).
 //However, my original code had the opposite sign convention -- which is correct?
@@ -14,32 +15,30 @@ namespace codee {
 extern "C" {
 #endif
 
-int poly2rc_s (float *Y, const float *X, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim);
-int poly2rc_d (double *Y, const double *X, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim);
-int poly2rc_c (float *Y, const float *X, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim);
-int poly2rc_z (double *Y, const double *X, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim);
+int ar2rc_s (float *Y, const float *X, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim);
+int ar2rc_d (double *Y, const double *X, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim);
+int ar2rc_c (float *Y, const float *X, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim);
+int ar2rc_z (double *Y, const double *X, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim);
 
 
-int poly2rc_s (float *Y, const float *X, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim)
+int ar2rc_s (float *Y, const float *X, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim)
 {
-    if (dim>3u) { fprintf(stderr,"error in poly2rc_s: dim must be in [0 3]\n"); return 1; }
+    if (dim>3u) { fprintf(stderr,"error in ar2rc_s: dim must be in [0 3]\n"); return 1; }
 
     const size_t N = R*C*S*H;
-    const size_t Lx = (dim==0u) ? R : (dim==1u) ? C : (dim==2u) ? S : H;
+    const size_t L = (dim==0u) ? R : (dim==1u) ? C : (dim==2u) ? S : H;
 
-    if (N==0u || Lx<2u) {}
+    if (N==0u) {}
     else
     {
-        const size_t Ly = Lx - 1u;
         float sc, sc2, *y;
-        if (!(y=(float *)malloc(Ly*sizeof(float)))) { fprintf(stderr,"error in poly2rc_s: problem with malloc. "); perror("malloc"); return 1; }
+        if (!(y=(float *)malloc(L*sizeof(float)))) { fprintf(stderr,"error in ar2rc_s: problem with malloc. "); perror("malloc"); return 1; }
         
-        if (Lx==N)
+        if (L==N)
         {
-            const float x0 = -*X++;
-            for (size_t l=0u; l<Ly; ++l, ++X, ++Y) { *Y = *X / x0; }
-            Y -= Ly;
-            for (size_t l=Ly-1u; l>0u; --l)
+            for (size_t l=0u; l<L; ++l, ++X, ++Y) { *Y = -*X; }
+            Y -= L;
+            for (size_t l=L-1u; l>0u; --l)
             {
                 for (size_t q=0u; q<=l; ++q, ++Y, ++y) { *y = *Y; }
                 sc = *--y; Y -= l + 1u;
@@ -54,17 +53,15 @@ int poly2rc_s (float *Y, const float *X, const size_t R, const size_t C, const s
         {
             const size_t K = (iscolmajor) ? ((dim==0u) ? 1u : (dim==1u) ? R : (dim==2u) ? R*C : R*C*S) : ((dim==0u) ? C*S*H : (dim==1u) ? S*H : (dim==2u) ? H : 1u);
             const size_t B = (iscolmajor && dim==0u) ? C*S*H : K;
-            const size_t V = N/Lx, G = V/B;
-            float x0;
+            const size_t V = N/L, G = V/B;
 
             if (K==1u && (G==1u || B==1u))
             {
-                for (size_t v=0u; v<V; ++v, Y+=Ly)
+                for (size_t v=0u; v<V; ++v, Y+=L)
                 {
-                    x0 = -*X++;
-                    for (size_t l=0u; l<Ly; ++l, ++X, ++Y) { *Y = *X / x0; }
-                    Y -= Ly;
-                    for (size_t l=Ly-1u; l>0u; --l)
+                    for (size_t l=0u; l<L; ++l, ++X, ++Y) { *Y = -*X; }
+                    Y -= L;
+                    for (size_t l=L-1u; l>0u; --l)
                     {
                         for (size_t q=0u; q<=l; ++q, ++Y, ++y) { *y = *Y; }
                         sc = *--y; Y -= l + 1u;
@@ -78,14 +75,13 @@ int poly2rc_s (float *Y, const float *X, const size_t R, const size_t C, const s
             }
             else
             {
-                for (size_t g=0u; g<G; ++g, X+=B*(Lx-1u), Y+=B*(Ly-1u))
+                for (size_t g=0u; g<G; ++g, X+=B*(L-1u), Y+=B*(L-1u))
                 {
-                    for (size_t b=0u; b<B; ++b, X-=K*Lx-1u, ++Y)
+                    for (size_t b=0u; b<B; ++b, X-=K*L-1u, ++Y)
                     {
-                        x0 = -*X; X += K;
-                        for (size_t l=0u; l<Ly; ++l, X+=K, Y+=K) { *Y = *X / x0; }
-                        Y -= Ly*K;
-                        for (size_t l=Ly-1u; l>0u; --l)
+                        for (size_t l=0u; l<L; ++l, X+=K, Y+=K) { *Y = -*X; }
+                        Y -= L*K;
+                        for (size_t l=L-1u; l>0u; --l)
                         {
                             for (size_t q=0u; q<=l; ++q, Y+=K, ++y) { *y = *Y; }
                             sc = *--y; Y -= K*(l+1u);
@@ -106,26 +102,24 @@ int poly2rc_s (float *Y, const float *X, const size_t R, const size_t C, const s
 }
 
 
-int poly2rc_d (double *Y, const double *X, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim)
+int ar2rc_d (double *Y, const double *X, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim)
 {
-    if (dim>3u) { fprintf(stderr,"error in poly2rc_d: dim must be in [0 3]\n"); return 1; }
+    if (dim>3u) { fprintf(stderr,"error in ar2rc_d: dim must be in [0 3]\n"); return 1; }
 
     const size_t N = R*C*S*H;
-    const size_t Lx = (dim==0u) ? R : (dim==1u) ? C : (dim==2u) ? S : H;
+    const size_t L = (dim==0u) ? R : (dim==1u) ? C : (dim==2u) ? S : H;
 
-    if (N==0u || Lx<2u) {}
+    if (N==0u) {}
     else
     {
-        const size_t Ly = Lx - 1u;
         double sc, sc2, *y;
-        if (!(y=(double *)malloc(Ly*sizeof(double)))) { fprintf(stderr,"error in poly2rc_d: problem with malloc. "); perror("malloc"); return 1; }
+        if (!(y=(double *)malloc(L*sizeof(double)))) { fprintf(stderr,"error in ar2rc_d: problem with malloc. "); perror("malloc"); return 1; }
         
-        if (Lx==N)
+        if (L==N)
         {
-            const double x0 = -*X++;
-            for (size_t l=0u; l<Ly; ++l, ++X, ++Y) { *Y = *X / x0; }
-            Y -= Ly;
-            for (size_t l=Ly-1u; l>0u; --l)
+            for (size_t l=0u; l<L; ++l, ++X, ++Y) { *Y = -*X; }
+            Y -= L;
+            for (size_t l=L-1u; l>0u; --l)
             {
                 for (size_t q=0u; q<=l; ++q, ++Y, ++y) { *y = *Y; }
                 sc = *--y; Y -= l + 1u;
@@ -140,17 +134,15 @@ int poly2rc_d (double *Y, const double *X, const size_t R, const size_t C, const
         {
             const size_t K = (iscolmajor) ? ((dim==0u) ? 1u : (dim==1u) ? R : (dim==2u) ? R*C : R*C*S) : ((dim==0u) ? C*S*H : (dim==1u) ? S*H : (dim==2u) ? H : 1u);
             const size_t B = (iscolmajor && dim==0u) ? C*S*H : K;
-            const size_t V = N/Lx, G = V/B;
-            double x0;
+            const size_t V = N/L, G = V/B;
 
             if (K==1u && (G==1u || B==1u))
             {
-                for (size_t v=0u; v<V; ++v, Y+=Ly)
+                for (size_t v=0u; v<V; ++v, Y+=L)
                 {
-                    x0 = -*X++;
-                    for (size_t l=0u; l<Ly; ++l, ++X, ++Y) { *Y = *X / x0; }
-                    Y -= Ly;
-                    for (size_t l=Ly-1u; l>0u; --l)
+                    for (size_t l=0u; l<L; ++l, ++X, ++Y) { *Y = -*X; }
+                    Y -= L;
+                    for (size_t l=L-1u; l>0u; --l)
                     {
                         for (size_t q=0u; q<=l; ++q, ++Y, ++y) { *y = *Y; }
                         sc = *--y; Y -= l + 1u;
@@ -164,14 +156,13 @@ int poly2rc_d (double *Y, const double *X, const size_t R, const size_t C, const
             }
             else
             {
-                for (size_t g=0u; g<G; ++g, X+=B*(Lx-1u), Y+=B*(Ly-1u))
+                for (size_t g=0u; g<G; ++g, X+=B*(L-1u), Y+=B*(L-1u))
                 {
-                    for (size_t b=0u; b<B; ++b, X-=K*Lx-1u, ++Y)
+                    for (size_t b=0u; b<B; ++b, X-=K*L-1u, ++Y)
                     {
-                        x0 = -*X; X += K;
-                        for (size_t l=0u; l<Ly; ++l, X+=K, Y+=K) { *Y = *X / x0; }
-                        Y -= Ly*K;
-                        for (size_t l=Ly-1u; l>0u; --l)
+                        for (size_t l=0u; l<L; ++l, X+=K, Y+=K) { *Y = -*X; }
+                        Y -= L*K;
+                        for (size_t l=L-1u; l>0u; --l)
                         {
                             for (size_t q=0u; q<=l; ++q, Y+=K, ++y) { *y = *Y; }
                             sc = *--y; Y -= K*(l+1u);
@@ -192,32 +183,25 @@ int poly2rc_d (double *Y, const double *X, const size_t R, const size_t C, const
 }
 
 
-int poly2rc_c (float *Y, const float *X, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim)
+int ar2rc_c (float *Y, const float *X, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim)
 {
-    if (dim>3u) { fprintf(stderr,"error in poly2rc_c: dim must be in [0 3]\n"); return 1; }
+    if (dim>3u) { fprintf(stderr,"error in ar2rc_c: dim must be in [0 3]\n"); return 1; }
     
     const size_t N = R*C*S*H;
-    const size_t Lx = (dim==0u) ? R : (dim==1u) ? C : (dim==2u) ? S : H;
+    const size_t L = (dim==0u) ? R : (dim==1u) ? C : (dim==2u) ? S : H;
 
-    if (N==0u || Lx<2u) {}
+    if (N==0u) {}
     else
     {
-        const size_t Ly = Lx - 1u;
         float scr, sci, sc2r, sc2i, sc2a, yr, yi, *y;
-        if (!(y=(float *)malloc(2u*Ly*sizeof(float)))) { fprintf(stderr,"error in poly2rc_s: problem with malloc. "); perror("malloc"); return 1; }
+        if (!(y=(float *)malloc(2u*L*sizeof(float)))) { fprintf(stderr,"error in ar2rc_s: problem with malloc. "); perror("malloc"); return 1; }
         
-        if (Lx==N)
+        if (L==N)
         {
-            const float x0r = -*X++, x0i = -*X++;
-            const float x0a = x0r*x0r + x0i*x0i;
-            for (size_t l=0u; l<Ly; ++l, X+=2)
-            {
-                *Y++ = (*X*x0r+*(X+1)*x0i) / x0a;
-                *Y++ = (*(X+1)*x0r-*X*x0i) / x0a;
-            }
-            Y -= 2u*Ly;
+            for (size_t l=0u; l<2u*L; ++l, ++X, ++Y) { *Y = -*X; }
+            Y -= 2u*L;
 
-            for (size_t l=Ly-1u; l>0u; --l)
+            for (size_t l=L-1u; l>0u; --l)
             {
                 for (size_t q=0u; q<=l; ++q) { *y++ = *Y++; *y++ = *Y++; }
                 sci = *--y; scr = *--y;
@@ -245,23 +229,16 @@ int poly2rc_c (float *Y, const float *X, const size_t R, const size_t C, const s
         {
             const size_t K = (iscolmajor) ? ((dim==0u) ? 1u : (dim==1u) ? R : (dim==2u) ? R*C : R*C*S) : ((dim==0u) ? C*S*H : (dim==1u) ? S*H : (dim==2u) ? H : 1u);
             const size_t B = (iscolmajor && dim==0u) ? C*S*H : K;
-            const size_t V = N/Lx, G = V/B;
-            float x0r, x0i, x0a;
+            const size_t V = N/L, G = V/B;
 
             if (K==1u && (G==1u || B==1u))
             {
-                for (size_t v=0u; v<V; ++v, Y+=2u*Ly)
+                for (size_t v=0u; v<V; ++v, Y+=2u*L)
                 {
-                    x0r = -*X++; x0i = -*X++;
-                    x0a = x0r*x0r + x0i*x0i;
-                    for (size_t l=0u; l<Ly; ++l, X+=2)
-                    {
-                        *Y++ = (*X*x0r+*(X+1)*x0i) / x0a;
-                        *Y++ = (*(X+1)*x0r-*X*x0i) / x0a;
-                    }
-                    Y -= 2u*Ly;
+                    for (size_t l=0u; l<2u*L; ++l, ++X, ++Y) { *Y = -*X; }
+                    Y -= 2u*L;
 
-                    for (size_t l=Ly-1u; l>0u; --l)
+                    for (size_t l=L-1u; l>0u; --l)
                     {
                         for (size_t q=0u; q<=l; ++q) { *y++ = *Y++; *y++ = *Y++; }
                         sci = *--y; scr = *--y;
@@ -288,20 +265,17 @@ int poly2rc_c (float *Y, const float *X, const size_t R, const size_t C, const s
             }
             else
             {
-                for (size_t g=0u; g<G; ++g, X+=2u*B*(Lx-1u), Y+=2u*B*(Ly-1u))
+                for (size_t g=0u; g<G; ++g, X+=2u*B*(L-1u), Y+=2u*B*(L-1u))
                 {
-                    for (size_t b=0u; b<B; ++b, X-=2u*K*Lx-2u, Y+=2u)
+                    for (size_t b=0u; b<B; ++b, X-=2u*K*L-2u, Y+=2u)
                     {
-                        x0r = -*X; x0i = -*(X+1); X += 2u*K;
-                        x0a = x0r*x0r + x0i*x0i;
-                        for (size_t l=0u; l<Ly; ++l, X+=2u*K, Y+=2u*K)
+                        for (size_t l=0u; l<L; ++l, X+=2u*K, Y+=2u*K)
                         {
-                            *Y = (*X*x0r+*(X+1)*x0i) / x0a;
-                            *(Y+1) = (*(X+1)*x0r-*X*x0i) / x0a;
+                            *Y = -*X; *(Y+1) = -*(X+1);
                         }
-                        Y -= 2u*K*Ly;
+                        Y -= 2u*K*L;
 
-                        for (size_t l=Ly-1u; l>0u; --l)
+                        for (size_t l=L-1u; l>0u; --l)
                         {
                             for (size_t q=0u; q<=l; ++q, Y+=2u*K) { *y++ = *Y; *y++ = *(Y+1); }
                             sci = *--y; scr = *--y;
@@ -336,32 +310,25 @@ int poly2rc_c (float *Y, const float *X, const size_t R, const size_t C, const s
 }
 
 
-int poly2rc_z (double *Y, const double *X, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim)
+int ar2rc_z (double *Y, const double *X, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim)
 {
-    if (dim>3u) { fprintf(stderr,"error in poly2rc_z: dim must be in [0 3]\n"); return 1; }
+    if (dim>3u) { fprintf(stderr,"error in ar2rc_z: dim must be in [0 3]\n"); return 1; }
     
     const size_t N = R*C*S*H;
-    const size_t Lx = (dim==0u) ? R : (dim==1u) ? C : (dim==2u) ? S : H;
+    const size_t L = (dim==0u) ? R : (dim==1u) ? C : (dim==2u) ? S : H;
 
-    if (N==0u || Lx<2u) {}
+    if (N==0u) {}
     else
     {
-        const size_t Ly = Lx - 1u;
         double scr, sci, sc2r, sc2i, sc2a, yr, yi, *y;
-        if (!(y=(double *)malloc(2u*Ly*sizeof(double)))) { fprintf(stderr,"error in poly2rc_z: problem with malloc. "); perror("malloc"); return 1; }
+        if (!(y=(double *)malloc(2u*L*sizeof(double)))) { fprintf(stderr,"error in ar2rc_z: problem with malloc. "); perror("malloc"); return 1; }
         
-        if (Lx==N)
+        if (L==N)
         {
-            const double x0r = -*X++, x0i = -*X++;
-            const double x0a = x0r*x0r + x0i*x0i;
-            for (size_t l=0u; l<Ly; ++l, X+=2)
-            {
-                *Y++ = (*X*x0r+*(X+1)*x0i) / x0a;
-                *Y++ = (*(X+1)*x0r-*X*x0i) / x0a;
-            }
-            Y -= 2u*Ly;
+            for (size_t l=0u; l<2u*L; ++l, ++X, ++Y) { *Y = -*X; }
+            Y -= 2u*L;
 
-            for (size_t l=Ly-1u; l>0u; --l)
+            for (size_t l=L-1u; l>0u; --l)
             {
                 for (size_t q=0u; q<=l; ++q) { *y++ = *Y++; *y++ = *Y++; }
                 sci = *--y; scr = *--y;
@@ -389,23 +356,16 @@ int poly2rc_z (double *Y, const double *X, const size_t R, const size_t C, const
         {
             const size_t K = (iscolmajor) ? ((dim==0u) ? 1u : (dim==1u) ? R : (dim==2u) ? R*C : R*C*S) : ((dim==0u) ? C*S*H : (dim==1u) ? S*H : (dim==2u) ? H : 1u);
             const size_t B = (iscolmajor && dim==0u) ? C*S*H : K;
-            const size_t V = N/Lx, G = V/B;
-            double x0r, x0i, x0a;
+            const size_t V = N/L, G = V/B;
 
             if (K==1u && (G==1u || B==1u))
             {
-                for (size_t v=0u; v<V; ++v, Y+=2u*Ly)
+                for (size_t v=0u; v<V; ++v, Y+=2u*L)
                 {
-                    x0r = -*X++; x0i = -*X++;
-                    x0a = x0r*x0r + x0i*x0i;
-                    for (size_t l=0u; l<Ly; ++l, X+=2)
-                    {
-                        *Y++ = (*X*x0r+*(X+1)*x0i) / x0a;
-                        *Y++ = (*(X+1)*x0r-*X*x0i) / x0a;
-                    }
-                    Y -= 2u*Ly;
+                    for (size_t l=0u; l<2u*L; ++l, ++X, ++Y) { *Y = -*X; }
+                    Y -= 2u*L;
 
-                    for (size_t l=Ly-1u; l>0u; --l)
+                    for (size_t l=L-1u; l>0u; --l)
                     {
                         for (size_t q=0u; q<=l; ++q) { *y++ = *Y++; *y++ = *Y++; }
                         sci = *--y; scr = *--y;
@@ -432,20 +392,17 @@ int poly2rc_z (double *Y, const double *X, const size_t R, const size_t C, const
             }
             else
             {
-                for (size_t g=0u; g<G; ++g, X+=2u*B*(Lx-1u), Y+=2u*B*(Ly-1u))
+                for (size_t g=0u; g<G; ++g, X+=2u*B*(L-1u), Y+=2u*B*(L-1u))
                 {
-                    for (size_t b=0u; b<B; ++b, X-=2u*K*Lx-2u, Y+=2u)
+                    for (size_t b=0u; b<B; ++b, X-=2u*K*L-2u, Y+=2u)
                     {
-                        x0r = -*X; x0i = -*(X+1); X += 2u*K;
-                        x0a = x0r*x0r + x0i*x0i;
-                        for (size_t l=0u; l<Ly; ++l, X+=2u*K, Y+=2u*K)
+                        for (size_t l=0u; l<L; ++l, X+=2u*K, Y+=2u*K)
                         {
-                            *Y = (*X*x0r+*(X+1)*x0i) / x0a;
-                            *(Y+1) = (*(X+1)*x0r-*X*x0i) / x0a;
+                            *Y = -*X; *(Y+1) = -*(X+1);
                         }
-                        Y -= 2u*K*Ly;
+                        Y -= 2u*K*L;
 
-                        for (size_t l=Ly-1u; l>0u; --l)
+                        for (size_t l=L-1u; l>0u; --l)
                         {
                             for (size_t q=0u; q<=l; ++q, Y+=2u*K) { *y++ = *Y; *y++ = *(Y+1); }
                             sci = *--y; scr = *--y;

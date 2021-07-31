@@ -48,7 +48,7 @@ int interp1q_s (float *Yi, const float *X, const float *Y, const float *Xi, cons
             while (*Xi<=*X && ni<Ni) { *Yi = *Y; ++Xi; ++Yi; ++ni; }
             while (n<N && ni<Ni)
             {
-                while (*X<=*Xi && n<N) { ++X; ++Y; ++n; }
+                while (n<N && *X<=*Xi) { ++X; ++Y; ++n; }
                 if (n<N)
                 {
                     x1 = *(X-1); y1 = *(Y-1);
@@ -96,7 +96,7 @@ int interp1q_d (double *Yi, const double *X, const double *Y, const double *Xi, 
             while (*Xi<=*X && ni<Ni) { *Yi = *Y; ++Xi; ++Yi; ++ni; }
             while (n<N && ni<Ni)
             {
-                while (*X<=*Xi && n<N) { ++X; ++Y; ++n; }
+                while (n<N && *X<=*Xi) { ++X; ++Y; ++n; }
                 if (n<N)
                 {
                     x1 = *(X-1); y1 = *(Y-1);
@@ -145,7 +145,7 @@ int interp1q_c (float *Yi, const float *X, const float *Y, const float *Xi, cons
             while (*Xi<=*X && ni<Ni) { *Yi++ = *Y; *Yi++ = *(Y+1); ++Xi; ++ni; }
             while (n<N && ni<Ni)
             {
-                while (*X<=*Xi && n<N) { ++X; Y+=2; ++n; }
+                while (n<N && *X<=*Xi) { ++X; Y+=2; ++n; }
                 if (n<N)
                 {
                     x1 = *(X-1); y1r = *(Y-2); y1i = *(Y-1);
@@ -195,7 +195,7 @@ int interp1q_z (double *Yi, const double *X, const double *Y, const double *Xi, 
             while (*Xi<=*X && ni<Ni) { *Yi++ = *Y++; *Yi++ = *Y++; ++Xi; ++ni; }
             while (n<N && ni<Ni)
             {
-                while (*X<=*Xi && n<N) { ++X; Y+=2; ++n; }
+                while (n<N && *X<=*Xi) { ++X; Y+=2; ++n; }
                 if (n<N)
                 {
                     x1 = *(X-1); y1r = *(Y-2); y1i = *(Y-1);

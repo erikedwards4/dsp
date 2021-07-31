@@ -8,7 +8,7 @@ size_t dim;
 
 //Description
 string descr;
-descr += "Gets power spectral density (PSD) from autoregressive (AR) params along rows or cols of X.\n";
+descr += "Gets power spectral density (PSD) from autoregressive (AR) params for each vec in X.\n";
 descr += "Also takes a 2nd input V, which is a vector of variances (prediction errors).\n";
 descr += "Also takes a 3rd input W, which is a vector of F freqs (in radians).\n";
 descr += "\n";
@@ -21,7 +21,7 @@ descr += "where X has size R x C.\n";
 descr += "\n";
 descr += "Examples:\n";
 descr += "$ ar2psd X V W -o Y \n";
-descr += "$ ar2psd X V W > Y \n";
+descr += "$ ar2psd -d1 X V W > Y \n";
 descr += "$ cat W | ar2psd X V > Y \n";
 
 //Argtable
