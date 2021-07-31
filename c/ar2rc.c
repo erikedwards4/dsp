@@ -1,10 +1,9 @@
 //Gets reflection coefficients (RCs) from autoregressive (AR) coeffs for each vector in X.
-//This is just poly2rc, but no need to normalize by X[0], since AR coeffs assume this.
+//This is similar to poly2rc, but no need to normalize by X[0], since AR coeffs assume this.
 
-//This currently matches the sign of Matlab output (see commented code below).
-//However, my original code had the opposite sign convention -- which is correct?
-//For the complex case, I take the negative of both real and imag parts,
-//but not entirely sure if the imag part should stay unflipped.
+//This currently has the same sign of Matlab output (see commented code below).
+//However, this may not match the Octave tsa toolbox in sign convention.
+//Right now, only the current sign convention allows round-trip with rc2poly.
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -44,10 +43,10 @@ int ar2rc_s (float *Y, const float *X, const size_t R, const size_t C, const siz
                 sc = *--y; Y -= l + 1u;
                 for (size_t q=0u; q<l; ++q, ++Y) { --y; *Y += sc * *y; }
                 sc2 = fmaf(sc,-sc,1.0f);
-                *Y = -*Y;  //to match sign convention
+                //*Y = -*Y;  //to match other sign convention
                 for (size_t q=0u; q<l; ++q) { --Y; *Y /= sc2; }
             }
-            *Y = -*Y;  //to match sign convention
+            //*Y = -*Y;  //to match other sign convention
         }
         else
         {
@@ -67,10 +66,10 @@ int ar2rc_s (float *Y, const float *X, const size_t R, const size_t C, const siz
                         sc = *--y; Y -= l + 1u;
                         for (size_t q=0u; q<l; ++q, ++Y) { --y; *Y += sc * *y; }
                         sc2 = fmaf(sc,-sc,1.0f);
-                        *Y = -*Y;  //to match sign convention
+                        //*Y = -*Y;  //to match other sign convention
                         for (size_t q=0u; q<l; ++q) { --Y; *Y /= sc2; }
                     }
-                    *Y = -*Y;  //to match sign convention
+                    //*Y = -*Y;  //to match other sign convention
                 }
             }
             else
@@ -87,10 +86,10 @@ int ar2rc_s (float *Y, const float *X, const size_t R, const size_t C, const siz
                             sc = *--y; Y -= K*(l+1u);
                             for (size_t q=0u; q<l; ++q, Y+=K) { --y; *Y += sc * *y; }
                             sc2 = fmaf(sc,-sc,1.0f);
-                            *Y = -*Y;  //to match sign convention
+                            //*Y = -*Y;  //to match other sign convention
                             for (size_t q=0u; q<l; ++q) { Y-=K; *Y /= sc2; }
                         }
-                        *Y = -*Y;  //to match sign convention
+                        //*Y = -*Y;  //to match other sign convention
                     }
                 }
             }
@@ -125,10 +124,10 @@ int ar2rc_d (double *Y, const double *X, const size_t R, const size_t C, const s
                 sc = *--y; Y -= l + 1u;
                 for (size_t q=0u; q<l; ++q, ++Y) { --y; *Y += sc * *y; }
                 sc2 = fma(sc,-sc,1.0);
-                *Y = -*Y;  //to match sign convention
+                //*Y = -*Y;  //to match other sign convention
                 for (size_t q=0u; q<l; ++q) { --Y; *Y /= sc2; }
             }
-            *Y = -*Y;  //to match sign convention
+            //*Y = -*Y;  //to match other sign convention
         }
         else
         {
@@ -148,10 +147,10 @@ int ar2rc_d (double *Y, const double *X, const size_t R, const size_t C, const s
                         sc = *--y; Y -= l + 1u;
                         for (size_t q=0u; q<l; ++q, ++Y) { --y; *Y += sc * *y; }
                         sc2 = fma(sc,-sc,1.0);
-                        *Y = -*Y;  //to match sign convention
+                        //*Y = -*Y;  //to match other sign convention
                         for (size_t q=0u; q<l; ++q) { --Y; *Y /= sc2; }
                     }
-                    *Y = -*Y;  //to match sign convention
+                    //*Y = -*Y;  //to match other sign convention
                 }
             }
             else
@@ -168,10 +167,10 @@ int ar2rc_d (double *Y, const double *X, const size_t R, const size_t C, const s
                             sc = *--y; Y -= K*(l+1u);
                             for (size_t q=0u; q<l; ++q, Y+=K) { --y; *Y += sc * *y; }
                             sc2 = fma(sc,-sc,1.0);
-                            *Y = -*Y;  //to match sign convention
+                            //*Y = -*Y;  //to match other sign convention
                             for (size_t q=0u; q<l; ++q) { Y-=K; *Y /= sc2; }
                         }
-                        *Y = -*Y;  //to match sign convention
+                        //*Y = -*Y;  //to match other sign convention
                     }
                 }
             }
@@ -215,7 +214,7 @@ int ar2rc_c (float *Y, const float *X, const size_t R, const size_t C, const siz
                 sc2r = 1.0f - scr*scr + sci*sci;
                 sc2i = -2.0f*scr*sci;
                 sc2a = sc2r*sc2r + sc2i*sc2i;
-                *Y = -*Y; *(Y+1) = -*(Y+1);  //to match sign convention
+                //*Y = -*Y; *(Y+1) = -*(Y+1);  //to match other sign convention
                 for (size_t q=0u; q<l; ++q)
                 {
                     yi = *--Y; yr = *--Y;
@@ -223,7 +222,7 @@ int ar2rc_c (float *Y, const float *X, const size_t R, const size_t C, const siz
                     *(Y+1) = (yi*sc2r-yr*sc2i) / sc2a;
                 }
             }
-            *Y = -*Y; *(Y+1) = -*(Y+1);  //to match sign convention
+            //*Y = -*Y; *(Y+1) = -*(Y+1);  //to match other sign convention
         }
         else
         {
@@ -252,7 +251,7 @@ int ar2rc_c (float *Y, const float *X, const size_t R, const size_t C, const siz
                         sc2r = 1.0f - scr*scr + sci*sci;
                         sc2i = -2.0f*scr*sci;
                         sc2a = sc2r*sc2r + sc2i*sc2i;
-                        *Y = -*Y; *(Y+1) = -*(Y+1);  //to match sign convention
+                        //*Y = -*Y; *(Y+1) = -*(Y+1);  //to match other sign convention
                         for (size_t q=0u; q<l; ++q)
                         {
                             yi = *--Y; yr = *--Y;
@@ -260,7 +259,7 @@ int ar2rc_c (float *Y, const float *X, const size_t R, const size_t C, const siz
                             *(Y+1) = (yi*sc2r-yr*sc2i) / sc2a;
                         }
                     }
-                    *Y = -*Y; *(Y+1) = -*(Y+1);  //to match sign convention
+                    //*Y = -*Y; *(Y+1) = -*(Y+1);  //to match other sign convention
                 }
             }
             else
@@ -289,7 +288,7 @@ int ar2rc_c (float *Y, const float *X, const size_t R, const size_t C, const siz
                             sc2r = 1.0f - scr*scr + sci*sci;
                             sc2i = -2.0f*scr*sci;
                             sc2a = sc2r*sc2r + sc2i*sc2i;
-                            *Y = -*Y; *(Y+1) = -*(Y+1);  //to match sign convention
+                            //*Y = -*Y; *(Y+1) = -*(Y+1);  //to match other sign convention
                             for (size_t q=0u; q<l; ++q)
                             {
                                 Y -= 2u*K;
@@ -298,7 +297,7 @@ int ar2rc_c (float *Y, const float *X, const size_t R, const size_t C, const siz
                                 *(Y+1) = (yi*sc2r-yr*sc2i) / sc2a;
                             }
                         }
-                        *Y = -*Y; *(Y+1) = -*(Y+1);  //to match sign convention
+                        //*Y = -*Y; *(Y+1) = -*(Y+1);  //to match other sign convention
                     }
                 }
             }
@@ -342,14 +341,14 @@ int ar2rc_z (double *Y, const double *X, const size_t R, const size_t C, const s
                 sc2r = 1.0 - scr*scr + sci*sci;
                 sc2i = -2.0*scr*sci;
                 sc2a = sc2r*sc2r + sc2i*sc2i;
-                *Y = -*Y; *(Y+1) = -*(Y+1);  //to match sign convention
+                //*Y = -*Y; *(Y+1) = -*(Y+1);  //to match other sign convention
                 for (size_t q=0u; q<l; ++q)
                 {
                     yi = *--Y; yr = *--Y;
                     *Y = (yr*sc2r+yi*sc2i) / sc2a;
                     *(Y+1) = (yi*sc2r-yr*sc2i) / sc2a;
                 }
-                *Y = -*Y; *(Y+1) = -*(Y+1);  //to match sign convention
+                //*Y = -*Y; *(Y+1) = -*(Y+1);  //to match other sign convention
             }
         }
         else
@@ -379,7 +378,7 @@ int ar2rc_z (double *Y, const double *X, const size_t R, const size_t C, const s
                         sc2r = 1.0 - scr*scr + sci*sci;
                         sc2i = -2.0*scr*sci;
                         sc2a = sc2r*sc2r + sc2i*sc2i;
-                        *Y = -*Y; *(Y+1) = -*(Y+1);  //to match sign convention
+                        //*Y = -*Y; *(Y+1) = -*(Y+1);  //to match other sign convention
                         for (size_t q=0u; q<l; ++q)
                         {
                             yi = *--Y; yr = *--Y;
@@ -387,7 +386,7 @@ int ar2rc_z (double *Y, const double *X, const size_t R, const size_t C, const s
                             *(Y+1) = (yi*sc2r-yr*sc2i) / sc2a;
                         }
                     }
-                    *Y = -*Y; *(Y+1) = -*(Y+1);  //to match sign convention
+                    //*Y = -*Y; *(Y+1) = -*(Y+1);  //to match other sign convention
                 }
             }
             else
@@ -416,7 +415,7 @@ int ar2rc_z (double *Y, const double *X, const size_t R, const size_t C, const s
                             sc2r = 1.0 - scr*scr + sci*sci;
                             sc2i = -2.0*scr*sci;
                             sc2a = sc2r*sc2r + sc2i*sc2i;
-                            *Y = -*Y; *(Y+1) = -*(Y+1);  //to match sign convention
+                            //*Y = -*Y; *(Y+1) = -*(Y+1);  //to match other sign convention
                             for (size_t q=0u; q<l; ++q)
                             {
                                 Y -= 2u*K;
@@ -425,7 +424,7 @@ int ar2rc_z (double *Y, const double *X, const size_t R, const size_t C, const s
                                 *(Y+1) = (yi*sc2r-yr*sc2i) / sc2a;
                             }
                         }
-                        *Y = -*Y; *(Y+1) = -*(Y+1);  //to match sign convention
+                        //*Y = -*Y; *(Y+1) = -*(Y+1);  //to match other sign convention
                     }
                 }
             }

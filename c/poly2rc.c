@@ -1,9 +1,8 @@
 //Gets reflection coefficients (RCs) from polynomials for each vector in X.
 
-//This currently matches the sign of Matlab output (see commented code below).
-//However, my original code had the opposite sign convention -- which is correct?
-//For the complex case, I take the negative of both real and imag parts,
-//but not entirely sure if the imag part should stay unflipped.
+//This currently has the same sign of Matlab output (see commented code below).
+//However, this may not match the Octave tsa toolbox in sign convention.
+//Right now, only the current sign convention allows round-trip with rc2poly.
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -36,7 +35,7 @@ int poly2rc_s (float *Y, const float *X, const size_t R, const size_t C, const s
         
         if (Lx==N)
         {
-            const float x0 = -*X++;
+            const float x0 = *X++;
             for (size_t l=0u; l<Ly; ++l, ++X, ++Y) { *Y = *X / x0; }
             Y -= Ly;
             for (size_t l=Ly-1u; l>0u; --l)
@@ -45,10 +44,10 @@ int poly2rc_s (float *Y, const float *X, const size_t R, const size_t C, const s
                 sc = *--y; Y -= l + 1u;
                 for (size_t q=0u; q<l; ++q, ++Y) { --y; *Y += sc * *y; }
                 sc2 = fmaf(sc,-sc,1.0f);
-                *Y = -*Y;  //to match sign convention
+                //*Y = -*Y;  //to match other sign convention
                 for (size_t q=0u; q<l; ++q) { --Y; *Y /= sc2; }
             }
-            *Y = -*Y;  //to match sign convention
+            //*Y = -*Y;  //to match other sign convention
         }
         else
         {
@@ -61,7 +60,7 @@ int poly2rc_s (float *Y, const float *X, const size_t R, const size_t C, const s
             {
                 for (size_t v=0u; v<V; ++v, Y+=Ly)
                 {
-                    x0 = -*X++;
+                    x0 = *X++;
                     for (size_t l=0u; l<Ly; ++l, ++X, ++Y) { *Y = *X / x0; }
                     Y -= Ly;
                     for (size_t l=Ly-1u; l>0u; --l)
@@ -70,10 +69,10 @@ int poly2rc_s (float *Y, const float *X, const size_t R, const size_t C, const s
                         sc = *--y; Y -= l + 1u;
                         for (size_t q=0u; q<l; ++q, ++Y) { --y; *Y += sc * *y; }
                         sc2 = fmaf(sc,-sc,1.0f);
-                        *Y = -*Y;  //to match sign convention
+                        //*Y = -*Y;  //to match other sign convention
                         for (size_t q=0u; q<l; ++q) { --Y; *Y /= sc2; }
                     }
-                    *Y = -*Y;  //to match sign convention
+                    //*Y = -*Y;  //to match other sign convention
                 }
             }
             else
@@ -82,7 +81,7 @@ int poly2rc_s (float *Y, const float *X, const size_t R, const size_t C, const s
                 {
                     for (size_t b=0u; b<B; ++b, X-=K*Lx-1u, ++Y)
                     {
-                        x0 = -*X; X += K;
+                        x0 = *X; X += K;
                         for (size_t l=0u; l<Ly; ++l, X+=K, Y+=K) { *Y = *X / x0; }
                         Y -= Ly*K;
                         for (size_t l=Ly-1u; l>0u; --l)
@@ -91,10 +90,10 @@ int poly2rc_s (float *Y, const float *X, const size_t R, const size_t C, const s
                             sc = *--y; Y -= K*(l+1u);
                             for (size_t q=0u; q<l; ++q, Y+=K) { --y; *Y += sc * *y; }
                             sc2 = fmaf(sc,-sc,1.0f);
-                            *Y = -*Y;  //to match sign convention
+                            //*Y = -*Y;  //to match other sign convention
                             for (size_t q=0u; q<l; ++q) { Y-=K; *Y /= sc2; }
                         }
-                        *Y = -*Y;  //to match sign convention
+                        //*Y = -*Y;  //to match other sign convention
                     }
                 }
             }
@@ -122,7 +121,7 @@ int poly2rc_d (double *Y, const double *X, const size_t R, const size_t C, const
         
         if (Lx==N)
         {
-            const double x0 = -*X++;
+            const double x0 = *X++;
             for (size_t l=0u; l<Ly; ++l, ++X, ++Y) { *Y = *X / x0; }
             Y -= Ly;
             for (size_t l=Ly-1u; l>0u; --l)
@@ -131,10 +130,10 @@ int poly2rc_d (double *Y, const double *X, const size_t R, const size_t C, const
                 sc = *--y; Y -= l + 1u;
                 for (size_t q=0u; q<l; ++q, ++Y) { --y; *Y += sc * *y; }
                 sc2 = fma(sc,-sc,1.0);
-                *Y = -*Y;  //to match sign convention
+                //*Y = -*Y;  //to match other sign convention
                 for (size_t q=0u; q<l; ++q) { --Y; *Y /= sc2; }
             }
-            *Y = -*Y;  //to match sign convention
+            //*Y = -*Y;  //to match other sign convention
         }
         else
         {
@@ -147,7 +146,7 @@ int poly2rc_d (double *Y, const double *X, const size_t R, const size_t C, const
             {
                 for (size_t v=0u; v<V; ++v, Y+=Ly)
                 {
-                    x0 = -*X++;
+                    x0 = *X++;
                     for (size_t l=0u; l<Ly; ++l, ++X, ++Y) { *Y = *X / x0; }
                     Y -= Ly;
                     for (size_t l=Ly-1u; l>0u; --l)
@@ -156,10 +155,10 @@ int poly2rc_d (double *Y, const double *X, const size_t R, const size_t C, const
                         sc = *--y; Y -= l + 1u;
                         for (size_t q=0u; q<l; ++q, ++Y) { --y; *Y += sc * *y; }
                         sc2 = fma(sc,-sc,1.0);
-                        *Y = -*Y;  //to match sign convention
+                        //*Y = -*Y;  //to match other sign convention
                         for (size_t q=0u; q<l; ++q) { --Y; *Y /= sc2; }
                     }
-                    *Y = -*Y;  //to match sign convention
+                    //*Y = -*Y;  //to match other sign convention
                 }
             }
             else
@@ -168,7 +167,7 @@ int poly2rc_d (double *Y, const double *X, const size_t R, const size_t C, const
                 {
                     for (size_t b=0u; b<B; ++b, X-=K*Lx-1u, ++Y)
                     {
-                        x0 = -*X; X += K;
+                        x0 = *X; X += K;
                         for (size_t l=0u; l<Ly; ++l, X+=K, Y+=K) { *Y = *X / x0; }
                         Y -= Ly*K;
                         for (size_t l=Ly-1u; l>0u; --l)
@@ -177,10 +176,10 @@ int poly2rc_d (double *Y, const double *X, const size_t R, const size_t C, const
                             sc = *--y; Y -= K*(l+1u);
                             for (size_t q=0u; q<l; ++q, Y+=K) { --y; *Y += sc * *y; }
                             sc2 = fma(sc,-sc,1.0);
-                            *Y = -*Y;  //to match sign convention
+                            //*Y = -*Y;  //to match other sign convention
                             for (size_t q=0u; q<l; ++q) { Y-=K; *Y /= sc2; }
                         }
-                        *Y = -*Y;  //to match sign convention
+                        //*Y = -*Y;  //to match other sign convention
                     }
                 }
             }
@@ -208,7 +207,7 @@ int poly2rc_c (float *Y, const float *X, const size_t R, const size_t C, const s
         
         if (Lx==N)
         {
-            const float x0r = -*X++, x0i = -*X++;
+            const float x0r = *X++, x0i = *X++;
             const float x0a = x0r*x0r + x0i*x0i;
             for (size_t l=0u; l<Ly; ++l, X+=2)
             {
@@ -231,7 +230,7 @@ int poly2rc_c (float *Y, const float *X, const size_t R, const size_t C, const s
                 sc2r = 1.0f - scr*scr + sci*sci;
                 sc2i = -2.0f*scr*sci;
                 sc2a = sc2r*sc2r + sc2i*sc2i;
-                *Y = -*Y; *(Y+1) = -*(Y+1);  //to match sign convention
+                //*Y = -*Y; *(Y+1) = -*(Y+1);  //to match other sign convention
                 for (size_t q=0u; q<l; ++q)
                 {
                     yi = *--Y; yr = *--Y;
@@ -239,7 +238,7 @@ int poly2rc_c (float *Y, const float *X, const size_t R, const size_t C, const s
                     *(Y+1) = (yi*sc2r-yr*sc2i) / sc2a;
                 }
             }
-            *Y = -*Y; *(Y+1) = -*(Y+1);  //to match sign convention
+            //*Y = -*Y; *(Y+1) = -*(Y+1);  //to match other sign convention
         }
         else
         {
@@ -252,7 +251,7 @@ int poly2rc_c (float *Y, const float *X, const size_t R, const size_t C, const s
             {
                 for (size_t v=0u; v<V; ++v, Y+=2u*Ly)
                 {
-                    x0r = -*X++; x0i = -*X++;
+                    x0r = *X++; x0i = *X++;
                     x0a = x0r*x0r + x0i*x0i;
                     for (size_t l=0u; l<Ly; ++l, X+=2)
                     {
@@ -275,7 +274,7 @@ int poly2rc_c (float *Y, const float *X, const size_t R, const size_t C, const s
                         sc2r = 1.0f - scr*scr + sci*sci;
                         sc2i = -2.0f*scr*sci;
                         sc2a = sc2r*sc2r + sc2i*sc2i;
-                        *Y = -*Y; *(Y+1) = -*(Y+1);  //to match sign convention
+                        //*Y = -*Y; *(Y+1) = -*(Y+1);  //to match other sign convention
                         for (size_t q=0u; q<l; ++q)
                         {
                             yi = *--Y; yr = *--Y;
@@ -283,7 +282,7 @@ int poly2rc_c (float *Y, const float *X, const size_t R, const size_t C, const s
                             *(Y+1) = (yi*sc2r-yr*sc2i) / sc2a;
                         }
                     }
-                    *Y = -*Y; *(Y+1) = -*(Y+1);  //to match sign convention
+                    //*Y = -*Y; *(Y+1) = -*(Y+1);  //to match other sign convention
                 }
             }
             else
@@ -292,7 +291,7 @@ int poly2rc_c (float *Y, const float *X, const size_t R, const size_t C, const s
                 {
                     for (size_t b=0u; b<B; ++b, X-=2u*K*Lx-2u, Y+=2u)
                     {
-                        x0r = -*X; x0i = -*(X+1); X += 2u*K;
+                        x0r = *X; x0i = *(X+1); X += 2u*K;
                         x0a = x0r*x0r + x0i*x0i;
                         for (size_t l=0u; l<Ly; ++l, X+=2u*K, Y+=2u*K)
                         {
@@ -315,7 +314,7 @@ int poly2rc_c (float *Y, const float *X, const size_t R, const size_t C, const s
                             sc2r = 1.0f - scr*scr + sci*sci;
                             sc2i = -2.0f*scr*sci;
                             sc2a = sc2r*sc2r + sc2i*sc2i;
-                            *Y = -*Y; *(Y+1) = -*(Y+1);  //to match sign convention
+                            //*Y = -*Y; *(Y+1) = -*(Y+1);  //to match other sign convention
                             for (size_t q=0u; q<l; ++q)
                             {
                                 Y -= 2u*K;
@@ -324,7 +323,7 @@ int poly2rc_c (float *Y, const float *X, const size_t R, const size_t C, const s
                                 *(Y+1) = (yi*sc2r-yr*sc2i) / sc2a;
                             }
                         }
-                        *Y = -*Y; *(Y+1) = -*(Y+1);  //to match sign convention
+                        //*Y = -*Y; *(Y+1) = -*(Y+1);  //to match other sign convention
                     }
                 }
             }
@@ -352,7 +351,7 @@ int poly2rc_z (double *Y, const double *X, const size_t R, const size_t C, const
         
         if (Lx==N)
         {
-            const double x0r = -*X++, x0i = -*X++;
+            const double x0r = *X++, x0i = *X++;
             const double x0a = x0r*x0r + x0i*x0i;
             for (size_t l=0u; l<Ly; ++l, X+=2)
             {
@@ -375,14 +374,14 @@ int poly2rc_z (double *Y, const double *X, const size_t R, const size_t C, const
                 sc2r = 1.0 - scr*scr + sci*sci;
                 sc2i = -2.0*scr*sci;
                 sc2a = sc2r*sc2r + sc2i*sc2i;
-                *Y = -*Y; *(Y+1) = -*(Y+1);  //to match sign convention
+                //*Y = -*Y; *(Y+1) = -*(Y+1);  //to match other sign convention
                 for (size_t q=0u; q<l; ++q)
                 {
                     yi = *--Y; yr = *--Y;
                     *Y = (yr*sc2r+yi*sc2i) / sc2a;
                     *(Y+1) = (yi*sc2r-yr*sc2i) / sc2a;
                 }
-                *Y = -*Y; *(Y+1) = -*(Y+1);  //to match sign convention
+                //*Y = -*Y; *(Y+1) = -*(Y+1);  //to match other sign convention
             }
         }
         else
@@ -396,7 +395,7 @@ int poly2rc_z (double *Y, const double *X, const size_t R, const size_t C, const
             {
                 for (size_t v=0u; v<V; ++v, Y+=2u*Ly)
                 {
-                    x0r = -*X++; x0i = -*X++;
+                    x0r = *X++; x0i = *X++;
                     x0a = x0r*x0r + x0i*x0i;
                     for (size_t l=0u; l<Ly; ++l, X+=2)
                     {
@@ -419,7 +418,7 @@ int poly2rc_z (double *Y, const double *X, const size_t R, const size_t C, const
                         sc2r = 1.0 - scr*scr + sci*sci;
                         sc2i = -2.0*scr*sci;
                         sc2a = sc2r*sc2r + sc2i*sc2i;
-                        *Y = -*Y; *(Y+1) = -*(Y+1);  //to match sign convention
+                        //*Y = -*Y; *(Y+1) = -*(Y+1);  //to match other sign convention
                         for (size_t q=0u; q<l; ++q)
                         {
                             yi = *--Y; yr = *--Y;
@@ -427,7 +426,7 @@ int poly2rc_z (double *Y, const double *X, const size_t R, const size_t C, const
                             *(Y+1) = (yi*sc2r-yr*sc2i) / sc2a;
                         }
                     }
-                    *Y = -*Y; *(Y+1) = -*(Y+1);  //to match sign convention
+                    //*Y = -*Y; *(Y+1) = -*(Y+1);  //to match other sign convention
                 }
             }
             else
@@ -436,7 +435,7 @@ int poly2rc_z (double *Y, const double *X, const size_t R, const size_t C, const
                 {
                     for (size_t b=0u; b<B; ++b, X-=2u*K*Lx-2u, Y+=2u)
                     {
-                        x0r = -*X; x0i = -*(X+1); X += 2u*K;
+                        x0r = *X; x0i = *(X+1); X += 2u*K;
                         x0a = x0r*x0r + x0i*x0i;
                         for (size_t l=0u; l<Ly; ++l, X+=2u*K, Y+=2u*K)
                         {
@@ -459,7 +458,7 @@ int poly2rc_z (double *Y, const double *X, const size_t R, const size_t C, const
                             sc2r = 1.0 - scr*scr + sci*sci;
                             sc2i = -2.0*scr*sci;
                             sc2a = sc2r*sc2r + sc2i*sc2i;
-                            *Y = -*Y; *(Y+1) = -*(Y+1);  //to match sign convention
+                            //*Y = -*Y; *(Y+1) = -*(Y+1);  //to match other sign convention
                             for (size_t q=0u; q<l; ++q)
                             {
                                 Y -= 2u*K;
@@ -468,7 +467,7 @@ int poly2rc_z (double *Y, const double *X, const size_t R, const size_t C, const
                                 *(Y+1) = (yi*sc2r-yr*sc2i) / sc2a;
                             }
                         }
-                        *Y = -*Y; *(Y+1) = -*(Y+1);  //to match sign convention
+                        //*Y = -*Y; *(Y+1) = -*(Y+1);  //to match other sign convention
                     }
                 }
             }

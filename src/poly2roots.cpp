@@ -39,7 +39,8 @@ int main(int argc, char *argv[])
 
     //Description
     string descr;
-    descr += "Roots of polynomials along rows or cols of X.\n";
+    descr += "Roots of polynomials for each vector in X X.\n";
+    descr += "\n";
     descr += "This uses the eig of the compan matrix, like the roots function of Octave.\n";
     descr += "Output (Y) is complex-valued.\n";
     descr += "\n";
@@ -53,7 +54,7 @@ int main(int argc, char *argv[])
     descr += "\n";
     descr += "Examples:\n";
     descr += "$ poly2roots X -o Y \n";
-    descr += "$ poly2roots X > Y \n";
+    descr += "$ poly2roots -d1 X > Y \n";
     descr += "$ cat X | poly2roots -d1 > Y \n";
 
 
