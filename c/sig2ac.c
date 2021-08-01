@@ -17,13 +17,13 @@ namespace codee {
 extern "C" {
 #endif
 
-int sig2ac_s (float *Y, const float *X, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim, const size_t L, const int unbiased);
-int sig2ac_d (double *Y, const double *X, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim, const size_t L, const int unbiased);
-int sig2ac_c (float *Y, const float *X, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim, const size_t L, const int unbiased);
-int sig2ac_z (double *Y, const double *X, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim, const size_t L, const int unbiased);
+int sig2ac_s (float *Y, const float *X, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim, const size_t L, const int unbiased, const int corr);
+int sig2ac_d (double *Y, const double *X, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim, const size_t L, const int unbiased, const int corr);
+int sig2ac_c (float *Y, const float *X, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim, const size_t L, const int unbiased, const int corr);
+int sig2ac_z (double *Y, const double *X, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim, const size_t L, const int unbiased, const int corr);
 
 
-int sig2ac_s (float *Y, const float *X, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim, const size_t L, const int unbiased)
+int sig2ac_s (float *Y, const float *X, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim, const size_t L, const int unbiased, const int corr)
 {
     if (dim>3u) { fprintf(stderr,"error in sig2ac_s: dim must be in [0 3]\n"); return 1; }
 
@@ -58,16 +58,28 @@ int sig2ac_s (float *Y, const float *X, const size_t R, const size_t C, const si
                 }
                 Y -= L;
             }
-            
-            if (unbiased) { for (size_t l=0u; l<L; ++l, ++Y) { *Y /= (float)(Lx-l); } }
-            else { for (size_t l=0u; l<L; ++l, ++Y) { *Y /= (float)Lx; } }
+
+            if (corr)
+            {
+                const float y0 = *Y;
+                *Y++ = 1.0f;
+                for (size_t l=1u; l<L; ++l, ++Y) { *Y /= y0; }
+            }
+            else if (unbiased)
+            {
+                for (size_t l=0u; l<L; ++l, ++Y) { *Y /= (float)(Lx-l); }
+            }
+            else //xcorr leaves this blank
+            {
+                for (size_t l=0u; l<L; ++l, ++Y) { *Y /= (float)Lx; }
+            }
         }
         else
         {
             const size_t K = (iscolmajor) ? ((dim==0u) ? 1u : (dim==1u) ? R : (dim==2u) ? R*C : R*C*S) : ((dim==0u) ? C*S*H : (dim==1u) ? S*H : (dim==2u) ? H : 1u);
             const size_t B = (iscolmajor && dim==0u) ? C*S*H : K;
             const size_t V = N/Lx, G = V/B;
-            float sm;
+            float sm, y0;
 
             if (K==1u && (G==1u || B==1u))
             {
@@ -83,8 +95,19 @@ int sig2ac_s (float *Y, const float *X, const size_t R, const size_t C, const si
                     for (size_t n=0u; n<Lx-L+1u; ++n, ++X) { sm += *X * *(X+L-1u); }
                     *Y = sm; Y -= L-1u;
 
-                    if (unbiased) { for (size_t l=0u; l<L; ++l, ++Y) { *Y /= (float)(Lx-l); } }
-                    else { for (size_t l=0u; l<L; ++l, ++Y) { *Y /= (float)Lx; } }
+                    if (corr)
+                    {
+                        y0 = *Y; *Y++ = 1.0f;
+                        for (size_t l=1u; l<L; ++l, ++Y) { *Y /= y0; }
+                    }
+                    else if (unbiased)
+                    {
+                        for (size_t l=0u; l<L; ++l, ++Y) { *Y /= (float)(Lx-l); }
+                    }
+                    else
+                    {
+                        for (size_t l=0u; l<L; ++l, ++Y) { *Y /= (float)Lx; }
+                    }
                 }
             }
             else
@@ -101,8 +124,19 @@ int sig2ac_s (float *Y, const float *X, const size_t R, const size_t C, const si
                         }
                         Y -= K*L;
 
-                        if (unbiased) { for (size_t l=0u; l<L; ++l, Y+=K) { *Y /= (float)(Lx-l); } }
-                        else { for (size_t l=0u; l<L; ++l, Y+=K) { *Y /= (float)Lx; } }
+                        if (corr)
+                        {
+                            y0 = *Y; *Y = 1.0f; Y += K;
+                            for (size_t l=1u; l<L; ++l, Y+=K) { *Y /= y0; }
+                        }
+                        else if (unbiased)
+                        {
+                            for (size_t l=0u; l<L; ++l, Y+=K) { *Y /= (float)(Lx-l); }
+                        }
+                        else
+                        {
+                            for (size_t l=0u; l<L; ++l, Y+=K) { *Y /= (float)Lx; }
+                        }
                     }
                 }
             }
@@ -113,7 +147,7 @@ int sig2ac_s (float *Y, const float *X, const size_t R, const size_t C, const si
 }
 
 
-int sig2ac_d (double *Y, const double *X, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim, const size_t L, const int unbiased)
+int sig2ac_d (double *Y, const double *X, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim, const size_t L, const int unbiased, const int corr)
 {
     if (dim>3u) { fprintf(stderr,"error in sig2ac_d: dim must be in [0 3]\n"); return 1; }
 
@@ -148,16 +182,28 @@ int sig2ac_d (double *Y, const double *X, const size_t R, const size_t C, const 
                 }
                 Y -= L;
             }
-            
-            if (unbiased) { for (size_t l=0u; l<L; ++l, ++Y) { *Y /= (double)(Lx-l); } }
-            else { for (size_t l=0u; l<L; ++l, ++Y) { *Y /= (double)Lx; } }
+
+            if (corr)
+            {
+                const double y0 = *Y;
+                *Y++ = 1.0;
+                for (size_t l=1u; l<L; ++l, ++Y) { *Y /= y0; }
+            }
+            else if (unbiased)
+            {
+                for (size_t l=0u; l<L; ++l, ++Y) { *Y /= (double)(Lx-l); }
+            }
+            else //xcorr leaves this blank
+            {
+                for (size_t l=0u; l<L; ++l, ++Y) { *Y /= (double)Lx; }
+            }
         }
         else
         {
             const size_t K = (iscolmajor) ? ((dim==0u) ? 1u : (dim==1u) ? R : (dim==2u) ? R*C : R*C*S) : ((dim==0u) ? C*S*H : (dim==1u) ? S*H : (dim==2u) ? H : 1u);
             const size_t B = (iscolmajor && dim==0u) ? C*S*H : K;
             const size_t V = N/Lx, G = V/B;
-            double sm;
+            double sm, y0;
 
             if (K==1u && (G==1u || B==1u))
             {
@@ -173,8 +219,19 @@ int sig2ac_d (double *Y, const double *X, const size_t R, const size_t C, const 
                     for (size_t n=0u; n<Lx-L+1u; ++n, ++X) { sm += *X * *(X+L-1u); }
                     *Y = sm; Y -= L-1u;
 
-                    if (unbiased) { for (size_t l=0u; l<L; ++l, ++Y) { *Y /= (double)(Lx-l); } }
-                    else { for (size_t l=0u; l<L; ++l, ++Y) { *Y /= (double)Lx; } }
+                    if (corr)
+                    {
+                        y0 = *Y; *Y++ = 1.0;
+                        for (size_t l=1u; l<L; ++l, ++Y) { *Y /= y0; }
+                    }
+                    else if (unbiased)
+                    {
+                        for (size_t l=0u; l<L; ++l, ++Y) { *Y /= (double)(Lx-l); }
+                    }
+                    else
+                    {
+                        for (size_t l=0u; l<L; ++l, ++Y) { *Y /= (double)Lx; }
+                    }
                 }
             }
             else
@@ -191,8 +248,19 @@ int sig2ac_d (double *Y, const double *X, const size_t R, const size_t C, const 
                         }
                         Y -= K*L;
 
-                        if (unbiased) { for (size_t l=0u; l<L; ++l, Y+=K) { *Y /= (double)(Lx-l); } }
-                        else { for (size_t l=0u; l<L; ++l, Y+=K) { *Y /= (double)Lx; } }
+                        if (corr)
+                        {
+                            y0 = *Y; *Y = 1.0; Y += K;
+                            for (size_t l=1u; l<L; ++l, Y+=K) { *Y /= y0; }
+                        }
+                        else if (unbiased)
+                        {
+                            for (size_t l=0u; l<L; ++l, Y+=K) { *Y /= (double)(Lx-l); }
+                        }
+                        else
+                        {
+                            for (size_t l=0u; l<L; ++l, Y+=K) { *Y /= (double)Lx; }
+                        }
                     }
                 }
             }
@@ -203,7 +271,7 @@ int sig2ac_d (double *Y, const double *X, const size_t R, const size_t C, const 
 }
 
 
-int sig2ac_c (float *Y, const float *X, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim, const size_t L, const int unbiased)
+int sig2ac_c (float *Y, const float *X, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim, const size_t L, const int unbiased, const int corr)
 {
     if (dim>3u) { fprintf(stderr,"error in sig2ac_c: dim must be in [0 3]\n"); return 1; }
 
@@ -226,8 +294,8 @@ int sig2ac_c (float *Y, const float *X, const size_t R, const size_t C, const si
                     xr = *X++; xi = *X++;
                     for (size_t l=0u; l<L && l<N-n; ++l)
                     {
-                        Y[2u*l] += xr*X[2u*l] - xi*X[2u*l+1u];
-                        Y[2u*l+1u] += xr*X[2u*l+1u] + xi*X[2u*l];
+                        Y[2u*l] += xr*X[2u*l] + xi*X[2u*l+1u];
+                        Y[2u*l+1u] += xi*X[2u*l] - xr*X[2u*l+1u];
                     }
                 }
             }
@@ -239,15 +307,27 @@ int sig2ac_c (float *Y, const float *X, const size_t R, const size_t C, const si
                     smr = smi = 0.0f;
                     for (size_t n=0u; n<Lx-l; ++n, X+=2)
                     {
-                        smr += *X**(X+2u*l) - *(X+1)**(X+2u*l+1u);
-                        smi += *X**(X+2u*l+1u) + *(X+1)**(X+2u*l);
+                        smr += *X**(X+2u*l) + *(X+1)**(X+2u*l+1u);
+                        smi += *(X+1)**(X+2u*l) - *X**(X+2u*l+1u);
                     }
                     *Y++ = smr; *Y++ = smi;
                 }
                 Y -= 2u*L;
             }
             
-            if (unbiased)
+            if (corr)
+            {
+                const float y0r = *Y, y0i = *(Y+1), y0a = y0r*y0r + y0i*y0i;
+                float yr, yi;
+                *Y++ = 1.0f; *Y++ = 0.0f;
+                for (size_t l=1u; l<L; ++l)
+                {
+                    yr = *Y; yi = *(Y+1);
+                    *Y++ = (yr*y0r+yi*y0i) / y0a;
+                    *Y++ = (yi*y0r-yr*y0i) / y0a;
+                }
+            }
+            else if (unbiased)
             {
                 for (size_t l=0u; l<L; ++l) { *Y++ /= (float)(Lx-l); *Y++ /= (float)(Lx-l); }
             }
@@ -261,7 +341,7 @@ int sig2ac_c (float *Y, const float *X, const size_t R, const size_t C, const si
             const size_t K = (iscolmajor) ? ((dim==0u) ? 1u : (dim==1u) ? R : (dim==2u) ? R*C : R*C*S) : ((dim==0u) ? C*S*H : (dim==1u) ? S*H : (dim==2u) ? H : 1u);
             const size_t B = (iscolmajor && dim==0u) ? C*S*H : K;
             const size_t V = N/Lx, G = V/B;
-            float smr, smi;
+            float smr, smi, y0r, y0i, y0a, yr, yi;
 
             if (K==1u && (G==1u || B==1u))
             {
@@ -272,20 +352,32 @@ int sig2ac_c (float *Y, const float *X, const size_t R, const size_t C, const si
                         smr = smi = 0.0f;
                         for (size_t n=0u; n<Lx-l; ++n, X+=2)
                         {
-                            smr += *X**(X+2u*l) - *(X+1u)**(X+2u*l+1u);
-                            smi += *X**(X+2u*l+1u) + *(X+1u)**(X+2u*l);
+                            smr += *X**(X+2u*l) + *(X+1u)**(X+2u*l+1u);
+                            smi += *(X+1u)**(X+2u*l) - *X**(X+2u*l+1u);
                         }
                         *Y++ = smr; *Y++ = smi;
                     }
                     smr = smi = 0.0f;
                     for (size_t n=0u; n<Lx-L+1u; ++n, X+=2)
                     {
-                        smr += *X**(X+2u*L-2u) - *(X+1u)**(X+2u*L-1u);
-                        smi += *X**(X+2u*L-1u) + *(X+1u)**(X+2u*L-2u);
+                        smr += *X**(X+2u*L-2u) + *(X+1u)**(X+2u*L-1u);
+                        smi += *(X+1u)**(X+2u*L-2u) - *X**(X+2u*L-1u);
                     }
                     *Y = smr; *(Y+1) = smi; Y -= 2u*L-2u;
 
-                    if (unbiased)
+                    if (corr)
+                    {
+                        y0r = *Y; y0i = *(Y+1);
+                        y0a = y0r*y0r + y0i*y0i;
+                        *Y++ = 1.0f; *Y++ = 0.0f;
+                        for (size_t l=1u; l<L; ++l)
+                        {
+                            yr = *Y; yi = *(Y+1);
+                            *Y++ = (yr*y0r+yi*y0i) / y0a;
+                            *Y++ = (yi*y0r-yr*y0i) / y0a;
+                        }
+                    }
+                    else if (unbiased)
                     {
                         for (size_t l=0u; l<L; ++l) { *Y++ /= (float)(Lx-l); *Y++ /= (float)(Lx-l); }
                     }
@@ -306,14 +398,26 @@ int sig2ac_c (float *Y, const float *X, const size_t R, const size_t C, const si
                             smr = smi = 0.0f;
                             for (size_t n=0u; n<Lx-l; ++n, X+=2u*K)
                             {
-                                smr += *X**(X+2u*l*K) - *(X+1)**(X+2u*l*K+1u);
-                                smi += *X**(X+2u*l*K+1u) + *(X+1)**(X+2u*l*K);
+                                smr += *X**(X+2u*l*K) + *(X+1)**(X+2u*l*K+1u);
+                                smi += *(X+1)**(X+2u*l*K) - *X**(X+2u*l*K+1u);
                             }
                             *Y = smr; *(Y+1) = smi;
                         }
                         Y -= 2u*K*L;
 
-                        if (unbiased)
+                        if (corr)
+                        {
+                            y0r = *Y; y0i = *(Y+1);
+                            y0a = y0r*y0r + y0i*y0i;
+                            *Y = 1.0f; *(Y+1) = 0.0f; Y += 2u*K;
+                            for (size_t l=1u; l<L; ++l, Y+=2u*K)
+                            {
+                                yr = *Y; yi = *(Y+1);
+                                *Y = (yr*y0r+yi*y0i) / y0a;
+                                *(Y+1) = (yi*y0r-yr*y0i) / y0a;
+                            }
+                        }
+                        else if (unbiased)
                         {
                             for (size_t l=0u; l<L; ++l, Y+=2u*K) { *Y /= (float)(Lx-l); *(Y+1) /= (float)(Lx-l); }
                         }
@@ -331,7 +435,7 @@ int sig2ac_c (float *Y, const float *X, const size_t R, const size_t C, const si
 }
 
 
-int sig2ac_z (double *Y, const double *X, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim, const size_t L, const int unbiased)
+int sig2ac_z (double *Y, const double *X, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim, const size_t L, const int unbiased, const int corr)
 {
     if (dim>3u) { fprintf(stderr,"error in sig2ac_z: dim must be in [0 3]\n"); return 1; }
 
@@ -354,8 +458,8 @@ int sig2ac_z (double *Y, const double *X, const size_t R, const size_t C, const 
                     xr = *X++; xi = *X++;
                     for (size_t l=0u; l<L && l<N-n; ++l)
                     {
-                        Y[2u*l] += xr*X[2u*l] - xi*X[2u*l+1u];
-                        Y[2u*l+1u] += xr*X[2u*l+1u] + xi*X[2u*l];
+                        Y[2u*l] += xr*X[2u*l] + xi*X[2u*l+1u];
+                        Y[2u*l+1u] += xi*X[2u*l] - xr*X[2u*l+1u];
                     }
                 }
             }
@@ -367,15 +471,27 @@ int sig2ac_z (double *Y, const double *X, const size_t R, const size_t C, const 
                     smr = smi = 0.0;
                     for (size_t n=0u; n<Lx-l; ++n, X+=2)
                     {
-                        smr += *X**(X+2u*l) - *(X+1)**(X+2u*l+1u);
-                        smi += *X**(X+2u*l+1u) + *(X+1)**(X+2u*l);
+                        smr += *X**(X+2u*l) + *(X+1)**(X+2u*l+1u);
+                        smi += *(X+1)**(X+2u*l) - *X**(X+2u*l+1u);
                     }
                     *Y++ = smr; *Y++ = smi;
                 }
                 Y -= 2u*L;
             }
             
-            if (unbiased)
+            if (corr)
+            {
+                const double y0r = *Y, y0i = *(Y+1), y0a = y0r*y0r + y0i*y0i;
+                double yr, yi;
+                *Y++ = 1.0; *Y++ = 0.0;
+                for (size_t l=1u; l<L; ++l)
+                {
+                    yr = *Y; yi = *(Y+1);
+                    *Y++ = (yr*y0r+yi*y0i) / y0a;
+                    *Y++ = (yi*y0r-yr*y0i) / y0a;
+                }
+            }
+            else if (unbiased)
             {
                 for (size_t l=0u; l<L; ++l) { *Y++ /= (double)(Lx-l); *Y++ /= (double)(Lx-l); }
             }
@@ -389,7 +505,7 @@ int sig2ac_z (double *Y, const double *X, const size_t R, const size_t C, const 
             const size_t K = (iscolmajor) ? ((dim==0u) ? 1u : (dim==1u) ? R : (dim==2u) ? R*C : R*C*S) : ((dim==0u) ? C*S*H : (dim==1u) ? S*H : (dim==2u) ? H : 1u);
             const size_t B = (iscolmajor && dim==0u) ? C*S*H : K;
             const size_t V = N/Lx, G = V/B;
-            double smr, smi;
+            double smr, smi, y0r, y0i, y0a, yr, yi;
 
             if (K==1u && (G==1u || B==1u))
             {
@@ -400,20 +516,32 @@ int sig2ac_z (double *Y, const double *X, const size_t R, const size_t C, const 
                         smr = smi = 0.0;
                         for (size_t n=0u; n<Lx-l; ++n, X+=2)
                         {
-                            smr += *X**(X+2u*l) - *(X+1u)**(X+2u*l+1u);
-                            smi += *X**(X+2u*l+1u) + *(X+1u)**(X+2u*l);
+                            smr += *X**(X+2u*l) + *(X+1u)**(X+2u*l+1u);
+                            smi += *(X+1u)**(X+2u*l) - *X**(X+2u*l+1u);
                         }
                         *Y++ = smr; *Y++ = smi;
                     }
                     smr = smi = 0.0;
                     for (size_t n=0u; n<Lx-L+1u; ++n, X+=2)
                     {
-                        smr += *X**(X+2u*L-2u) - *(X+1u)**(X+2u*L-1u);
-                        smi += *X**(X+2u*L-1u) + *(X+1u)**(X+2u*L-2u);
+                        smr += *X**(X+2u*L-2u) + *(X+1u)**(X+2u*L-1u);
+                        smi += *(X+1u)**(X+2u*L-2u) - *X**(X+2u*L-1u);
                     }
                     *Y = smr; *(Y+1) = smi; Y -= 2u*L-2u;
 
-                    if (unbiased)
+                    if (corr)
+                    {
+                        y0r = *Y; y0i = *(Y+1);
+                        y0a = y0r*y0r + y0i*y0i;
+                        *Y++ = 1.0; *Y++ = 0.0;
+                        for (size_t l=1u; l<L; ++l)
+                        {
+                            yr = *Y; yi = *(Y+1);
+                            *Y++ = (yr*y0r+yi*y0i) / y0a;
+                            *Y++ = (yi*y0r-yr*y0i) / y0a;
+                        }
+                    }
+                    else if (unbiased)
                     {
                         for (size_t l=0u; l<L; ++l) { *Y++ /= (double)(Lx-l); *Y++ /= (double)(Lx-l); }
                     }
@@ -434,14 +562,26 @@ int sig2ac_z (double *Y, const double *X, const size_t R, const size_t C, const 
                             smr = smi = 0.0;
                             for (size_t n=0u; n<Lx-l; ++n, X+=2u*K)
                             {
-                                smr += *X**(X+2u*l*K) - *(X+1)**(X+2u*l*K+1u);
-                                smi += *X**(X+2u*l*K+1u) + *(X+1)**(X+2u*l*K);
+                                smr += *X**(X+2u*l*K) + *(X+1)**(X+2u*l*K+1u);
+                                smi += *(X+1)**(X+2u*l*K) - *X**(X+2u*l*K+1u);
                             }
                             *Y = smr; *(Y+1) = smi;
                         }
                         Y -= 2u*K*L;
 
-                        if (unbiased)
+                        if (corr)
+                        {
+                            y0r = *Y; y0i = *(Y+1);
+                            y0a = y0r*y0r + y0i*y0i;
+                            *Y = 1.0; *(Y+1) = 0.0; Y += 2u*K;
+                            for (size_t l=1u; l<L; ++l, Y+=2u*K)
+                            {
+                                yr = *Y; yi = *(Y+1);
+                                *Y = (yr*y0r+yi*y0i) / y0a;
+                                *(Y+1) = (yi*y0r-yr*y0i) / y0a;
+                            }
+                        }
+                        else if (unbiased)
                         {
                             for (size_t l=0u; l<L; ++l, Y+=2u*K) { *Y /= (double)(Lx-l); *(Y+1) /= (double)(Lx-l); }
                         }
