@@ -1,326 +1,458 @@
+//Gets autocovariance (AC) for lags 0 to L-1 for each vector in X.
+//The means are NOT subtracted, and lag 0 of Y is NOT normalized,
+//which matches the behavior of Octave's xcorr.
+
+//The "biased" version uses N in the denominator,
+//which is unlike Octave's xcorr, which leaves it unnormalized.
+
 //The "unbiased" version uses N-l in the denominator instead of N.
 //It is actually just "less biased", but is slower,
 //has larger mean-squared error, and doesn't match FFT estimate.
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <cblas.h>
 
 #ifdef __cplusplus
 namespace codee {
 extern "C" {
 #endif
 
-int sig2ac_s (float *Y, const float *X, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim, const int L, const char unbiased);
-int sig2ac_d (double *Y, const double *X, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim, const int L, const char unbiased);
-int sig2ac_c (float *Y, const float *X, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim, const int L, const char unbiased);
-int sig2ac_z (double *Y, const double *X, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim, const int L, const char unbiased);
+int sig2ac_s (float *Y, const float *X, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim, const size_t L, const int unbiased);
+int sig2ac_d (double *Y, const double *X, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim, const size_t L, const int unbiased);
+int sig2ac_c (float *Y, const float *X, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim, const size_t L, const int unbiased);
+int sig2ac_z (double *Y, const double *X, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim, const size_t L, const int unbiased);
 
 
-int sig2ac_s (float *Y, const float *X, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim, const int L, const char unbiased)
+int sig2ac_s (float *Y, const float *X, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim, const size_t L, const int unbiased)
 {
-    if (dim>3) { fprintf(stderr,"error in sig2ac_s: dim must be in [0 3]\n"); return 1; }
+    if (dim>3u) { fprintf(stderr,"error in sig2ac_s: dim must be in [0 3]\n"); return 1; }
 
-    float *X1;  //1 row or col of X
+    const size_t N = R*C*S*H;
+    const size_t Lx = (dim==0u) ? R : (dim==1u) ? C : (dim==2u) ? S : H;
+    if (L>Lx) { fprintf(stderr,"error in sig2ac_s: L (num lags in output) must be <= Lx (length of vecs in X)\n"); return 1; }
 
-    if (dim==0)
-    {
-        if (L>R) { fprintf(stderr,"error in sig2ac_s: nlags must be < nrows X for dim==0\n"); return 1; }
-        if (!(X1=(float *)malloc((size_t)R*sizeof(float)))) { fprintf(stderr,"error in sig2ac_s: problem with malloc. "); perror("malloc"); return 1; }
-        if (iscolmajor)
-        {
-            for (size_t c=0; c<C; c++)
-            {
-                cblas_scopy((int)R,&X[c*R],1,&X1[0],1);
-                //m = cblas_sdot((int)R,&X1[0],1,&o,0) / R;
-                //cblas_saxpy((int)R,-m,&o,0,&X1[0],1);
-                for (l=0; l<L; l++) { Y[l+c*L] = cblas_sdot(R-l,&X1[0],1,&X1[l],1); }
-            }
-            if (unbiased) { for (l=0; l<L; l++) { cblas_sscal((int)C,(float)R/(R-l),&Y[l],L); } }
-        }
-        else
-        {
-            for (size_t c=0; c<C; c++)
-            {
-                cblas_scopy((int)R,&X[c],(int)C,&X1[0],1);
-                //m = cblas_sdot((int)R,&X1[0],1,&o,0) / R;
-                //cblas_saxpy((int)R,-m,&o,0,&X1[0],1);
-                for (l=0; l<L; l++) { Y[c+l*C] = cblas_sdot(R-l,&X1[0],1,&X1[l],1); }
-            }
-            if (unbiased) { for (l=0; l<L; l++) { cblas_sscal((int)C,(float)R/(R-l),&Y[l*C],1); } }
-        }
-    }
-    else if (dim==1)
-    {
-        if (L>C) { fprintf(stderr,"error in sig2ac_s: nlags must be < ncols X for dim==1\n"); return 1; }
-        if (!(X1=(float *)malloc((size_t)C*sizeof(float)))) { fprintf(stderr,"error in sig2ac_s: problem with malloc. "); perror("malloc"); return 1; }
-        if (iscolmajor)
-        {
-            for (size_t r=0; r<R; r++)
-            {
-                cblas_scopy((int)C,&X[r],(int)R,&X1[0],1);
-                //m = cblas_sdot((int)C,&X1[0],1,&o,0) / C;
-                //cblas_saxpy((int)C,-m,&o,0,&X1[0],1);
-                for (l=0; l<L; l++) { Y[r+l*R] = cblas_sdot(C-l,&X1[0],1,&X1[l],1); }
-            }
-            if (unbiased) { for (l=0; l<L; l++) { cblas_sscal((int)R,(float)C/(C-l),&Y[l*R],1); } }
-        }
-        else
-        {
-            for (size_t r=0; r<R; r++)
-            {
-                cblas_scopy((int)C,&X[r*C],1,&X1[0],1);
-                //m = cblas_sdot((int)C,&X1[0],1,&o,0) / C;
-                //cblas_saxpy((int)C,-m,&o,0,&X1[0],1);
-                for (l=0; l<L; l++) { Y[l+r*L] = cblas_sdot(C-l,&X1[0],1,&X1[l],1); }
-            }
-            if (unbiased) { for (l=0; l<L; l++) { cblas_sscal((int)R,(float)C/(C-l),&Y[l],L); } }
-        }
-    }
+    if (N==0u) {}
     else
     {
-        fprintf(stderr,"error in sig2ac_s: dim must be 0 or 1.\n"); return 1;
+        if (Lx==N)
+        {
+            if (L>850u && Lx>80000u) //I also leave this solution since it is closer to real-time use
+            {
+                float x;
+                for (size_t l=0u; l<L; ++l, ++Y) { *Y = 0.0f; }
+                Y -= L;
+                for (size_t n=0u; n<N; ++n, ++X)
+                {
+                    x = *X;
+                    for (size_t l=0u; l<L && l<N-n; ++l) { Y[l] += x * X[l]; }
+                }
+            }
+            else
+            {
+                float sm;
+                for (size_t l=0u; l<L; ++l, X-=Lx-l+1u, ++Y)
+                {
+                    sm = 0.0f;
+                    for (size_t n=0u; n<Lx-l; ++n, ++X) { sm += *X * *(X+l); }
+                    *Y = sm;
+                }
+                Y -= L;
+            }
+            
+            if (unbiased) { for (size_t l=0u; l<L; ++l, ++Y) { *Y /= (float)(Lx-l); } }
+            else { for (size_t l=0u; l<L; ++l, ++Y) { *Y /= (float)Lx; } }
+        }
+        else
+        {
+            const size_t K = (iscolmajor) ? ((dim==0u) ? 1u : (dim==1u) ? R : (dim==2u) ? R*C : R*C*S) : ((dim==0u) ? C*S*H : (dim==1u) ? S*H : (dim==2u) ? H : 1u);
+            const size_t B = (iscolmajor && dim==0u) ? C*S*H : K;
+            const size_t V = N/Lx, G = V/B;
+            float sm;
+
+            if (K==1u && (G==1u || B==1u))
+            {
+                for (size_t v=0u; v<V; ++v, X+=L-1u)
+                {
+                    for (size_t l=0u; l<L-1u; ++l, X-=Lx-l+1u, ++Y)
+                    {
+                        sm = 0.0f;
+                        for (size_t n=0u; n<Lx-l; ++n, ++X) { sm += *X * *(X+l); }
+                        *Y = sm;
+                    }
+                    sm = 0.0f;
+                    for (size_t n=0u; n<Lx-L+1u; ++n, ++X) { sm += *X * *(X+L-1u); }
+                    *Y = sm; Y -= L-1u;
+
+                    if (unbiased) { for (size_t l=0u; l<L; ++l, ++Y) { *Y /= (float)(Lx-l); } }
+                    else { for (size_t l=0u; l<L; ++l, ++Y) { *Y /= (float)Lx; } }
+                }
+            }
+            else
+            {
+                for (size_t g=0u; g<G; ++g, X+=B*(Lx-1u), Y+=B*(L-1u))
+                {
+                    for (size_t b=0u; b<B; ++b, ++X, Y-=K*L-1u)
+                    {
+                        for (size_t l=0u; l<L; ++l, X-=K*(Lx-l+1u), Y+=K)
+                        {
+                            sm = 0.0f;
+                            for (size_t n=0u; n<Lx-l; ++n, X+=K) { sm += *X * *(X+l*K); }
+                            *Y = sm;
+                        }
+                        Y -= K*L;
+
+                        if (unbiased) { for (size_t l=0u; l<L; ++l, Y+=K) { *Y /= (float)(Lx-l); } }
+                        else { for (size_t l=0u; l<L; ++l, Y+=K) { *Y /= (float)Lx; } }
+                    }
+                }
+            }
+        }
     }
 
     return 0;
 }
 
 
-int sig2ac_d (double *Y, const double *X, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim, const int L, const char unbiased)
+int sig2ac_d (double *Y, const double *X, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim, const size_t L, const int unbiased)
 {
-    if (dim>3) { fprintf(stderr,"error in sig2ac_d: dim must be in [0 3]\n"); return 1; }
+    if (dim>3u) { fprintf(stderr,"error in sig2ac_d: dim must be in [0 3]\n"); return 1; }
 
-    double *X1;  //1 row or col of X
+    const size_t N = R*C*S*H;
+    const size_t Lx = (dim==0u) ? R : (dim==1u) ? C : (dim==2u) ? S : H;
+    if (L>Lx) { fprintf(stderr,"error in sig2ac_d: L (num lags in output) must be <= Lx (length of vecs in X)\n"); return 1; }
 
-    if (dim==0)
-    {
-        if (L>R) { fprintf(stderr,"error in sig2ac_d: nlags must be < nrows X for dim==0\n"); return 1; }
-        if (!(X1=(double *)malloc((size_t)R*sizeof(double)))) { fprintf(stderr,"error in sig2ac_d: problem with malloc. "); perror("malloc"); return 1; }
-        if (iscolmajor)
-        {
-            for (size_t c=0; c<C; c++)
-            {
-                cblas_dcopy((int)R,&X[c*R],1,&X1[0],1);
-                //m = cblas_ddot((int)R,&X1[0],1,&o,0) / R;
-                //cblas_daxpy((int)R,-m,&o,0,&X1[0],1);
-                for (l=0; l<L; l++) { Y[l+c*L] = cblas_ddot(R-l,&X1[0],1,&X1[l],1); }
-            }
-            if (unbiased) { for (l=0; l<L; l++) { cblas_dscal((int)C,(double)R/(R-l),&Y[l],L); } }
-        }
-        else
-        {
-            for (size_t c=0; c<C; c++)
-            {
-                cblas_dcopy((int)R,&X[c],(int)C,&X1[0],1);
-                //m = cblas_ddot((int)R,&X1[0],1,&o,0) / R;
-                //cblas_daxpy((int)R,-m,&o,0,&X1[0],1);
-                for (l=0; l<L; l++) { Y[c+l*C] = cblas_ddot(R-l,&X1[0],1,&X1[l],1); }
-            }
-            if (unbiased) { for (l=0; l<L; l++) { cblas_dscal((int)C,(double)R/(R-l),&Y[l*C],1); } }
-        }
-    }
-    else if (dim==1)
-    {
-        if (L>C) { fprintf(stderr,"error in sig2ac_d: nlags must be < ncols X for dim==1\n"); return 1; }
-        if (!(X1=(double *)malloc((size_t)C*sizeof(double)))) { fprintf(stderr,"error in sig2ac_d: problem with malloc. "); perror("malloc"); return 1; }
-        if (iscolmajor)
-        {
-            for (size_t r=0; r<R; r++)
-            {
-                cblas_dcopy((int)C,&X[r],(int)R,&X1[0],1);
-                //m = cblas_ddot((int)C,&X1[0],1,&o,0) / C;
-                //cblas_daxpy((int)C,-m,&o,0,&X1[0],1);
-                for (l=0; l<L; l++) { Y[r+l*R] = cblas_ddot(C-l,&X1[0],1,&X1[l],1); }
-            }
-            if (unbiased) { for (l=0; l<L; l++) { cblas_dscal((int)R,(double)C/(C-l),&Y[l*R],1); } }
-        }
-        else
-        {
-            for (size_t r=0; r<R; r++)
-            {
-                cblas_dcopy((int)C,&X[r*C],1,&X1[0],1);
-                //m = cblas_ddot((int)C,&X1[0],1,&o,0) / C;
-                //cblas_daxpy((int)C,-m,&o,0,&X1[0],1);
-                for (l=0; l<L; l++) { Y[l+r*L] = cblas_ddot(C-l,&X1[0],1,&X1[l],1); }
-            }
-            if (unbiased) { for (l=0; l<L; l++) { cblas_dscal((int)R,(double)C/(C-l),&Y[l],L); } }
-        }
-    }
+    if (N==0u) {}
     else
     {
-        fprintf(stderr,"error in sig2ac_d: dim must be 0 or 1.\n"); return 1;
+        if (Lx==N)
+        {
+            if (L>850u && Lx>80000u) //I also leave this solution since it is closer to real-time use
+            {
+                double x;
+                for (size_t l=0u; l<L; ++l, ++Y) { *Y = 0.0; }
+                Y -= L;
+                for (size_t n=0u; n<N; ++n, ++X)
+                {
+                    x = *X;
+                    for (size_t l=0u; l<L && l<N-n; ++l) { Y[l] += x * X[l]; }
+                }
+            }
+            else
+            {
+                double sm;
+                for (size_t l=0u; l<L; ++l, X-=Lx-l+1u, ++Y)
+                {
+                    sm = 0.0;
+                    for (size_t n=0u; n<Lx-l; ++n, ++X) { sm += *X * *(X+l); }
+                    *Y = sm;
+                }
+                Y -= L;
+            }
+            
+            if (unbiased) { for (size_t l=0u; l<L; ++l, ++Y) { *Y /= (double)(Lx-l); } }
+            else { for (size_t l=0u; l<L; ++l, ++Y) { *Y /= (double)Lx; } }
+        }
+        else
+        {
+            const size_t K = (iscolmajor) ? ((dim==0u) ? 1u : (dim==1u) ? R : (dim==2u) ? R*C : R*C*S) : ((dim==0u) ? C*S*H : (dim==1u) ? S*H : (dim==2u) ? H : 1u);
+            const size_t B = (iscolmajor && dim==0u) ? C*S*H : K;
+            const size_t V = N/Lx, G = V/B;
+            double sm;
+
+            if (K==1u && (G==1u || B==1u))
+            {
+                for (size_t v=0u; v<V; ++v, X+=L-1u)
+                {
+                    for (size_t l=0u; l<L-1u; ++l, X-=Lx-l+1u, ++Y)
+                    {
+                        sm = 0.0;
+                        for (size_t n=0u; n<Lx-l; ++n, ++X) { sm += *X * *(X+l); }
+                        *Y = sm;
+                    }
+                    sm = 0.0;
+                    for (size_t n=0u; n<Lx-L+1u; ++n, ++X) { sm += *X * *(X+L-1u); }
+                    *Y = sm; Y -= L-1u;
+
+                    if (unbiased) { for (size_t l=0u; l<L; ++l, ++Y) { *Y /= (double)(Lx-l); } }
+                    else { for (size_t l=0u; l<L; ++l, ++Y) { *Y /= (double)Lx; } }
+                }
+            }
+            else
+            {
+                for (size_t g=0u; g<G; ++g, X+=B*(Lx-1u), Y+=B*(L-1u))
+                {
+                    for (size_t b=0u; b<B; ++b, ++X, Y-=K*L-1u)
+                    {
+                        for (size_t l=0u; l<L; ++l, X-=K*(Lx-l+1u), Y+=K)
+                        {
+                            sm = 0.0;
+                            for (size_t n=0u; n<Lx-l; ++n, X+=K) { sm += *X * *(X+l*K); }
+                            *Y = sm;
+                        }
+                        Y -= K*L;
+
+                        if (unbiased) { for (size_t l=0u; l<L; ++l, Y+=K) { *Y /= (double)(Lx-l); } }
+                        else { for (size_t l=0u; l<L; ++l, Y+=K) { *Y /= (double)Lx; } }
+                    }
+                }
+            }
+        }
     }
 
     return 0;
 }
 
 
-int sig2ac_c (float *Y, const float *X, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim, const int L, const char unbiased)
+int sig2ac_c (float *Y, const float *X, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim, const size_t L, const int unbiased)
 {
-    if (dim>3) { fprintf(stderr,"error in sig2ac_c: dim must be in [0 3]\n"); return 1; }
+    if (dim>3u) { fprintf(stderr,"error in sig2ac_c: dim must be in [0 3]\n"); return 1; }
 
-    _Complex float dot;
-    float *X1;  //1 row or col of X
+    const size_t N = R*C*S*H;
+    const size_t Lx = (dim==0u) ? R : (dim==1u) ? C : (dim==2u) ? S : H;
+    if (L>Lx) { fprintf(stderr,"error in sig2ac_c: L (num lags in output) must be <= Lx (length of vecs in X)\n"); return 1; }
 
-    if (dim==0)
-    {
-        if (L>R) { fprintf(stderr,"error in sig2ac_c: nlags must be < nrows X for dim==0\n"); return 1; }
-        if (!(X1=(float *)malloc((size_t)(2*R)*sizeof(float)))) { fprintf(stderr,"error in sig2ac_c: problem with malloc. "); perror("malloc"); return 1; }
-        if (iscolmajor)
-        {
-            for (size_t c=0; c<C; c++)
-            {
-                cblas_ccopy((int)R,&X[2*c*R],1,&X1[0],1);
-                //m = -cblas_cdotu((int)R,&X1[0],1,&o[0],0) / R;
-                //cblas_caxpy((int)R,(float *)&m,&o[0],0,&X1[0],1);
-                for (l=0; l<L; l++)
-                {
-                    dot = cblas_cdotu(R-l,&X1[0],1,&X1[2*l],1);
-                    cblas_ccopy(1,(float *)&dot,1,&Y[2*(l+c*L)],1);
-                }
-            }
-            if (unbiased) { for (l=0; l<L; l++) { cblas_csscal((int)C,(float)R/(R-l),&Y[2*l],L); } }
-        }
-        else
-        {
-            for (size_t c=0; c<C; c++)
-            {
-                cblas_ccopy((int)R,&X[2*c],2*C,&X1[0],1);
-                //m = -cblas_cdotu((int)R,&X1[0],1,&o[0],0) / R;
-                //cblas_caxpy((int)R,(float *)&m,&o[0],0,&X1[0],1);
-                for (l=0; l<L; l++)
-                {
-                    dot = cblas_cdotu(R-l,&X1[0],1,&X1[2*l],1);
-                    cblas_ccopy(1,(float *)&dot,1,&Y[2*(c+l*C)],1);
-                }
-            }
-            if (unbiased) { for (l=0; l<L; l++) { cblas_csscal((int)C,(float)R/(R-l),&Y[2*l*C],1); } }
-        }
-    }
-    else if (dim==1)
-    {
-        if (L>C) { fprintf(stderr,"error in sig2ac_c: nlags must be < ncols X for dim==1\n"); return 1; }
-        if (!(X1=(float *)malloc((size_t)(2*C)*sizeof(float)))) { fprintf(stderr,"error in sig2ac_c: problem with malloc. "); perror("malloc"); return 1; }
-        if (iscolmajor)
-        {
-            for (size_t r=0; r<R; r++)
-            {
-                cblas_ccopy((int)C,&X[2*r],2*R,&X1[0],1);
-                //m = -cblas_cdotu((int)C,&X1[0],1,&o[0],0) / C;
-                //cblas_caxpy((int)C,(float *)&m,&o[0],0,&X1[0],1);
-                for (l=0; l<L; l++)
-                {
-                    dot = cblas_cdotu(C-l,&X1[0],1,&X1[2*l],1);
-                    cblas_ccopy(1,(float *)&dot,1,&Y[2*(r+l*R)],1);
-                }
-            }
-            if (unbiased) { for (l=0; l<L; l++) { cblas_csscal((int)R,(float)C/(C-l),&Y[2*l*R],1); } }
-        }
-        else
-        {
-            for (size_t r=0; r<R; r++)
-            {
-                cblas_ccopy((int)C,&X[2*r*C],1,&X1[0],1);
-                //m = -cblas_cdotu((int)C,&X1[0],1,&o[0],0) / C;
-                //cblas_caxpy((int)C,(float *)&m,&o[0],0,&X1[0],1);
-                for (l=0; l<L; l++)
-                {
-                    dot = cblas_cdotu(C-l,&X1[0],1,&X1[2*l],1);
-                    cblas_ccopy(1,(float *)&dot,1,&Y[2*(l+r*L)],1);
-                }
-            }
-            if (unbiased) { for (l=0; l<L; l++) { cblas_csscal((int)R,(float)C/(C-l),&Y[2*l],L); } }
-        }
-    }
+    if (N==0u) {}
     else
     {
-        fprintf(stderr,"error in sig2ac_c: dim must be 0 or 1.\n"); return 1;
+        if (Lx==N)
+        {
+            if (L>850u && Lx>80000u) //I also leave this solution since it is closer to real-time use
+            {
+                float xr, xi;
+                for (size_t l=0u; l<2u*L; ++l, ++Y) { *Y = 0.0f; }
+                Y -= 2u*L;
+                for (size_t n=0u; n<N; ++n)
+                {
+                    xr = *X++; xi = *X++;
+                    for (size_t l=0u; l<L && l<N-n; ++l)
+                    {
+                        Y[2u*l] += xr*X[2u*l] - xi*X[2u*l+1u];
+                        Y[2u*l+1u] += xr*X[2u*l+1u] + xi*X[2u*l];
+                    }
+                }
+            }
+            else
+            {
+                float smr, smi;
+                for (size_t l=0u; l<L; ++l, X-=2u*(Lx-l+1u))
+                {
+                    smr = smi = 0.0f;
+                    for (size_t n=0u; n<Lx-l; ++n, X+=2)
+                    {
+                        smr += *X**(X+2u*l) - *(X+1)**(X+2u*l+1u);
+                        smi += *X**(X+2u*l+1u) + *(X+1)**(X+2u*l);
+                    }
+                    *Y++ = smr; *Y++ = smi;
+                }
+                Y -= 2u*L;
+            }
+            
+            if (unbiased)
+            {
+                for (size_t l=0u; l<L; ++l) { *Y++ /= (float)(Lx-l); *Y++ /= (float)(Lx-l); }
+            }
+            else
+            {
+                for (size_t l=0u; l<2u*L; ++l, ++Y) { *Y /= (float)Lx; }
+            }
+        }
+        else
+        {
+            const size_t K = (iscolmajor) ? ((dim==0u) ? 1u : (dim==1u) ? R : (dim==2u) ? R*C : R*C*S) : ((dim==0u) ? C*S*H : (dim==1u) ? S*H : (dim==2u) ? H : 1u);
+            const size_t B = (iscolmajor && dim==0u) ? C*S*H : K;
+            const size_t V = N/Lx, G = V/B;
+            float smr, smi;
+
+            if (K==1u && (G==1u || B==1u))
+            {
+                for (size_t v=0u; v<V; ++v, X+=2u*L-2u)
+                {
+                    for (size_t l=0u; l<L-1u; ++l, X-=2u*(Lx-l+1u))
+                    {
+                        smr = smi = 0.0f;
+                        for (size_t n=0u; n<Lx-l; ++n, X+=2)
+                        {
+                            smr += *X**(X+2u*l) - *(X+1u)**(X+2u*l+1u);
+                            smi += *X**(X+2u*l+1u) + *(X+1u)**(X+2u*l);
+                        }
+                        *Y++ = smr; *Y++ = smi;
+                    }
+                    smr = smi = 0.0f;
+                    for (size_t n=0u; n<Lx-L+1u; ++n, X+=2)
+                    {
+                        smr += *X**(X+2u*L-2u) - *(X+1u)**(X+2u*L-1u);
+                        smi += *X**(X+2u*L-1u) + *(X+1u)**(X+2u*L-2u);
+                    }
+                    *Y = smr; *(Y+1) = smi; Y -= 2u*L-2u;
+
+                    if (unbiased)
+                    {
+                        for (size_t l=0u; l<L; ++l) { *Y++ /= (float)(Lx-l); *Y++ /= (float)(Lx-l); }
+                    }
+                    else
+                    {
+                        for (size_t l=0u; l<2u*L; ++l, ++Y) { *Y /= (float)Lx; }
+                    }
+                }
+            }
+            else
+            {
+                for (size_t g=0u; g<G; ++g, X+=2u*B*(Lx-1u), Y+=2u*B*(L-1u))
+                {
+                    for (size_t b=0u; b<B; ++b, X+=2, Y-=2u*K*L-2u)
+                    {
+                        for (size_t l=0u; l<L; ++l, X-=2u*K*(Lx-l+1u), Y+=2u*K)
+                        {
+                            smr = smi = 0.0f;
+                            for (size_t n=0u; n<Lx-l; ++n, X+=2u*K)
+                            {
+                                smr += *X**(X+2u*l*K) - *(X+1)**(X+2u*l*K+1u);
+                                smi += *X**(X+2u*l*K+1u) + *(X+1)**(X+2u*l*K);
+                            }
+                            *Y = smr; *(Y+1) = smi;
+                        }
+                        Y -= 2u*K*L;
+
+                        if (unbiased)
+                        {
+                            for (size_t l=0u; l<L; ++l, Y+=2u*K) { *Y /= (float)(Lx-l); *(Y+1) /= (float)(Lx-l); }
+                        }
+                        else
+                        {
+                            for (size_t l=0u; l<L; ++l, Y+=2u*K) { *Y /= (float)Lx; *(Y+1) /= (float)Lx; }
+                        }
+                    }
+                }
+            }
+        }
     }
 
     return 0;
 }
 
 
-int sig2ac_z (double *Y, const double *X, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim, const int L, const char unbiased)
+int sig2ac_z (double *Y, const double *X, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim, const size_t L, const int unbiased)
 {
-    if (dim>3) { fprintf(stderr,"error in sig2ac_z: dim must be in [0 3]\n"); return 1; }
+    if (dim>3u) { fprintf(stderr,"error in sig2ac_z: dim must be in [0 3]\n"); return 1; }
 
-    _Complex double dot;
-    double *X1;  //1 row or col of X
+    const size_t N = R*C*S*H;
+    const size_t Lx = (dim==0u) ? R : (dim==1u) ? C : (dim==2u) ? S : H;
+    if (L>Lx) { fprintf(stderr,"error in sig2ac_z: L (num lags in output) must be <= Lx (length of vecs in X)\n"); return 1; }
 
-    if (dim==0)
-    {
-        if (L>R) { fprintf(stderr,"error in sig2ac_z: nlags must be < nrows X for dim==0\n"); return 1; }
-        if (!(X1=(double *)malloc((size_t)(2*R)*sizeof(double)))) { fprintf(stderr,"error in sig2ac_z: problem with malloc. "); perror("malloc"); return 1; }
-        if (iscolmajor)
-        {
-            for (size_t c=0; c<C; c++)
-            {
-                cblas_zcopy((int)R,&X[2*c*R],1,&X1[0],1);
-                //m = -cblas_zdotu((int)R,&X1[0],1,&o[0],0) / R;
-                //cblas_zaxpy((int)R,(double *)&m,&o[0],0,&X1[0],1);
-                for (l=0; l<L; l++)
-                {
-                    dot = cblas_zdotu(R-l,&X1[0],1,&X1[2*l],1);
-                    cblas_zcopy(1,(double *)&dot,1,&Y[2*(l+c*L)],1);
-                }
-            }
-            if (unbiased) { for (l=0; l<L; l++) { cblas_zdscal((int)C,(double)R/(R-l),&Y[2*l],L); } }
-        }
-        else
-        {
-            for (size_t c=0; c<C; c++)
-            {
-                cblas_zcopy((int)R,&X[2*c],2*C,&X1[0],1);
-                //m = -cblas_zdotu((int)R,&X1[0],1,&o[0],0) / R;
-                //cblas_zaxpy((int)R,(double *)&m,&o[0],0,&X1[0],1);
-                for (l=0; l<L; l++)
-                {
-                    dot = cblas_zdotu(R-l,&X1[0],1,&X1[2*l],1);
-                    cblas_zcopy(1,(double *)&dot,1,&Y[2*(c+l*C)],1);
-                }
-            }
-            if (unbiased) { for (l=0; l<L; l++) { cblas_zdscal((int)C,(double)R/(R-l),&Y[2*l*C],1); } }
-        }
-    }
-    else if (dim==1)
-    {
-        if (L>C) { fprintf(stderr,"error in sig2ac_z: nlags must be < ncols X for dim==1\n"); return 1; }
-        if (!(X1=(double *)malloc((size_t)(2*C)*sizeof(double)))) { fprintf(stderr,"error in sig2ac_z: problem with malloc. "); perror("malloc"); return 1; }
-        if (iscolmajor)
-        {
-            for (size_t r=0; r<R; r++)
-            {
-                cblas_zcopy((int)C,&X[2*r],2*R,&X1[0],1);
-                //m = -cblas_zdotu((int)C,&X1[0],1,&o[0],0) / C;
-                //cblas_zaxpy((int)C,(double *)&m,&o[0],0,&X1[0],1);
-                for (l=0; l<L; l++)
-                {
-                    dot = cblas_zdotu(C-l,&X1[0],1,&X1[2*l],1);
-                    cblas_zcopy(1,(double *)&dot,1,&Y[2*(r+l*R)],1);
-                }
-            }
-            if (unbiased) { for (l=0; l<L; l++) { cblas_zdscal((int)R,(double)C/(C-l),&Y[2*l*R],1); } }
-        }
-        else
-        {
-            for (size_t r=0; r<R; r++)
-            {
-                cblas_zcopy((int)C,&X[2*r*C],1,&X1[0],1);
-                //m = -cblas_zdotu((int)C,&X1[0],1,&o[0],0) / C;
-                //cblas_zaxpy((int)C,(double *)&m,&o[0],0,&X1[0],1);
-                for (l=0; l<L; l++)
-                {
-                    dot = cblas_zdotu(C-l,&X1[0],1,&X1[2*l],1);
-                    cblas_zcopy(1,(double *)&dot,1,&Y[2*(l+r*L)],1);
-                }
-            }
-            if (unbiased) { for (l=0; l<L; l++) { cblas_zdscal((int)R,(double)C/(C-l),&Y[2*l],L); } }
-        }
-    }
+    if (N==0u) {}
     else
     {
-        fprintf(stderr,"error in sig2ac_z: dim must be 0 or 1.\n"); return 1;
+        if (Lx==N)
+        {
+            if (L>850u && Lx>80000u) //I also leave this solution since it is closer to real-time use
+            {
+                double xr, xi;
+                for (size_t l=0u; l<2u*L; ++l, ++Y) { *Y = 0.0; }
+                Y -= 2u*L;
+                for (size_t n=0u; n<N; ++n)
+                {
+                    xr = *X++; xi = *X++;
+                    for (size_t l=0u; l<L && l<N-n; ++l)
+                    {
+                        Y[2u*l] += xr*X[2u*l] - xi*X[2u*l+1u];
+                        Y[2u*l+1u] += xr*X[2u*l+1u] + xi*X[2u*l];
+                    }
+                }
+            }
+            else
+            {
+                double smr, smi;
+                for (size_t l=0u; l<L; ++l, X-=2u*(Lx-l+1u))
+                {
+                    smr = smi = 0.0;
+                    for (size_t n=0u; n<Lx-l; ++n, X+=2)
+                    {
+                        smr += *X**(X+2u*l) - *(X+1)**(X+2u*l+1u);
+                        smi += *X**(X+2u*l+1u) + *(X+1)**(X+2u*l);
+                    }
+                    *Y++ = smr; *Y++ = smi;
+                }
+                Y -= 2u*L;
+            }
+            
+            if (unbiased)
+            {
+                for (size_t l=0u; l<L; ++l) { *Y++ /= (double)(Lx-l); *Y++ /= (double)(Lx-l); }
+            }
+            else
+            {
+                for (size_t l=0u; l<2u*L; ++l, ++Y) { *Y /= (double)Lx; }
+            }
+        }
+        else
+        {
+            const size_t K = (iscolmajor) ? ((dim==0u) ? 1u : (dim==1u) ? R : (dim==2u) ? R*C : R*C*S) : ((dim==0u) ? C*S*H : (dim==1u) ? S*H : (dim==2u) ? H : 1u);
+            const size_t B = (iscolmajor && dim==0u) ? C*S*H : K;
+            const size_t V = N/Lx, G = V/B;
+            double smr, smi;
+
+            if (K==1u && (G==1u || B==1u))
+            {
+                for (size_t v=0u; v<V; ++v, X+=2u*L-2u)
+                {
+                    for (size_t l=0u; l<L-1u; ++l, X-=2u*(Lx-l+1u))
+                    {
+                        smr = smi = 0.0;
+                        for (size_t n=0u; n<Lx-l; ++n, X+=2)
+                        {
+                            smr += *X**(X+2u*l) - *(X+1u)**(X+2u*l+1u);
+                            smi += *X**(X+2u*l+1u) + *(X+1u)**(X+2u*l);
+                        }
+                        *Y++ = smr; *Y++ = smi;
+                    }
+                    smr = smi = 0.0;
+                    for (size_t n=0u; n<Lx-L+1u; ++n, X+=2)
+                    {
+                        smr += *X**(X+2u*L-2u) - *(X+1u)**(X+2u*L-1u);
+                        smi += *X**(X+2u*L-1u) + *(X+1u)**(X+2u*L-2u);
+                    }
+                    *Y = smr; *(Y+1) = smi; Y -= 2u*L-2u;
+
+                    if (unbiased)
+                    {
+                        for (size_t l=0u; l<L; ++l) { *Y++ /= (double)(Lx-l); *Y++ /= (double)(Lx-l); }
+                    }
+                    else
+                    {
+                        for (size_t l=0u; l<2u*L; ++l, ++Y) { *Y /= (double)Lx; }
+                    }
+                }
+            }
+            else
+            {
+                for (size_t g=0u; g<G; ++g, X+=2u*B*(Lx-1u), Y+=2u*B*(L-1u))
+                {
+                    for (size_t b=0u; b<B; ++b, X+=2, Y-=2u*K*L-2u)
+                    {
+                        for (size_t l=0u; l<L; ++l, X-=2u*K*(Lx-l+1u), Y+=2u*K)
+                        {
+                            smr = smi = 0.0;
+                            for (size_t n=0u; n<Lx-l; ++n, X+=2u*K)
+                            {
+                                smr += *X**(X+2u*l*K) - *(X+1)**(X+2u*l*K+1u);
+                                smi += *X**(X+2u*l*K+1u) + *(X+1)**(X+2u*l*K);
+                            }
+                            *Y = smr; *(Y+1) = smi;
+                        }
+                        Y -= 2u*K*L;
+
+                        if (unbiased)
+                        {
+                            for (size_t l=0u; l<L; ++l, Y+=2u*K) { *Y /= (double)(Lx-l); *(Y+1) /= (double)(Lx-l); }
+                        }
+                        else
+                        {
+                            for (size_t l=0u; l<L; ++l, Y+=2u*K) { *Y /= (double)Lx; *(Y+1) /= (double)Lx; }
+                        }
+                    }
+                }
+            }
+        }
     }
 
     return 0;
