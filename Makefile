@@ -184,7 +184,7 @@ mcr_windowed: srci/mcr_windowed.cpp c/mcr_windowed.c
 
 #AR_Poly: conversion between AR (autoregressive), poly (polynomial),
 #RC (reflection coeff), and PSD (power spectral density) representations
-AR_Poly: poly2roots roots2poly poly2ar ar2poly ar2rc rc2ar poly2rc rc2poly #ar2psd poly2psd
+AR_Poly: poly2roots roots2poly poly2ar ar2poly ar2rc rc2ar poly2rc rc2poly ar2psd poly2psd
 poly2roots: srci/poly2roots.cpp c/poly2roots.c
 	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -llapacke -lm
 roots2poly: srci/roots2poly.cpp c/roots2poly.c

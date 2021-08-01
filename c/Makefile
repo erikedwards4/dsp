@@ -126,7 +126,7 @@ mcr_windowed: mcr_windowed.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 
 #AR_Poly: conversion between AR (autoregressive), poly (polynomial),
 #RC (reflection coeff), and PSD (power spectral density) representations
-AR_Poly: poly2roots roots2poly poly2ar ar2poly ar2rc rc2ar poly2rc rc2poly #ar2psd poly2psd
+AR_Poly: poly2roots roots2poly poly2ar ar2poly ar2rc rc2ar poly2rc rc2poly ar2psd poly2psd
 poly2roots: poly2roots.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 roots2poly: roots2poly.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 poly2ar: poly2ar.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
