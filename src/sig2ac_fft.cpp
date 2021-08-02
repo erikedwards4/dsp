@@ -12,7 +12,7 @@
 #include <unordered_map>
 #include <argtable2.h>
 #include "../util/cmli.hpp"
-#include "sig2ac.c"
+#include "sig2ac_fft.c"
 
 #ifdef I
 #undef I
@@ -40,35 +40,27 @@ int main(int argc, char *argv[])
 
     //Description
     string descr;
-    descr += "Gets autocovariance of each vector in X.\n";
+    descr += "Gets autocovariance of each vector in X using FFT method.\n";
     descr += "The means are NOT subtracted before computing.\n";
     descr += "This does NOT normalize lag 0 of Y (so just like Octave xcorr),\n";
     descr += "unless the -c (--corr) flag is given.\n";
     descr += "\n";
     descr += "Use -l (--L) to give the number of lags at which to compute.\n";
-    descr += "Note that the max lag is L-1 (not L as for xcorr).\n";
     descr += "\n";
     descr += "Use -d (--dim) to give the dimension along which to operate.\n";
     descr += "Default is 0 (along cols), unless X is a row vector.\n";
     descr += "\n";
-    descr += "If dim==0, then Y has size L x C x S x H.\n";
-    descr += "If dim==1, then Y has size R x L x S x H.\n";
-    descr += "If dim==2, then Y has size R x C x L x H.\n";
-    descr += "If dim==3, then Y has size R x C x S x L.\n";
+    descr += "If dim==0, then Y has size L x C.\n";
+    descr += "If dim==1, then Y has size R x L.\n";
     descr += "\n";
     descr += "Include -u (--unbiased) to use unbiased calculation [default is biased].\n";
     descr += "This uses N-l instead of N in the denominator (it is actually just less biased).\n";
-    descr += "This takes longer, doesn't match FFT estimate, and has larger MSE (see Wikipedia).\n";
-    descr += "\n";
-    descr += "For the \"biased\" case, this normalizes by N (unlike xcorr, which leaves raw result).\n";
-    descr += "\n";
-    descr += "Use -c (--corr) to output autocorrelation, i.e. normalize by cov at lag 0 [default=false].\n";
-    descr += "This is like the 'coeff' option of xcorr.\n";
+    descr += "This takes longer, doesn't match the Octave method, and has larger MSE (see Wikipedia).\n";
     descr += "\n";
     descr += "Examples:\n";
-    descr += "$ sig2ac -l127 X -o Y \n";
-    descr += "$ sig2ac -d1 -l127 -u X > Y \n";
-    descr += "$ cat X | sig2ac -l127 -c > Y \n";
+    descr += "$ sig2ac_fft -l127 X -o Y \n";
+    descr += "$ sig2ac_fft -d1 -l127 -u X > Y \n";
+    descr += "$ cat X | sig2ac_fft -l127 -c > Y \n";
 
 
     //Argtable
@@ -179,7 +171,7 @@ int main(int argc, char *argv[])
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for output file (Y)" << endl; return 1; }
         try { ifs1.read(reinterpret_cast<char*>(X),i1.nbytes()); }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file (X)" << endl; return 1; }
-        if (codee::sig2ac_s(Y,X,i1.R,i1.C,i1.S,i1.H,i1.iscolmajor(),dim,L,u,corr)) { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
+        if (codee::sig2ac_fft_s(Y,X,i1.R,i1.C,i1.S,i1.H,i1.iscolmajor(),dim,L,u,corr)) { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
         if (wo1)
         {
             try { ofs1.write(reinterpret_cast<char*>(Y),o1.nbytes()); }
@@ -196,7 +188,7 @@ int main(int argc, char *argv[])
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for output file (Y)" << endl; return 1; }
         try { ifs1.read(reinterpret_cast<char*>(X),i1.nbytes()); }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file (X)" << endl; return 1; }
-        if (codee::sig2ac_d(Y,X,i1.R,i1.C,i1.S,i1.H,i1.iscolmajor(),dim,L,u,corr)) { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
+        if (codee::sig2ac_fft_d(Y,X,i1.R,i1.C,i1.S,i1.H,i1.iscolmajor(),dim,L,u,corr)) { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
         if (wo1)
         {
             try { ofs1.write(reinterpret_cast<char*>(Y),o1.nbytes()); }
@@ -213,7 +205,7 @@ int main(int argc, char *argv[])
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for output file (Y)" << endl; return 1; }
         try { ifs1.read(reinterpret_cast<char*>(X),i1.nbytes()); }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file (X)" << endl; return 1; }
-        if (codee::sig2ac_c(Y,X,i1.R,i1.C,i1.S,i1.H,i1.iscolmajor(),dim,L,u,corr)) { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
+        if (codee::sig2ac_fft_c(Y,X,i1.R,i1.C,i1.S,i1.H,i1.iscolmajor(),dim,L,u,corr)) { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
         if (wo1)
         {
             try { ofs1.write(reinterpret_cast<char*>(Y),o1.nbytes()); }
@@ -230,7 +222,7 @@ int main(int argc, char *argv[])
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for output file (Y)" << endl; return 1; }
         try { ifs1.read(reinterpret_cast<char*>(X),i1.nbytes()); }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file (X)" << endl; return 1; }
-        if (codee::sig2ac_z(Y,X,i1.R,i1.C,i1.S,i1.H,i1.iscolmajor(),dim,L,u,corr)) { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
+        if (codee::sig2ac_fft_z(Y,X,i1.R,i1.C,i1.S,i1.H,i1.iscolmajor(),dim,L,u,corr)) { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
         if (wo1)
         {
             try { ofs1.write(reinterpret_cast<char*>(Y),o1.nbytes()); }

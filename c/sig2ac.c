@@ -79,7 +79,7 @@ int sig2ac_s (float *Y, const float *X, const size_t R, const size_t C, const si
             const size_t K = (iscolmajor) ? ((dim==0u) ? 1u : (dim==1u) ? R : (dim==2u) ? R*C : R*C*S) : ((dim==0u) ? C*S*H : (dim==1u) ? S*H : (dim==2u) ? H : 1u);
             const size_t B = (iscolmajor && dim==0u) ? C*S*H : K;
             const size_t V = N/Lx, G = V/B;
-            float sm, y0;
+            float sm;
 
             if (K==1u && (G==1u || B==1u))
             {
@@ -97,7 +97,8 @@ int sig2ac_s (float *Y, const float *X, const size_t R, const size_t C, const si
 
                     if (corr)
                     {
-                        y0 = *Y; *Y++ = 1.0f;
+                        const float y0 = *Y;
+                        *Y++ = 1.0f;
                         for (size_t l=1u; l<L; ++l, ++Y) { *Y /= y0; }
                     }
                     else if (unbiased)
@@ -126,7 +127,8 @@ int sig2ac_s (float *Y, const float *X, const size_t R, const size_t C, const si
 
                         if (corr)
                         {
-                            y0 = *Y; *Y = 1.0f; Y += K;
+                            const float y0 = *Y;
+                            *Y = 1.0f; Y += K;
                             for (size_t l=1u; l<L; ++l, Y+=K) { *Y /= y0; }
                         }
                         else if (unbiased)
@@ -203,7 +205,7 @@ int sig2ac_d (double *Y, const double *X, const size_t R, const size_t C, const 
             const size_t K = (iscolmajor) ? ((dim==0u) ? 1u : (dim==1u) ? R : (dim==2u) ? R*C : R*C*S) : ((dim==0u) ? C*S*H : (dim==1u) ? S*H : (dim==2u) ? H : 1u);
             const size_t B = (iscolmajor && dim==0u) ? C*S*H : K;
             const size_t V = N/Lx, G = V/B;
-            double sm, y0;
+            double sm;
 
             if (K==1u && (G==1u || B==1u))
             {
@@ -221,7 +223,8 @@ int sig2ac_d (double *Y, const double *X, const size_t R, const size_t C, const 
 
                     if (corr)
                     {
-                        y0 = *Y; *Y++ = 1.0;
+                        const double y0 = *Y;
+                        *Y++ = 1.0;
                         for (size_t l=1u; l<L; ++l, ++Y) { *Y /= y0; }
                     }
                     else if (unbiased)
@@ -250,7 +253,8 @@ int sig2ac_d (double *Y, const double *X, const size_t R, const size_t C, const 
 
                         if (corr)
                         {
-                            y0 = *Y; *Y = 1.0; Y += K;
+                            const double y0 = *Y;
+                            *Y = 1.0; Y += K;
                             for (size_t l=1u; l<L; ++l, Y+=K) { *Y /= y0; }
                         }
                         else if (unbiased)
@@ -341,7 +345,7 @@ int sig2ac_c (float *Y, const float *X, const size_t R, const size_t C, const si
             const size_t K = (iscolmajor) ? ((dim==0u) ? 1u : (dim==1u) ? R : (dim==2u) ? R*C : R*C*S) : ((dim==0u) ? C*S*H : (dim==1u) ? S*H : (dim==2u) ? H : 1u);
             const size_t B = (iscolmajor && dim==0u) ? C*S*H : K;
             const size_t V = N/Lx, G = V/B;
-            float smr, smi, y0r, y0i, y0a, yr, yi;
+            float smr, smi;
 
             if (K==1u && (G==1u || B==1u))
             {
@@ -367,8 +371,8 @@ int sig2ac_c (float *Y, const float *X, const size_t R, const size_t C, const si
 
                     if (corr)
                     {
-                        y0r = *Y; y0i = *(Y+1);
-                        y0a = y0r*y0r + y0i*y0i;
+                        const float y0r = *Y, y0i = *(Y+1), y0a = y0r*y0r + y0i*y0i;
+                        float yr, yi;
                         *Y++ = 1.0f; *Y++ = 0.0f;
                         for (size_t l=1u; l<L; ++l)
                         {
@@ -407,8 +411,8 @@ int sig2ac_c (float *Y, const float *X, const size_t R, const size_t C, const si
 
                         if (corr)
                         {
-                            y0r = *Y; y0i = *(Y+1);
-                            y0a = y0r*y0r + y0i*y0i;
+                            const float y0r = *Y, y0i = *(Y+1), y0a = y0r*y0r + y0i*y0i;
+                            float yr, yi;
                             *Y = 1.0f; *(Y+1) = 0.0f; Y += 2u*K;
                             for (size_t l=1u; l<L; ++l, Y+=2u*K)
                             {
@@ -505,7 +509,7 @@ int sig2ac_z (double *Y, const double *X, const size_t R, const size_t C, const 
             const size_t K = (iscolmajor) ? ((dim==0u) ? 1u : (dim==1u) ? R : (dim==2u) ? R*C : R*C*S) : ((dim==0u) ? C*S*H : (dim==1u) ? S*H : (dim==2u) ? H : 1u);
             const size_t B = (iscolmajor && dim==0u) ? C*S*H : K;
             const size_t V = N/Lx, G = V/B;
-            double smr, smi, y0r, y0i, y0a, yr, yi;
+            double smr, smi;
 
             if (K==1u && (G==1u || B==1u))
             {
@@ -531,8 +535,8 @@ int sig2ac_z (double *Y, const double *X, const size_t R, const size_t C, const 
 
                     if (corr)
                     {
-                        y0r = *Y; y0i = *(Y+1);
-                        y0a = y0r*y0r + y0i*y0i;
+                        const double y0r = *Y, y0i = *(Y+1), y0a = y0r*y0r + y0i*y0i;
+                        double yr, yi;
                         *Y++ = 1.0; *Y++ = 0.0;
                         for (size_t l=1u; l<L; ++l)
                         {
@@ -571,8 +575,8 @@ int sig2ac_z (double *Y, const double *X, const size_t R, const size_t C, const 
 
                         if (corr)
                         {
-                            y0r = *Y; y0i = *(Y+1);
-                            y0a = y0r*y0r + y0i*y0i;
+                            const double y0r = *Y, y0i = *(Y+1), y0a = y0r*y0r + y0i*y0i;
+                            double yr, yi;
                             *Y = 1.0; *(Y+1) = 0.0; Y += 2u*K;
                             for (size_t l=1u; l<L; ++l, Y+=2u*K)
                             {
