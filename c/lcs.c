@@ -7,11 +7,11 @@ namespace ov {
 extern "C" {
 #endif
 
-int lcs_s (char *Y, const float *X, const char iscolmajor, const int R, const int C, const int dim, const int going, const float level);
-int lcs_d (char *Y, const double *X, const char iscolmajor, const int R, const int C, const int dim, const int going, const double level);
+int lcs_s (char *Y, const float *X, const int iscolmajor, const int R, const int C, const int dim, const int going, const float level);
+int lcs_d (char *Y, const double *X, const int iscolmajor, const int R, const int C, const int dim, const int going, const double level);
 
 
-int lcs_s (char *Y, const float *X, const char iscolmajor, const int R, const int C, const int dim, const int going, const float level)
+int lcs_s (char *Y, const float *X, const int iscolmajor, const int R, const int C, const int dim, const int going, const float level)
 {
     const int N = R*C;
     int n = -1;
@@ -63,7 +63,7 @@ int lcs_s (char *Y, const float *X, const char iscolmajor, const int R, const in
 }
 
 
-int lcs_d (char *Y, const double *X, const char iscolmajor, const int R, const int C, const int dim, const int going, const double level)
+int lcs_d (char *Y, const double *X, const int iscolmajor, const int R, const int C, const int dim, const int going, const double level)
 {
     const int N = R*C;
     int n = -1;

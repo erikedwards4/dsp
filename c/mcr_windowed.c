@@ -10,11 +10,11 @@ namespace ov {
 extern "C" {
 #endif
 
-int mcr_windowed_s (float *Y, const float *X, const char iscolmajor, const int R, const int C, const float *W, const int L, const int dim, const int c0, const float stp, const int going);
-int mcr_windowed_d (double *Y, const double *X, const char iscolmajor, const int R, const int C, const double *W, const int L, const int dim, const int c0, const double stp, const int going);
+int mcr_windowed_s (float *Y, const float *X, const int iscolmajor, const int R, const int C, const float *W, const int L, const int dim, const int c0, const float stp, const int going);
+int mcr_windowed_d (double *Y, const double *X, const int iscolmajor, const int R, const int C, const double *W, const int L, const int dim, const int c0, const double stp, const int going);
 
 
-int mcr_windowed_s (float *Y, const float *X, const char iscolmajor, const int R, const int C, const float *W, const int L, const int dim, const int c0, const float stp, const int going)
+int mcr_windowed_s (float *Y, const float *X, const int iscolmajor, const int R, const int C, const float *W, const int L, const int dim, const int c0, const float stp, const int going)
 {
     const float z = 0.0f, o = 1.0f;
     const int N = R*C;
@@ -172,7 +172,7 @@ int mcr_windowed_s (float *Y, const float *X, const char iscolmajor, const int R
 }
 
 
-int mcr_windowed_d (double *Y, const double *X, const char iscolmajor, const int R, const int C, const double *W, const int L, const int dim, const int c0, const double stp, const int going)
+int mcr_windowed_d (double *Y, const double *X, const int iscolmajor, const int R, const int C, const double *W, const int L, const int dim, const int c0, const double stp, const int going)
 {
     const double z = 0.0, o = 1.0;
     const int N = R*C;

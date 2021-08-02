@@ -5,7 +5,7 @@
 const valarray<size_t> oktypes = {1u,2u,101u,102u};
 const size_t I = 1u, O = 1u;
 size_t dim, ndct;
-char sc;
+int sc;
 
 //Description
 string descr;

@@ -27,13 +27,13 @@ namespace codee {
 extern "C" {
 #endif
 
-int pink_s (float *Y, const size_t N, const float std, const char zmn);
-int pink_d (double *Y, const size_t N, const double std, const char zmn);
-int pink_c (float *Y, const size_t N, const float std, const char zmn);
-int pink_z (double *Y, const size_t N, const double std, const char zmn);
+int pink_s (float *Y, const size_t N, const float std, const int zmn);
+int pink_d (double *Y, const size_t N, const double std, const int zmn);
+int pink_c (float *Y, const size_t N, const float std, const int zmn);
+int pink_z (double *Y, const size_t N, const double std, const int zmn);
 
 
-int pink_s (float *Y, const size_t N, const float std, const char zmn)
+int pink_s (float *Y, const size_t N, const float std, const int zmn)
 {
     if (std<0.0f) { fprintf(stderr, "error in pink_s: std must be nonnegative\n"); return 1; }
 
@@ -183,7 +183,7 @@ int pink_s (float *Y, const size_t N, const float std, const char zmn)
 }
 
 
-int pink_d (double *Y, const size_t N, const double std, const char zmn)
+int pink_d (double *Y, const size_t N, const double std, const int zmn)
 {
     if (std<0.0) { fprintf(stderr, "error in pink_d: std must be nonnegative\n"); return 1; }
 
@@ -333,7 +333,7 @@ int pink_d (double *Y, const size_t N, const double std, const char zmn)
 }
 
 
-int pink_c (float *Y, const size_t N, const float std, const char zmn)
+int pink_c (float *Y, const size_t N, const float std, const int zmn)
 {
     if (std<0.0f) { fprintf(stderr, "error in pink_c: std must be nonnegative\n"); return 1; }
 
@@ -453,7 +453,7 @@ int pink_c (float *Y, const size_t N, const float std, const char zmn)
 }
 
 
-int pink_z (double *Y, const size_t N, const double std, const char zmn)
+int pink_z (double *Y, const size_t N, const double std, const int zmn)
 {
     if (std<0.0) { fprintf(stderr, "error in pink_z: std must be nonnegative\n"); return 1; }
 

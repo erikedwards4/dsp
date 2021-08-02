@@ -10,11 +10,11 @@ namespace ov {
 extern "C" {
 #endif
 
-int mcr_s (float *Y, const float *X, const char iscolmajor, const int R, const int C, const int L, const int dim, const int c0, const float stp, const int going);
-int mcr_d (double *Y, const double *X, const char iscolmajor, const int R, const int C, const int L, const int dim, const int c0, const double stp, const int going);
+int mcr_s (float *Y, const float *X, const int iscolmajor, const int R, const int C, const int L, const int dim, const int c0, const float stp, const int going);
+int mcr_d (double *Y, const double *X, const int iscolmajor, const int R, const int C, const int L, const int dim, const int c0, const double stp, const int going);
 
 
-int mcr_s (float *Y, const float *X, const char iscolmajor, const int R, const int C, const int L, const int dim, const int c0, const float stp, const int going)
+int mcr_s (float *Y, const float *X, const int iscolmajor, const int R, const int C, const int L, const int dim, const int c0, const float stp, const int going)
 {
     const float o = 1.0f;
     const int N = R*C;
@@ -178,7 +178,7 @@ int mcr_s (float *Y, const float *X, const char iscolmajor, const int R, const i
 }
 
 
-int mcr_d (double *Y, const double *X, const char iscolmajor, const int R, const int C, const int L, const int dim, const int c0, const double stp, const int going)
+int mcr_d (double *Y, const double *X, const int iscolmajor, const int R, const int C, const int L, const int dim, const int c0, const double stp, const int going)
 {
     const double o = 1.0;
     const int N = R*C;

@@ -22,13 +22,13 @@ namespace codee {
 extern "C" {
 #endif
 
-int white_s (float *Y, const size_t N, const float std, const char uni, const char zmn);
-int white_d (double *Y, const size_t N, const double std, const char uni, const char zmn);
-int white_c (float *Y, const size_t N, const float std, const char uni, const char zmn);
-int white_z (double *Y, const size_t N, const double std, const char uni, const char zmn);
+int white_s (float *Y, const size_t N, const float std, const int uni, const int zmn);
+int white_d (double *Y, const size_t N, const double std, const int uni, const int zmn);
+int white_c (float *Y, const size_t N, const float std, const int uni, const int zmn);
+int white_z (double *Y, const size_t N, const double std, const int uni, const int zmn);
 
 
-int white_s (float *Y, const size_t N, const float std, const char uni, const char zmn)
+int white_s (float *Y, const size_t N, const float std, const int uni, const int zmn)
 {
     if (std<0.0f) { fprintf(stderr, "error in white_s: std must be nonnegative\n"); return 1; }
 
@@ -158,7 +158,7 @@ int white_s (float *Y, const size_t N, const float std, const char uni, const ch
 }
 
 
-int white_d (double *Y, const size_t N, const double std, const char uni, const char zmn)
+int white_d (double *Y, const size_t N, const double std, const int uni, const int zmn)
 {
     if (std<0.0) { fprintf(stderr, "error in white_d: std must be nonnegative\n"); return 1; }
 
@@ -288,7 +288,7 @@ int white_d (double *Y, const size_t N, const double std, const char uni, const 
 }
 
 
-int white_c (float *Y, const size_t N, const float std, const char uni, const char zmn)
+int white_c (float *Y, const size_t N, const float std, const int uni, const int zmn)
 {
     if (std<0.0f) { fprintf(stderr, "error in white_c: std must be nonnegative\n"); return 1; }
 
@@ -388,7 +388,7 @@ int white_c (float *Y, const size_t N, const float std, const char uni, const ch
 }
 
 
-int white_z (double *Y, const size_t N, const double std, const char uni, const char zmn)
+int white_z (double *Y, const size_t N, const double std, const int uni, const int zmn)
 {
     if (std<0.0) { fprintf(stderr, "error in white_z: std must be nonnegative\n"); return 1; }
 

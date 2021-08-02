@@ -13,13 +13,13 @@ namespace codee {
 extern "C" {
 #endif
 
-int dct_s (float *Y, const float *X, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim, const size_t ndct, const char sc);
-int dct_d (double *Y, const double *X, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim, const size_t ndct, const char sc);
-int dct_c (float *Y, const float *X, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim, const size_t ndct, const char sc);
-int dct_z (double *Y, const double *X, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim, const size_t ndct, const char sc);
+int dct_s (float *Y, const float *X, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t dim, const size_t ndct, const int sc);
+int dct_d (double *Y, const double *X, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t dim, const size_t ndct, const int sc);
+int dct_c (float *Y, const float *X, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t dim, const size_t ndct, const int sc);
+int dct_z (double *Y, const double *X, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t dim, const size_t ndct, const int sc);
 
 
-int dct_s (float *Y, const float *X, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim, const size_t ndct, const char sc)
+int dct_s (float *Y, const float *X, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t dim, const size_t ndct, const int sc)
 {
     if (dim>3u) { fprintf(stderr,"error in dct_s: dim must be in [0 3]\n"); return 1; }
 
@@ -125,7 +125,7 @@ int dct_s (float *Y, const float *X, const size_t R, const size_t C, const size_
 }
 
 
-int dct_d (double *Y, const double *X, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim, const size_t ndct, const char sc)
+int dct_d (double *Y, const double *X, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t dim, const size_t ndct, const int sc)
 {
     if (dim>3u) { fprintf(stderr,"error in dct_d: dim must be in [0 3]\n"); return 1; }
 
@@ -231,7 +231,7 @@ int dct_d (double *Y, const double *X, const size_t R, const size_t C, const siz
 }
 
 
-int dct_c (float *Y, const float *X, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim, const size_t ndct, const char sc)
+int dct_c (float *Y, const float *X, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t dim, const size_t ndct, const int sc)
 {
     if (dim>3u) { fprintf(stderr,"error in dct_c: dim must be in [0 3]\n"); return 1; }
 
@@ -342,7 +342,7 @@ int dct_c (float *Y, const float *X, const size_t R, const size_t C, const size_
 }
 
 
-int dct_z (double *Y, const double *X, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim, const size_t ndct, const char sc)
+int dct_z (double *Y, const double *X, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t dim, const size_t ndct, const int sc)
 {
     if (dim>3u) { fprintf(stderr,"error in dct_z: dim must be in [0 3]\n"); return 1; }
 

@@ -4,7 +4,7 @@
 //Declarations
 const valarray<size_t> oktypes = {1u,2u,101u,102u};
 const size_t I = 3u, O = 1u;
-char decreasing;
+int decreasing;
 
 //Description
 string descr;

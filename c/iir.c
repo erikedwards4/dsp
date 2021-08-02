@@ -14,18 +14,18 @@ namespace codee {
 extern "C" {
 #endif
 
-int iir_s (float *Y, const float *X, float *A, const size_t R, const size_t C, const size_t S, const size_t H, const size_t Q, const char iscolmajor, const size_t dim);
-int iir_d (double *Y, const double *X, double *A, const size_t R, const size_t C, const size_t S, const size_t H, const size_t Q, const char iscolmajor, const size_t dim);
-int iir_c (float *Y, const float *X, float *A, const size_t R, const size_t C, const size_t S, const size_t H, const size_t Q, const char iscolmajor, const size_t dim);
-int iir_z (double *Y, const double *X, double *A, const size_t R, const size_t C, const size_t S, const size_t H, const size_t Q, const char iscolmajor, const size_t dim);
+int iir_s (float *Y, const float *X, float *A, const size_t R, const size_t C, const size_t S, const size_t H, const size_t Q, const int iscolmajor, const size_t dim);
+int iir_d (double *Y, const double *X, double *A, const size_t R, const size_t C, const size_t S, const size_t H, const size_t Q, const int iscolmajor, const size_t dim);
+int iir_c (float *Y, const float *X, float *A, const size_t R, const size_t C, const size_t S, const size_t H, const size_t Q, const int iscolmajor, const size_t dim);
+int iir_z (double *Y, const double *X, double *A, const size_t R, const size_t C, const size_t S, const size_t H, const size_t Q, const int iscolmajor, const size_t dim);
 
-int iir_inplace_s (float *X, float *A, const size_t R, const size_t C, const size_t S, const size_t H, const size_t Q, const char iscolmajor, const size_t dim);
-int iir_inplace_d (double *X, double *A, const size_t R, const size_t C, const size_t S, const size_t H, const size_t Q, const char iscolmajor, const size_t dim);
-int iir_inplace_c (float *X, float *A, const size_t R, const size_t C, const size_t S, const size_t H, const size_t Q, const char iscolmajor, const size_t dim);
-int iir_inplace_z (double *X, double *A, const size_t R, const size_t C, const size_t S, const size_t H, const size_t Q, const char iscolmajor, const size_t dim);
+int iir_inplace_s (float *X, float *A, const size_t R, const size_t C, const size_t S, const size_t H, const size_t Q, const int iscolmajor, const size_t dim);
+int iir_inplace_d (double *X, double *A, const size_t R, const size_t C, const size_t S, const size_t H, const size_t Q, const int iscolmajor, const size_t dim);
+int iir_inplace_c (float *X, float *A, const size_t R, const size_t C, const size_t S, const size_t H, const size_t Q, const int iscolmajor, const size_t dim);
+int iir_inplace_z (double *X, double *A, const size_t R, const size_t C, const size_t S, const size_t H, const size_t Q, const int iscolmajor, const size_t dim);
 
 
-int iir_s (float *Y, const float *X, float *A, const size_t R, const size_t C, const size_t S, const size_t H, const size_t Q, const char iscolmajor, const size_t dim)
+int iir_s (float *Y, const float *X, float *A, const size_t R, const size_t C, const size_t S, const size_t H, const size_t Q, const int iscolmajor, const size_t dim)
 {
     if (dim>3u) { fprintf(stderr,"error in iir_s: dim must be in [0 3]\n"); return 1; }
 
@@ -104,7 +104,7 @@ int iir_s (float *Y, const float *X, float *A, const size_t R, const size_t C, c
 }
 
 
-int iir_d (double *Y, const double *X, double *A, const size_t R, const size_t C, const size_t S, const size_t H, const size_t Q, const char iscolmajor, const size_t dim)
+int iir_d (double *Y, const double *X, double *A, const size_t R, const size_t C, const size_t S, const size_t H, const size_t Q, const int iscolmajor, const size_t dim)
 {
     if (dim>3u) { fprintf(stderr,"error in iir_d: dim must be in [0 3]\n"); return 1; }
 
@@ -183,7 +183,7 @@ int iir_d (double *Y, const double *X, double *A, const size_t R, const size_t C
 }
 
 
-int iir_c (float *Y, const float *X, float *A, const size_t R, const size_t C, const size_t S, const size_t H, const size_t Q, const char iscolmajor, const size_t dim)
+int iir_c (float *Y, const float *X, float *A, const size_t R, const size_t C, const size_t S, const size_t H, const size_t Q, const int iscolmajor, const size_t dim)
 {
     if (dim>3u) { fprintf(stderr,"error in iir_c: dim must be in [0 3]\n"); return 1; }
 
@@ -311,7 +311,7 @@ int iir_c (float *Y, const float *X, float *A, const size_t R, const size_t C, c
 }
 
 
-int iir_z (double *Y, const double *X, double *A, const size_t R, const size_t C, const size_t S, const size_t H, const size_t Q, const char iscolmajor, const size_t dim)
+int iir_z (double *Y, const double *X, double *A, const size_t R, const size_t C, const size_t S, const size_t H, const size_t Q, const int iscolmajor, const size_t dim)
 {
     if (dim>3u) { fprintf(stderr,"error in iir_z: dim must be in [0 3]\n"); return 1; }
 
@@ -439,7 +439,7 @@ int iir_z (double *Y, const double *X, double *A, const size_t R, const size_t C
 }
 
 
-int iir_inplace_s (float *X, float *A, const size_t R, const size_t C, const size_t S, const size_t H, const size_t Q, const char iscolmajor, const size_t dim)
+int iir_inplace_s (float *X, float *A, const size_t R, const size_t C, const size_t S, const size_t H, const size_t Q, const int iscolmajor, const size_t dim)
 {
     const size_t N = R*C*S*H;
     const size_t T = (dim==0u) ? R : (dim==1u) ? C : (dim==2u) ? S : H;
@@ -514,7 +514,7 @@ int iir_inplace_s (float *X, float *A, const size_t R, const size_t C, const siz
 }
 
 
-int iir_inplace_d (double *X, double *A, const size_t R, const size_t C, const size_t S, const size_t H, const size_t Q, const char iscolmajor, const size_t dim)
+int iir_inplace_d (double *X, double *A, const size_t R, const size_t C, const size_t S, const size_t H, const size_t Q, const int iscolmajor, const size_t dim)
 {
     const size_t N = R*C*S*H;
     const size_t T = (dim==0u) ? R : (dim==1u) ? C : (dim==2u) ? S : H;
@@ -589,7 +589,7 @@ int iir_inplace_d (double *X, double *A, const size_t R, const size_t C, const s
 }
 
 
-int iir_inplace_c (float *X, float *A, const size_t R, const size_t C, const size_t S, const size_t H, const size_t Q, const char iscolmajor, const size_t dim)
+int iir_inplace_c (float *X, float *A, const size_t R, const size_t C, const size_t S, const size_t H, const size_t Q, const int iscolmajor, const size_t dim)
 {
     const size_t N = R*C*S*H;
     const size_t T = (dim==0u) ? R : (dim==1u) ? C : (dim==2u) ? S : H;
@@ -713,7 +713,7 @@ int iir_inplace_c (float *X, float *A, const size_t R, const size_t C, const siz
 }
 
 
-int iir_inplace_z (double *X, double *A, const size_t R, const size_t C, const size_t S, const size_t H, const size_t Q, const char iscolmajor, const size_t dim)
+int iir_inplace_z (double *X, double *A, const size_t R, const size_t C, const size_t S, const size_t H, const size_t Q, const int iscolmajor, const size_t dim)
 {
     const size_t N = R*C*S*H;
     const size_t T = (dim==0u) ? R : (dim==1u) ? C : (dim==2u) ? S : H;

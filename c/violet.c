@@ -21,13 +21,13 @@ namespace codee {
 extern "C" {
 #endif
 
-int violet_s (float *Y, const size_t N, const float std, const char zmn);
-int violet_d (double *Y, const size_t N, const double std, const char zmn);
-int violet_c (float *Y, const size_t N, const float std, const char zmn);
-int violet_z (double *Y, const size_t N, const double std, const char zmn);
+int violet_s (float *Y, const size_t N, const float std, const int zmn);
+int violet_d (double *Y, const size_t N, const double std, const int zmn);
+int violet_c (float *Y, const size_t N, const float std, const int zmn);
+int violet_z (double *Y, const size_t N, const double std, const int zmn);
 
 
-int violet_s (float *Y, const size_t N, const float std, const char zmn)
+int violet_s (float *Y, const size_t N, const float std, const int zmn)
 {
     if (std<0.0f) { fprintf(stderr, "error in violet_s: std must be nonnegative\n"); return 1; }
 
@@ -136,7 +136,7 @@ int violet_s (float *Y, const size_t N, const float std, const char zmn)
 }
 
 
-int violet_d (double *Y, const size_t N, const double std, const char zmn)
+int violet_d (double *Y, const size_t N, const double std, const int zmn)
 {
     if (std<0.0) { fprintf(stderr, "error in violet_d: std must be nonnegative\n"); return 1; }
 
@@ -245,7 +245,7 @@ int violet_d (double *Y, const size_t N, const double std, const char zmn)
 }
 
 
-int violet_c (float *Y, const size_t N, const float std, const char zmn)
+int violet_c (float *Y, const size_t N, const float std, const int zmn)
 {
     if (std<0.0f) { fprintf(stderr, "error in violet_c: std must be nonnegative\n"); return 1; }
 
@@ -325,7 +325,7 @@ int violet_c (float *Y, const size_t N, const float std, const char zmn)
 }
 
 
-int violet_z (double *Y, const size_t N, const double std, const char zmn)
+int violet_z (double *Y, const size_t N, const double std, const int zmn)
 {
     if (std<0.0) { fprintf(stderr, "error in violet_z: std must be nonnegative\n"); return 1; }
 

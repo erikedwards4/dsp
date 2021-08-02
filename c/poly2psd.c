@@ -19,13 +19,13 @@ namespace codee {
 extern "C" {
 #endif
 
-int poly2psd_s (float *Y, const float *X, const float *E, const float *W, const size_t F, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim);
-int poly2psd_d (double *Y, const double *X, const double *E, const double *W, const size_t F, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim);
-int poly2psd_c (float *Y, const float *X, const float *E, const float *W, const size_t F, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim);
-int poly2psd_z (double *Y, const double *X, const double *E, const double *W, const size_t F, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim);
+int poly2psd_s (float *Y, const float *X, const float *E, const float *W, const size_t F, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t dim);
+int poly2psd_d (double *Y, const double *X, const double *E, const double *W, const size_t F, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t dim);
+int poly2psd_c (float *Y, const float *X, const float *E, const float *W, const size_t F, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t dim);
+int poly2psd_z (double *Y, const double *X, const double *E, const double *W, const size_t F, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t dim);
 
 
-int poly2psd_s (float *Y, const float *X, const float *E, const float *W, const size_t F, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim)
+int poly2psd_s (float *Y, const float *X, const float *E, const float *W, const size_t F, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t dim)
 {
     if (dim>3u) { fprintf(stderr,"error in poly2psd_s: dim must be in [0 3]\n"); return 1; }
 
@@ -123,7 +123,7 @@ int poly2psd_s (float *Y, const float *X, const float *E, const float *W, const 
 }
 
 
-int poly2psd_d (double *Y, const double *X, const double *E, const double *W, const size_t F, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim)
+int poly2psd_d (double *Y, const double *X, const double *E, const double *W, const size_t F, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t dim)
 {
     if (dim>3u) { fprintf(stderr,"error in poly2psd_d: dim must be in [0 3]\n"); return 1; }
 
@@ -221,7 +221,7 @@ int poly2psd_d (double *Y, const double *X, const double *E, const double *W, co
 }
 
 
-int poly2psd_c (float *Y, const float *X, const float *E, const float *W, const size_t F, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim)
+int poly2psd_c (float *Y, const float *X, const float *E, const float *W, const size_t F, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t dim)
 {
     if (dim>3u) { fprintf(stderr,"error in poly2psd_c: dim must be in [0 3]\n"); return 1; }
 
@@ -319,7 +319,7 @@ int poly2psd_c (float *Y, const float *X, const float *E, const float *W, const 
 }
 
 
-int poly2psd_z (double *Y, const double *X, const double *E, const double *W, const size_t F, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim)
+int poly2psd_z (double *Y, const double *X, const double *E, const double *W, const size_t F, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t dim)
 {
     if (dim>3u) { fprintf(stderr,"error in poly2psd_z: dim must be in [0 3]\n"); return 1; }
 

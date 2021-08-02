@@ -141,18 +141,23 @@ poly2psd: poly2psd.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 
 #AC_LP: conversions between sig (signal), AC (autocorrelation), LP (linear prediction), and related.
 #For example, ac2rc converts from AC to RCs (reflection coeffs).
-AC_LP: #autocorr autocorr_fft sig2ac sig2ac_fft ac2ar_levdurb ac2poly_levdurb sig2ar_levdurb sig2poly_levdurb sig2ar_burg sig2poly_burg ac2rc ac2cc ac2mvdr
+AC_LP: sig2ac sig2ac_fft #ac2ar_levdurb ac2poly_levdurb sig2ar_levdurb sig2poly_levdurb sig2ar_burg sig2poly_burg ac2rc ac2cc ac2mvdr
 sig2ac: sig2ac.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 sig2ac_fft: sig2ac_fft.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+ac2rc_levdurb: ac2rc_levdurb.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 ac2ar_levdurb: ac2ar_levdurb.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 ac2poly_levdurb: ac2poly_levdurb.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+sig2rc_levdurb: sig2rc_levdurb.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 sig2ar_levdurb: sig2ar_levdurb.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 sig2poly_levdurb: sig2poly_levdurb.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 sig2ar_burg: sig2ar_burg.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 sig2poly_burg: sig2poly_burg.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
-ac2rc: ac2rc.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
-ac2cc: ac2cc.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+
+ac2cc_levdurb: ac2cc_levdurb.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+sig2cc_levdurb: sig2cc_levdurb.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+
 ac2mvdr: ac2mvdr.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+sig2mvdr: sig2mvdr.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 
 
 #Frame: get frames and apply windows for univariate signal to put into matrix

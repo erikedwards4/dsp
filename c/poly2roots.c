@@ -15,13 +15,13 @@ namespace codee {
 extern "C" {
 #endif
 
-int poly2roots_s (float *Y, const float *X, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim);
-int poly2roots_d (double *Y, const double *X, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim);
-int poly2roots_c (float *Y, const float *X, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim);
-int poly2roots_z (double *Y, const double *X, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim);
+int poly2roots_s (float *Y, const float *X, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t dim);
+int poly2roots_d (double *Y, const double *X, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t dim);
+int poly2roots_c (float *Y, const float *X, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t dim);
+int poly2roots_z (double *Y, const double *X, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t dim);
 
 
-int poly2roots_s (float *Y, const float *X, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim)
+int poly2roots_s (float *Y, const float *X, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t dim)
 {
     if (dim>3u) { fprintf(stderr,"error in poly2roots_s: dim must be in [0 3]\n"); return 1; }
 
@@ -55,7 +55,7 @@ int poly2roots_s (float *Y, const float *X, const size_t R, const size_t C, cons
     {
         const size_t Ly = Lx - 1u;
         float x0;
-        const char job = 'E', compz = 'N';  //eigenvalues only
+        const int job = 'E', compz = 'N';  //eigenvalues only
         const lapack_int ldh = (int)Ly, n = (int)Ly, ldz = 1;
         const lapack_int ilo = 1, ihi = n;  //avoids balancing
         lapack_int info;
@@ -129,7 +129,7 @@ int poly2roots_s (float *Y, const float *X, const size_t R, const size_t C, cons
 }
 
 
-int poly2roots_d (double *Y, const double *X, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim)
+int poly2roots_d (double *Y, const double *X, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t dim)
 {
     if (dim>3u) { fprintf(stderr,"error in poly2roots_d: dim must be in [0 3]\n"); return 1; }
 
@@ -164,7 +164,7 @@ int poly2roots_d (double *Y, const double *X, const size_t R, const size_t C, co
         const size_t Ly = Lx - 1u;
         double x0;
 
-        const char job = 'E', compz = 'N';  //eigenvalues only
+        const int job = 'E', compz = 'N';  //eigenvalues only
         const lapack_int ldh = (int)Ly, n = (int)Ly, ldz = 1;
         const lapack_int ilo = 1, ihi = n;  //avoids balancing
         lapack_int info;
@@ -238,7 +238,7 @@ int poly2roots_d (double *Y, const double *X, const size_t R, const size_t C, co
 }
 
 
-int poly2roots_c (float *Y, const float *X, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim)
+int poly2roots_c (float *Y, const float *X, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t dim)
 {
     if (dim>3u) { fprintf(stderr,"error in poly2roots_c: dim must be in [0 3]\n"); return 1; }
 
@@ -249,7 +249,7 @@ int poly2roots_c (float *Y, const float *X, const size_t R, const size_t C, cons
     else
     {
         const size_t Ly = Lx - 1u;
-        const char job = 'E', compz = 'N';  //eigenvalues only
+        const int job = 'E', compz = 'N';  //eigenvalues only
         const lapack_int ldh = (int)Ly, n = (int)Ly, ldz = 1;
         const lapack_int ilo = 1, ihi = n;  //avoids balancing
         lapack_int info;
@@ -341,7 +341,7 @@ int poly2roots_c (float *Y, const float *X, const size_t R, const size_t C, cons
 }
 
 
-int poly2roots_z (double *Y, const double *X, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim)
+int poly2roots_z (double *Y, const double *X, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t dim)
 {
     if (dim>3u) { fprintf(stderr,"error in poly2roots_z: dim must be in [0 3]\n"); return 1; }
 
@@ -352,7 +352,7 @@ int poly2roots_z (double *Y, const double *X, const size_t R, const size_t C, co
     else
     {
         const size_t Ly = Lx - 1u;
-        const char job = 'E', compz = 'N';  //eigenvalues only
+        const int job = 'E', compz = 'N';  //eigenvalues only
         const lapack_int ldh = (int)Ly, n = (int)Ly, ldz = 1;
         const lapack_int ilo = 1, ihi = n;  //avoids balancing
         lapack_int info;

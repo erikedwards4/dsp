@@ -10,11 +10,11 @@ namespace ov {
 extern "C" {
 #endif
 
-int lcr_windowed_s (float *Y, const float *X, const char iscolmajor, const int R, const int C, const float *W, const int L, const int dim, const int c0, const float stp, const int going, const float level);
-int lcr_windowed_d (double *Y, const double *X, const char iscolmajor, const int R, const int C, const double *W, const int L, const int dim, const int c0, const double stp, const int going, const double level);
+int lcr_windowed_s (float *Y, const float *X, const int iscolmajor, const int R, const int C, const float *W, const int L, const int dim, const int c0, const float stp, const int going, const float level);
+int lcr_windowed_d (double *Y, const double *X, const int iscolmajor, const int R, const int C, const double *W, const int L, const int dim, const int c0, const double stp, const int going, const double level);
 
 
-int lcr_windowed_s (float *Y, const float *X, const char iscolmajor, const int R, const int C, const float *W, const int L, const int dim, const int c0, const float stp, const int going, const float level)
+int lcr_windowed_s (float *Y, const float *X, const int iscolmajor, const int R, const int C, const float *W, const int L, const int dim, const int c0, const float stp, const int going, const float level)
 {
     const float z = 0.0f;
     const int N = R*C;
@@ -145,7 +145,7 @@ int lcr_windowed_s (float *Y, const float *X, const char iscolmajor, const int R
 }
 
 
-int lcr_windowed_d (double *Y, const double *X, const char iscolmajor, const int R, const int C, const double *W, const int L, const int dim, const int c0, const double stp, const int going, const double level)
+int lcr_windowed_d (double *Y, const double *X, const int iscolmajor, const int R, const int C, const double *W, const int L, const int dim, const int c0, const double stp, const int going, const double level)
 {
     const double z = 0.0;
     const int N = R*C;

@@ -35,10 +35,10 @@ static void ifft_1d_d (double *Y, const size_t nfft, const size_t *bittbl, const
 static void ifft_1d_c (float *Y, const size_t nfft, const size_t *bittbl, const float *cstbl);
 static void ifft_1d_z (double *Y, const size_t nfft, const size_t *bittbl, const double *cstbl);
 
-int ifft_rad2_s (float *Y, const float *X, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim, const size_t nfft, const char sc);
-int ifft_rad2_d (double *Y, const double *X, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim, const size_t nfft, const char sc);
-int ifft_rad2_c (float *Y, const float *X, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim, const size_t nfft, const char sc);
-int ifft_rad2_z (double *Y, const double *X, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim, const size_t nfft, const char sc);
+int ifft_rad2_s (float *Y, const float *X, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t dim, const size_t nfft, const int sc);
+int ifft_rad2_d (double *Y, const double *X, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t dim, const size_t nfft, const int sc);
+int ifft_rad2_c (float *Y, const float *X, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t dim, const size_t nfft, const int sc);
+int ifft_rad2_z (double *Y, const double *X, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t dim, const size_t nfft, const int sc);
 
 
 static void get_bittbl(size_t* bittbl, const size_t nfft)
@@ -327,7 +327,7 @@ static void ifft_1d_z (double *Y, const size_t nfft, const size_t *bittbl, const
 }
 
 
-int ifft_rad2_s (float *Y, const float *X, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim, const size_t nfft, const char sc)
+int ifft_rad2_s (float *Y, const float *X, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t dim, const size_t nfft, const int sc)
 {
     if (dim>3u) { fprintf(stderr,"error in ifft_rad2_s: dim must be in [0 3]\n"); return 1; }
     if (nfft>0u && (nfft & (nfft-1u))) { fprintf(stderr,"error in ifft_rad2_s: nfft must be a power of 2\n"); return 1; }
@@ -410,7 +410,7 @@ int ifft_rad2_s (float *Y, const float *X, const size_t R, const size_t C, const
 }
 
 
-int ifft_rad2_d (double *Y, const double *X, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim, const size_t nfft, const char sc)
+int ifft_rad2_d (double *Y, const double *X, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t dim, const size_t nfft, const int sc)
 {
     if (dim>3u) { fprintf(stderr,"error in ifft_rad2_d: dim must be in [0 3]\n"); return 1; }
     if (nfft>0u && (nfft & (nfft-1u))) { fprintf(stderr,"error in ifft_rad2_d: nfft must be a power of 2\n"); return 1; }
@@ -493,7 +493,7 @@ int ifft_rad2_d (double *Y, const double *X, const size_t R, const size_t C, con
 }
 
 
-int ifft_rad2_c (float *Y, const float *X, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim, const size_t nfft, const char sc)
+int ifft_rad2_c (float *Y, const float *X, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t dim, const size_t nfft, const int sc)
 {
     if (dim>3u) { fprintf(stderr,"error in ifft_rad2_c: dim must be in [0 3]\n"); return 1; }
     if (nfft>0u && (nfft & (nfft-1u))) { fprintf(stderr,"error in ifft_rad2_c: nfft must be a power of 2\n"); return 1; }
@@ -565,7 +565,7 @@ int ifft_rad2_c (float *Y, const float *X, const size_t R, const size_t C, const
 }
 
 
-int ifft_rad2_z (double *Y, const double *X, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim, const size_t nfft, const char sc)
+int ifft_rad2_z (double *Y, const double *X, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t dim, const size_t nfft, const int sc)
 {
     if (dim>3u) { fprintf(stderr,"error in ifft_rad2_z: dim must be in [0 3]\n"); return 1; }
     if (nfft>0u && (nfft & (nfft-1u))) { fprintf(stderr,"error in ifft_rad2_z: nfft must be a power of 2\n"); return 1; }

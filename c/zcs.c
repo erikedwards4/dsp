@@ -10,13 +10,13 @@ namespace ov {
 extern "C" {
 #endif
 
-int zcs_s (char *Y, const float *X, const char iscolmajor, const int R, const int C, const int dim, const int going);
-int zcs_d (char *Y, const double *X, const char iscolmajor, const int R, const int C, const int dim, const int going);
-int zcs_c (char *Y, const float *X, const char iscolmajor, const int R, const int C, const int dim, const int going);
-int zcs_z (char *Y, const double *X, const char iscolmajor, const int R, const int C, const int dim, const int going);
+int zcs_s (char *Y, const float *X, const int iscolmajor, const int R, const int C, const int dim, const int going);
+int zcs_d (char *Y, const double *X, const int iscolmajor, const int R, const int C, const int dim, const int going);
+int zcs_c (char *Y, const float *X, const int iscolmajor, const int R, const int C, const int dim, const int going);
+int zcs_z (char *Y, const double *X, const int iscolmajor, const int R, const int C, const int dim, const int going);
 
 
-int zcs_s (char *Y, const float *X, const char iscolmajor, const int R, const int C, const int dim, const int going)
+int zcs_s (char *Y, const float *X, const int iscolmajor, const int R, const int C, const int dim, const int going)
 {
     const int N = R*C;
     int n = -1;
@@ -69,7 +69,7 @@ int zcs_s (char *Y, const float *X, const char iscolmajor, const int R, const in
 }
 
 
-int zcs_d (char *Y, const double *X, const char iscolmajor, const int R, const int C, const int dim, const int going)
+int zcs_d (char *Y, const double *X, const int iscolmajor, const int R, const int C, const int dim, const int going)
 {
     const int N = R*C;
     int n = -1;
@@ -121,7 +121,7 @@ int zcs_d (char *Y, const double *X, const char iscolmajor, const int R, const i
 }
 
 
-int zcs_c (char *Y, const float *X, const char iscolmajor, const int R, const int C, const int dim, const int going)
+int zcs_c (char *Y, const float *X, const int iscolmajor, const int R, const int C, const int dim, const int going)
 {
     const int N = R*C;
     int n = -1;
@@ -173,7 +173,7 @@ int zcs_c (char *Y, const float *X, const char iscolmajor, const int R, const in
 }
 
 
-int zcs_z (char *Y, const double *X, const char iscolmajor, const int R, const int C, const int dim, const int going)
+int zcs_z (char *Y, const double *X, const int iscolmajor, const int R, const int C, const int dim, const int going)
 {
     const int N = R*C;
     int n = -1;

@@ -23,13 +23,13 @@ namespace codee {
 extern "C" {
 #endif
 
-int red_s (float *Y, const size_t N, const float std, const char zmn);
-int red_d (double *Y, const size_t N, const double std, const char zmn);
-int red_c (float *Y, const size_t N, const float std, const char zmn);
-int red_z (double *Y, const size_t N, const double std, const char zmn);
+int red_s (float *Y, const size_t N, const float std, const int zmn);
+int red_d (double *Y, const size_t N, const double std, const int zmn);
+int red_c (float *Y, const size_t N, const float std, const int zmn);
+int red_z (double *Y, const size_t N, const double std, const int zmn);
 
 
-int red_s (float *Y, const size_t N, const float std, const char zmn)
+int red_s (float *Y, const size_t N, const float std, const int zmn)
 {
     if (std<0.0f) { fprintf(stderr, "error in red_s: std must be nonnegative\n"); return 1; }
 
@@ -179,7 +179,7 @@ int red_s (float *Y, const size_t N, const float std, const char zmn)
 }
 
 
-int red_d (double *Y, const size_t N, const double std, const char zmn)
+int red_d (double *Y, const size_t N, const double std, const int zmn)
 {
     if (std<0.0) { fprintf(stderr, "error in red_d: std must be nonnegative\n"); return 1; }
 
@@ -329,7 +329,7 @@ int red_d (double *Y, const size_t N, const double std, const char zmn)
 }
 
 
-int red_c (float *Y, const size_t N, const float std, const char zmn)
+int red_c (float *Y, const size_t N, const float std, const int zmn)
 {
     if (std<0.0f) { fprintf(stderr, "error in red_c: std must be nonnegative\n"); return 1; }
 
@@ -449,7 +449,7 @@ int red_c (float *Y, const size_t N, const float std, const char zmn)
 }
 
 
-int red_z (double *Y, const size_t N, const double std, const char zmn)
+int red_z (double *Y, const size_t N, const double std, const int zmn)
 {
     if (std<0.0) { fprintf(stderr, "error in red_z: std must be nonnegative\n"); return 1; }
 

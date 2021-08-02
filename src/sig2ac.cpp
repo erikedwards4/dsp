@@ -35,18 +35,22 @@ int main(int argc, char *argv[])
     int8_t stdi1, stdo1, wo1;
     ioinfo i1, o1;
     size_t dim, L, Lx;
-    int u, corr;
+    int mnz, u, corr;
 
 
     //Description
     string descr;
     descr += "Gets autocovariance of each vector in X.\n";
     descr += "The means are NOT subtracted before computing.\n";
-    descr += "This does NOT normalize lag 0 of Y (so just like Octave xcorr),\n";
-    descr += "unless the -c (--corr) flag is given.\n";
+    descr += "This does NOT normalize lag 0 of Y (so just like Octave xcorr).\n";
+    descr += "\n";
+    descr += "Include -z (--zero_mean) to subtract the means from each vec in X [default=false].\n";
+    descr += "\n";
+    descr += "Include -c (--corr) to output autocorrelation [default=false -> autocovariance].\n";
+    descr += "This normalizes each vector in Y by its lag-zero element.\n";
     descr += "\n";
     descr += "Use -l (--L) to give the number of lags at which to compute.\n";
-    descr += "Note that the max lag is L-1 (not L as for xcorr).\n";
+    descr += "This is the length of each vector in Y (not the max lag as for xcorr).\n";
     descr += "\n";
     descr += "Use -d (--dim) to give the dimension along which to operate.\n";
     descr += "Default is 0 (along cols), unless X is a row vector.\n";
@@ -76,12 +80,13 @@ int main(int argc, char *argv[])
     struct arg_file  *a_fi = arg_filen(nullptr,nullptr,"<file>",I-1,I,"input file (X)");
     struct arg_int    *a_l = arg_intn("l","L","<uint>",0,1,"number of lags to compute [default=1]");
     struct arg_int    *a_d = arg_intn("d","dim","<uint>",0,1,"dimension along which to operate [default=0]");
+    struct arg_lit  *a_mnz = arg_litn("z","zero_mean",0,1,"subtract mean from each vec in X [default=false]");
     struct arg_lit    *a_u = arg_litn("u","unbiased",0,1,"use unbiased (N-l) denominator [default=biased]");
     struct arg_lit    *a_c = arg_litn("c","corr",0,1,"output autocorrelation [default=false -> autocovariance]");
     struct arg_file  *a_fo = arg_filen("o","ofile","<file>",0,O,"output file (Y)");
     struct arg_lit *a_help = arg_litn("h","help",0,1,"display this help and exit");
     struct arg_end  *a_end = arg_end(5);
-    void *argtable[] = {a_fi, a_l, a_d, a_u, a_c, a_fo, a_help, a_end};
+    void *argtable[] = {a_fi, a_l, a_d, a_mnz, a_u, a_c, a_fo, a_help, a_end};
     if (arg_nullcheck(argtable)!=0) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating argtable" << endl; return 1; }
     nerrs = arg_parse(argc, argv, argtable);
     if (a_help->count>0)
@@ -132,6 +137,9 @@ int main(int argc, char *argv[])
     else { dim = size_t(a_d->ival[0]); }
     if (dim>3u) { cerr << progstr+": " << __LINE__ << errstr << "dim must be in {0,1,2,3}" << endl; return 1; }
 
+    //Get mnz
+    mnz = (a_mnz->count>0);
+
     //Get u
     u = (a_u->count>0);
 
@@ -179,7 +187,7 @@ int main(int argc, char *argv[])
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for output file (Y)" << endl; return 1; }
         try { ifs1.read(reinterpret_cast<char*>(X),i1.nbytes()); }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file (X)" << endl; return 1; }
-        if (codee::sig2ac_s(Y,X,i1.R,i1.C,i1.S,i1.H,i1.iscolmajor(),dim,L,u,corr)) { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
+        if (codee::sig2ac_s(Y,X,i1.R,i1.C,i1.S,i1.H,i1.iscolmajor(),dim,L,mnz,u,corr)) { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
         if (wo1)
         {
             try { ofs1.write(reinterpret_cast<char*>(Y),o1.nbytes()); }
@@ -196,7 +204,7 @@ int main(int argc, char *argv[])
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for output file (Y)" << endl; return 1; }
         try { ifs1.read(reinterpret_cast<char*>(X),i1.nbytes()); }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file (X)" << endl; return 1; }
-        if (codee::sig2ac_d(Y,X,i1.R,i1.C,i1.S,i1.H,i1.iscolmajor(),dim,L,u,corr)) { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
+        if (codee::sig2ac_d(Y,X,i1.R,i1.C,i1.S,i1.H,i1.iscolmajor(),dim,L,mnz,u,corr)) { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
         if (wo1)
         {
             try { ofs1.write(reinterpret_cast<char*>(Y),o1.nbytes()); }
@@ -213,7 +221,7 @@ int main(int argc, char *argv[])
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for output file (Y)" << endl; return 1; }
         try { ifs1.read(reinterpret_cast<char*>(X),i1.nbytes()); }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file (X)" << endl; return 1; }
-        if (codee::sig2ac_c(Y,X,i1.R,i1.C,i1.S,i1.H,i1.iscolmajor(),dim,L,u,corr)) { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
+        if (codee::sig2ac_c(Y,X,i1.R,i1.C,i1.S,i1.H,i1.iscolmajor(),dim,L,mnz,u,corr)) { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
         if (wo1)
         {
             try { ofs1.write(reinterpret_cast<char*>(Y),o1.nbytes()); }
@@ -230,7 +238,7 @@ int main(int argc, char *argv[])
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for output file (Y)" << endl; return 1; }
         try { ifs1.read(reinterpret_cast<char*>(X),i1.nbytes()); }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file (X)" << endl; return 1; }
-        if (codee::sig2ac_z(Y,X,i1.R,i1.C,i1.S,i1.H,i1.iscolmajor(),dim,L,u,corr)) { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
+        if (codee::sig2ac_z(Y,X,i1.R,i1.C,i1.S,i1.H,i1.iscolmajor(),dim,L,mnz,u,corr)) { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
         if (wo1)
         {
             try { ofs1.write(reinterpret_cast<char*>(Y),o1.nbytes()); }

@@ -28,13 +28,13 @@ namespace codee {
 extern "C" {
 #endif
 
-int brown_s (float *Y, const size_t N, const float std, const char zmn);
-int brown_d (double *Y, const size_t N, const double std, const char zmn);
-int brown_c (float *Y, const size_t N, const float std, const char zmn);
-int brown_z (double *Y, const size_t N, const double std, const char zmn);
+int brown_s (float *Y, const size_t N, const float std, const int zmn);
+int brown_d (double *Y, const size_t N, const double std, const int zmn);
+int brown_c (float *Y, const size_t N, const float std, const int zmn);
+int brown_z (double *Y, const size_t N, const double std, const int zmn);
 
 
-int brown_s (float *Y, const size_t N, const float std, const char zmn)
+int brown_s (float *Y, const size_t N, const float std, const int zmn)
 {
     if (std<0.0f) { fprintf(stderr, "error in brown_s: std must be nonnegative\n"); return 1; }
 
@@ -162,7 +162,7 @@ int brown_s (float *Y, const size_t N, const float std, const char zmn)
 }
 
 
-int brown_d (double *Y, const size_t N, const double std, const char zmn)
+int brown_d (double *Y, const size_t N, const double std, const int zmn)
 {
     if (std<0.0) { fprintf(stderr, "error in brown_d: std must be nonnegative\n"); return 1; }
 
@@ -290,7 +290,7 @@ int brown_d (double *Y, const size_t N, const double std, const char zmn)
 }
 
 
-int brown_c (float *Y, const size_t N, const float std, const char zmn)
+int brown_c (float *Y, const size_t N, const float std, const int zmn)
 {
     if (std<0.0f) { fprintf(stderr, "error in brown_c: std must be nonnegative\n"); return 1; }
 
@@ -380,7 +380,7 @@ int brown_c (float *Y, const size_t N, const float std, const char zmn)
 }
 
 
-int brown_z (double *Y, const size_t N, const double std, const char zmn)
+int brown_z (double *Y, const size_t N, const double std, const int zmn)
 {
     if (std<0.0) { fprintf(stderr, "error in brown_z: std must be nonnegative\n"); return 1; }
 

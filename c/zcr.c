@@ -10,11 +10,11 @@ namespace ov {
 extern "C" {
 #endif
 
-int zcr_s (float *Y, const float *X, const char iscolmajor, const int R, const int C, const int L, const int dim, const int c0, const float stp, const int going);
-int zcr_d (double *Y, const double *X, const char iscolmajor, const int R, const int C, const int L, const int dim, const int c0, const double stp, const int going);
+int zcr_s (float *Y, const float *X, const int iscolmajor, const int R, const int C, const int L, const int dim, const int c0, const float stp, const int going);
+int zcr_d (double *Y, const double *X, const int iscolmajor, const int R, const int C, const int L, const int dim, const int c0, const double stp, const int going);
 
 
-int zcr_s (float *Y, const float *X, const char iscolmajor, const int R, const int C, const int L, const int dim, const int c0, const float stp, const int going)
+int zcr_s (float *Y, const float *X, const int iscolmajor, const int R, const int C, const int L, const int dim, const int c0, const float stp, const int going)
 {
     const int N = R*C;
     const int T = (dim==0) ? 1 + (int)(floorf(((int)R-1-c0)/stp)) : 1 + (int)(floorf(((int)C-1-c0)/stp));
@@ -151,7 +151,7 @@ int zcr_s (float *Y, const float *X, const char iscolmajor, const int R, const i
 }
 
 
-int zcr_d (double *Y, const double *X, const char iscolmajor, const int R, const int C, const int L, const int dim, const int c0, const double stp, const int going)
+int zcr_d (double *Y, const double *X, const int iscolmajor, const int R, const int C, const int L, const int dim, const int c0, const double stp, const int going)
 {
     const int N = R*C;
     const int T = (dim==0) ? 1 + (int)(floor(((int)R-1-c0)/stp)) : 1 + (int)(floor(((int)C-1-c0)/stp));

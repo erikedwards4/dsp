@@ -15,11 +15,11 @@ namespace codee {
 extern "C" {
 #endif
 
-int sig2poly_levdurb_s (float *Y, float *V, const float *X, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim, const size_t P, const char mean0);
-int sig2poly_levdurb_d (double *Y, double *V, const double *X, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim, const size_t P, const char mean0);
+int sig2poly_levdurb_s (float *Y, float *V, const float *X, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t dim, const size_t P, const int mean0);
+int sig2poly_levdurb_d (double *Y, double *V, const double *X, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t dim, const size_t P, const int mean0);
 
 
-int sig2poly_levdurb_s (float *Y, float *V, const float *X, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim, const size_t P, const char mean0)
+int sig2poly_levdurb_s (float *Y, float *V, const float *X, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t dim, const size_t P, const int mean0)
 {
     if (dim>3) { fprintf(stderr,"error in sig2poly_levdurb_s: dim must be in [0 3]\n"); return 1; }
 
@@ -187,7 +187,7 @@ int sig2poly_levdurb_s (float *Y, float *V, const float *X, const size_t R, cons
 }
 
 
-int sig2poly_levdurb_d (double *Y, double *V, const double *X, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim, const size_t P, const char mean0)
+int sig2poly_levdurb_d (double *Y, double *V, const double *X, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t dim, const size_t P, const int mean0)
 {
     if (dim>3) { fprintf(stderr,"error in sig2poly_levdurb_d: dim must be in [0 3]\n"); return 1; }
 

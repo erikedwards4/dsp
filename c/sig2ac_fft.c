@@ -7,22 +7,24 @@
 //However, this is the case for N>2, so only set up time would prevent using this.
 //On quick local-system test, this is worth using for N>?.
 
+//The mnz option allows the mean to be zeroed first for each vec in X.
+//For numerical accuracy, this is done before the FFT, and the DC term is also set to 0.0.
+
 #include <stdio.h>
 #include <fftw3.h>
-#include <time.h>
 
 #ifdef __cplusplus
 namespace codee {
 extern "C" {
 #endif
 
-int sig2ac_fft_s (float *Y, const float *X, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim, const size_t L, const int unbiased, const int corr);
-int sig2ac_fft_d (double *Y, const double *X, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim, const size_t L, const int unbiased, const int corr);
-int sig2ac_fft_c (float *Y, const float *X, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim, const size_t L, const int unbiased, const int corr);
-int sig2ac_fft_z (double *Y, const double *X, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim, const size_t L, const int unbiased, const int corr);
+int sig2ac_fft_s (float *Y, const float *X, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t dim, const size_t L, const int mnz, const int unbiased, const int corr);
+int sig2ac_fft_d (double *Y, const double *X, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t dim, const size_t L, const int mnz, const int unbiased, const int corr);
+int sig2ac_fft_c (float *Y, const float *X, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t dim, const size_t L, const int mnz, const int unbiased, const int corr);
+int sig2ac_fft_z (double *Y, const double *X, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t dim, const size_t L, const int mnz, const int unbiased, const int corr);
 
 
-int sig2ac_fft_s (float *Y, const float *X, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim, const size_t L, const int unbiased, const int corr)
+int sig2ac_fft_s (float *Y, const float *X, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t dim, const size_t L, const int mnz, const int unbiased, const int corr)
 {
     if (dim>3u) { fprintf(stderr,"error in sig2ac_fft_s: dim must be in [0 3]\n"); return 1; }
 
@@ -53,18 +55,29 @@ int sig2ac_fft_s (float *Y, const float *X, const size_t R, const size_t C, cons
         {
             for (size_t l=0u; l<Lx; ++l, ++X, ++X1) { *X1 = *X; }
             X1 -= Lx;
+
+            if (mnz)
+            {
+                float mn = 0.0f;
+                for (size_t l=0u; l<Lx; ++l, ++X1) { mn += *X1; }
+                mn /= (float)Lx;
+                for (size_t l=0u; l<Lx; ++l) { *--X1 -= mn; }
+            }
+
             fftwf_execute(fplan);
+            if (mnz) { *Y1++ = 0.0f; }
+            else { *Y1 *= *Y1; ++Y1; }
             
             //struct timespec tic, toc; clock_gettime(CLOCK_REALTIME,&tic);
 
             //Fastest
-            for (size_t f=0u; f<nfft; ++f, ++Y1) { *Y1 *= *Y1; }
+            for (size_t f=1u; f<nfft; ++f, ++Y1) { *Y1 *= *Y1; }
             Y1 -= nfft - 1u;
             for (size_t f=1u; f<F-1u; ++f, ++Y1) { *Y1 += *(Y1+nfft-2u*f); *(Y1+nfft-2u*f) = *Y1; }
             Y1 -= F - 1u;
 
             //2nd fastest
-            // for (size_t f=0u; f<nfft; ++f, ++Y1) { *Y1 *= *Y1; }
+            // for (size_t f=1u; f<nfft; ++f, ++Y1) { *Y1 *= *Y1; }
             // --Y1;
             // for (size_t f=1u; f<F-1u; ++f, --Y1) { *Y1 += *(Y1-nfft+2u*f); *(Y1-nfft+2u*f) = *Y1; }
             // Y1 -= nfft - F + 1u;
@@ -113,8 +126,18 @@ int sig2ac_fft_s (float *Y, const float *X, const size_t R, const size_t C, cons
                 {
                     for (size_t l=0u; l<Lx; ++l, ++X, ++X1) { *X1 = *X; }
                     X1 -= Lx;
+
+                    if (mnz)
+                    {
+                        float mn = 0.0f;
+                        for (size_t l=0u; l<Lx; ++l, ++X1) { mn += *X1; }
+                        mn /= (float)Lx;
+                        for (size_t l=0u; l<Lx; ++l) { *--X1 -= mn; }
+                    }
+                    
                     fftwf_execute(fplan);
-                    for (size_t f=0u; f<nfft; ++f, ++Y1) { *Y1 *= *Y1; }
+                    if (mnz) { *Y1++ = 0.0f; } else { *Y1 *= *Y1; ++Y1; }
+                    for (size_t f=1u; f<nfft; ++f, ++Y1) { *Y1 *= *Y1; }
                     Y1 -= nfft - 1u;
                     for (size_t f=1u; f<F-1u; ++f, ++Y1) { *Y1 += *(Y1+nfft-2u*f); *(Y1+nfft-2u*f) = *Y1; }
                     Y1 -= F - 1u;
@@ -147,8 +170,18 @@ int sig2ac_fft_s (float *Y, const float *X, const size_t R, const size_t C, cons
                     {
                         for (size_t l=0u; l<Lx; ++l, X+=K, ++X1) { *X1 = *X; }
                         X1 -= Lx;
+
+                        if (mnz)
+                        {
+                            float mn = 0.0f;
+                            for (size_t l=0u; l<Lx; ++l, ++X1) { mn += *X1; }
+                            mn /= (float)Lx;
+                            for (size_t l=0u; l<Lx; ++l) { *--X1 -= mn; }
+                        }
+                        
                         fftwf_execute(fplan);
-                        for (size_t f=0u; f<nfft; ++f, ++Y1) { *Y1 *= *Y1; }
+                        if (mnz) { *Y1++ = 0.0f; } else { *Y1 *= *Y1; ++Y1; }
+                        for (size_t f=1u; f<nfft; ++f, ++Y1) { *Y1 *= *Y1; }
                         Y1 -= nfft - 1u;
                         for (size_t f=1u; f<F-1u; ++f, ++Y1) { *Y1 += *(Y1+nfft-2u*f); *(Y1+nfft-2u*f) = *Y1; }
                         Y1 -= F - 1u;
@@ -183,7 +216,7 @@ int sig2ac_fft_s (float *Y, const float *X, const size_t R, const size_t C, cons
 }
 
 
-int sig2ac_fft_d (double *Y, const double *X, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim, const size_t L, const int unbiased, const int corr)
+int sig2ac_fft_d (double *Y, const double *X, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t dim, const size_t L, const int mnz, const int unbiased, const int corr)
 {
     if (dim>3u) { fprintf(stderr,"error in sig2ac_fft_d: dim must be in [0 3]\n"); return 1; }
 
@@ -214,8 +247,18 @@ int sig2ac_fft_d (double *Y, const double *X, const size_t R, const size_t C, co
         {
             for (size_t l=0u; l<Lx; ++l, ++X, ++X1) { *X1 = *X; }
             X1 -= Lx;
+
+            if (mnz)
+            {
+                double mn = 0.0;
+                for (size_t l=0u; l<Lx; ++l, ++X1) { mn += *X1; }
+                mn /= (double)Lx;
+                for (size_t l=0u; l<Lx; ++l) { *--X1 -= mn; }
+            }
+            
             fftw_execute(fplan);
-            for (size_t f=0u; f<nfft; ++f, ++Y1) { *Y1 *= *Y1; }
+            if (mnz) { *Y1++ = 0.0; } else { *Y1 *= *Y1; ++Y1; }
+            for (size_t f=1u; f<nfft; ++f, ++Y1) { *Y1 *= *Y1; }
             Y1 -= nfft - 1u;
             for (size_t f=1u; f<F-1u; ++f, ++Y1) { *Y1 += *(Y1+nfft-2u*f); *(Y1+nfft-2u*f) = *Y1; }
             Y1 -= F - 1u;
@@ -251,8 +294,18 @@ int sig2ac_fft_d (double *Y, const double *X, const size_t R, const size_t C, co
                 {
                     for (size_t l=0u; l<Lx; ++l, ++X, ++X1) { *X1 = *X; }
                     X1 -= Lx;
+
+                    if (mnz)
+                    {
+                        double mn = 0.0;
+                        for (size_t l=0u; l<Lx; ++l, ++X1) { mn += *X1; }
+                        mn /= (double)Lx;
+                        for (size_t l=0u; l<Lx; ++l) { *--X1 -= mn; }
+                    }
+                    
                     fftw_execute(fplan);
-                    for (size_t f=0u; f<nfft; ++f, ++Y1) { *Y1 *= *Y1; }
+                    if (mnz) { *Y1++ = 0.0; } else { *Y1 *= *Y1; ++Y1; }
+                    for (size_t f=1u; f<nfft; ++f, ++Y1) { *Y1 *= *Y1; }
                     Y1 -= nfft - 1u;
                     for (size_t f=1u; f<F-1u; ++f, ++Y1) { *Y1 += *(Y1+nfft-2u*f); *(Y1+nfft-2u*f) = *Y1; }
                     Y1 -= F - 1u;
@@ -285,8 +338,18 @@ int sig2ac_fft_d (double *Y, const double *X, const size_t R, const size_t C, co
                     {
                         for (size_t l=0u; l<Lx; ++l, X+=K, ++X1) { *X1 = *X; }
                         X1 -= Lx;
+
+                        if (mnz)
+                        {
+                            double mn = 0.0;
+                            for (size_t l=0u; l<Lx; ++l, ++X1) { mn += *X1; }
+                            mn /= (double)Lx;
+                            for (size_t l=0u; l<Lx; ++l) { *--X1 -= mn; }
+                        }
+                        
                         fftw_execute(fplan);
-                        for (size_t f=0u; f<nfft; ++f, ++Y1) { *Y1 *= *Y1; }
+                        if (mnz) { *Y1++ = 0.0; } else { *Y1 *= *Y1; ++Y1; }
+                        for (size_t f=1u; f<nfft; ++f, ++Y1) { *Y1 *= *Y1; }
                         Y1 -= nfft - 1u;
                         for (size_t f=1u; f<F-1u; ++f, ++Y1) { *Y1 += *(Y1+nfft-2u*f); *(Y1+nfft-2u*f) = *Y1; }
                         Y1 -= F - 1u;
@@ -321,7 +384,7 @@ int sig2ac_fft_d (double *Y, const double *X, const size_t R, const size_t C, co
 }
 
 
-int sig2ac_fft_c (float *Y, const float *X, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim, const size_t L, const int unbiased, const int corr)
+int sig2ac_fft_c (float *Y, const float *X, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t dim, const size_t L, const int mnz, const int unbiased, const int corr)
 {
     if (dim>3u) { fprintf(stderr,"error in sig2ac_fft_c: dim must be in [0 3]\n"); return 1; }
 
@@ -351,8 +414,19 @@ int sig2ac_fft_c (float *Y, const float *X, const size_t R, const size_t C, cons
         {
             for (size_t l=0u; l<2u*Lx; ++l, ++X, ++X1) { *X1 = *X; }
             X1 -= 2u*Lx;
+
+            if (mnz)
+            {
+                float mnr = 0.0f, mni = 0.0f;
+                for (size_t l=0u; l<Lx; ++l) { mnr += *X1++; mni += *X1++; }
+                mnr /= (float)Lx; mni /= (float)Lx;
+                for (size_t l=0u; l<Lx; ++l) { *--X1 -= mni; *--X1 -= mnr; }
+            }
+
             fftwf_execute(fplan);
-            for (size_t f=0u; f<nfft; ++f)
+            if (mnz) { *Y1++ = 0.0f; *Y1++ = 0.0f; }
+            else { *Y1 *= *Y1; ++Y1; *Y1++ = 0.0f; }
+            for (size_t f=1u; f<nfft; ++f)
             {
                 yr = *Y1; yi = *(Y1+1);
                 *Y1++ = yr*yr + yi*yi;
@@ -398,8 +472,19 @@ int sig2ac_fft_c (float *Y, const float *X, const size_t R, const size_t C, cons
                     for (size_t l=0u; l<2u*Lx; ++l, ++X, ++X1) { *X1 = *X; }
                     for (size_t l=2u*Lx; l<2u*nfft; ++l, ++X1) { *X1 = 0.0f; }
                     X1 -= 2u*nfft;
+
+                    if (mnz)
+                    {
+                        float mnr = 0.0f, mni = 0.0f;
+                        for (size_t l=0u; l<Lx; ++l) { mnr += *X1++; mni += *X1++; }
+                        mnr /= (float)Lx; mni /= (float)Lx;
+                        for (size_t l=0u; l<Lx; ++l) { *--X1 -= mni; *--X1 -= mnr; }
+                    }
+
                     fftwf_execute(fplan);
-                    for (size_t f=0u; f<nfft; ++f)
+                    if (mnz) { *Y1++ = 0.0f; *Y1++ = 0.0f; }
+                    else { *Y1 *= *Y1; ++Y1; *Y1++ = 0.0f; }
+                    for (size_t f=1u; f<nfft; ++f)
                     {
                         yr = *Y1; yi = *(Y1+1);
                         *Y1++ = yr*yr + yi*yi;
@@ -442,8 +527,19 @@ int sig2ac_fft_c (float *Y, const float *X, const size_t R, const size_t C, cons
                         for (size_t l=0u; l<Lx; ++l, X+=2u*K) { *X1++ = *X; *X1++ = *(X+1); }
                         for (size_t l=2u*Lx; l<2u*nfft; ++l, ++X1) { *X1 = 0.0f; }
                         X1 -= 2u*nfft;
+
+                        if (mnz)
+                        {
+                            float mnr = 0.0f, mni = 0.0f;
+                            for (size_t l=0u; l<Lx; ++l) { mnr += *X1++; mni += *X1++; }
+                            mnr /= (float)Lx; mni /= (float)Lx;
+                            for (size_t l=0u; l<Lx; ++l) { *--X1 -= mni; *--X1 -= mnr; }
+                        }
+
                         fftwf_execute(fplan);
-                        for (size_t f=0u; f<nfft; ++f)
+                        if (mnz) { *Y1++ = 0.0f; *Y1++ = 0.0f; }
+                        else { *Y1 *= *Y1; ++Y1; *Y1++ = 0.0f; }
+                        for (size_t f=1u; f<nfft; ++f)
                         {
                             yr = *Y1; yi = *(Y1+1);
                             *Y1++ = yr*yr + yi*yi;
@@ -487,7 +583,7 @@ int sig2ac_fft_c (float *Y, const float *X, const size_t R, const size_t C, cons
 }
 
 
-int sig2ac_fft_z (double *Y, const double *X, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim, const size_t L, const int unbiased, const int corr)
+int sig2ac_fft_z (double *Y, const double *X, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t dim, const size_t L, const int mnz, const int unbiased, const int corr)
 {
     if (dim>3u) { fprintf(stderr,"error in sig2ac_fft_z: dim must be in [0 3]\n"); return 1; }
 
@@ -517,8 +613,19 @@ int sig2ac_fft_z (double *Y, const double *X, const size_t R, const size_t C, co
         {
             for (size_t l=0u; l<2u*Lx; ++l, ++X, ++X1) { *X1 = *X; }
             X1 -= 2u*Lx;
+
+            if (mnz)
+            {
+                double mnr = 0.0, mni = 0.0;
+                for (size_t l=0u; l<Lx; ++l) { mnr += *X1++; mni += *X1++; }
+                mnr /= (double)Lx; mni /= (double)Lx;
+                for (size_t l=0u; l<Lx; ++l) { *--X1 -= mni; *--X1 -= mnr; }
+            }
+
             fftw_execute(fplan);
-            for (size_t f=0u; f<nfft; ++f)
+            if (mnz) { *Y1++ = 0.0; *Y1++ = 0.0; }
+            else { *Y1 *= *Y1; ++Y1; *Y1++ = 0.0; }
+            for (size_t f=1u; f<nfft; ++f)
             {
                 yr = *Y1; yi = *(Y1+1);
                 *Y1++ = yr*yr + yi*yi;
@@ -564,8 +671,19 @@ int sig2ac_fft_z (double *Y, const double *X, const size_t R, const size_t C, co
                     for (size_t l=0u; l<2u*Lx; ++l, ++X, ++X1) { *X1 = *X; }
                     for (size_t l=2u*Lx; l<2u*nfft; ++l, ++X1) { *X1 = 0.0; }
                     X1 -= 2u*nfft;
+
+                    if (mnz)
+                    {
+                        double mnr = 0.0, mni = 0.0;
+                        for (size_t l=0u; l<Lx; ++l) { mnr += *X1++; mni += *X1++; }
+                        mnr /= (double)Lx; mni /= (double)Lx;
+                        for (size_t l=0u; l<Lx; ++l) { *--X1 -= mni; *--X1 -= mnr; }
+                    }
+                    
                     fftw_execute(fplan);
-                    for (size_t f=0u; f<nfft; ++f)
+                    if (mnz) { *Y1++ = 0.0; *Y1++ = 0.0; }
+                    else { *Y1 *= *Y1; ++Y1; *Y1++ = 0.0; }
+                    for (size_t f=1u; f<nfft; ++f)
                     {
                         yr = *Y1; yi = *(Y1+1);
                         *Y1++ = yr*yr + yi*yi;
@@ -608,8 +726,19 @@ int sig2ac_fft_z (double *Y, const double *X, const size_t R, const size_t C, co
                         for (size_t l=0u; l<Lx; ++l, X+=2u*K) { *X1++ = *X; *X1++ = *(X+1); }
                         for (size_t l=2u*Lx; l<2u*nfft; ++l, ++X1) { *X1 = 0.0; }
                         X1 -= 2u*nfft;
+
+                        if (mnz)
+                        {
+                            double mnr = 0.0, mni = 0.0;
+                            for (size_t l=0u; l<Lx; ++l) { mnr += *X1++; mni += *X1++; }
+                            mnr /= (double)Lx; mni /= (double)Lx;
+                            for (size_t l=0u; l<Lx; ++l) { *--X1 -= mni; *--X1 -= mnr; }
+                        }
+                        
                         fftw_execute(fplan);
-                        for (size_t f=0u; f<nfft; ++f)
+                        if (mnz) { *Y1++ = 0.0; *Y1++ = 0.0; }
+                        else { *Y1 *= *Y1; ++Y1; *Y1++ = 0.0; }
+                        for (size_t f=1u; f<nfft; ++f)
                         {
                             yr = *Y1; yi = *(Y1+1);
                             *Y1++ = yr*yr + yi*yi;

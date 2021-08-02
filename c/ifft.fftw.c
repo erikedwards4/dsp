@@ -18,13 +18,13 @@ namespace codee {
 extern "C" {
 #endif
 
-int ifft_fftw_s (float *Y, const float *X, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim, const size_t nfft, const char sc);
-int ifft_fftw_d (double *Y, const double *X, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim, const size_t nfft, const char sc);
-int ifft_fftw_c (float *Y, const float *X, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim, const size_t nfft, const char sc);
-int ifft_fftw_z (double *Y, const double *X, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim, const size_t nfft, const char sc);
+int ifft_fftw_s (float *Y, const float *X, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t dim, const size_t nfft, const int sc);
+int ifft_fftw_d (double *Y, const double *X, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t dim, const size_t nfft, const int sc);
+int ifft_fftw_c (float *Y, const float *X, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t dim, const size_t nfft, const int sc);
+int ifft_fftw_z (double *Y, const double *X, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t dim, const size_t nfft, const int sc);
 
 
-int ifft_fftw_s (float *Y, const float *X, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim, const size_t nfft, const char sc)
+int ifft_fftw_s (float *Y, const float *X, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t dim, const size_t nfft, const int sc)
 {
     if (dim>3u) { fprintf(stderr,"error in ifft_fftw_s: dim must be in [0 3]\n"); return 1; }
 
@@ -105,7 +105,7 @@ int ifft_fftw_s (float *Y, const float *X, const size_t R, const size_t C, const
 }
 
 
-int ifft_fftw_d (double *Y, const double *X, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim, const size_t nfft, const char sc)
+int ifft_fftw_d (double *Y, const double *X, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t dim, const size_t nfft, const int sc)
 {
     if (dim>3u) { fprintf(stderr,"error in ifft_fftw_d: dim must be in [0 3]\n"); return 1; }
 
@@ -186,7 +186,7 @@ int ifft_fftw_d (double *Y, const double *X, const size_t R, const size_t C, con
 }
 
 
-int ifft_fftw_c (float *Y, const float *X, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim, const size_t nfft, const char sc)
+int ifft_fftw_c (float *Y, const float *X, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t dim, const size_t nfft, const int sc)
 {
     if (dim>3u) { fprintf(stderr,"error in ifft_fftw_c: dim must be in [0 3]\n"); return 1; }
 
@@ -259,7 +259,7 @@ int ifft_fftw_c (float *Y, const float *X, const size_t R, const size_t C, const
 }
 
 
-int ifft_fftw_z (double *Y, const double *X, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim, const size_t nfft, const char sc)
+int ifft_fftw_z (double *Y, const double *X, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t dim, const size_t nfft, const int sc)
 {
     if (dim>3u) { fprintf(stderr,"error in ifft_fftw_z: dim must be in [0 3]\n"); return 1; }
 

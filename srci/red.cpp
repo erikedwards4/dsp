@@ -6,7 +6,7 @@
 const valarray<size_t> oktypes = {1u,2u,101u,102u};
 const size_t I = 0u, O = 1u;
 size_t N, dim;
-char zmn;
+int zmn;
 double std;
 
 //Description

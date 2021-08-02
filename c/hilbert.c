@@ -11,11 +11,11 @@ namespace codee {
 extern "C" {
 #endif
 
-int hilbert_s (float *Y, const float *X, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim, const size_t nfft);
-int hilbert_d (double *Y, const double *X, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim, const size_t nfft);
+int hilbert_s (float *Y, const float *X, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t dim, const size_t nfft);
+int hilbert_d (double *Y, const double *X, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t dim, const size_t nfft);
 
 
-int hilbert_s (float *Y, const float *X, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim, const size_t nfft)
+int hilbert_s (float *Y, const float *X, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t dim, const size_t nfft)
 {
     if (dim>3u) { fprintf(stderr,"error in hilbert_s: dim must be in [0 3]\n"); return 1; }
 
@@ -121,7 +121,7 @@ int hilbert_s (float *Y, const float *X, const size_t R, const size_t C, const s
 }
 
 
-int hilbert_d (double *Y, const double *X, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim, const size_t nfft)
+int hilbert_d (double *Y, const double *X, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t dim, const size_t nfft)
 {
     if (dim>3u) { fprintf(stderr,"error in hilbert_d: dim must be in [0 3]\n"); return 1; }
 

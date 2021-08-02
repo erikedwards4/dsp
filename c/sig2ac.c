@@ -1,6 +1,10 @@
 //Gets autocovariance (AC) for lags 0 to L-1 for each vector in X.
-//The means are NOT subtracted, and lag 0 of Y is NOT normalized,
+//By default, the means of X are NOT subtracted,
+//and Y is NOT normalized by lag 0, 
 //which matches the behavior of Octave's xcorr.
+
+//The mnz option allows the mean to be zeroed first for each vec in X.
+//However, this also required the removal of the const qualifier for input *X.
 
 //The "biased" version uses N in the denominator,
 //which is unlike Octave's xcorr, which leaves it unnormalized.
@@ -17,13 +21,13 @@ namespace codee {
 extern "C" {
 #endif
 
-int sig2ac_s (float *Y, const float *X, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim, const size_t L, const int unbiased, const int corr);
-int sig2ac_d (double *Y, const double *X, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim, const size_t L, const int unbiased, const int corr);
-int sig2ac_c (float *Y, const float *X, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim, const size_t L, const int unbiased, const int corr);
-int sig2ac_z (double *Y, const double *X, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim, const size_t L, const int unbiased, const int corr);
+int sig2ac_s (float *Y, float *X, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t dim, const size_t L, const int mnz, const int unbiased, const int corr);
+int sig2ac_d (double *Y, double *X, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t dim, const size_t L, const int mnz, const int unbiased, const int corr);
+int sig2ac_c (float *Y, float *X, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t dim, const size_t L, const int mnz, const int unbiased, const int corr);
+int sig2ac_z (double *Y, double *X, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t dim, const size_t L, const int mnz, const int unbiased, const int corr);
 
 
-int sig2ac_s (float *Y, const float *X, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim, const size_t L, const int unbiased, const int corr)
+int sig2ac_s (float *Y, float *X, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t dim, const size_t L, const int mnz, const int unbiased, const int corr)
 {
     if (dim>3u) { fprintf(stderr,"error in sig2ac_s: dim must be in [0 3]\n"); return 1; }
 
@@ -36,6 +40,14 @@ int sig2ac_s (float *Y, const float *X, const size_t R, const size_t C, const si
     {
         if (Lx==N)
         {
+            if (mnz)
+            {
+                float mn = 0.0f;
+                for (size_t l=0u; l<Lx; ++l, ++X) { mn += *X; }
+                mn /= (float)Lx;
+                for (size_t l=0u; l<Lx; ++l) { *--X -= mn; }
+            }
+
             if (L>850u && Lx>80000u) //I also leave this solution since it is closer to real-time use
             {
                 float x;
@@ -85,6 +97,14 @@ int sig2ac_s (float *Y, const float *X, const size_t R, const size_t C, const si
             {
                 for (size_t v=0u; v<V; ++v, X+=L-1u)
                 {
+                    if (mnz)
+                    {
+                        float mn = 0.0f;
+                        for (size_t l=0u; l<Lx; ++l, ++X) { mn += *X; }
+                        mn /= (float)Lx;
+                        for (size_t l=0u; l<Lx; ++l) { *--X -= mn; }
+                    }
+
                     for (size_t l=0u; l<L-1u; ++l, X-=Lx-l+1u, ++Y)
                     {
                         sm = 0.0f;
@@ -117,6 +137,14 @@ int sig2ac_s (float *Y, const float *X, const size_t R, const size_t C, const si
                 {
                     for (size_t b=0u; b<B; ++b, ++X, Y-=K*L-1u)
                     {
+                        if (mnz)
+                        {
+                            float mn = 0.0f;
+                            for (size_t l=0u; l<Lx; ++l, X+=K) { mn += *X; }
+                            mn /= (float)Lx;
+                            for (size_t l=0u; l<Lx; ++l) { X-=K; *X -= mn; }
+                        }
+
                         for (size_t l=0u; l<L; ++l, X-=K*(Lx-l+1u), Y+=K)
                         {
                             sm = 0.0f;
@@ -149,7 +177,7 @@ int sig2ac_s (float *Y, const float *X, const size_t R, const size_t C, const si
 }
 
 
-int sig2ac_d (double *Y, const double *X, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim, const size_t L, const int unbiased, const int corr)
+int sig2ac_d (double *Y, double *X, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t dim, const size_t L, const int mnz, const int unbiased, const int corr)
 {
     if (dim>3u) { fprintf(stderr,"error in sig2ac_d: dim must be in [0 3]\n"); return 1; }
 
@@ -162,6 +190,14 @@ int sig2ac_d (double *Y, const double *X, const size_t R, const size_t C, const 
     {
         if (Lx==N)
         {
+            if (mnz)
+            {
+                double mn = 0.0;
+                for (size_t l=0u; l<Lx; ++l, ++X) { mn += *X; }
+                mn /= (double)Lx;
+                for (size_t l=0u; l<Lx; ++l) { *--X -= mn; }
+            }
+
             if (L>850u && Lx>80000u) //I also leave this solution since it is closer to real-time use
             {
                 double x;
@@ -211,6 +247,14 @@ int sig2ac_d (double *Y, const double *X, const size_t R, const size_t C, const 
             {
                 for (size_t v=0u; v<V; ++v, X+=L-1u)
                 {
+                    if (mnz)
+                    {
+                        double mn = 0.0;
+                        for (size_t l=0u; l<Lx; ++l, ++X) { mn += *X; }
+                        mn /= (double)Lx;
+                        for (size_t l=0u; l<Lx; ++l) { *--X -= mn; }
+                    }
+
                     for (size_t l=0u; l<L-1u; ++l, X-=Lx-l+1u, ++Y)
                     {
                         sm = 0.0;
@@ -243,6 +287,14 @@ int sig2ac_d (double *Y, const double *X, const size_t R, const size_t C, const 
                 {
                     for (size_t b=0u; b<B; ++b, ++X, Y-=K*L-1u)
                     {
+                        if (mnz)
+                        {
+                            double mn = 0.0;
+                            for (size_t l=0u; l<Lx; ++l, X+=K) { mn += *X; }
+                            mn /= (double)Lx;
+                            for (size_t l=0u; l<Lx; ++l) { X-=K; *X -= mn; }
+                        }
+
                         for (size_t l=0u; l<L; ++l, X-=K*(Lx-l+1u), Y+=K)
                         {
                             sm = 0.0;
@@ -275,7 +327,7 @@ int sig2ac_d (double *Y, const double *X, const size_t R, const size_t C, const 
 }
 
 
-int sig2ac_c (float *Y, const float *X, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim, const size_t L, const int unbiased, const int corr)
+int sig2ac_c (float *Y, float *X, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t dim, const size_t L, const int mnz, const int unbiased, const int corr)
 {
     if (dim>3u) { fprintf(stderr,"error in sig2ac_c: dim must be in [0 3]\n"); return 1; }
 
@@ -288,6 +340,14 @@ int sig2ac_c (float *Y, const float *X, const size_t R, const size_t C, const si
     {
         if (Lx==N)
         {
+            if (mnz)
+            {
+                float mnr = 0.0f, mni = 0.0f;
+                for (size_t l=0u; l<Lx; ++l) { mnr += *X++; mni += *X++; }
+                mnr /= (float)Lx; mni /= (float)Lx;
+                for (size_t l=0u; l<Lx; ++l) { *--X -= mni; *--X -= mnr; }
+            }
+
             if (L>850u && Lx>80000u) //I also leave this solution since it is closer to real-time use
             {
                 float xr, xi;
@@ -351,6 +411,14 @@ int sig2ac_c (float *Y, const float *X, const size_t R, const size_t C, const si
             {
                 for (size_t v=0u; v<V; ++v, X+=2u*L-2u)
                 {
+                    if (mnz)
+                    {
+                        float mnr = 0.0f, mni = 0.0f;
+                        for (size_t l=0u; l<Lx; ++l) { mnr += *X++; mni += *X++; }
+                        mnr /= (float)Lx; mni /= (float)Lx;
+                        for (size_t l=0u; l<Lx; ++l) { *--X -= mni; *--X -= mnr; }
+                    }
+
                     for (size_t l=0u; l<L-1u; ++l, X-=2u*(Lx-l+1u))
                     {
                         smr = smi = 0.0f;
@@ -397,6 +465,14 @@ int sig2ac_c (float *Y, const float *X, const size_t R, const size_t C, const si
                 {
                     for (size_t b=0u; b<B; ++b, X+=2, Y-=2u*K*L-2u)
                     {
+                        if (mnz)
+                        {
+                            float mnr = 0.0f, mni = 0.0f;
+                            for (size_t l=0u; l<Lx; ++l, X+=2u*K) { mnr += *X; mni += *(X+1); }
+                            mnr /= (float)Lx; mni /= (float)Lx;
+                            for (size_t l=0u; l<Lx; ++l) { X-=2u*K; *X -= mnr; *(X+1) -= mni; }
+                        }
+
                         for (size_t l=0u; l<L; ++l, X-=2u*K*(Lx-l+1u), Y+=2u*K)
                         {
                             smr = smi = 0.0f;
@@ -439,7 +515,7 @@ int sig2ac_c (float *Y, const float *X, const size_t R, const size_t C, const si
 }
 
 
-int sig2ac_z (double *Y, const double *X, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim, const size_t L, const int unbiased, const int corr)
+int sig2ac_z (double *Y, double *X, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t dim, const size_t L, const int mnz, const int unbiased, const int corr)
 {
     if (dim>3u) { fprintf(stderr,"error in sig2ac_z: dim must be in [0 3]\n"); return 1; }
 
@@ -452,6 +528,14 @@ int sig2ac_z (double *Y, const double *X, const size_t R, const size_t C, const 
     {
         if (Lx==N)
         {
+            if (mnz)
+            {
+                double mnr = 0.0, mni = 0.0;
+                for (size_t l=0u; l<Lx; ++l) { mnr += *X++; mni += *X++; }
+                mnr /= (double)Lx; mni /= (double)Lx;
+                for (size_t l=0u; l<Lx; ++l) { *--X -= mni; *--X -= mnr; }
+            }
+
             if (L>850u && Lx>80000u) //I also leave this solution since it is closer to real-time use
             {
                 double xr, xi;
@@ -515,6 +599,14 @@ int sig2ac_z (double *Y, const double *X, const size_t R, const size_t C, const 
             {
                 for (size_t v=0u; v<V; ++v, X+=2u*L-2u)
                 {
+                    if (mnz)
+                    {
+                        double mnr = 0.0, mni = 0.0;
+                        for (size_t l=0u; l<Lx; ++l) { mnr += *X++; mni += *X++; }
+                        mnr /= (double)Lx; mni /= (double)Lx;
+                        for (size_t l=0u; l<Lx; ++l) { *--X -= mni; *--X -= mnr; }
+                    }
+
                     for (size_t l=0u; l<L-1u; ++l, X-=2u*(Lx-l+1u))
                     {
                         smr = smi = 0.0;
@@ -561,6 +653,14 @@ int sig2ac_z (double *Y, const double *X, const size_t R, const size_t C, const 
                 {
                     for (size_t b=0u; b<B; ++b, X+=2, Y-=2u*K*L-2u)
                     {
+                        if (mnz)
+                        {
+                            double mnr = 0.0, mni = 0.0;
+                            for (size_t l=0u; l<Lx; ++l, X+=2u*K) { mnr += *X; mni += *(X+1); }
+                            mnr /= (double)Lx; mni /= (double)Lx;
+                            for (size_t l=0u; l<Lx; ++l) { X-=2u*K; *X -= mnr; *(X+1) -= mni; }
+                        }
+
                         for (size_t l=0u; l<L; ++l, X-=2u*K*(Lx-l+1u), Y+=2u*K)
                         {
                             smr = smi = 0.0;

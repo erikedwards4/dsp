@@ -13,13 +13,13 @@ namespace codee {
 extern "C" {
 #endif
 
-int interp1q_s (float *Yi, const float *X, const float *Y, const float *Xi, const size_t N, const size_t Ni, const char decreasing);
-int interp1q_d (double *Yi, const double *X, const double *Y, const double *Xi, const size_t N, const size_t Ni, const char decreasing);
-int interp1q_c (float *Yi, const float *X, const float *Y, const float *Xi, const size_t N, const size_t Ni, const char decreasing);
-int interp1q_z (double *Yi, const double *X, const double *Y, const double *Xi, const size_t N, const size_t Ni, const char decreasing);
+int interp1q_s (float *Yi, const float *X, const float *Y, const float *Xi, const size_t N, const size_t Ni, const int decreasing);
+int interp1q_d (double *Yi, const double *X, const double *Y, const double *Xi, const size_t N, const size_t Ni, const int decreasing);
+int interp1q_c (float *Yi, const float *X, const float *Y, const float *Xi, const size_t N, const size_t Ni, const int decreasing);
+int interp1q_z (double *Yi, const double *X, const double *Y, const double *Xi, const size_t N, const size_t Ni, const int decreasing);
 
 
-int interp1q_s (float *Yi, const float *X, const float *Y, const float *Xi, const size_t N, const size_t Ni, const char decreasing)
+int interp1q_s (float *Yi, const float *X, const float *Y, const float *Xi, const size_t N, const size_t Ni, const int decreasing)
 {
     if (N<1u) { fprintf(stderr,"error in interp1q_s: N must be positive\n"); return 1; }
     
@@ -67,7 +67,7 @@ int interp1q_s (float *Yi, const float *X, const float *Y, const float *Xi, cons
 }
 
 
-int interp1q_d (double *Yi, const double *X, const double *Y, const double *Xi, const size_t N, const size_t Ni, const char decreasing)
+int interp1q_d (double *Yi, const double *X, const double *Y, const double *Xi, const size_t N, const size_t Ni, const int decreasing)
 {
     if (N<1u) { fprintf(stderr,"error in interp1q_d: N must be positive\n"); return 1; }
     
@@ -115,7 +115,7 @@ int interp1q_d (double *Yi, const double *X, const double *Y, const double *Xi, 
 }
 
 
-int interp1q_c (float *Yi, const float *X, const float *Y, const float *Xi, const size_t N, const size_t Ni, const char decreasing)
+int interp1q_c (float *Yi, const float *X, const float *Y, const float *Xi, const size_t N, const size_t Ni, const int decreasing)
 {
     if (N<1u) { fprintf(stderr,"error in interp1q_c: N must be positive\n"); return 1; }
     
@@ -165,7 +165,7 @@ int interp1q_c (float *Yi, const float *X, const float *Y, const float *Xi, cons
 }
 
 
-int interp1q_z (double *Yi, const double *X, const double *Y, const double *Xi, const size_t N, const size_t Ni, const char decreasing)
+int interp1q_z (double *Yi, const double *X, const double *Y, const double *Xi, const size_t N, const size_t Ni, const int decreasing)
 {
     if (N<1u) { fprintf(stderr,"error in interp1q_z: N must be positive\n"); return 1; }
     

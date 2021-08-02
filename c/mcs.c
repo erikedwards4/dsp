@@ -8,11 +8,11 @@ namespace ov {
 extern "C" {
 #endif
 
-int mcs_s (char *Y, const float *X, const char iscolmajor, const int R, const int C, const int dim, const int going);
-int mcs_d (char *Y, const double *X, const char iscolmajor, const int R, const int C, const int dim, const int going);
+int mcs_s (char *Y, const float *X, const int iscolmajor, const int R, const int C, const int dim, const int going);
+int mcs_d (char *Y, const double *X, const int iscolmajor, const int R, const int C, const int dim, const int going);
 
 
-int mcs_s (char *Y, const float *X, const char iscolmajor, const int R, const int C, const int dim, const int going)
+int mcs_s (char *Y, const float *X, const int iscolmajor, const int R, const int C, const int dim, const int going)
 {
     const float o = 1.0f;
     const int N = R*C;
@@ -93,7 +93,7 @@ int mcs_s (char *Y, const float *X, const char iscolmajor, const int R, const in
 }
 
 
-int mcs_d (char *Y, const double *X, const char iscolmajor, const int R, const int C, const int dim, const int going)
+int mcs_d (char *Y, const double *X, const int iscolmajor, const int R, const int C, const int dim, const int going)
 {
     const double o = 1.0;
     const int N = R*C;

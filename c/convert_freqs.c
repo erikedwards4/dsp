@@ -10,11 +10,11 @@ namespace codee {
 extern "C" {
 #endif
 
-int convert_freqs_s (float *frqs, const size_t F, const char in_scale[], const char out_scale[]);
-int convert_freqs_d (double *frqs, const size_t F, const char in_scale[], const char out_scale[]);
+int convert_freqs_s (float *frqs, const size_t F, const int in_scale[], const int out_scale[]);
+int convert_freqs_d (double *frqs, const size_t F, const int in_scale[], const int out_scale[]);
 
 
-int convert_freqs_s (float *frqs, const size_t F, const char in_scale[], const char out_scale[])
+int convert_freqs_s (float *frqs, const size_t F, const int in_scale[], const int out_scale[])
 {
 	if (strlen(in_scale)<2u) { fprintf(stderr,"error in convert_freqs_s: input freq scale must be string with length > 1\n"); return 1; }
 	if (strlen(out_scale)<2u) { fprintf(stderr,"error in convert_freqs_s: output freq scale must be string with length > 1\n"); return 1; }
@@ -118,7 +118,7 @@ int convert_freqs_s (float *frqs, const size_t F, const char in_scale[], const c
 }
 
 
-int convert_freqs_d (double *frqs, const size_t F, const char in_scale[], const char out_scale[])
+int convert_freqs_d (double *frqs, const size_t F, const int in_scale[], const int out_scale[])
 {
 	if (strlen(in_scale)<2u) { fprintf(stderr,"error in convert_freqs_d: input freq scale must be string with length > 1\n"); return 1; }
 	if (strlen(out_scale)<2u) { fprintf(stderr,"error in convert_freqs_d: output freq scale must be string with length > 1\n"); return 1; }
