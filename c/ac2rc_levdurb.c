@@ -1,11 +1,9 @@
 //Gets reflection coefficients (RCs) from the autocorrelation (AC) function for each vector in X.
 //Uses a Levinson-Durbin recursion from the AC values.
 
-//The complex-valued case here uses multiply and divide with no conjugation.
-//This matches the real-valued case (i.e., make a complex-valued input with 0 imaginary parts),
-//but does not match Octave. However, I can't even match the very first number with Octave,
-//even after trying every conj or no-conj combination, so something else is going on.
-//Thus, if really requiring the complex-valued case, reconsider first.
+//This adopts levinson.m from Octave's signal package as the correct answer,
+//including the sign convention.
+//The function from the tsa package seems definitely wrong for complex case!
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -30,55 +28,95 @@ int ac2rc_levdurb_s (float *Y, const float *X, const size_t R, const size_t C, c
     const size_t Lx = (dim==0u) ? R : (dim==1u) ? C : (dim==2u) ? S : H;
 
     if (N==0u || Lx<2u) {}
+    else if (Lx==2u)
+    {
+        if (Lx==N) { *Y++ = -*(X+1) / *X; }
+        else
+        {
+            const size_t K = (iscolmajor) ? ((dim==0u) ? 1u : (dim==1u) ? R : (dim==2u) ? R*C : R*C*S) : ((dim==0u) ? C*S*H : (dim==1u) ? S*H : (dim==2u) ? H : 1u);
+            const size_t B = (iscolmajor && dim==0u) ? C*S*H : K;
+            const size_t V = N/Lx, G = V/B;
+
+            if (K==1u && (G==1u || B==1u))
+            {
+                for (size_t v=0u; v<V; ++v, X+=2) { *Y++ = -*(X+1) / *X; }
+            }
+            else
+            {
+                for (size_t g=0u; g<G; ++g, X+=B)
+                {
+                    for (size_t b=0u; b<B; ++b, ++X, ++Y) { *Y = -*(X+K) / *X; }
+                }
+            }
+        }
+    }
     else
     {
         const size_t P = Lx - 1u;
-        float *A, *Atmp, a, e;
-        if (!(A=(float *)malloc(P*sizeof(float)))) { fprintf(stderr,"error in ac2rc_levdurb_s: problem with malloc. "); perror("malloc"); return 1; }
-        if (!(Atmp=(float *)malloc((P-1u)*sizeof(float)))) { fprintf(stderr,"error in ac2rc_levdurb_s: problem with malloc. "); perror("malloc"); return 1; }
+        float *A1, *A2, a, e;
+        if (!(A1=(float *)malloc((P-1u)*sizeof(float)))) { fprintf(stderr,"error in ac2rc_levdurb_s: problem with malloc. "); perror("malloc"); return 1; }
+        if (!(A2=(float *)malloc((P-1u)*sizeof(float)))) { fprintf(stderr,"error in ac2rc_levdurb_s: problem with malloc. "); perror("malloc"); return 1; }
         
-        //struct timespec tic, toc; clock_gettime(CLOCK_REALTIME,&tic);
-
         if (Lx==N)
         {
             a = -*(X+1) / *X;
-            *A++ = 1.0f; *A++ = *Atmp++ = a;
-            *Y++ = -a;
+            *A1 = a; *Y++ = a;
             e = *X++; e += a * *X++;
-            for (size_t p=2u; p<P; ++p, ++X, ++Y)
+            for (size_t p=1u; p<P-1u; ++p, X+=p)
             {
                 a = *X;
-                X -= p - 1u;
-                for (size_t q=1u; q<p; ++q, ++X) { --A; a += *X * *A; }
-                a /= -e; *Y = -a; *(A+p-1u) = a;
-                for (size_t q=1u; q<p; ++q, ++A) { --Atmp; *A += a * *Atmp; }
-                A -= p - 1u;
-                for (size_t q=0u; q<p; ++q, ++A, ++Atmp) { *Atmp = *A; }
+                for (size_t q=0u; q<p; ++q, ++A1) { --X; a += *X * *A1; }
+                a /= -e;
+                *A1 = a; *Y++ = a;
+                for (size_t q=0u; q<p; ++q, ++A2) { --A1; *A2 = *A1; }
+                A1 += p;
+                for (size_t q=0u; q<p; ++q) { --A2; --A1; *A1 += a * *A2; }
                 e *= 1.0f - a*a;
             }
             a = *X;
-            X -= P - 1u;
-            for (size_t q=1u; q<P; ++q, ++X) { --A; a += *X * *A; }
-            Atmp -= P - 1u; --A;
-            *Y = a/e;
+            for (size_t q=0u; q<P; ++q, ++A1) { --X; a += *X * *A1; }
+            A1 -= P;
+            *Y++ = a/-e;
 
-            //This may be slightly faster, but almost unmeasurable, and assembly code definitely longer
-            // A[0] = 1.0f;
-            // A[1] = Atmp[0] = a = -X[1]/X[0];
+            //Older solution
+            // a = -*(X+1) / *X;
+            // *A1++ = 1.0f; *A1++ = *A2++ = a;
+            // *Y++ = -a;
+            // e = *X++; e += a * *X++;
+            // for (size_t p=2u; p<P; ++p, ++X, ++Y)
+            // {
+            //     a = *X;
+            //     X -= p - 1u;
+            //     for (size_t q=1u; q<p; ++q, ++X) { --A1; a += *X * *A1; }
+            //     a /= -e; *Y = -a; *(A1+p-1u) = a;
+            //     for (size_t q=1u; q<p; ++q, ++A1) { --A2; *A1 += a * *A2; }
+            //     A1 -= p - 1u;
+            //     for (size_t q=0u; q<p; ++q, ++A1, ++A2) { *A2 = *A1; }
+            //     e *= 1.0f - a*a;
+            // }
+            // a = *X;
+            // X -= P - 1u;
+            // for (size_t q=1u; q<P; ++q, ++X) { --A1; a += *X * *A1; }
+            // A2 -= P - 1u; --A1;
+            // *Y = a/e;
+
+            //This has approx. same speed (unmeasurable diff), but assembly code definitely longer
+            // A1[0] = 1.0f;
+            // A1[1] = A2[0] = a = -X[1]/X[0];
             // Y[0] = -a;
             // e = fmaf(X[1],a,X[0]);
             // for (size_t p=2u; p<P; ++p)
             // {
             //     a = X[p];
-            //     for (size_t q=1u; q<p; ++q) { a = fmaf(X[q],A[p-q],a); }
-            //     A[p] = a = -a/e;
+            //     for (size_t q=1u; q<p; ++q) { a = fmaf(X[q],A1[p-q],a); }
+            //     A1[p] = a = -a/e;
             //     Y[p-1u] = -a;
-            //     for (size_t q=1u; q<p; ++q) { A[q] = fmaf(a,Atmp[p-q-1u],A[q]); }
-            //     for (size_t q=0u; q<p; ++q) { Atmp[q] = A[q+1u]; }
+            //     for (size_t q=1u; q<p; ++q) { A1[q] = fmaf(a,A2[p-q-1u],A1[q]); }
+            //     for (size_t q=0u; q<p; ++q) { A2[q] = A1[q+1u]; }
             //     e *= fmaf(a,-a,1.0f);
             // }
             // a = X[P];
-            // for (size_t q=1u; q<P; ++q) { a = fmaf(X[q],A[P-q],a); }
+            // for (size_t q=1u; q<P; ++q) { a = fmaf(X[q],A1[P-q],a); }
             // Y[P-1u] = a/e;
         }
         else
@@ -89,62 +127,58 @@ int ac2rc_levdurb_s (float *Y, const float *X, const size_t R, const size_t C, c
 
             if (K==1u && (G==1u || B==1u))
             {
-                for (size_t v=0u; v<V; ++v)
+                for (size_t v=0u; v<V; ++v, X+=Lx, ++Y)
                 {
                     a = -*(X+1) / *X;
-                    *A++ = 1.0f; *A++ = *Atmp++ = a;
-                    *Y++ = -a;
+                    *A1 = a; *Y++ = a;
                     e = *X++; e += a * *X++;
-                    for (size_t p=2u; p<P; ++p, ++X, ++Y)
+                    for (size_t p=1u; p<P-1u; ++p, X+=p)
                     {
                         a = *X;
-                        X -= p - 1u;
-                        for (size_t q=1u; q<p; ++q, ++X) { --A; a += *X * *A; }
-                        a /= -e; *Y = -a; *(A+p-1u) = a;
-                        for (size_t q=1u; q<p; ++q, ++A) { --Atmp; *A += a * *Atmp; }
-                        A -= p - 1u;
-                        for (size_t q=0u; q<p; ++q, ++A, ++Atmp) { *Atmp = *A; }
+                        for (size_t q=0u; q<p; ++q, ++A1) { --X; a += *X * *A1; }
+                        a /= -e;
+                        *A1 = a; *Y++ = a;
+                        for (size_t q=0u; q<p; ++q, ++A2) { --A1; *A2 = *A1; }
+                        A1 += p;
+                        for (size_t q=0u; q<p; ++q) { --A2; --A1; *A1 += a * *A2; }
                         e *= 1.0f - a*a;
                     }
                     a = *X;
-                    X -= P - 1u;
-                    for (size_t q=1u; q<P; ++q, ++X) { --A; a += *X * *A; }
-                    Atmp -= P - 1u; --A;
-                    *Y++ = a/e; ++X;
+                    for (size_t q=0u; q<P; ++q, ++A1) { --X; a += *X * *A1; }
+                    A1 -= P;
+                    *Y = a/-e;
                 }
             }
             else
             {
                 for (size_t g=0u; g<G; ++g, X+=B*(Lx-1u), Y+=B*(P-1u))
                 {
-                    for (size_t b=0u; b<B; ++b, X-=K*Lx-K-1u, Y-=K*P-K-1u)
+                    for (size_t b=0u; b<B; ++b, ++X, Y-=K*P-K-1u)
                     {
                         a = -*(X+K) / *X;
-                        *A++ = 1.0f; *A++ = *Atmp++ = a;
-                        *Y = -a; Y += K;
-                        e = *X; X += K; e += a * *X; X += K;
-                        for (size_t p=2u; p<P; ++p, X+=K, Y+=K)
+                        *A1 = a; *Y = a; Y += K;
+                        e = *X; X += K;
+                        e += a * *X; X += K;
+                        for (size_t p=1u; p<P-1u; ++p, X+=p*K)
                         {
                             a = *X;
-                            X -= K*(p-1u);
-                            for (size_t q=1u; q<p; ++q, X+=K) { --A; a += *X * *A; }
-                            a /= -e; *Y = -a; *(A+p-1u) = a;
-                            for (size_t q=1u; q<p; ++q, ++A) { --Atmp; *A += a * *Atmp; }
-                            A -= p - 1u;
-                            for (size_t q=0u; q<p; ++q, ++A, ++Atmp) { *Atmp = *A; }
+                            for (size_t q=0u; q<p; ++q, ++A1) { X-=K; a += *X * *A1; }
+                            a /= -e;
+                            *A1 = a; *Y = a; Y += K;
+                            for (size_t q=0u; q<p; ++q, ++A2) { --A1; *A2 = *A1; }
+                            A1 += p;
+                            for (size_t q=0u; q<p; ++q) { --A2; --A1; *A1 += a * *A2; }
                             e *= 1.0f - a*a;
                         }
                         a = *X;
-                        X -= K*(P-1u);
-                        for (size_t q=1u; q<P; ++q, X+=K) { --A; a += *X * *A; }
-                        Atmp -= P - 1u; --A;
-                        *Y = a/e;
+                        for (size_t q=0u; q<P; ++q, ++A1) { X-=K; a += *X * *A1; }
+                        A1 -= P;
+                        *Y = a/-e;
                     }
                 }
             }
         }
-        //clock_gettime(CLOCK_REALTIME,&toc); fprintf(stderr,"elapsed time = %.6f ms\n",(toc.tv_sec-tic.tv_sec)*1e3+(toc.tv_nsec-tic.tv_nsec)/1e6);
-        free(A); free(Atmp);
+        free(A1); free(A2);
     }
 	
 	return 0;
@@ -158,35 +192,55 @@ int ac2rc_levdurb_d (double *Y, const double *X, const size_t R, const size_t C,
     const size_t Lx = (dim==0u) ? R : (dim==1u) ? C : (dim==2u) ? S : H;
 
     if (N==0u || Lx<2u) {}
+    else if (Lx==2u)
+    {
+        if (Lx==N) { *Y++ = -*(X+1) / *X; }
+        else
+        {
+            const size_t K = (iscolmajor) ? ((dim==0u) ? 1u : (dim==1u) ? R : (dim==2u) ? R*C : R*C*S) : ((dim==0u) ? C*S*H : (dim==1u) ? S*H : (dim==2u) ? H : 1u);
+            const size_t B = (iscolmajor && dim==0u) ? C*S*H : K;
+            const size_t V = N/Lx, G = V/B;
+
+            if (K==1u && (G==1u || B==1u))
+            {
+                for (size_t v=0u; v<V; ++v, X+=2) { *Y++ = -*(X+1) / *X; }
+            }
+            else
+            {
+                for (size_t g=0u; g<G; ++g, X+=B)
+                {
+                    for (size_t b=0u; b<B; ++b, ++X, ++Y) { *Y = -*(X+K) / *X; }
+                }
+            }
+        }
+    }
     else
     {
         const size_t P = Lx - 1u;
-        double *A, *Atmp, a, e;
-        if (!(A=(double *)malloc(P*sizeof(double)))) { fprintf(stderr,"error in ac2rc_levdurb_d: problem with malloc. "); perror("malloc"); return 1; }
-        if (!(Atmp=(double *)malloc((P-1u)*sizeof(double)))) { fprintf(stderr,"error in ac2rc_levdurb_d: problem with malloc. "); perror("malloc"); return 1; }
+        double *A1, *A2, a, e;
+        if (!(A1=(double *)malloc((P-1u)*sizeof(double)))) { fprintf(stderr,"error in ac2rc_levdurb_d: problem with malloc. "); perror("malloc"); return 1; }
+        if (!(A2=(double *)malloc((P-1u)*sizeof(double)))) { fprintf(stderr,"error in ac2rc_levdurb_d: problem with malloc. "); perror("malloc"); return 1; }
         
         if (Lx==N)
         {
             a = -*(X+1) / *X;
-            *A++ = 1.0; *A++ = *Atmp++ = a;
-            *Y++ = -a;
+            *A1 = a; *Y++ = a;
             e = *X++; e += a * *X++;
-            for (size_t p=2u; p<P; ++p, ++X, ++Y)
+            for (size_t p=1u; p<P-1u; ++p, X+=p)
             {
                 a = *X;
-                X -= p - 1u;
-                for (size_t q=1u; q<p; ++q, ++X) { --A; a += *X * *A; }
-                a /= -e; *Y = -a; *(A+p-1u) = a;
-                for (size_t q=1u; q<p; ++q, ++A) { --Atmp; *A += a * *Atmp; }
-                A -= p - 1u;
-                for (size_t q=0u; q<p; ++q, ++A, ++Atmp) { *Atmp = *A; }
+                for (size_t q=0u; q<p; ++q, ++A1) { --X; a += *X * *A1; }
+                a /= -e;
+                *A1 = a; *Y++ = a;
+                for (size_t q=0u; q<p; ++q, ++A2) { --A1; *A2 = *A1; }
+                A1 += p;
+                for (size_t q=0u; q<p; ++q) { --A2; --A1; *A1 += a * *A2; }
                 e *= 1.0 - a*a;
             }
             a = *X;
-            X -= P - 1u;
-            for (size_t q=1u; q<P; ++q, ++X) { --A; a += *X * *A; }
-            Atmp -= P - 1u; --A;
-            *Y = a/e;
+            for (size_t q=0u; q<P; ++q, ++A1) { --X; a += *X * *A1; }
+            A1 -= P;
+            *Y++ = a/-e;
         }
         else
         {
@@ -196,28 +250,26 @@ int ac2rc_levdurb_d (double *Y, const double *X, const size_t R, const size_t C,
 
             if (K==1u && (G==1u || B==1u))
             {
-                for (size_t v=0u; v<V; ++v)
+                for (size_t v=0u; v<V; ++v, X+=Lx, ++Y)
                 {
                     a = -*(X+1) / *X;
-                    *A++ = 1.0; *A++ = *Atmp++ = a;
-                    *Y++ = -a;
+                    *A1 = a; *Y++ = a;
                     e = *X++; e += a * *X++;
-                    for (size_t p=2u; p<P; ++p, ++X, ++Y)
+                    for (size_t p=1u; p<P-1u; ++p, X+=p)
                     {
                         a = *X;
-                        X -= p - 1u;
-                        for (size_t q=1u; q<p; ++q, ++X) { --A; a += *X * *A; }
-                        a /= -e; *Y = -a; *(A+p-1u) = a;
-                        for (size_t q=1u; q<p; ++q, ++A) { --Atmp; *A += a * *Atmp; }
-                        A -= p - 1u;
-                        for (size_t q=0u; q<p; ++q, ++A, ++Atmp) { *Atmp = *A; }
+                        for (size_t q=0u; q<p; ++q, ++A1) { --X; a += *X * *A1; }
+                        a /= -e;
+                        *A1 = a; *Y++ = a;
+                        for (size_t q=0u; q<p; ++q, ++A2) { --A1; *A2 = *A1; }
+                        A1 += p;
+                        for (size_t q=0u; q<p; ++q) { --A2; --A1; *A1 += a * *A2; }
                         e *= 1.0 - a*a;
                     }
                     a = *X;
-                    X -= P - 1u;
-                    for (size_t q=1u; q<P; ++q, ++X) { --A; a += *X * *A; }
-                    Atmp -= P - 1u; --A;
-                    *Y++ = a/e; ++X;
+                    for (size_t q=0u; q<P; ++q, ++A1) { --X; a += *X * *A1; }
+                    A1 -= P;
+                    *Y = a/-e;
                 }
             }
             else
@@ -226,31 +278,30 @@ int ac2rc_levdurb_d (double *Y, const double *X, const size_t R, const size_t C,
                 {
                     for (size_t b=0u; b<B; ++b, X-=K*Lx-K-1u, Y-=K*P-K-1u)
                     {
-                        a = -*(X+K) / *X;
-                        *A++ = 1.0; *A++ = *Atmp++ = a;
-                        *Y = -a; Y += K;
-                        e = *X; X += K; e += a * *X; X += K;
-                        for (size_t p=2u; p<P; ++p, X+=K, Y+=K)
+                        a = -*(X+1) / *X;
+                        *A1 = a; *Y = a; Y += K;
+                        e = *X; X += K;
+                        e += a * *X; X += K;
+                        for (size_t p=1u; p<P-1u; ++p, X+=p*K)
                         {
                             a = *X;
-                            X -= K*(p-1u);
-                            for (size_t q=1u; q<p; ++q, X+=K) { --A; a += *X * *A; }
-                            a /= -e; *Y = -a; *(A+p-1u) = a;
-                            for (size_t q=1u; q<p; ++q, ++A) { --Atmp; *A += a * *Atmp; }
-                            A -= p - 1u;
-                            for (size_t q=0u; q<p; ++q, ++A, ++Atmp) { *Atmp = *A; }
+                            for (size_t q=0u; q<p; ++q, ++A1) { X-=K; a += *X * *A1; }
+                            a /= -e;
+                            *A1 = a; *Y = a; Y += K;
+                            for (size_t q=0u; q<p; ++q, ++A2) { --A1; *A2 = *A1; }
+                            A1 += p;
+                            for (size_t q=0u; q<p; ++q) { --A2; --A1; *A1 += a * *A2; }
                             e *= 1.0 - a*a;
                         }
                         a = *X;
-                        X -= K*(P-1u);
-                        for (size_t q=1u; q<P; ++q, X+=K) { --A; a += *X * *A; }
-                        Atmp -= P - 1u; --A;
-                        *Y = a/e;
+                        for (size_t q=0u; q<P; ++q, ++A1) { X-=K; a += *X * *A1; }
+                        A1 -= P;
+                        *Y = a/-e;
                     }
                 }
             }
         }
-        free(A); free(Atmp);
+        free(A1); free(A2);
     }
 	
 	return 0;
@@ -265,68 +316,91 @@ int ac2rc_levdurb_c (float *Y, const float *X, const size_t R, const size_t C, c
     const size_t Lx = (dim==0u) ? R : (dim==1u) ? C : (dim==2u) ? S : H;
 
     if (N==0u || Lx<2u) {}
+    else if (Lx==2u)
+    {
+        if (Lx==N)
+        {
+            const float den = *X**X + *(X+1)**(X+1);
+            *Y++ = -(*X**(X+2) + *(X+1)**(X+3)) / den;
+            *Y++ = (*(X+1)**(X+2) - *X**(X+3)) / den;
+        }
+        else
+        {
+            const size_t K = (iscolmajor) ? ((dim==0u) ? 1u : (dim==1u) ? R : (dim==2u) ? R*C : R*C*S) : ((dim==0u) ? C*S*H : (dim==1u) ? S*H : (dim==2u) ? H : 1u);
+            const size_t B = (iscolmajor && dim==0u) ? C*S*H : K;
+            const size_t V = N/Lx, G = V/B;
+            float den;
+
+            if (K==1u && (G==1u || B==1u))
+            {
+                for (size_t v=0u; v<V; ++v, X+=4)
+                {
+                    den = *X**X + *(X+1)**(X+1);
+                    *Y++ = -(*X**(X+2) + *(X+1)**(X+3)) / den;
+                    *Y++ = (*(X+1)**(X+2) - *X**(X+3)) / den;
+                }
+            }
+            else
+            {
+                for (size_t g=0u; g<G; ++g, X+=2u*B)
+                {
+                    for (size_t b=0u; b<B; ++b, X+=2u, Y+=2u)
+                    {
+                        den = *X**X + *(X+1)**(X+1);
+                        *Y = -(*X**(X+2u*K) + *(X+1)**(X+2u*K+1u)) / den;
+                        *(Y+1) = (*(X+1)**(X+2u*K) - *X**(X+2u*K+1u)) / den;
+                    }
+                }
+            }
+        }
+    }
     else
     {
         const size_t P = Lx - 1u;
-        float *A, *Atmp, ar, ai, aa, aar, aai, er, ei, ea;
-        if (!(A=(float *)malloc(2u*P*sizeof(float)))) { fprintf(stderr,"error in ac2rc_levdurb_c: problem with malloc. "); perror("malloc"); return 1; }
-        if (!(Atmp=(float *)malloc(2u*(P-1u)*sizeof(float)))) { fprintf(stderr,"error in ac2rc_levdurb_c: problem with malloc. "); perror("malloc"); return 1; }
-
+        float *A1, *A2, ar, ai, e, den;
+        if (!(A1=(float *)malloc(2u*(P-1u)*sizeof(float)))) { fprintf(stderr,"error in ac2rc_levdurb_c: problem with malloc. "); perror("malloc"); return 1; }
+        if (!(A2=(float *)malloc(2u*(P-1u)*sizeof(float)))) { fprintf(stderr,"error in ac2rc_levdurb_c: problem with malloc. "); perror("malloc"); return 1; }
+        
         if (Lx==N)
         {
-            aa = *X**X + *(X+1)**(X+1);
-            ar = -(*(X+2)**X+*(X+3)**(X+1)) / aa;
-            ai = -(*(X+3)**X-*(X+2)**(X+1)) / aa;
-            *A++ = 1.0f; *A++ = 0.0f;
-            *A++ = *Atmp++ = ar;
-            *A++ = *Atmp++ = ai;
-            *Y++ = -ar; *Y++ = -ai;
-            er = *X++; ei = *X++;
-            er += ar**X - ai**(X+1);
-            ei += ar**(X+1) + ai**X;
-            X += 2;
-            for (size_t p=2u; p<P; ++p, X+=2)
+            den = *X**X + *(X+1)**(X+1);
+            ar = -(*(X+2)**X + *(X+3)**(X+1)) / den;
+            ai = (*(X+1)**(X+2) - *(X+3)**X) / den;
+            *A1 = ar; *(A1+1) = ai;
+            *Y = ar; *(Y+1) = ai;
+            e = *X * (1.0f - (ar*ar+ai*ai));
+            X += 4; Y += 2;
+            for (size_t p=1u; p<P-1u; ++p, X+=2u*p, Y+=2)
             {
-                ar = *X++; ai = *X--;
-                X -= 2u*(p-1u);
-                for (size_t q=1u; q<p; ++q, X+=2)
+                ar = *X; ai = *(X+1);
+                for (size_t q=0u; q<p; ++q, A1+=2)
                 {
-                    A -= 2;
-                    ar += *A**X - *(A+1)**(X+1);
-                    ai += *A**(X+1) + *(A+1)**X;
+                    X -= 2;
+                    ar += *X**A1 - *(X+1)**(A1+1);
+                    ai += *(X+1)**A1 + *X**(A1+1);
                 }
-                ea = er*er + ei*ei;
-                aa = (ar*er+ai*ei) / ea;
-                ai = (ar*ei-ai*er) / ea;
-                ar = -aa;
-                *Y++ = -ar; *Y++ = -ai;
-                *(A+2u*p-2u) = ar; *(A+2u*p-1u) = ai;
-                for (size_t q=1u; q<p; ++q)
+                ar /= -e; ai /= -e;
+                *A1 = ar; *(A1+1) = ai;
+                *Y = ar; *(Y+1) = ai;
+                for (size_t q=0u; q<p; ++q, A2+=2) { A1-=2; *A2 = *A1; *(A2+1) = -*(A1+1); }
+                A1 += 2u*p;
+                for (size_t q=0u; q<p; ++q)
                 {
-                    Atmp -= 2;
-                    *A++ += ar**Atmp - ai**(Atmp+1);
-                    *A++ = ar**(Atmp+1) + ai**Atmp;
+                    A2 -= 2; A1 -= 2;
+                    *A1 += ar**A2 - ai**(A2+1);
+                    *(A1+1) += ar**(A2+1) + ai**A2;
                 }
-                A -= 2u*(p-1u);
-                for (size_t q=0u; q<2u*p; ++q, ++A, ++Atmp) { *Atmp = *A; }
-                aar = 1.0f - ar*ar + ai*ai;
-                aai = - ar*ai - ar*ai;
-                ea = er*aar - ei*aai;
-                ei = er*aai + ei*aar;
-                er = ea;
+                e *= 1.0f - (ar*ar + ai*ai);
             }
             ar = *X; ai = *(X+1);
-            X -= 2u*(P-1u);
-            for (size_t q=1u; q<P; ++q, X+=2)
+            for (size_t q=0u; q<P; ++q, A1+=2)
             {
-                A -= 2;
-                ar += *A**X - *(A+1)**(X+1);
-                ai += *A**(X+1) + *(A+1)**X;
+                X -= 2;
+                ar += *X**A1 - *(X+1)**(A1+1);
+                ai += *(X+1)**A1 + *X**(A1+1);
             }
-            Atmp -= 2u*(P-1u); A -= 2;
-            ea = er*er + ei*ei;
-            *Y++ = (ar*er+ai*ei) / ea;
-            *Y++ = (ai*er-ar*ei) / ea;
+            A1 -= 2u*P;
+            *Y++ = ar/-e; *Y = ai/-e;
         }
         else
         {
@@ -336,127 +410,97 @@ int ac2rc_levdurb_c (float *Y, const float *X, const size_t R, const size_t C, c
 
             if (K==1u && (G==1u || B==1u))
             {
-                for (size_t v=0u; v<V; ++v, X+=2)
+                for (size_t v=0u; v<V; ++v, X+=2u*Lx)
                 {
-                    aa = *X**X + *(X+1)**(X+1);
-                    ar = -(*(X+2)**X+*(X+3)**(X+1)) / aa;
-                    ai = -(*(X+3)**X-*(X+2)**(X+1)) / aa;
-                    *A++ = 1.0f; *A++ = 0.0f;
-                    *A++ = *Atmp++ = ar;
-                    *A++ = *Atmp++ = ai;
-                    *Y++ = -ar; *Y++ = -ai;
-                    er = *X++; ei = *X++;
-                    er += ar**X - ai**(X+1);
-                    ei += ar**(X+1) + ai**X;
-                    X += 2;
-                    for (size_t p=2u; p<P; ++p, X+=2)
+                    den = *X**X + *(X+1)**(X+1);
+                    ar = -(*(X+2)**X + *(X+3)**(X+1)) / den;
+                    ai = (*(X+1)**(X+2) - *(X+3)**X) / den;
+                    *A1 = ar; *(A1+1) = ai;
+                    *Y = ar; *(Y+1) = ai;
+                    e = *X * (1.0f - (ar*ar+ai*ai));
+                    X += 4; Y += 2;
+                    for (size_t p=1u; p<P-1u; ++p, X+=2u*p, Y+=2)
                     {
-                        ar = *X++; ai = *X--;
-                        X -= 2u*(p-1u);
-                        for (size_t q=1u; q<p; ++q, X+=2)
+                        ar = *X; ai = *(X+1);
+                        for (size_t q=0u; q<p; ++q, A1+=2)
                         {
-                            A -= 2;
-                            ar += *A**X - *(A+1)**(X+1);
-                            ai += *A**(X+1) + *(A+1)**X;
+                            X -= 2;
+                            ar += *X**A1 - *(X+1)**(A1+1);
+                            ai += *(X+1)**A1 + *X**(A1+1);
                         }
-                        ea = er*er + ei*ei;
-                        aa = (ar*er+ai*ei) / ea;
-                        ai = (ar*ei-ai*er) / ea;
-                        ar = -aa;
-                        *Y++ = -ar; *Y++ = -ai;
-                        *(A+2u*p-2u) = ar; *(A+2u*p-1u) = ai;
-                        for (size_t q=1u; q<p; ++q)
+                        ar /= -e; ai /= -e;
+                        *A1 = ar; *(A1+1) = ai;
+                        *Y = ar; *(Y+1) = ai;
+                        for (size_t q=0u; q<p; ++q, A2+=2) { A1-=2; *A2 = *A1; *(A2+1) = -*(A1+1); }
+                        A1 += 2u*p;
+                        for (size_t q=0u; q<p; ++q)
                         {
-                            Atmp -= 2;
-                            *A++ += ar**Atmp - ai**(Atmp+1);
-                            *A++ = ar**(Atmp+1) + ai**Atmp;
+                            A2 -= 2; A1 -= 2;
+                            *A1 += ar**A2 - ai**(A2+1);
+                            *(A1+1) += ar**(A2+1) + ai**A2;
                         }
-                        A -= 2u*(p-1u);
-                        for (size_t q=0u; q<2u*p; ++q, ++A, ++Atmp) { *Atmp = *A; }
-                        aar = 1.0f - ar*ar + ai*ai;
-                        aai = - ar*ai - ar*ai;
-                        ea = er*aar - ei*aai;
-                        ei = er*aai + ei*aar;
-                        er = ea;
+                        e *= 1.0f - (ar*ar + ai*ai);
                     }
                     ar = *X; ai = *(X+1);
-                    X -= 2u*(P-1u);
-                    for (size_t q=1u; q<P; ++q, X+=2)
+                    for (size_t q=0u; q<P; ++q, A1+=2)
                     {
-                        A -= 2;
-                        ar += *A**X - *(A+1)**(X+1);
-                        ai += *A**(X+1) + *(A+1)**X;
+                        X -= 2;
+                        ar += *X**A1 - *(X+1)**(A1+1);
+                        ai += *(X+1)**A1 + *X**(A1+1);
                     }
-                    Atmp -= 2u*(P-1u); A -= 2;
-                    ea = er*er + ei*ei;
-                    *Y++ = (ar*er+ai*ei) / ea;
-                    *Y++ = (ai*er-ar*ei) / ea;
+                    A1 -= 2u*P;
+                    *Y++ = ar/-e; *Y++ = ai/-e;
                 }
             }
             else
             {
                 for (size_t g=0u; g<G; ++g, X+=2u*B*(Lx-1u), Y+=2u*B*(P-1u))
                 {
-                    for (size_t b=0u; b<B; ++b, X-=2u*(K*Lx-K-1u), Y-=2u*(K*P-K-1u))
+                    for (size_t b=0u; b<B; ++b, X+=2, Y-=2u*(K*P-K-1u))
                     {
-                        aa = *X**X + *(X+1)**(X+1);
-                        ar = -(*(X+2u*K)**X+*(X+2u*K+1u)**(X+1)) / aa;
-                        ai = -(*(X+2u*K+1u)**X-*(X+2u*K)**(X+1)) / aa;
-                        *A++ = 1.0f; *A++ = 0.0f;
-                        *A++ = *Atmp++ = ar;
-                        *A++ = *Atmp++ = ai;
-                        *Y = -ar; *(Y+1) = -ai; Y += 2u*K;
-                        er = *X; ei = *(X+1); X += 2u*K;
-                        er += ar**X - ai**(X+1);
-                        ei += ar**(X+1) + ai**X;
-                        X += 2u*K;
-                        for (size_t p=2u; p<P; ++p, X+=2u*K)
+                        den = *X**X + *(X+1)**(X+1);
+                        ar = -(*(X+2u*K)**X + *(X+2u*K+1u)**(X+1)) / den;
+                        ai = (*(X+1)**(X+2u*K) - *(X+2u*K+1u)**X) / den;
+                        *A1 = ar; *(A1+1) = ai;
+                        *Y = ar; *(Y+1) = ai;
+                        e = *X * (1.0f - (ar*ar+ai*ai));
+                        X += 4u*K; Y += 2u*K;
+                        for (size_t p=1u; p<P-1u; ++p, X+=2u*p*K, Y+=2u*K)
                         {
-                            ar = *X++; ai = *X--;
-                            X -= 2u*(p-1u)*K;
-                            for (size_t q=1u; q<p; ++q, X+=2u*K)
+                            ar = *X; ai = *(X+1);
+                            for (size_t q=0u; q<p; ++q, A1+=2)
                             {
-                                A -= 2;
-                                ar += *A**X - *(A+1)**(X+1);
-                                ai += *A**(X+1) + *(A+1)**X;
+                                X -= 2u*K;
+                                ar += *X**A1 - *(X+1)**(A1+1);
+                                ai += *(X+1)**A1 + *X**(A1+1);
                             }
-                            ea = er*er + ei*ei;
-                            aa = (ar*er+ai*ei) / ea;
-                            ai = (ar*ei-ai*er) / ea;
-                            ar = -aa;
-                            *Y = -ar; *(Y+1) = -ai; Y += 2u*K;
-                            *(A+2u*p-2u) = ar; *(A+2u*p-1u) = ai;
-                            for (size_t q=1u; q<p; ++q)
+                            ar /= -e; ai /= -e;
+                            *A1 = ar; *(A1+1) = ai;
+                            *Y = ar; *(Y+1) = ai;
+                            for (size_t q=0u; q<p; ++q, A2+=2) { A1-=2; *A2 = *A1; *(A2+1) = -*(A1+1); }
+                            A1 += 2u*p;
+                            for (size_t q=0u; q<p; ++q)
                             {
-                                Atmp -= 2;
-                                *A++ += ar**Atmp - ai**(Atmp+1);
-                                *A++ = ar**(Atmp+1) + ai**Atmp;
+                                A2 -= 2; A1 -= 2;
+                                *A1 += ar**A2 - ai**(A2+1);
+                                *(A1+1) += ar**(A2+1) + ai**A2;
                             }
-                            A -= 2u*(p-1u);
-                            for (size_t q=0u; q<2u*p; ++q, ++A, ++Atmp) { *Atmp = *A; }
-                            aar = 1.0f - ar*ar + ai*ai;
-                            aai = - ar*ai - ar*ai;
-                            ea = er*aar - ei*aai;
-                            ei = er*aai + ei*aar;
-                            er = ea;
+                            e *= 1.0f - (ar*ar + ai*ai);
                         }
                         ar = *X; ai = *(X+1);
-                        X -= 2u*(P-1u)*K;
-                        for (size_t q=1u; q<P; ++q, X+=2u*K)
+                        for (size_t q=0u; q<P; ++q, A1+=2)
                         {
-                            A -= 2;
-                            ar += *A**X - *(A+1)**(X+1);
-                            ai += *A**(X+1) + *(A+1)**X;
+                            X -= 2u*K;
+                            ar += *X**A1 - *(X+1)**(A1+1);
+                            ai += *(X+1)**A1 + *X**(A1+1);
                         }
-                        Atmp -= 2u*(P-1u); A -= 2;
-                        ea = er*er + ei*ei;
-                        *Y = (ar*er+ai*ei) / ea;
-                        *(Y+1) = (ai*er-ar*ei) / ea;
+                        A1 -= 2u*P;
+                        *Y = ar/-e; *(Y+1) = ai/-e;
                     }
                 }
             }
         }
-        free(A); free(Atmp);
+        free(A1); free(A2);
     }
 	
 	return 0;
@@ -471,68 +515,91 @@ int ac2rc_levdurb_z (double *Y, const double *X, const size_t R, const size_t C,
     const size_t Lx = (dim==0u) ? R : (dim==1u) ? C : (dim==2u) ? S : H;
 
     if (N==0u || Lx<2u) {}
+    else if (Lx==2u)
+    {
+        if (Lx==N)
+        {
+            const double den = *X**X + *(X+1)**(X+1);
+            *Y++ = -(*X**(X+2) + *(X+1)**(X+3)) / den;
+            *Y++ = (*(X+1)**(X+2) - *X**(X+3)) / den;
+        }
+        else
+        {
+            const size_t K = (iscolmajor) ? ((dim==0u) ? 1u : (dim==1u) ? R : (dim==2u) ? R*C : R*C*S) : ((dim==0u) ? C*S*H : (dim==1u) ? S*H : (dim==2u) ? H : 1u);
+            const size_t B = (iscolmajor && dim==0u) ? C*S*H : K;
+            const size_t V = N/Lx, G = V/B;
+            double den;
+
+            if (K==1u && (G==1u || B==1u))
+            {
+                for (size_t v=0u; v<V; ++v, X+=4)
+                {
+                    den = *X**X + *(X+1)**(X+1);
+                    *Y++ = -(*X**(X+2) + *(X+1)**(X+3)) / den;
+                    *Y++ = (*(X+1)**(X+2) - *X**(X+3)) / den;
+                }
+            }
+            else
+            {
+                for (size_t g=0u; g<G; ++g, X+=2u*B)
+                {
+                    for (size_t b=0u; b<B; ++b, X+=2u, Y+=2u)
+                    {
+                        den = *X**X + *(X+1)**(X+1);
+                        *Y = -(*X**(X+2u*K) + *(X+1)**(X+2u*K+1u)) / den;
+                        *(Y+1) = (*(X+1)**(X+2u*K) - *X**(X+2u*K+1u)) / den;
+                    }
+                }
+            }
+        }
+    }
     else
     {
         const size_t P = Lx - 1u;
-        double *A, *Atmp, ar, ai, aa, aar, aai, er, ei, ea;
-        if (!(A=(double *)malloc(2u*P*sizeof(double)))) { fprintf(stderr,"error in ac2rc_levdurb_z: problem with malloc. "); perror("malloc"); return 1; }
-        if (!(Atmp=(double *)malloc(2u*(P-1u)*sizeof(double)))) { fprintf(stderr,"error in ac2rc_levdurb_z: problem with malloc. "); perror("malloc"); return 1; }
-
+        double *A1, *A2, ar, ai, e, den;
+        if (!(A1=(double *)malloc(2u*(P-1u)*sizeof(double)))) { fprintf(stderr,"error in ac2rc_levdurb_z: problem with malloc. "); perror("malloc"); return 1; }
+        if (!(A2=(double *)malloc(2u*(P-1u)*sizeof(double)))) { fprintf(stderr,"error in ac2rc_levdurb_z: problem with malloc. "); perror("malloc"); return 1; }
+        
         if (Lx==N)
         {
-            aa = *X**X + *(X+1)**(X+1);
-            ar = -(*(X+2)**X+*(X+3)**(X+1)) / aa;
-            ai = -(*(X+3)**X-*(X+2)**(X+1)) / aa;
-            *A++ = 1.0; *A++ = 0.0;
-            *A++ = *Atmp++ = ar;
-            *A++ = *Atmp++ = ai;
-            *Y++ = -ar; *Y++ = -ai;
-            er = *X++; ei = *X++;
-            er += ar**X - ai**(X+1);
-            ei += ar**(X+1) + ai**X;
-            X += 2;
-            for (size_t p=2u; p<P; ++p, X+=2)
+            den = *X**X + *(X+1)**(X+1);
+            ar = -(*(X+2)**X + *(X+3)**(X+1)) / den;
+            ai = (*(X+1)**(X+2) - *(X+3)**X) / den;
+            *A1 = ar; *(A1+1) = ai;
+            *Y = ar; *(Y+1) = ai;
+            e = *X * (1.0 - (ar*ar+ai*ai));
+            X += 4; Y += 2;
+            for (size_t p=1u; p<P-1u; ++p, X+=2u*p, Y+=2)
             {
-                ar = *X++; ai = *X--;
-                X -= 2u*(p-1u);
-                for (size_t q=1u; q<p; ++q, X+=2)
+                ar = *X; ai = *(X+1);
+                for (size_t q=0u; q<p; ++q, A1+=2)
                 {
-                    A -= 2;
-                    ar += *A**X - *(A+1)**(X+1);
-                    ai += *A**(X+1) + *(A+1)**X;
+                    X -= 2;
+                    ar += *X**A1 - *(X+1)**(A1+1);
+                    ai += *(X+1)**A1 + *X**(A1+1);
                 }
-                ea = er*er + ei*ei;
-                aa = (ar*er+ai*ei) / ea;
-                ai = (ar*ei-ai*er) / ea;
-                ar = -aa;
-                *Y++ = -ar; *Y++ = -ai;
-                *(A+2u*p-2u) = ar; *(A+2u*p-1u) = ai;
-                for (size_t q=1u; q<p; ++q)
+                ar /= -e; ai /= -e;
+                *A1 = ar; *(A1+1) = ai;
+                *Y = ar; *(Y+1) = ai;
+                for (size_t q=0u; q<p; ++q, A2+=2) { A1-=2; *A2 = *A1; *(A2+1) = -*(A1+1); }
+                A1 += 2u*p;
+                for (size_t q=0u; q<p; ++q)
                 {
-                    Atmp -= 2;
-                    *A++ += ar**Atmp - ai**(Atmp+1);
-                    *A++ = ar**(Atmp+1) + ai**Atmp;
+                    A2 -= 2; A1 -= 2;
+                    *A1 += ar**A2 - ai**(A2+1);
+                    *(A1+1) += ar**(A2+1) + ai**A2;
                 }
-                A -= 2u*(p-1u);
-                for (size_t q=0u; q<2u*p; ++q, ++A, ++Atmp) { *Atmp = *A; }
-                aar = 1.0 - ar*ar + ai*ai;
-                aai = - ar*ai - ar*ai;
-                ea = er*aar - ei*aai;
-                ei = er*aai + ei*aar;
-                er = ea;
+                e *= 1.0 - (ar*ar + ai*ai);
             }
             ar = *X; ai = *(X+1);
-            X -= 2u*(P-1u);
-            for (size_t q=1u; q<P; ++q, X+=2)
+            for (size_t q=0u; q<P; ++q, A1+=2)
             {
-                A -= 2;
-                ar += *A**X - *(A+1)**(X+1);
-                ai += *A**(X+1) + *(A+1)**X;
+                X -= 2;
+                ar += *X**A1 - *(X+1)**(A1+1);
+                ai += *(X+1)**A1 + *X**(A1+1);
             }
-            Atmp -= 2u*(P-1u); A -= 2;
-            ea = er*er + ei*ei;
-            *Y++ = (ar*er+ai*ei) / ea;
-            *Y++ = (ai*er-ar*ei) / ea;
+            A1 -= 2u*P;
+            *Y++ = ar/-e; *Y = ai/-e;
         }
         else
         {
@@ -542,127 +609,97 @@ int ac2rc_levdurb_z (double *Y, const double *X, const size_t R, const size_t C,
 
             if (K==1u && (G==1u || B==1u))
             {
-                for (size_t v=0u; v<V; ++v, X+=2)
+                for (size_t v=0u; v<V; ++v, X+=2u*Lx)
                 {
-                    aa = *X**X + *(X+1)**(X+1);
-                    ar = -(*(X+2)**X+*(X+3)**(X+1)) / aa;
-                    ai = -(*(X+3)**X-*(X+2)**(X+1)) / aa;
-                    *A++ = 1.0; *A++ = 0.0;
-                    *A++ = *Atmp++ = ar;
-                    *A++ = *Atmp++ = ai;
-                    *Y++ = -ar; *Y++ = -ai;
-                    er = *X++; ei = *X++;
-                    er += ar**X - ai**(X+1);
-                    ei += ar**(X+1) + ai**X;
-                    X += 2;
-                    for (size_t p=2u; p<P; ++p, X+=2)
+                    den = *X**X + *(X+1)**(X+1);
+                    ar = -(*(X+2)**X + *(X+3)**(X+1)) / den;
+                    ai = (*(X+1)**(X+2) - *(X+3)**X) / den;
+                    *A1 = ar; *(A1+1) = ai;
+                    *Y = ar; *(Y+1) = ai;
+                    e = *X * (1.0 - (ar*ar+ai*ai));
+                    X += 4; Y += 2;
+                    for (size_t p=1u; p<P-1u; ++p, X+=2u*p, Y+=2)
                     {
-                        ar = *X++; ai = *X--;
-                        X -= 2u*(p-1u);
-                        for (size_t q=1u; q<p; ++q, X+=2)
+                        ar = *X; ai = *(X+1);
+                        for (size_t q=0u; q<p; ++q, A1+=2)
                         {
-                            A -= 2;
-                            ar += *A**X - *(A+1)**(X+1);
-                            ai += *A**(X+1) + *(A+1)**X;
+                            X -= 2;
+                            ar += *X**A1 - *(X+1)**(A1+1);
+                            ai += *(X+1)**A1 + *X**(A1+1);
                         }
-                        ea = er*er + ei*ei;
-                        aa = (ar*er+ai*ei) / ea;
-                        ai = (ar*ei-ai*er) / ea;
-                        ar = -aa;
-                        *Y++ = -ar; *Y++ = -ai;
-                        *(A+2u*p-2u) = ar; *(A+2u*p-1u) = ai;
-                        for (size_t q=1u; q<p; ++q)
+                        ar /= -e; ai /= -e;
+                        *A1 = ar; *(A1+1) = ai;
+                        *Y = ar; *(Y+1) = ai;
+                        for (size_t q=0u; q<p; ++q, A2+=2) { A1-=2; *A2 = *A1; *(A2+1) = -*(A1+1); }
+                        A1 += 2u*p;
+                        for (size_t q=0u; q<p; ++q)
                         {
-                            Atmp -= 2;
-                            *A++ += ar**Atmp - ai**(Atmp+1);
-                            *A++ = ar**(Atmp+1) + ai**Atmp;
+                            A2 -= 2; A1 -= 2;
+                            *A1 += ar**A2 - ai**(A2+1);
+                            *(A1+1) += ar**(A2+1) + ai**A2;
                         }
-                        A -= 2u*(p-1u);
-                        for (size_t q=0u; q<2u*p; ++q, ++A, ++Atmp) { *Atmp = *A; }
-                        aar = 1.0 - ar*ar + ai*ai;
-                        aai = - ar*ai - ar*ai;
-                        ea = er*aar - ei*aai;
-                        ei = er*aai + ei*aar;
-                        er = ea;
+                        e *= 1.0 - (ar*ar + ai*ai);
                     }
                     ar = *X; ai = *(X+1);
-                    X -= 2u*(P-1u);
-                    for (size_t q=1u; q<P; ++q, X+=2)
+                    for (size_t q=0u; q<P; ++q, A1+=2)
                     {
-                        A -= 2;
-                        ar += *A**X - *(A+1)**(X+1);
-                        ai += *A**(X+1) + *(A+1)**X;
+                        X -= 2;
+                        ar += *X**A1 - *(X+1)**(A1+1);
+                        ai += *(X+1)**A1 + *X**(A1+1);
                     }
-                    Atmp -= 2u*(P-1u); A -= 2;
-                    ea = er*er + ei*ei;
-                    *Y++ = (ar*er+ai*ei) / ea;
-                    *Y++ = (ai*er-ar*ei) / ea;
+                    A1 -= 2u*P;
+                    *Y++ = ar/-e; *Y++ = ai/-e;
                 }
             }
             else
             {
                 for (size_t g=0u; g<G; ++g, X+=2u*B*(Lx-1u), Y+=2u*B*(P-1u))
                 {
-                    for (size_t b=0u; b<B; ++b, X-=2u*(K*Lx-K-1u), Y-=2u*(K*P-K-1u))
+                    for (size_t b=0u; b<B; ++b, X+=2, Y-=2u*(K*P-K-1u))
                     {
-                        aa = *X**X + *(X+1)**(X+1);
-                        ar = -(*(X+2u*K)**X+*(X+2u*K+1u)**(X+1)) / aa;
-                        ai = -(*(X+2u*K+1u)**X-*(X+2u*K)**(X+1)) / aa;
-                        *A++ = 1.0; *A++ = 0.0;
-                        *A++ = *Atmp++ = ar;
-                        *A++ = *Atmp++ = ai;
-                        *Y = -ar; *(Y+1) = -ai; Y += 2u*K;
-                        er = *X; ei = *(X+1); X += 2u*K;
-                        er += ar**X - ai**(X+1);
-                        ei += ar**(X+1) + ai**X;
-                        X += 2u*K;
-                        for (size_t p=2u; p<P; ++p, X+=2u*K)
+                        den = *X**X + *(X+1)**(X+1);
+                        ar = -(*(X+2u*K)**X + *(X+2u*K+1u)**(X+1)) / den;
+                        ai = (*(X+1)**(X+2u*K) - *(X+2u*K+1u)**X) / den;
+                        *A1 = ar; *(A1+1) = ai;
+                        *Y = ar; *(Y+1) = ai;
+                        e = *X * (1.0 - (ar*ar+ai*ai));
+                        X += 4u*K; Y += 2u*K;
+                        for (size_t p=1u; p<P-1u; ++p, X+=2u*p*K, Y+=2u*K)
                         {
-                            ar = *X++; ai = *X--;
-                            X -= 2u*(p-1u)*K;
-                            for (size_t q=1u; q<p; ++q, X+=2u*K)
+                            ar = *X; ai = *(X+1);
+                            for (size_t q=0u; q<p; ++q, A1+=2)
                             {
-                                A -= 2;
-                                ar += *A**X - *(A+1)**(X+1);
-                                ai += *A**(X+1) + *(A+1)**X;
+                                X -= 2u*K;
+                                ar += *X**A1 - *(X+1)**(A1+1);
+                                ai += *(X+1)**A1 + *X**(A1+1);
                             }
-                            ea = er*er + ei*ei;
-                            aa = (ar*er+ai*ei) / ea;
-                            ai = (ar*ei-ai*er) / ea;
-                            ar = -aa;
-                            *Y = -ar; *(Y+1) = -ai; Y += 2u*K;
-                            *(A+2u*p-2u) = ar; *(A+2u*p-1u) = ai;
-                            for (size_t q=1u; q<p; ++q)
+                            ar /= -e; ai /= -e;
+                            *A1 = ar; *(A1+1) = ai;
+                            *Y = ar; *(Y+1) = ai;
+                            for (size_t q=0u; q<p; ++q, A2+=2) { A1-=2; *A2 = *A1; *(A2+1) = -*(A1+1); }
+                            A1 += 2u*p;
+                            for (size_t q=0u; q<p; ++q)
                             {
-                                Atmp -= 2;
-                                *A++ += ar**Atmp - ai**(Atmp+1);
-                                *A++ = ar**(Atmp+1) + ai**Atmp;
+                                A2 -= 2; A1 -= 2;
+                                *A1 += ar**A2 - ai**(A2+1);
+                                *(A1+1) += ar**(A2+1) + ai**A2;
                             }
-                            A -= 2u*(p-1u);
-                            for (size_t q=0u; q<2u*p; ++q, ++A, ++Atmp) { *Atmp = *A; }
-                            aar = 1.0 - ar*ar + ai*ai;
-                            aai = - ar*ai - ar*ai;
-                            ea = er*aar - ei*aai;
-                            ei = er*aai + ei*aar;
-                            er = ea;
+                            e *= 1.0 - (ar*ar + ai*ai);
                         }
                         ar = *X; ai = *(X+1);
-                        X -= 2u*(P-1u)*K;
-                        for (size_t q=1u; q<P; ++q, X+=2u*K)
+                        for (size_t q=0u; q<P; ++q, A1+=2)
                         {
-                            A -= 2;
-                            ar += *A**X - *(A+1)**(X+1);
-                            ai += *A**(X+1) + *(A+1)**X;
+                            X -= 2u*K;
+                            ar += *X**A1 - *(X+1)**(A1+1);
+                            ai += *(X+1)**A1 + *X**(A1+1);
                         }
-                        Atmp -= 2u*(P-1u); A -= 2;
-                        ea = er*er + ei*ei;
-                        *Y = (ar*er+ai*ei) / ea;
-                        *(Y+1) = (ai*er-ar*ei) / ea;
+                        A1 -= 2u*P;
+                        *Y = ar/-e; *(Y+1) = ai/-e;
                     }
                 }
             }
         }
-        free(A); free(Atmp);
+        free(A1); free(A2);
     }
 	
 	return 0;
