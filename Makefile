@@ -210,7 +210,7 @@ poly2psd: srci/poly2psd.cpp c/poly2psd.c
 #AC_LP: conversions between sig (signal), AC (autocorrelation), LP (linear prediction), and related.
 #For example, ac2rc converts from AC to RCs (reflection coeffs).
 #AC_LP: autocorr autocorr_fft sig2ac sig2ac_fft ac2ar_levdurb ac2poly_levdurb sig2poly_levdurb sig2ar_levdurb sig2ar_burg sig2poly_burg ac2rc ac2cc ac2mvdr
-AC_LP:sig2ac sig2ac_fft ac2rc_levdurb ac2ar_levdurb ac2poly_levdurb sig2rc_levdurb sig2ar_levdurb sig2poly_levdurb sig2ar_burg sig2poly_burg #ac2cc ac2mvdr
+AC_LP: sig2ac sig2ac_fft ac2rc_levdurb ac2ar_levdurb ac2poly_levdurb sig2rc_levdurb sig2ar_levdurb sig2poly_levdurb sig2ar_burg sig2poly_burg #ac2cc ac2mvdr
 sig2ac: srci/sig2ac.cpp c/sig2ac.c
 	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2
 sig2ac_fft: srci/sig2ac_fft.cpp c/sig2ac_fft.c
@@ -228,8 +228,6 @@ sig2poly_levdurb: srci/sig2poly_levdurb.cpp c/sig2poly_levdurb.c
 sig2ar_burg: srci/sig2ar_burg.cpp c/sig2ar_burg.c
 	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lm
 sig2poly_burg: srci/sig2poly_burg.cpp c/sig2poly_burg.c
-	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lm
-ac2rc: srci/ac2rc.cpp c/ac2rc.c
 	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lm
 ac2cc: srci/ac2cc.cpp c/ac2cc.c
 	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lm

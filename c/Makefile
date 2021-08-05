@@ -125,22 +125,28 @@ mcr_windowed: mcr_windowed.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 
 
 #AR_Poly: conversion between AR (autoregressive), poly (polynomial),
-#RC (reflection coeff), and PSD (power spectral density) representations
-AR_Poly: poly2roots roots2poly poly2ar ar2poly ar2rc rc2ar poly2rc rc2poly ar2psd poly2psd
+#RC (reflection coeff), and PSD (power spectral density) representations.
+#Currently, the RC-related functions are not working, which are less important,
+#and the Octave tsa functions for RCs are also not working.
+AR_Poly: poly2roots roots2poly poly2ar ar2poly poly2psd ar2psd #ar2rc rc2ar poly2rc rc2poly
 poly2roots: poly2roots.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 roots2poly: roots2poly.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 poly2ar: poly2ar.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 ar2poly: ar2poly.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
-ar2rc: ar2rc.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
-rc2ar: rc2ar.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
-poly2rc: poly2rc.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
-rc2poly: rc2poly.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
-ar2psd: ar2psd.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 poly2psd: poly2psd.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+ar2psd: ar2psd.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+#ar2rc: ar2rc.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+#rc2ar: rc2ar.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+#poly2rc: poly2rc.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+#rc2poly: rc2poly.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 
 
-#AC_LP: conversions between sig (signal), AC (autocorrelation), LP (linear prediction), and related.
-#For example, ac2rc converts from AC to RCs (reflection coeffs).
+#AC_LP: conversions related to AC (autocovariance) and LP (linear prediction).
+#These work from the signal (sig) or autocovariance (ac) to get
+#ac, rc (reflection coeff), poly (polynomial params), ar (autoregressive),
+#cc (cepstral coeff), or mvdr (minimum-variance distortionless-response) representations.
+#Here sig is signal, ac is autocovariance, rc is reflection coefficients,
+#poly is polynomial params, and ar is autoregressive params.
 AC_LP: sig2ac sig2ac_fft ac2rc_levdurb ac2ar_levdurb ac2poly_levdurb sig2rc_levdurb sig2ar_levdurb sig2poly_levdurb sig2ar_burg sig2poly_burg #ac2rc ac2cc ac2mvdr
 sig2ac: sig2ac.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 sig2ac_fft: sig2ac_fft.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)

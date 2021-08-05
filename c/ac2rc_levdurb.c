@@ -54,7 +54,7 @@ int ac2rc_levdurb_s (float *Y, const float *X, const size_t R, const size_t C, c
     {
         const size_t P = Lx - 1u;
         float *A1, *A2, a, e;
-        if (!(A1=(float *)malloc((P-1u)*sizeof(float)))) { fprintf(stderr,"error in ac2rc_levdurb_s: problem with malloc. "); perror("malloc"); return 1; }
+        if (!(A1=(float *)malloc(P*sizeof(float)))) { fprintf(stderr,"error in ac2rc_levdurb_s: problem with malloc. "); perror("malloc"); return 1; }
         if (!(A2=(float *)malloc((P-1u)*sizeof(float)))) { fprintf(stderr,"error in ac2rc_levdurb_s: problem with malloc. "); perror("malloc"); return 1; }
         
         if (Lx==N)
@@ -218,7 +218,7 @@ int ac2rc_levdurb_d (double *Y, const double *X, const size_t R, const size_t C,
     {
         const size_t P = Lx - 1u;
         double *A1, *A2, a, e;
-        if (!(A1=(double *)malloc((P-1u)*sizeof(double)))) { fprintf(stderr,"error in ac2rc_levdurb_d: problem with malloc. "); perror("malloc"); return 1; }
+        if (!(A1=(double *)malloc(P*sizeof(double)))) { fprintf(stderr,"error in ac2rc_levdurb_d: problem with malloc. "); perror("malloc"); return 1; }
         if (!(A2=(double *)malloc((P-1u)*sizeof(double)))) { fprintf(stderr,"error in ac2rc_levdurb_d: problem with malloc. "); perror("malloc"); return 1; }
         
         if (Lx==N)
@@ -358,7 +358,7 @@ int ac2rc_levdurb_c (float *Y, const float *X, const size_t R, const size_t C, c
     {
         const size_t P = Lx - 1u;
         float *A1, *A2, ar, ai, e, den;
-        if (!(A1=(float *)malloc(2u*(P-1u)*sizeof(float)))) { fprintf(stderr,"error in ac2rc_levdurb_c: problem with malloc. "); perror("malloc"); return 1; }
+        if (!(A1=(float *)malloc(2u*P*sizeof(float)))) { fprintf(stderr,"error in ac2rc_levdurb_c: problem with malloc. "); perror("malloc"); return 1; }
         if (!(A2=(float *)malloc(2u*(P-1u)*sizeof(float)))) { fprintf(stderr,"error in ac2rc_levdurb_c: problem with malloc. "); perror("malloc"); return 1; }
         
         if (Lx==N)
@@ -557,7 +557,7 @@ int ac2rc_levdurb_z (double *Y, const double *X, const size_t R, const size_t C,
     {
         const size_t P = Lx - 1u;
         double *A1, *A2, ar, ai, e, den;
-        if (!(A1=(double *)malloc(2u*(P-1u)*sizeof(double)))) { fprintf(stderr,"error in ac2rc_levdurb_z: problem with malloc. "); perror("malloc"); return 1; }
+        if (!(A1=(double *)malloc(2u*P*sizeof(double)))) { fprintf(stderr,"error in ac2rc_levdurb_z: problem with malloc. "); perror("malloc"); return 1; }
         if (!(A2=(double *)malloc(2u*(P-1u)*sizeof(double)))) { fprintf(stderr,"error in ac2rc_levdurb_z: problem with malloc. "); perror("malloc"); return 1; }
         
         if (Lx==N)
