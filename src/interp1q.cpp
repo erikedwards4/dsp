@@ -34,7 +34,7 @@ int main(int argc, char *argv[])
     ifstream ifs1, ifs2, ifs3; ofstream ofs1;
     int8_t stdi1, stdi2, stdi3, stdo1, wo1;
     ioinfo i1, i2, i3, o1;
-    char decreasing;
+    int decreasing;
 
 
     //Description

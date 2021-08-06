@@ -36,7 +36,7 @@ int main(int argc, char *argv[])
     int8_t stdi1, stdo1, wo1;
     ioinfo i1, o1;
     size_t dim, nfft;
-    char sc, rl;
+    int sc, rl;
 
 
     //Description

@@ -36,7 +36,7 @@ int main(int argc, char *argv[])
     int8_t stdo1, wo1;
     ioinfo o1;
     size_t N, dim;
-    char uni, zmn;
+    int uni, zmn;
     double std;
 
 

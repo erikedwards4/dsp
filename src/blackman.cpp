@@ -35,7 +35,7 @@ int main(int argc, char *argv[])
     int8_t stdo1, wo1;
     ioinfo o1;
     size_t L, dim, norm;
-    char exact;
+    int exact;
 
 
     //Description

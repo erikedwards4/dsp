@@ -32,7 +32,6 @@ all: Dirs Generate Wins Transform Filter Conv Interp ZCs_LCs AR_Poly AC_LP Frame
 
 Dirs:
 	mkdir -pm 777 bin obj
-	ln -s ../util/cmli.hpp src/cmli.hpp
 
 
 #Generate: generate noise, simple waveforms, windows
@@ -184,9 +183,10 @@ mcr_windowed: srci/mcr_windowed.cpp c/mcr_windowed.c
 
 #AR_Poly: conversion between AR (autoregressive), poly (polynomial),
 #RC (reflection coeff), and PSD (power spectral density) representations
+#poly2roots uses LAPACKE, so for complex case requires -Wno-c99-extensions.
 AR_Poly: poly2roots roots2poly poly2ar ar2poly ar2rc rc2ar poly2rc rc2poly ar2psd poly2psd
 poly2roots: srci/poly2roots.cpp c/poly2roots.c
-	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -llapacke -lm
+	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS) -Wno-c99-extensions; $(CC) obj/$@.o -obin/$@ -largtable2 -llapacke -lm
 roots2poly: srci/roots2poly.cpp c/roots2poly.c
 	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lm
 poly2ar: srci/poly2ar.cpp c/poly2ar.c
@@ -210,7 +210,7 @@ poly2psd: srci/poly2psd.cpp c/poly2psd.c
 #AC_LP: conversions between sig (signal), AC (autocorrelation), LP (linear prediction), and related.
 #For example, ac2rc converts from AC to RCs (reflection coeffs).
 #AC_LP: autocorr autocorr_fft sig2ac sig2ac_fft ac2ar_levdurb ac2poly_levdurb sig2poly_levdurb sig2ar_levdurb sig2ar_burg sig2poly_burg ac2rc ac2cc ac2mvdr
-AC_LP: sig2ac sig2ac_fft ac2rc_levdurb ac2ar_levdurb ac2poly_levdurb sig2rc_levdurb sig2ar_levdurb sig2poly_levdurb sig2ar_burg sig2poly_burg #ac2cc ac2mvdr
+AC_LP: sig2ac sig2ac_fft ac2rc_levdurb ac2ar_levdurb ac2poly_levdurb sig2ar_levdurb #sig2poly_levdurb sig2rc_levdurb sig2ar_burg sig2poly_burg #ac2cc ac2mvdr
 sig2ac: srci/sig2ac.cpp c/sig2ac.c
 	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2
 sig2ac_fft: srci/sig2ac_fft.cpp c/sig2ac_fft.c

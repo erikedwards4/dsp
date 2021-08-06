@@ -15,7 +15,6 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <time.h>
 
 #ifdef __cplusplus
 namespace codee {
@@ -49,6 +48,8 @@ int sig2ac_s (float *Y, float *X, const size_t R, const size_t C, const size_t S
                 for (size_t l=0u; l<Lx; ++l) { *--X -= mn; }
             }
 
+            //struct timespec tic, toc; clock_gettime(CLOCK_REALTIME,&tic);
+
             if (L>850u && Lx>80000u) //I also leave this solution since it is closer to real-time use
             {
                 float x;
@@ -60,32 +61,33 @@ int sig2ac_s (float *Y, float *X, const size_t R, const size_t C, const size_t S
                     for (size_t l=0u; l<L && l<N-n; ++l) { Y[l] += x * X[l]; }
                 }
             }
-            else
+            else if (L%2u)
             {
-                float sm; //int cnt = 0;
-                struct timespec tic, toc; clock_gettime(CLOCK_REALTIME,&tic);
-
-                for (size_t l=0u; l<L/2u; ++l, ++Y)
+                float sm;
+                for (size_t l=0u; l<L; ++l, X-=Lx-l+1u, ++Y)
                 {
-                    sm = 0.0f; size_t l2 = 2u*l;
-                    for (size_t n=0u; n<Lx-l2; ++n, ++X) { sm += *X * *(X+l2); }
-                    *Y++ = sm; //fprintf(stderr,"l=%lu, l2=%lu, cnt=%d \n",l,l2,cnt);
-                    sm = 0.0f; ++l2; --X;
-                    for (size_t n=0u; n<Lx-l2; ++n) { --X; sm += *X * *(X+l2); }
-                    *Y = sm; //fprintf(stderr,"l=%lu, l2=%lu, cnt=%d \n",l,l2,cnt);
+                    sm = 0.0f;
+                    for (size_t n=0u; n<Lx-l; ++n, ++X) { sm += *X * *(X+l); }
+                    *Y = sm;
                 }
                 Y -= L;
-
-                // for (size_t l=0u; l<L; ++l, X-=Lx-l+1u, ++Y)
-                // {
-                //     sm = 0.0f;
-                //     for (size_t n=0u; n<Lx-l; ++n, ++X) { sm += *X * *(X+l); }
-                //     *Y = sm;
-                // }
-                // Y -= L;
-
-                clock_gettime(CLOCK_REALTIME,&toc); fprintf(stderr,"elapsed time = %.6f ms\n",(toc.tv_sec-tic.tv_sec)*1e3+(toc.tv_nsec-tic.tv_nsec)/1e6);
             }
+            else //tested, and this back-and-forth is slightly faster for even L only
+            {
+                float sm;
+                for (size_t l=0u; l<L; ++l, ++Y)
+                {
+                    sm = 0.0f;
+                    for (size_t n=0u; n<Lx-l; ++n, ++X) { sm += *X * *(X+l); }
+                    *Y++ = sm;
+                    sm = 0.0f; ++l; --X;
+                    for (size_t n=0u; n<Lx-l; ++n) { --X; sm += *X * *(X+l); }
+                    *Y = sm;
+                }
+                Y -= L;
+            }
+
+            //clock_gettime(CLOCK_REALTIME,&toc); fprintf(stderr,"elapsed time = %.6f ms\n",(double)(toc.tv_sec-tic.tv_sec)*1e3+(double)(toc.tv_nsec-tic.tv_nsec)/1e6);
 
             if (corr)
             {
@@ -225,13 +227,27 @@ int sig2ac_d (double *Y, double *X, const size_t R, const size_t C, const size_t
                     for (size_t l=0u; l<L && l<N-n; ++l) { Y[l] += x * X[l]; }
                 }
             }
-            else
+            else if (L%2u)
             {
                 double sm;
                 for (size_t l=0u; l<L; ++l, X-=Lx-l+1u, ++Y)
                 {
                     sm = 0.0;
                     for (size_t n=0u; n<Lx-l; ++n, ++X) { sm += *X * *(X+l); }
+                    *Y = sm;
+                }
+                Y -= L;
+            }
+            else //tested, and this back-and-forth is slightly faster for even L only
+            {
+                double sm;
+                for (size_t l=0u; l<L; ++l, ++Y)
+                {
+                    sm = 0.0;
+                    for (size_t n=0u; n<Lx-l; ++n, ++X) { sm += *X * *(X+l); }
+                    *Y++ = sm;
+                    sm = 0.0; ++l; --X;
+                    for (size_t n=0u; n<Lx-l; ++n) { --X; sm += *X * *(X+l); }
                     *Y = sm;
                 }
                 Y -= L;

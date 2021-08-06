@@ -1,356 +1,811 @@
-//This gets polynomial coeffs for each row/col of X.
-//The autocov is the biased version (e.g. default of Octave, etc.).
+//Gets polynomial params (Y), and error variance (V), for each vector in X.
+//Works along dim, such that each signal (vector) in X is converted
+//to one scalar in V and one vector (of length L) in Y.
 
-//An opt mean0 is added to zero the mean of each row/col of X first.
-//In this case, this is mean0 -> autocov_fft -> lev_durb.
+//By default, the means of X are NOT subtracted.
+//The mnz option allows the mean to be zeroed first for each vec in X.
+//However, this also required the removal of the const qualifier for input *X.
+
+//This starts by getting the autocovariance (AC) for lags 0 to L-1 for each vector in X.
+//The "biased" version of AC uses N in the denominator,
+//whereas the "unbiased" version uses N-l in the denominator instead of N.
+//It is actually just "less biased", but is slower, has worse MSE, and doesn't match FFT estimate.
+
+//After getting the AC, Levinson-Durbin (levdurb) recursion is used to get the polynomial params (Y)
+//and the error variance (E).
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <math.h>
-#include <cblas.h>
-#include <fftw3.h>
 
 #ifdef __cplusplus
 namespace codee {
 extern "C" {
 #endif
 
-int sig2poly_levdurb_s (float *Y, float *V, const float *X, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t dim, const size_t P, const int mean0);
-int sig2poly_levdurb_d (double *Y, double *V, const double *X, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t dim, const size_t P, const int mean0);
+int sig2poly_levdurb_s (float *Y, float *E, float *X, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t dim, const size_t L, const int mnz, const int unbiased);
+int sig2poly_levdurb_d (double *Y, double *E, double *X, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t dim, const size_t L, const int mnz, const int unbiased);
+int sig2poly_levdurb_c (float *Y, float *E, float *X, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t dim, const size_t L, const int mnz, const int unbiased);
+int sig2poly_levdurb_z (double *Y, double *E, double *X, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t dim, const size_t L, const int mnz, const int unbiased);
 
 
-int sig2poly_levdurb_s (float *Y, float *V, const float *X, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t dim, const size_t P, const int mean0)
+int sig2poly_levdurb_s (float *Y, float *E, float *X, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t dim, const size_t L, const int mnz, const int unbiased)
 {
-    if (dim>3) { fprintf(stderr,"error in sig2poly_levdurb_s: dim must be in [0 3]\n"); return 1; }
+    if (dim>3u) { fprintf(stderr,"error in sig2poly_levdurb_s: dim must be in [0 3]\n"); return 1; }
+    if (L<1u) { fprintf(stderr,"error in sig2poly_levdurb_s: L (length of ACF) must be positive\n"); return 1; }
 
-    const float z = 0.0f, o = 1.0f;
-    const size_t P1 = P + 1; //size of Y along dim
-    float m, g, sc;
-    int r, c, f, nfft, F, p, q;
-    float *X1, *Y1, *AStmp;
-    fftwf_plan fplan, iplan;
+    const size_t N = R*C*S*H;
+    const size_t Lx = (dim==0u) ? R : (dim==1u) ? C : (dim==2u) ? S : H;
+    const size_t P = L - 1u;
+    if (P>=Lx) { fprintf(stderr,"error in sig2poly_levdurb_s: P (polynomial order) must be < Lx (length of vecs in X)\n"); return 1; }
 
-    //Checks
-    if (R<1) { fprintf(stderr,"error in sig2poly_levdurb_s: nrows X must be positive\n"); return 1; }
-    if (C<1) { fprintf(stderr,"error in sig2poly_levdurb_s: ncols X must be positive\n"); return 1; }
-    if (dim==0 && P>=R) { fprintf(stderr,"error in sig2poly_levdurb_s: P must be < nrows X for dim==0\n"); return 1; }
-    if (dim==1 && P>=C) { fprintf(stderr,"error in sig2poly_levdurb_s: P must be < ncols X for dim==1\n"); return 1; }
-
-    //Get nfft
-    nfft = (dim==0) ? R+P1 : C+P1;
-    if (nfft>16384) { nfft += nfft%2; }
-    else { f = 1; while (f<nfft) { f *= 2; } nfft = f; }
-    F = nfft/2 + 1;
-    sc = 1.0f/nfft;
-
-    //Initialize
-    X1 = fftwf_alloc_real((size_t)nfft);
-    Y1 = fftwf_alloc_real((size_t)nfft);
-    fplan = fftwf_plan_r2r_1d(nfft,X1,Y1,FFTW_R2HC,FFTW_ESTIMATE);
-    iplan = fftwf_plan_r2r_1d(nfft,Y1,X1,FFTW_R2HC,FFTW_ESTIMATE);
-    if (!fplan || !iplan) { fprintf(stderr,"error in sig2poly_levdurb_s: problem creating fftw plan"); return 1; }
-    if (!(AStmp=(float *)malloc((size_t)(P)*sizeof(float)))) { fprintf(stderr,"error in sig2poly_levdurb_s: problem with malloc. "); perror("malloc"); return 1; }
-
-    if (dim==0)
-    {
-        if (iscolmajor)
-        {
-            cblas_scopy((int)C,&o,0,Y,P1);
-            for (size_t c=0; c<C; c++)
-            {
-                cblas_scopy(nfft-R,&z,0,&X1[R],1); //zero-pad
-                cblas_scopy((int)R,&X[c*R],1,&X1[0],1);
-                if (mean0)
-                {
-                    m = cblas_sdot((int)R,&X1[0],1,&o,0) / R;
-                    cblas_saxpy((int)R,-m,&o,0,&X1[0],1);
-                }
-                fftwf_execute(fplan);
-                for (f=0; f<nfft; f++) { Y1[f] *= Y1[f]; }
-                for (f=1; f<F-1; f++) { Y1[f] += Y1[nfft-f]; Y1[nfft-f] = Y1[f]; }
-                fftwf_execute(iplan);
-                Y[c*P1+1] = AStmp[0] = g = -X1[1]/X1[0];
-                cblas_sscal(P1,sc,&X1[0],1);
-                V[c] = fmaf(X1[1],g,X1[0]);
-                for (p=1; p<P; p++)
-                {
-                    g = X1[p+1];
-                    for (q=0; q<p; q++) { g = fmaf(X1[q+1],Y[p-q+c*P1],g); }
-                    Y[p+1+c*P1] = g = -g/V[c];
-                    for (q=0; q<p; q++) { Y[q+1+c*P1] = fmaf(g,AStmp[p-q-1],Y[q+1+c*P1]); }
-                    cblas_scopy(p,&Y[1+c*P1],1,&AStmp[0],1);
-                    V[c] *= fmaf(g,-g,1.0f);
-                }
-            }
-        }
-        else
-        {
-            cblas_scopy((int)C,&o,0,Y,1);
-            for (size_t c=0; c<C; c++)
-            {
-                cblas_scopy(nfft-R,&z,0,&X1[R],1); //zero-pad
-                cblas_scopy((int)R,&X[c],(int)C,&X1[0],1);
-                if (mean0)
-                {
-                    m = cblas_sdot((int)R,&X1[0],1,&o,0) / R;
-                    cblas_saxpy((int)R,-m,&o,0,&X1[0],1);
-                }
-                fftwf_execute(fplan);
-                for (f=0; f<nfft; f++) { Y1[f] *= Y1[f]; }
-                for (f=1; f<F-1; f++) { Y1[f] += Y1[nfft-f]; Y1[nfft-f] = Y1[f]; }
-                fftwf_execute(iplan);
-                Y[c+C] = AStmp[0] = g = -X1[1]/X1[0];
-                cblas_sscal(P1,sc,&X1[0],1);
-                V[c] = fmaf(X1[1],g,X1[0]);
-                for (p=1; p<P; p++)
-                {
-                    g = X1[p+1];
-                    for (q=0; q<p; q++) { g = fmaf(X1[q+1],Y[c+(p-q)*C],g); }
-                    Y[c+(p+1)*C] = g = -g/V[c];
-                    for (q=0; q<p; q++) { Y[c+(q+1)*C] = fmaf(g,AStmp[p-q-1],Y[c+(q+1)*C]); }
-                    cblas_scopy(p,&Y[c+C],(int)C,&AStmp[0],1);
-                    V[c] *= fmaf(g,-g,1.0f);
-                }
-            }
-        }
-    }
-    else if (dim==1)
-    {
-        if (iscolmajor)
-        {
-            cblas_scopy((int)R,&o,0,Y,1);
-            for (size_t r=0; r<R; r++)
-            {
-                cblas_scopy(nfft-C,&z,0,&X1[C],1); //zero-pad
-                cblas_scopy((int)C,&X[r],(int)R,&X1[0],1);
-                if (mean0)
-                {
-                    m = cblas_sdot((int)C,&X1[0],1,&o,0) / C;
-                    cblas_saxpy((int)C,-m,&o,0,&X1[0],1);
-                }
-                fftwf_execute(fplan);
-                for (f=0; f<nfft; f++) { Y1[f] *= Y1[f]; }
-                for (f=1; f<F-1; f++) { Y1[f] += Y1[nfft-f]; Y1[nfft-f] = Y1[f]; }
-                fftwf_execute(iplan);
-                Y[r+R] = AStmp[0] = g = -X1[1]/X1[0];
-                cblas_sscal(P1,sc,&X1[0],1);
-                V[r] = fmaf(X1[1],g,X1[0]);
-                for (p=1; p<P; p++)
-                {
-                    g = X1[p+1];
-                    for (q=0; q<p; q++) { g = fmaf(X1[q+1],Y[r+(p-q)*R],g); }
-                    Y[r+(p+1)*R] = g = -g/V[r];
-                    for (q=0; q<p; q++) { Y[r+(q+1)*R] = fmaf(g,AStmp[p-q-1],Y[r+(q+1)*R]); }
-                    cblas_scopy(p,&Y[r+R],(int)R,&AStmp[0],1);
-                    V[r] *= fmaf(g,-g,1.0f);
-                }
-            }
-        }
-        else
-        {
-            cblas_scopy((int)R,&o,0,Y,P1);
-            for (size_t r=0; r<R; r++)
-            {
-                cblas_scopy(nfft-C,&z,0,&X1[C],1); //zero-pad
-                cblas_scopy((int)C,&X[r*C],1,&X1[0],1);
-                if (mean0)
-                {
-                    m = cblas_sdot((int)C,&X1[0],1,&o,0) / C;
-                    cblas_saxpy((int)C,-m,&o,0,&X1[0],1);
-                }
-                fftwf_execute(fplan);
-                for (f=0; f<nfft; f++) { Y1[f] *= Y1[f]; }
-                for (f=1; f<F-1; f++) { Y1[f] += Y1[nfft-f]; Y1[nfft-f] = Y1[f]; }
-                fftwf_execute(iplan);
-                Y[r*P1+1] = AStmp[0] = g = -X1[1]/X1[0];
-                cblas_sscal(P1,sc,&X1[0],1);
-                V[r] = fmaf(X1[1],g,X1[0]);
-                for (p=1; p<P; p++)
-                {
-                    g = X1[p+1];
-                    for (q=0; q<p; q++) { g = fmaf(X1[q+1],Y[p-q+r*P1],g); }
-                    Y[p+1+r*P1] = g = -g/V[r];
-                    for (q=0; q<p; q++) { Y[q+1+r*P1] = fmaf(g,AStmp[p-q-1],Y[q+1+r*P1]); }
-                    cblas_scopy(p,&Y[1+r*P],1,&AStmp[0],1);
-                    V[r] *= fmaf(g,-g,1.0f);
-                }
-            }
-        }
-    }
+    if (N==0u) {}
     else
     {
-        fprintf(stderr,"error in sig2poly_levdurb_s: dim must be 0 or 1.\n"); return 1;
+        float *AC, *A2, a, sm, e;
+        if (!(AC=(float *)malloc(L*sizeof(float)))) { fprintf(stderr,"error in sig2poly_levdurb_s: problem with malloc. "); perror("malloc"); return 1; }
+        if (!(A2=(float *)malloc((P-1u)*sizeof(float)))) { fprintf(stderr,"error in sig2poly_levdurb_s: problem with malloc. "); perror("malloc"); return 1; }
+
+        if (Lx==N)
+        {
+            if (mnz)
+            {
+                float mn = 0.0f;
+                for (size_t l=0u; l<Lx; ++l, ++X) { mn += *X; }
+                mn /= (float)Lx;
+                for (size_t l=0u; l<Lx; ++l) { *--X -= mn; }
+            }
+
+            for (size_t l=0u; l<L; ++l, X-=Lx-l+1u, ++AC)
+            {
+                sm = 0.0f;
+                for (size_t n=0u; n<Lx-l; ++n, ++X) { sm += *X * *(X+l); }
+                *AC = sm;
+            }
+            AC -= L;
+
+            if (unbiased)
+            {
+                for (size_t l=0u; l<L; ++l, ++AC) { *AC /= (float)(Lx-l); }
+                AC -= L;
+            }
+
+            *Y++ = 1.0f;
+            a = -*(AC+1) / *AC;
+            *Y = a;
+            e = *AC++; e += a * *AC++;
+            for (size_t p=1u; p<P; ++p, AC+=p)
+            {
+                a = *AC;
+                for (size_t q=0u; q<p; ++q, ++Y) { --AC; a += *AC * *Y; }
+                a /= -e;
+                *Y = a;
+                for (size_t q=0u; q<p; ++q, ++A2) { --Y; *A2 = *Y; }
+                Y += p;
+                for (size_t q=0u; q<p; ++q) { --A2; --Y; *Y += a * *A2; }
+                e *= 1.0f - a*a;
+            }
+            AC -= L;
+            *E = e;
+        }
+        else
+        {
+            const size_t K = (iscolmajor) ? ((dim==0u) ? 1u : (dim==1u) ? R : (dim==2u) ? R*C : R*C*S) : ((dim==0u) ? C*S*H : (dim==1u) ? S*H : (dim==2u) ? H : 1u);
+            const size_t B = (iscolmajor && dim==0u) ? C*S*H : K;
+            const size_t V = N/Lx, G = V/B;
+
+            if (K==1u && (G==1u || B==1u))
+            {
+                for (size_t v=0u; v<V; ++v, X+=P, Y+=P, ++E)
+                {
+                    if (mnz)
+                    {
+                        float mn = 0.0f;
+                        for (size_t l=0u; l<Lx; ++l, ++X) { mn += *X; }
+                        mn /= (float)Lx;
+                        for (size_t l=0u; l<Lx; ++l) { *--X -= mn; }
+                    }
+
+                    for (size_t l=0u; l<P; ++l, X-=Lx-l+1u, ++AC)
+                    {
+                        sm = 0.0f;
+                        for (size_t n=0u; n<Lx-l; ++n, ++X) { sm += *X * *(X+l); }
+                        *AC = sm;
+                    }
+                    sm = 0.0f;
+                    for (size_t n=0u; n<Lx-P; ++n, ++X) { sm += *X * *(X+P); }
+                    *AC = sm; AC -= P;
+
+                    if (unbiased)
+                    {
+                        for (size_t l=0u; l<L; ++l, ++AC) { *AC /= (float)(Lx-l); }
+                        AC -= L;
+                    }
+
+                    *Y++ = 1.0f;
+                    a = -*(AC+1) / *AC;
+                    *Y = a;
+                    e = *AC++; e += a * *AC++;
+                    for (size_t p=1u; p<P; ++p, AC+=p)
+                    {
+                        a = *AC;
+                        for (size_t q=0u; q<p; ++q, ++Y) { --AC; a += *AC * *Y; }
+                        a /= -e;
+                        *Y = a;
+                        for (size_t q=0u; q<p; ++q, ++A2) { --Y; *A2 = *Y; }
+                        Y += p;
+                        for (size_t q=0u; q<p; ++q) { --A2; --Y; *Y += a * *A2; }
+                        e *= 1.0f - a*a;
+                    }
+                    AC -= L;
+                    *E = e;
+                }
+            }
+            else
+            {
+                for (size_t g=0u; g<G; ++g, X+=B*(Lx-1u), Y+=B*P)
+                {
+                    for (size_t b=0u; b<B; ++b, ++X, ++Y, ++E)
+                    {
+                        if (mnz)
+                        {
+                            float mn = 0.0f;
+                            for (size_t l=0u; l<Lx; ++l, X+=K) { mn += *X; }
+                            mn /= (float)Lx;
+                            for (size_t l=0u; l<Lx; ++l) { X-=K; *X -= mn; }
+                        }
+
+                        for (size_t l=0u; l<L; ++l, X-=K*(Lx-l+1u), ++AC)
+                        {
+                            sm = 0.0f;
+                            for (size_t n=0u; n<Lx-l; ++n, X+=K) { sm += *X * *(X+l*K); }
+                            *AC = sm;
+                        }
+                        AC -= L;
+
+                        if (unbiased)
+                        {
+                            for (size_t l=0u; l<L; ++l, ++AC) { *AC /= (float)(Lx-l); }
+                            AC -= L;
+                        }
+
+                        *Y = 1.0f; Y += K;
+                        a = -*(AC+1) / *AC;
+                        *Y = a;
+                        e = *AC; ++AC;
+                        e += a * *AC; ++AC;
+                        for (size_t p=1u; p<P; ++p, AC+=p)
+                        {
+                            a = *AC;
+                            for (size_t q=0u; q<p; ++q, Y+=K) { --AC; a += *AC * *Y; }
+                            a /= -e;
+                            *Y = a;
+                            for (size_t q=0u; q<p; ++q, ++A2) { Y-=K; *A2 = *Y; }
+                            Y += p*K;
+                            for (size_t q=0u; q<p; ++q) { --A2; Y-=K; *Y += a * *A2; }
+                            e *= 1.0f - a*a;
+                        }
+                        AC -= L;
+                        *E = e;
+                    }
+                }
+            }
+        }
+        free(AC); free(A2);
     }
 
-    fftwf_destroy_plan(fplan); fftwf_destroy_plan(iplan); fftwf_free(X1); fftwf_free(Y1);
     return 0;
 }
 
 
-int sig2poly_levdurb_d (double *Y, double *V, const double *X, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t dim, const size_t P, const int mean0)
+int sig2poly_levdurb_d (double *Y, double *E, double *X, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t dim, const size_t L, const int mnz, const int unbiased)
 {
-    if (dim>3) { fprintf(stderr,"error in sig2poly_levdurb_d: dim must be in [0 3]\n"); return 1; }
+    if (dim>3u) { fprintf(stderr,"error in sig2poly_levdurb_d: dim must be in [0 3]\n"); return 1; }
+    if (L<1u) { fprintf(stderr,"error in sig2poly_levdurb_d: L (length of ACF) must be positive\n"); return 1; }
 
-    const double z = 0.0, o = 1.0;
-    const size_t P1 = P + 1; //size of Y along dim
-    double m, g, sc;
-    int r, c, f, nfft, F, p, q;
-    double *X1, *Y1, *AStmp;
-    fftw_plan fplan, iplan;
+    const size_t N = R*C*S*H;
+    const size_t Lx = (dim==0u) ? R : (dim==1u) ? C : (dim==2u) ? S : H;
+    const size_t P = L - 1u;
+    if (P>=Lx) { fprintf(stderr,"error in sig2poly_levdurb_d: P (polynomial order) must be < Lx (length of vecs in X)\n"); return 1; }
 
-    //Checks
-    if (R<1) { fprintf(stderr,"error in sig2poly_levdurb_d: nrows X must be positive\n"); return 1; }
-    if (C<1) { fprintf(stderr,"error in sig2poly_levdurb_d: ncols X must be positive\n"); return 1; }
-    if (dim==0 && P>=R) { fprintf(stderr,"error in sig2poly_levdurb_d: P must be < nrows X for dim==0\n"); return 1; }
-    if (dim==1 && P>=C) { fprintf(stderr,"error in sig2poly_levdurb_d: P must be < ncols X for dim==1\n"); return 1; }
-
-    //Get nfft
-    nfft = (dim==0) ? R+P1 : C+P1;
-    if (nfft>16384) { nfft += nfft%2; }
-    else { f = 1; while (f<nfft) { f *= 2; } nfft = f; }
-    F = nfft/2 + 1;
-    sc = 1.0/nfft;
-
-    //Initialize
-    X1 = fftw_alloc_real((size_t)nfft);
-    Y1 = fftw_alloc_real((size_t)nfft);
-    fplan = fftw_plan_r2r_1d(nfft,X1,Y1,FFTW_R2HC,FFTW_ESTIMATE);
-    iplan = fftw_plan_r2r_1d(nfft,Y1,X1,FFTW_R2HC,FFTW_ESTIMATE);
-    if (!fplan || !iplan) { fprintf(stderr,"error in sig2poly_levdurb_d: problem creating fftw plan"); return 1; }
-    if (!(AStmp=(double *)malloc((size_t)(P)*sizeof(double)))) { fprintf(stderr,"error in sig2poly_levdurb_d: problem with malloc. "); perror("malloc"); return 1; }
-
-    if (dim==0)
-    {
-        if (iscolmajor)
-        {
-            cblas_dcopy((int)C,&o,0,Y,P1);
-            for (size_t c=0; c<C; c++)
-            {
-                cblas_dcopy(nfft-R,&z,0,&X1[R],1); //zero-pad
-                cblas_dcopy((int)R,&X[c*R],1,&X1[0],1);
-                if (mean0)
-                {
-                    m = cblas_ddot((int)R,&X1[0],1,&o,0) / R;
-                    cblas_daxpy((int)R,-m,&o,0,&X1[0],1);
-                }
-                fftw_execute(fplan);
-                for (f=0; f<nfft; f++) { Y1[f] *= Y1[f]; }
-                for (f=1; f<F-1; f++) { Y1[f] += Y1[nfft-f]; Y1[nfft-f] = Y1[f]; }
-                fftw_execute(iplan);
-                Y[c*P1+1] = AStmp[0] = g = -X1[1]/X1[0];
-                cblas_dscal(P1,sc,&X1[0],1);
-                V[c] = fma(X1[1],g,X1[0]);
-                for (p=1; p<P; p++)
-                {
-                    g = X1[p+1];
-                    for (q=0; q<p; q++) { g = fma(X1[q+1],Y[p-q+c*P1],g); }
-                    Y[p+1+c*P1] = g = -g/V[c];
-                    for (q=0; q<p; q++) { Y[q+1+c*P1] = fma(g,AStmp[p-q-1],Y[q+1+c*P1]); }
-                    cblas_dcopy(p,&Y[1+c*P1],1,&AStmp[0],1);
-                    V[c] *= fma(g,-g,1.0);
-                }
-            }
-        }
-        else
-        {
-            cblas_dcopy((int)C,&o,0,Y,1);
-            for (size_t c=0; c<C; c++)
-            {
-                cblas_dcopy(nfft-R,&z,0,&X1[R],1); //zero-pad
-                cblas_dcopy((int)R,&X[c],(int)C,&X1[0],1);
-                if (mean0)
-                {
-                    m = cblas_ddot((int)R,&X1[0],1,&o,0) / R;
-                    cblas_daxpy((int)R,-m,&o,0,&X1[0],1);
-                }
-                fftw_execute(fplan);
-                for (f=0; f<nfft; f++) { Y1[f] *= Y1[f]; }
-                for (f=1; f<F-1; f++) { Y1[f] += Y1[nfft-f]; Y1[nfft-f] = Y1[f]; }
-                fftw_execute(iplan);
-                Y[c+C] = AStmp[0] = g = -X1[1]/X1[0];
-                cblas_dscal(P1,sc,&X1[0],1);
-                V[c] = fma(X1[1],g,X1[0]);
-                for (p=1; p<P; p++)
-                {
-                    g = X1[p+1];
-                    for (q=0; q<p; q++) { g = fma(X1[q+1],Y[c+(p-q)*C],g); }
-                    Y[c+(p+1)*C] = g = -g/V[c];
-                    for (q=0; q<p; q++) { Y[c+(q+1)*C] = fma(g,AStmp[p-q-1],Y[c+(q+1)*C]); }
-                    cblas_dcopy(p,&Y[c+C],(int)C,&AStmp[0],1);
-                    V[c] *= fma(g,-g,1.0);
-                }
-            }
-        }
-    }
-    else if (dim==1)
-    {
-        if (iscolmajor)
-        {
-            cblas_dcopy((int)R,&o,0,Y,1);
-            for (size_t r=0; r<R; r++)
-            {
-                cblas_dcopy(nfft-C,&z,0,&X1[C],1); //zero-pad
-                cblas_dcopy((int)C,&X[r],(int)R,&X1[0],1);
-                if (mean0)
-                {
-                    m = cblas_ddot((int)C,&X1[0],1,&o,0) / C;
-                    cblas_daxpy((int)C,-m,&o,0,&X1[0],1);
-                }
-                fftw_execute(fplan);
-                for (f=0; f<nfft; f++) { Y1[f] *= Y1[f]; }
-                for (f=1; f<F-1; f++) { Y1[f] += Y1[nfft-f]; Y1[nfft-f] = Y1[f]; }
-                fftw_execute(iplan);
-                Y[r+R] = AStmp[0] = g = -X1[1]/X1[0];
-                cblas_dscal(P1,sc,&X1[0],1);
-                V[r] = fma(X1[1],g,X1[0]);
-                for (p=1; p<P; p++)
-                {
-                    g = X1[p+1];
-                    for (q=0; q<p; q++) { g = fma(X1[q+1],Y[r+(p-q)*R],g); }
-                    Y[r+(p+1)*R] = g = -g/V[r];
-                    for (q=0; q<p; q++) { Y[r+(q+1)*R] = fma(g,AStmp[p-q-1],Y[r+(q+1)*R]); }
-                    cblas_dcopy(p,&Y[r+R],(int)R,&AStmp[0],1);
-                    V[r] *= fma(g,-g,1.0);
-                }
-            }
-        }
-        else
-        {
-            cblas_dcopy((int)R,&o,0,Y,P1);
-            for (size_t r=0; r<R; r++)
-            {
-                cblas_dcopy(nfft-C,&z,0,&X1[C],1); //zero-pad
-                cblas_dcopy((int)C,&X[r*C],1,&X1[0],1);
-                if (mean0)
-                {
-                    m = cblas_ddot((int)C,&X1[0],1,&o,0) / C;
-                    cblas_daxpy((int)C,-m,&o,0,&X1[0],1);
-                }
-                fftw_execute(fplan);
-                for (f=0; f<nfft; f++) { Y1[f] *= Y1[f]; }
-                for (f=1; f<F-1; f++) { Y1[f] += Y1[nfft-f]; Y1[nfft-f] = Y1[f]; }
-                fftw_execute(iplan);
-                Y[r*P1+1] = AStmp[0] = g = -X1[1]/X1[0];
-                cblas_dscal(P1,sc,&X1[0],1);
-                V[r] = fma(X1[1],g,X1[0]);
-                for (p=1; p<P; p++)
-                {
-                    g = X1[p+1];
-                    for (q=0; q<p; q++) { g = fma(X1[q+1],Y[p-q+r*P1],g); }
-                    Y[p+1+r*P1] = g = -g/V[r];
-                    for (q=0; q<p; q++) { Y[q+1+r*P1] = fma(g,AStmp[p-q-1],Y[q+1+r*P1]); }
-                    cblas_dcopy(p,&Y[1+r*P1],1,&AStmp[0],1);
-                    V[r] *= fma(g,-g,1.0);
-                }
-            }
-        }
-    }
+    if (N==0u) {}
     else
     {
-        fprintf(stderr,"error in sig2poly_levdurb_d: dim must be 0 or 1.\n"); return 1;
+        double *AC, *A2, a, sm, e;
+        if (!(AC=(double *)malloc(L*sizeof(double)))) { fprintf(stderr,"error in sig2poly_levdurb_d: problem with malloc. "); perror("malloc"); return 1; }
+        if (!(A2=(double *)malloc((P-1u)*sizeof(double)))) { fprintf(stderr,"error in sig2poly_levdurb_d: problem with malloc. "); perror("malloc"); return 1; }
+
+        if (Lx==N)
+        {
+            if (mnz)
+            {
+                double mn = 0.0;
+                for (size_t l=0u; l<Lx; ++l, ++X) { mn += *X; }
+                mn /= (double)Lx;
+                for (size_t l=0u; l<Lx; ++l) { *--X -= mn; }
+            }
+
+            for (size_t l=0u; l<L; ++l, X-=Lx-l+1u, ++AC)
+            {
+                sm = 0.0;
+                for (size_t n=0u; n<Lx-l; ++n, ++X) { sm += *X * *(X+l); }
+                *AC = sm;
+            }
+            AC -= L;
+
+            if (unbiased)
+            {
+                for (size_t l=0u; l<L; ++l, ++AC) { *AC /= (double)(Lx-l); }
+                AC -= L;
+            }
+
+            *Y++ = 1.0;
+            a = -*(AC+1) / *AC;
+            *Y = a;
+            e = *AC++; e += a * *AC++;
+            for (size_t p=1u; p<P; ++p, AC+=p)
+            {
+                a = *AC;
+                for (size_t q=0u; q<p; ++q, ++Y) { --AC; a += *AC * *Y; }
+                a /= -e;
+                *Y = a;
+                for (size_t q=0u; q<p; ++q, ++A2) { --Y; *A2 = *Y; }
+                Y += p;
+                for (size_t q=0u; q<p; ++q) { --A2; --Y; *Y += a * *A2; }
+                e *= 1.0 - a*a;
+            }
+            AC -= L;
+            *E = e;
+        }
+        else
+        {
+            const size_t K = (iscolmajor) ? ((dim==0u) ? 1u : (dim==1u) ? R : (dim==2u) ? R*C : R*C*S) : ((dim==0u) ? C*S*H : (dim==1u) ? S*H : (dim==2u) ? H : 1u);
+            const size_t B = (iscolmajor && dim==0u) ? C*S*H : K;
+            const size_t V = N/Lx, G = V/B;
+
+            if (K==1u && (G==1u || B==1u))
+            {
+                for (size_t v=0u; v<V; ++v, X+=P, Y+=P, ++E)
+                {
+                    if (mnz)
+                    {
+                        double mn = 0.0;
+                        for (size_t l=0u; l<Lx; ++l, ++X) { mn += *X; }
+                        mn /= (double)Lx;
+                        for (size_t l=0u; l<Lx; ++l) { *--X -= mn; }
+                    }
+
+                    for (size_t l=0u; l<P; ++l, X-=Lx-l+1u, ++AC)
+                    {
+                        sm = 0.0;
+                        for (size_t n=0u; n<Lx-l; ++n, ++X) { sm += *X * *(X+l); }
+                        *AC = sm;
+                    }
+                    sm = 0.0;
+                    for (size_t n=0u; n<Lx-P; ++n, ++X) { sm += *X * *(X+P); }
+                    *AC = sm; AC -= P;
+
+                    if (unbiased)
+                    {
+                        for (size_t l=0u; l<L; ++l, ++AC) { *AC /= (double)(Lx-l); }
+                        AC -= L;
+                    }
+
+                    *Y++ = 1.0;
+                    a = -*(AC+1) / *AC;
+                    *Y = a;
+                    e = *AC++; e += a * *AC++;
+                    for (size_t p=1u; p<P; ++p, AC+=p)
+                    {
+                        a = *AC;
+                        for (size_t q=0u; q<p; ++q, ++Y) { --AC; a += *AC * *Y; }
+                        a /= -e;
+                        *Y = a;
+                        for (size_t q=0u; q<p; ++q, ++A2) { --Y; *A2 = *Y; }
+                        Y += p;
+                        for (size_t q=0u; q<p; ++q) { --A2; --Y; *Y += a * *A2; }
+                        e *= 1.0 - a*a;
+                    }
+                    AC -= L;
+                    *E = e;
+                }
+            }
+            else
+            {
+                for (size_t g=0u; g<G; ++g, X+=B*(Lx-1u), Y+=B*P)
+                {
+                    for (size_t b=0u; b<B; ++b, ++X, ++Y, ++E)
+                    {
+                        if (mnz)
+                        {
+                            double mn = 0.0;
+                            for (size_t l=0u; l<Lx; ++l, X+=K) { mn += *X; }
+                            mn /= (double)Lx;
+                            for (size_t l=0u; l<Lx; ++l) { X-=K; *X -= mn; }
+                        }
+
+                        for (size_t l=0u; l<L; ++l, X-=K*(Lx-l+1u), ++AC)
+                        {
+                            sm = 0.0;
+                            for (size_t n=0u; n<Lx-l; ++n, X+=K) { sm += *X * *(X+l*K); }
+                            *AC = sm;
+                        }
+                        AC -= L;
+
+                        if (unbiased)
+                        {
+                            for (size_t l=0u; l<L; ++l, ++AC) { *AC /= (double)(Lx-l); }
+                            AC -= L;
+                        }
+
+                        *Y = 1.0; Y += K;
+                        a = -*(AC+1) / *AC;
+                        *Y = a;
+                        e = *AC; ++AC;
+                        e += a * *AC; ++AC;
+                        for (size_t p=1u; p<P; ++p, AC+=p)
+                        {
+                            a = *AC;
+                            for (size_t q=0u; q<p; ++q, Y+=K) { --AC; a += *AC * *Y; }
+                            a /= -e;
+                            *Y = a;
+                            for (size_t q=0u; q<p; ++q, ++A2) { Y-=K; *A2 = *Y; }
+                            Y += p*K;
+                            for (size_t q=0u; q<p; ++q) { --A2; Y-=K; *Y += a * *A2; }
+                            e *= 1.0 - a*a;
+                        }
+                        AC -= L;
+                        *E = e;
+                    }
+                }
+            }
+        }
+        free(AC); free(A2);
     }
 
-    fftw_destroy_plan(fplan); fftw_destroy_plan(iplan); fftw_free(X1); fftw_free(Y1);
+    return 0;
+}
+
+
+int sig2poly_levdurb_c (float *Y, float *E, float *X, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t dim, const size_t L, const int mnz, const int unbiased)
+{
+    if (dim>3u) { fprintf(stderr,"error in sig2poly_levdurb_c: dim must be in [0 3]\n"); return 1; }
+    if (L<1u) { fprintf(stderr,"error in sig2poly_levdurb_c: L (length of ACF) must be positive\n"); return 1; }
+
+    const size_t N = R*C*S*H;
+    const size_t Lx = (dim==0u) ? R : (dim==1u) ? C : (dim==2u) ? S : H;
+    const size_t P = L - 1u;
+    if (P>=Lx) { fprintf(stderr,"error in sig2poly_levdurb_c: P (polynomial order) must be < Lx (length of vecs in X)\n"); return 1; }
+
+    if (N==0u) {}
+    else
+    {
+        float *AC, *A2, ar, ai, smr, smi, den, e;
+        if (!(AC=(float *)malloc(2u*L*sizeof(float)))) { fprintf(stderr,"error in sig2poly_levdurb_c: problem with malloc. "); perror("malloc"); return 1; }
+        if (!(A2=(float *)malloc(2u*(P-1u)*sizeof(float)))) { fprintf(stderr,"error in sig2poly_levdurb_c: problem with malloc. "); perror("malloc"); return 1; }
+
+        if (Lx==N)
+        {
+            if (mnz)
+            {
+                float mnr = 0.0f, mni = 0.0f;
+                for (size_t l=0u; l<Lx; ++l) { mnr += *X++; mni += *X++; }
+                mnr /= (float)Lx; mni /= (float)Lx;
+                for (size_t l=0u; l<Lx; ++l) { *--X -= mni; *--X -= mnr; }
+            }
+
+            for (size_t l=0u; l<L; ++l, X-=2u*(Lx-l+1u))
+            {
+                smr = smi = 0.0f;
+                for (size_t n=0u; n<Lx-l; ++n, X+=2)
+                {
+                    smr += *X**(X+2u*l) + *(X+1)**(X+2u*l+1u);
+                    smi += *(X+1)**(X+2u*l) - *X**(X+2u*l+1u);
+                }
+                *AC++ = smr; *AC++ = smi;
+            }
+            AC -= 2u*L;
+            
+            if (unbiased)
+            {
+                for (size_t l=0u; l<L; ++l) { *AC++ /= (float)(Lx-l); *AC++ /= (float)(Lx-l); }
+                AC -= 2u*L;
+            }
+
+            *Y++ = 1.0f; *Y++ = 0.0f;
+            den = *AC**AC + *(AC+1)**(AC+1);
+            ar = -(*(AC+2)**AC + *(AC+3)**(AC+1)) / den;
+            ai = -(*(AC+3)**AC - *(AC+1)**(AC+2)) / den;
+            *Y = -ar; *(Y+1) = -ai;
+            e = *AC * (1.0f - (ar*ar+ai*ai));
+            AC += 4;
+            for (size_t p=1u; p<P; ++p, AC+=2u*p)
+            {
+                ar = *AC; ai = *(AC+1);
+                for (size_t q=0u; q<p; ++q, Y+=2)
+                {
+                    AC -= 2;
+                    ar -= *AC**Y - *(AC+1)**(Y+1);
+                    ai -= *(AC+1)**Y + *AC**(Y+1);
+                }
+                ar /= -e; ai /= -e;
+                *Y = -ar; *(Y+1) = -ai;
+                for (size_t q=0u; q<p; ++q, A2+=2) { Y-=2; *A2 = *Y; *(A2+1) = -*(Y+1); }
+                Y += 2u*p;
+                for (size_t q=0u; q<p; ++q)
+                {
+                    A2 -= 2; Y -= 2;
+                    *Y += ar**A2 - ai**(A2+1);
+                    *(Y+1) += ar**(A2+1) + ai**A2;
+                }
+                e *= 1.0f - (ar*ar + ai*ai);
+            }
+            AC -= 2u*P+2u;
+            *E = e;
+        }
+        else
+        {
+            const size_t K = (iscolmajor) ? ((dim==0u) ? 1u : (dim==1u) ? R : (dim==2u) ? R*C : R*C*S) : ((dim==0u) ? C*S*H : (dim==1u) ? S*H : (dim==2u) ? H : 1u);
+            const size_t B = (iscolmajor && dim==0u) ? C*S*H : K;
+            const size_t V = N/Lx, G = V/B;
+
+            if (K==1u && (G==1u || B==1u))
+            {
+                for (size_t v=0u; v<V; ++v, X+=2u*P, Y+=2u*P, ++E)
+                {
+                    if (mnz)
+                    {
+                        float mnr = 0.0f, mni = 0.0f;
+                        for (size_t l=0u; l<Lx; ++l) { mnr += *X++; mni += *X++; }
+                        mnr /= (float)Lx; mni /= (float)Lx;
+                        for (size_t l=0u; l<Lx; ++l) { *--X -= mni; *--X -= mnr; }
+                    }
+
+                    for (size_t l=0u; l<P; ++l, X-=2u*(Lx-l+1u))
+                    {
+                        smr = smi = 0.0f;
+                        for (size_t n=0u; n<Lx-l; ++n, X+=2)
+                        {
+                            smr += *X**(X+2u*l) + *(X+1u)**(X+2u*l+1u);
+                            smi += *(X+1u)**(X+2u*l) - *X**(X+2u*l+1u);
+                        }
+                        *AC++ = smr; *AC++ = smi;
+                    }
+                    smr = smi = 0.0f;
+                    for (size_t n=0u; n<Lx-P; ++n, X+=2)
+                    {
+                        smr += *X**(X+2u*P) + *(X+1u)**(X+2u*P+1u);
+                        smi += *(X+1u)**(X+2u*P) - *X**(X+2u*P+1u);
+                    }
+                    *AC = smr; *(AC+1) = smi; AC -= 2u*P;
+
+                    if (unbiased)
+                    {
+                        for (size_t l=0u; l<L; ++l) { *AC++ /= (float)(Lx-l); *AC++ /= (float)(Lx-l); }
+                        AC -= 2u*L;
+                    }
+
+                    *Y++ = 1.0f; *Y++ = 0.0f;
+                    den = *AC**AC + *(AC+1)**(AC+1);
+                    ar = -(*(AC+2)**AC + *(AC+3)**(AC+1)) / den;
+                    ai = -(*(AC+3)**AC - *(AC+1)**(AC+2)) / den;
+                    *Y = -ar; *(Y+1) = -ai;
+                    e = *AC * (1.0f - (ar*ar+ai*ai));
+                    AC += 4;
+                    for (size_t p=1u; p<P; ++p, AC+=2u*p)
+                    {
+                        ar = *AC; ai = *(AC+1);
+                        for (size_t q=0u; q<p; ++q, Y+=2)
+                        {
+                            AC -= 2;
+                            ar -= *AC**Y - *(AC+1)**(Y+1);
+                            ai -= *(AC+1)**Y + *AC**(Y+1);
+                        }
+                        ar /= -e; ai /= -e;
+                        *Y = -ar; *(Y+1) = -ai;
+                        for (size_t q=0u; q<p; ++q, A2+=2) { Y-=2; *A2 = *Y; *(A2+1) = -*(Y+1); }
+                        Y += 2u*p;
+                        for (size_t q=0u; q<p; ++q)
+                        {
+                            A2 -= 2; Y -= 2;
+                            *Y += ar**A2 - ai**(A2+1);
+                            *(Y+1) += ar**(A2+1) + ai**A2;
+                        }
+                        e *= 1.0f - (ar*ar + ai*ai);
+                    }
+                    AC -= 2u*P+2u;
+                    *E = e;
+                }
+            }
+            else
+            {
+                for (size_t g=0u; g<G; ++g, X+=2u*B*(Lx-1u), Y+=2u*B*(P-1u))
+                {
+                    for (size_t b=0u; b<B; ++b, X+=2, Y+=2, ++E)
+                    {
+                        if (mnz)
+                        {
+                            float mnr = 0.0f, mni = 0.0f;
+                            for (size_t l=0u; l<Lx; ++l, X+=2u*K) { mnr += *X; mni += *(X+1); }
+                            mnr /= (float)Lx; mni /= (float)Lx;
+                            for (size_t l=0u; l<Lx; ++l) { X-=2u*K; *X -= mnr; *(X+1) -= mni; }
+                        }
+
+                        for (size_t l=0u; l<L; ++l, X-=2u*K*(Lx-l+1u), AC+=2)
+                        {
+                            smr = smi = 0.0f;
+                            for (size_t n=0u; n<Lx-l; ++n, X+=2u*K)
+                            {
+                                smr += *X**(X+2u*l*K) + *(X+1)**(X+2u*l*K+1u);
+                                smi += *(X+1)**(X+2u*l*K) - *X**(X+2u*l*K+1u);
+                            }
+                            *AC = smr; *(AC+1) = smi;
+                        }
+                        AC -= 2u*L;
+
+                        if (unbiased)
+                        {
+                            for (size_t l=0u; l<L; ++l, AC+=2u) { *AC /= (float)(Lx-l); *(AC+1) /= (float)(Lx-l); }
+                        }
+
+                        *Y = 1.0f; *(Y+1) = 0.0f; Y += 2u*K;
+                        den = *AC**AC + *(AC+1)**(AC+1);
+                        ar = -(*(AC+2)**AC + *(AC+3)**(AC+1)) / den;
+                        ai = -(*(AC+3)**AC - *(AC+1)**(AC+2)) / den;
+                        *Y = -ar; *(Y+1) = -ai;
+                        e = *AC * (1.0f - (ar*ar+ai*ai));
+                        AC += 4;
+                        for (size_t p=1u; p<P; ++p, AC+=2u*p)
+                        {
+                            ar = *AC; ai = *(AC+1);
+                            for (size_t q=0u; q<p; ++q, Y+=2u*K)
+                            {
+                                AC -= 2;
+                                ar -= *AC**Y - *(AC+1)**(Y+1);
+                                ai -= *(AC+1)**Y + *AC**(Y+1);
+                            }
+                            ar /= -e; ai /= -e;
+                            *Y = -ar; *(Y+1) = -ai;
+                            for (size_t q=0u; q<p; ++q, A2+=2) { Y-=2u*K; *A2 = *Y; *(A2+1) = -*(Y+1); }
+                            Y += 2u*p*K;
+                            for (size_t q=0u; q<p; ++q)
+                            {
+                                A2 -= 2; Y -= 2u*K;
+                                *Y += ar**A2 - ai**(A2+1);
+                                *(Y+1) += ar**(A2+1) + ai**A2;
+                            }
+                            e *= 1.0f - (ar*ar + ai*ai);
+                        }
+                        AC -= 2u*P+2u;
+                        *E = e;
+                    }
+                }
+            }
+        }
+        free(AC); free(A2);
+    }
+
+    return 0;
+}
+
+
+int sig2poly_levdurb_z (double *Y, double *E, double *X, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t dim, const size_t L, const int mnz, const int unbiased)
+{
+    if (dim>3u) { fprintf(stderr,"error in sig2poly_levdurb_z: dim must be in [0 3]\n"); return 1; }
+    if (L<1u) { fprintf(stderr,"error in sig2poly_levdurb_z: L (length of ACF) must be positive\n"); return 1; }
+
+    const size_t N = R*C*S*H;
+    const size_t Lx = (dim==0u) ? R : (dim==1u) ? C : (dim==2u) ? S : H;
+    const size_t P = L - 1u;
+    if (P>=Lx) { fprintf(stderr,"error in sig2poly_levdurb_z: P (polynomial order) must be < Lx (length of vecs in X)\n"); return 1; }
+
+    if (N==0u) {}
+    else
+    {
+        double *AC, *A2, ar, ai, smr, smi, den, e;
+        if (!(AC=(double *)malloc(2u*L*sizeof(double)))) { fprintf(stderr,"error in sig2poly_levdurb_z: problem with malloc. "); perror("malloc"); return 1; }
+        if (!(A2=(double *)malloc(2u*(P-1u)*sizeof(double)))) { fprintf(stderr,"error in sig2poly_levdurb_z: problem with malloc. "); perror("malloc"); return 1; }
+
+        if (Lx==N)
+        {
+            if (mnz)
+            {
+                double mnr = 0.0, mni = 0.0;
+                for (size_t l=0u; l<Lx; ++l) { mnr += *X++; mni += *X++; }
+                mnr /= (double)Lx; mni /= (double)Lx;
+                for (size_t l=0u; l<Lx; ++l) { *--X -= mni; *--X -= mnr; }
+            }
+
+            for (size_t l=0u; l<L; ++l, X-=2u*(Lx-l+1u))
+            {
+                smr = smi = 0.0;
+                for (size_t n=0u; n<Lx-l; ++n, X+=2)
+                {
+                    smr += *X**(X+2u*l) + *(X+1)**(X+2u*l+1u);
+                    smi += *(X+1)**(X+2u*l) - *X**(X+2u*l+1u);
+                }
+                *AC++ = smr; *AC++ = smi;
+            }
+            AC -= 2u*L;
+            
+            if (unbiased)
+            {
+                for (size_t l=0u; l<L; ++l) { *AC++ /= (double)(Lx-l); *AC++ /= (double)(Lx-l); }
+                AC -= 2u*L;
+            }
+
+            *Y++ = 1.0; *Y++ = 0.0;
+            den = *AC**AC + *(AC+1)**(AC+1);
+            ar = -(*(AC+2)**AC + *(AC+3)**(AC+1)) / den;
+            ai = -(*(AC+3)**AC - *(AC+1)**(AC+2)) / den;
+            *Y = -ar; *(Y+1) = -ai;
+            e = *AC * (1.0 - (ar*ar+ai*ai));
+            AC += 4;
+            for (size_t p=1u; p<P; ++p, AC+=2u*p)
+            {
+                ar = *AC; ai = *(AC+1);
+                for (size_t q=0u; q<p; ++q, Y+=2)
+                {
+                    AC -= 2;
+                    ar -= *AC**Y - *(AC+1)**(Y+1);
+                    ai -= *(AC+1)**Y + *AC**(Y+1);
+                }
+                ar /= -e; ai /= -e;
+                *Y = -ar; *(Y+1) = -ai;
+                for (size_t q=0u; q<p; ++q, A2+=2) { Y-=2; *A2 = *Y; *(A2+1) = -*(Y+1); }
+                Y += 2u*p;
+                for (size_t q=0u; q<p; ++q)
+                {
+                    A2 -= 2; Y -= 2;
+                    *Y += ar**A2 - ai**(A2+1);
+                    *(Y+1) += ar**(A2+1) + ai**A2;
+                }
+                e *= 1.0 - (ar*ar + ai*ai);
+            }
+            AC -= 2u*P+2u;
+            *E = e;
+        }
+        else
+        {
+            const size_t K = (iscolmajor) ? ((dim==0u) ? 1u : (dim==1u) ? R : (dim==2u) ? R*C : R*C*S) : ((dim==0u) ? C*S*H : (dim==1u) ? S*H : (dim==2u) ? H : 1u);
+            const size_t B = (iscolmajor && dim==0u) ? C*S*H : K;
+            const size_t V = N/Lx, G = V/B;
+
+            if (K==1u && (G==1u || B==1u))
+            {
+                for (size_t v=0u; v<V; ++v, X+=2u*P, Y+=2u*P, ++E)
+                {
+                    if (mnz)
+                    {
+                        double mnr = 0.0, mni = 0.0;
+                        for (size_t l=0u; l<Lx; ++l) { mnr += *X++; mni += *X++; }
+                        mnr /= (double)Lx; mni /= (double)Lx;
+                        for (size_t l=0u; l<Lx; ++l) { *--X -= mni; *--X -= mnr; }
+                    }
+
+                    for (size_t l=0u; l<P; ++l, X-=2u*(Lx-l+1u))
+                    {
+                        smr = smi = 0.0;
+                        for (size_t n=0u; n<Lx-l; ++n, X+=2)
+                        {
+                            smr += *X**(X+2u*l) + *(X+1u)**(X+2u*l+1u);
+                            smi += *(X+1u)**(X+2u*l) - *X**(X+2u*l+1u);
+                        }
+                        *AC++ = smr; *AC++ = smi;
+                    }
+                    smr = smi = 0.0;
+                    for (size_t n=0u; n<Lx-P; ++n, X+=2)
+                    {
+                        smr += *X**(X+2u*P) + *(X+1u)**(X+2u*P+1u);
+                        smi += *(X+1u)**(X+2u*P) - *X**(X+2u*P+1u);
+                    }
+                    *AC = smr; *(AC+1) = smi; AC -= 2u*P;
+
+                    if (unbiased)
+                    {
+                        for (size_t l=0u; l<L; ++l) { *AC++ /= (double)(Lx-l); *AC++ /= (double)(Lx-l); }
+                        AC -= 2u*L;
+                    }
+
+                    *Y++ = 1.0; *Y++ = 0.0;
+                    den = *AC**AC + *(AC+1)**(AC+1);
+                    ar = -(*(AC+2)**AC + *(AC+3)**(AC+1)) / den;
+                    ai = -(*(AC+3)**AC - *(AC+1)**(AC+2)) / den;
+                    *Y = -ar; *(Y+1) = -ai;
+                    e = *AC * (1.0 - (ar*ar+ai*ai));
+                    AC += 4;
+                    for (size_t p=1u; p<P; ++p, AC+=2u*p)
+                    {
+                        ar = *AC; ai = *(AC+1);
+                        for (size_t q=0u; q<p; ++q, Y+=2)
+                        {
+                            AC -= 2;
+                            ar -= *AC**Y - *(AC+1)**(Y+1);
+                            ai -= *(AC+1)**Y + *AC**(Y+1);
+                        }
+                        ar /= -e; ai /= -e;
+                        *Y = -ar; *(Y+1) = -ai;
+                        for (size_t q=0u; q<p; ++q, A2+=2) { Y-=2; *A2 = *Y; *(A2+1) = -*(Y+1); }
+                        Y += 2u*p;
+                        for (size_t q=0u; q<p; ++q)
+                        {
+                            A2 -= 2; Y -= 2;
+                            *Y += ar**A2 - ai**(A2+1);
+                            *(Y+1) += ar**(A2+1) + ai**A2;
+                        }
+                        e *= 1.0 - (ar*ar + ai*ai);
+                    }
+                    AC -= 2u*P+2u;
+                    *E = e;
+                }
+            }
+            else
+            {
+                for (size_t g=0u; g<G; ++g, X+=2u*B*(Lx-1u), Y+=2u*B*(P-1u))
+                {
+                    for (size_t b=0u; b<B; ++b, X+=2, Y+=2, ++E)
+                    {
+                        if (mnz)
+                        {
+                            double mnr = 0.0, mni = 0.0;
+                            for (size_t l=0u; l<Lx; ++l, X+=2u*K) { mnr += *X; mni += *(X+1); }
+                            mnr /= (double)Lx; mni /= (double)Lx;
+                            for (size_t l=0u; l<Lx; ++l) { X-=2u*K; *X -= mnr; *(X+1) -= mni; }
+                        }
+
+                        for (size_t l=0u; l<L; ++l, X-=2u*K*(Lx-l+1u), AC+=2)
+                        {
+                            smr = smi = 0.0;
+                            for (size_t n=0u; n<Lx-l; ++n, X+=2u*K)
+                            {
+                                smr += *X**(X+2u*l*K) + *(X+1)**(X+2u*l*K+1u);
+                                smi += *(X+1)**(X+2u*l*K) - *X**(X+2u*l*K+1u);
+                            }
+                            *AC = smr; *(AC+1) = smi;
+                        }
+                        AC -= 2u*L;
+
+                        if (unbiased)
+                        {
+                            for (size_t l=0u; l<L; ++l, AC+=2u) { *AC /= (double)(Lx-l); *(AC+1) /= (double)(Lx-l); }
+                        }
+
+                        *Y = 1.0; *(Y+1) = 0.0; Y += 2u*K;
+                        den = *AC**AC + *(AC+1)**(AC+1);
+                        ar = -(*(AC+2)**AC + *(AC+3)**(AC+1)) / den;
+                        ai = -(*(AC+3)**AC - *(AC+1)**(AC+2)) / den;
+                        *Y = -ar; *(Y+1) = -ai;
+                        e = *AC * (1.0 - (ar*ar+ai*ai));
+                        AC += 4;
+                        for (size_t p=1u; p<P; ++p, AC+=2u*p)
+                        {
+                            ar = *AC; ai = *(AC+1);
+                            for (size_t q=0u; q<p; ++q, Y+=2u*K)
+                            {
+                                AC -= 2;
+                                ar -= *AC**Y - *(AC+1)**(Y+1);
+                                ai -= *(AC+1)**Y + *AC**(Y+1);
+                            }
+                            ar /= -e; ai /= -e;
+                            *Y = -ar; *(Y+1) = -ai;
+                            for (size_t q=0u; q<p; ++q, A2+=2) { Y-=2u*K; *A2 = *Y; *(A2+1) = -*(Y+1); }
+                            Y += 2u*p*K;
+                            for (size_t q=0u; q<p; ++q)
+                            {
+                                A2 -= 2; Y -= 2u*K;
+                                *Y += ar**A2 - ai**(A2+1);
+                                *(Y+1) += ar**(A2+1) + ai**A2;
+                            }
+                            e *= 1.0 - (ar*ar + ai*ai);
+                        }
+                        AC -= 2u*P+2u;
+                        *E = e;
+                    }
+                }
+            }
+        }
+        free(AC); free(A2);
+    }
+
     return 0;
 }
 

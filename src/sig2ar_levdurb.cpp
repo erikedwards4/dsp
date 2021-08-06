@@ -11,7 +11,7 @@
 #include <valarray>
 #include <unordered_map>
 #include <argtable2.h>
-#include "../util/cmli.hpp"
+#include "cmli.hpp"
 #include "sig2ar_levdurb.c"
 
 #ifdef I
@@ -29,7 +29,7 @@ int main(int argc, char *argv[])
     const string errstr = ": \033[1;31merror:\033[0m ";
     const string warstr = ": \033[1;35mwarning:\033[0m ";
     const string progstr(__FILE__,string(__FILE__).find_last_of("/")+1,strlen(__FILE__)-string(__FILE__).find_last_of("/")-5);
-    const valarray<size_t> oktypes = {1u};
+    const valarray<size_t> oktypes = {1u,2u,101u,102u};
     const size_t I = 1u, O = 2u;
     ifstream ifs1; ofstream ofs1, ofs2;
     int8_t stdi1, stdo1, stdo2, wo1, wo2;
@@ -94,14 +94,14 @@ int main(int argc, char *argv[])
 
 
     //Check stdin
-    stdi1 = (a_fi->count==0 || strlen(a_fi->filename[0])==0u || strcmp(a_fi->filename[0],"-")==0);
+    stdi1 = (a_fi->count==0 || strlen(a_fi->filename[0])==0 || strcmp(a_fi->filename[0],"-")==0);
     if (stdi1>0 && isatty(fileno(stdin))) { cerr << progstr+": " << __LINE__ << errstr << "no stdin detected" << endl; return 1; }
 
 
     //Check stdout
-    if (a_fo->count>0) { stdo1 = (strlen(a_fo->filename[0])==0u || strcmp(a_fo->filename[0],"-")==0); }
+    if (a_fo->count>0) { stdo1 = (strlen(a_fo->filename[0])==0 || strcmp(a_fo->filename[0],"-")==0); }
     else { stdo1 = (!isatty(fileno(stdout))); }
-    if (a_fo->count>1) { stdo2 = (strlen(a_fo->filename[1])==0u || strcmp(a_fo->filename[1],"-")==0); }
+    if (a_fo->count>1) { stdo2 = (strlen(a_fo->filename[1])==0 || strcmp(a_fo->filename[1],"-")==0); }
     else { stdo2 = (!isatty(fileno(stdout)) && a_fo->count==1 && stdo1==0); }
     if (stdo1+stdo2>1) { cerr << progstr+": " << __LINE__ << errstr << "can only use stdout for one output" << endl; return 1; }
     wo1 = (stdo1 || a_fo->count>0); wo2 = (stdo2 || a_fo->count>1);
@@ -150,7 +150,8 @@ int main(int argc, char *argv[])
 
     //Set output header infos
     o1.F = o2.F = i1.F;
-    o1.T = o2.T = i1.T;
+    o1.T = i1.T;
+    o2.T = i1.isreal() ? i1.T : i1.T-100u;
     o1.R = (dim==0u) ? P : i1.R;
     o1.C = (dim==1u) ? P : i1.C;
     o1.S = (dim==2u) ? P : i1.S;
@@ -198,12 +199,84 @@ int main(int argc, char *argv[])
         if (wo1)
         {
             try { ofs1.write(reinterpret_cast<char*>(Y),o1.nbytes()); }
-            catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem writing output file (Y)" << endl; return 1; }
+            catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem writing output file 1 (Y)" << endl; return 1; }
         }
         if (wo2)
         {
             try { ofs2.write(reinterpret_cast<char*>(V),o2.nbytes()); }
-            catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem writing output file (V)" << endl; return 1; }
+            catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem writing output file 2 (V)" << endl; return 1; }
+        }
+        delete[] X; delete[] Y; delete[] V;
+    }
+    else if (i1.T==2)
+    {
+        double *X, *Y, *V;
+        try { X = new double[i1.N()]; }
+        catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for input file (X)" << endl; return 1; }
+        try { Y = new double[o1.N()]; }
+        catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for output file 1 (Y)" << endl; return 1; }
+        try { V = new double[o2.N()]; }
+        catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for output file 2 (V)" << endl; return 1; }
+        try { ifs1.read(reinterpret_cast<char*>(X),i1.nbytes()); }
+        catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file (X)" << endl; return 1; }
+        if (codee::sig2ar_levdurb_d(Y,V,X,i1.R,i1.C,i1.S,i1.H,i1.iscolmajor(),dim,P,mnz,u)) { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
+        if (wo1)
+        {
+            try { ofs1.write(reinterpret_cast<char*>(Y),o1.nbytes()); }
+            catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem writing output file 1 (Y)" << endl; return 1; }
+        }
+        if (wo2)
+        {
+            try { ofs2.write(reinterpret_cast<char*>(V),o2.nbytes()); }
+            catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem writing output file 2 (V)" << endl; return 1; }
+        }
+        delete[] X; delete[] Y; delete[] V;
+    }
+    else if (i1.T==101u)
+    {
+        float *X, *Y, *V;
+        try { X = new float[2u*i1.N()]; }
+        catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for input file (X)" << endl; return 1; }
+        try { Y = new float[2u*o1.N()]; }
+        catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for output file (Y)" << endl; return 1; }
+        try { V = new float[o2.N()]; }
+        catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for output file 2 (V)" << endl; return 1; }
+        try { ifs1.read(reinterpret_cast<char*>(X),i1.nbytes()); }
+        catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file (X)" << endl; return 1; }
+        if (codee::sig2ar_levdurb_c(Y,V,X,i1.R,i1.C,i1.S,i1.H,i1.iscolmajor(),dim,P,mnz,u)) { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
+        if (wo1)
+        {
+            try { ofs1.write(reinterpret_cast<char*>(Y),o1.nbytes()); }
+            catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem writing output file 1 (Y)" << endl; return 1; }
+        }
+        if (wo2)
+        {
+            try { ofs2.write(reinterpret_cast<char*>(V),o2.nbytes()); }
+            catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem writing output file 2 (V)" << endl; return 1; }
+        }
+        delete[] X; delete[] Y; delete[] V;
+    }
+    else if (i1.T==102u)
+    {
+        double *X, *Y, *V;
+        try { X = new double[2u*i1.N()]; }
+        catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for input file (X)" << endl; return 1; }
+        try { Y = new double[2u*o1.N()]; }
+        catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for output file (Y)" << endl; return 1; }
+        try { V = new double[o2.N()]; }
+        catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for output file 2 (V)" << endl; return 1; }
+        try { ifs1.read(reinterpret_cast<char*>(X),i1.nbytes()); }
+        catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file (X)" << endl; return 1; }
+        if (codee::sig2ar_levdurb_z(Y,V,X,i1.R,i1.C,i1.S,i1.H,i1.iscolmajor(),dim,P,mnz,u)) { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
+        if (wo1)
+        {
+            try { ofs1.write(reinterpret_cast<char*>(Y),o1.nbytes()); }
+            catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem writing output file 1 (Y)" << endl; return 1; }
+        }
+        if (wo2)
+        {
+            try { ofs2.write(reinterpret_cast<char*>(V),o2.nbytes()); }
+            catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem writing output file 2 (V)" << endl; return 1; }
         }
         delete[] X; delete[] Y; delete[] V;
     }
@@ -213,26 +286,7 @@ int main(int argc, char *argv[])
     }
     
 
-    //Finish
-    // else if (i1.T==101u)
-    // {
-    //     float *X, *Y;
-    //     try { X = new float[2u*i1.N()]; }
-    //     catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for input file (X)" << endl; return 1; }
-    //     try { Y = new float[2u*o1.N()]; }
-    //     catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for output file (Y)" << endl; return 1; }
-    //     try { ifs1.read(reinterpret_cast<char*>(X),i1.nbytes()); }
-    //     catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file (X)" << endl; return 1; }
-    //     if (codee::sig2ar_levdurb_c(Y,X,i1.R,i1.C,i1.S,i1.H,i1.iscolmajor(),dim,P,mnz,u)) { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
-    //     if (wo1)
-    //     {
-    //         try { ofs1.write(reinterpret_cast<char*>(Y),o1.nbytes()); }
-    //         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem writing output file (Y)" << endl; return 1; }
-    //     }
-    //     delete[] X; delete[] Y;
-    // }
-
-
     //Exit
     return ret;
 }
+
