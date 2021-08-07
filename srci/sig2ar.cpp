@@ -1,5 +1,5 @@
 //Includes
-#include "sig2ar_levdurb.c"
+#include "sig2ar.c"
 
 //Declarations
 const valarray<size_t> oktypes = {1u,2u,101u,102u};
@@ -35,9 +35,9 @@ descr += "Include -u (--unbiased) to use unbiased calculation of AC [default is 
 descr += "This uses N-l instead of N in the denominator (it is actually just less biased).\n";
 descr += "\n";
 descr += "Examples:\n";
-descr += "$ sig2ar_levdurb -p3 X -o Y -o V \n";
-descr += "$ sig2ar_levdurb -d1 -p5 X -o Y -o V \n";
-descr += "$ cat X | sig2ar_levdurb -z -p7 > Y \n";
+descr += "$ sig2ar -p3 X -o Y -o V \n";
+descr += "$ sig2ar -d1 -p5 X -o Y -o V \n";
+descr += "$ cat X | sig2ar -z -p7 > Y \n";
 
 //Argtable
 struct arg_file  *a_fi = arg_filen(nullptr,nullptr,"<file>",I-1,I,"input file (X)");
@@ -98,7 +98,7 @@ if (i1.T==1u)
     catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for output file 2 (V)" << endl; return 1; }
     try { ifs1.read(reinterpret_cast<char*>(X),i1.nbytes()); }
     catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file (X)" << endl; return 1; }
-    if (codee::sig2ar_levdurb_s(Y,V,X,i1.R,i1.C,i1.S,i1.H,i1.iscolmajor(),dim,P,mnz,u)) { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
+    if (codee::sig2ar_s(Y,V,X,i1.R,i1.C,i1.S,i1.H,i1.iscolmajor(),dim,P,mnz,u)) { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
     if (wo1)
     {
         try { ofs1.write(reinterpret_cast<char*>(Y),o1.nbytes()); }
@@ -122,7 +122,7 @@ else if (i1.T==101u)
     catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for output file 2 (V)" << endl; return 1; }
     try { ifs1.read(reinterpret_cast<char*>(X),i1.nbytes()); }
     catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file (X)" << endl; return 1; }
-    if (codee::sig2ar_levdurb_c(Y,V,X,i1.R,i1.C,i1.S,i1.H,i1.iscolmajor(),dim,P,mnz,u)) { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
+    if (codee::sig2ar_c(Y,V,X,i1.R,i1.C,i1.S,i1.H,i1.iscolmajor(),dim,P,mnz,u)) { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
     if (wo1)
     {
         try { ofs1.write(reinterpret_cast<char*>(Y),o1.nbytes()); }

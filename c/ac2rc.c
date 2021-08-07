@@ -14,15 +14,15 @@ namespace codee {
 extern "C" {
 #endif
 
-int ac2rc_levdurb_s (float *Y, const float *X, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t dim);
-int ac2rc_levdurb_d (double *Y, const double *X, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t dim);
-int ac2rc_levdurb_c (float *Y, const float *X, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t dim);
-int ac2rc_levdurb_z (double *Y, const double *X, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t dim);
+int ac2rc_s (float *Y, const float *X, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t dim);
+int ac2rc_d (double *Y, const double *X, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t dim);
+int ac2rc_c (float *Y, const float *X, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t dim);
+int ac2rc_z (double *Y, const double *X, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t dim);
 
 
-int ac2rc_levdurb_s (float *Y, const float *X, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t dim)
+int ac2rc_s (float *Y, const float *X, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t dim)
 {
-    if (dim>3u) { fprintf(stderr,"error in ac2rc_levdurb_s: dim must be in [0 3]\n"); return 1; }
+    if (dim>3u) { fprintf(stderr,"error in ac2rc_s: dim must be in [0 3]\n"); return 1; }
 
     const size_t N = R*C*S*H;
     const size_t Lx = (dim==0u) ? R : (dim==1u) ? C : (dim==2u) ? S : H;
@@ -54,8 +54,8 @@ int ac2rc_levdurb_s (float *Y, const float *X, const size_t R, const size_t C, c
     {
         const size_t P = Lx - 1u;
         float *A1, *A2, a, e;
-        if (!(A1=(float *)malloc(P*sizeof(float)))) { fprintf(stderr,"error in ac2rc_levdurb_s: problem with malloc. "); perror("malloc"); return 1; }
-        if (!(A2=(float *)malloc((P-1u)*sizeof(float)))) { fprintf(stderr,"error in ac2rc_levdurb_s: problem with malloc. "); perror("malloc"); return 1; }
+        if (!(A1=(float *)malloc(P*sizeof(float)))) { fprintf(stderr,"error in ac2rc_s: problem with malloc. "); perror("malloc"); return 1; }
+        if (!(A2=(float *)malloc((P-1u)*sizeof(float)))) { fprintf(stderr,"error in ac2rc_s: problem with malloc. "); perror("malloc"); return 1; }
         
         if (Lx==N)
         {
@@ -184,9 +184,9 @@ int ac2rc_levdurb_s (float *Y, const float *X, const size_t R, const size_t C, c
 	return 0;
 }
 
-int ac2rc_levdurb_d (double *Y, const double *X, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t dim)
+int ac2rc_d (double *Y, const double *X, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t dim)
 {
-	if (dim>3u) { fprintf(stderr,"error in ac2rc_levdurb_d: dim must be in [0 3]\n"); return 1; }
+	if (dim>3u) { fprintf(stderr,"error in ac2rc_d: dim must be in [0 3]\n"); return 1; }
 
     const size_t N = R*C*S*H;
     const size_t Lx = (dim==0u) ? R : (dim==1u) ? C : (dim==2u) ? S : H;
@@ -218,8 +218,8 @@ int ac2rc_levdurb_d (double *Y, const double *X, const size_t R, const size_t C,
     {
         const size_t P = Lx - 1u;
         double *A1, *A2, a, e;
-        if (!(A1=(double *)malloc(P*sizeof(double)))) { fprintf(stderr,"error in ac2rc_levdurb_d: problem with malloc. "); perror("malloc"); return 1; }
-        if (!(A2=(double *)malloc((P-1u)*sizeof(double)))) { fprintf(stderr,"error in ac2rc_levdurb_d: problem with malloc. "); perror("malloc"); return 1; }
+        if (!(A1=(double *)malloc(P*sizeof(double)))) { fprintf(stderr,"error in ac2rc_d: problem with malloc. "); perror("malloc"); return 1; }
+        if (!(A2=(double *)malloc((P-1u)*sizeof(double)))) { fprintf(stderr,"error in ac2rc_d: problem with malloc. "); perror("malloc"); return 1; }
         
         if (Lx==N)
         {
@@ -308,9 +308,9 @@ int ac2rc_levdurb_d (double *Y, const double *X, const size_t R, const size_t C,
 }
 
 
-int ac2rc_levdurb_c (float *Y, const float *X, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t dim)
+int ac2rc_c (float *Y, const float *X, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t dim)
 {
-    if (dim>3u) { fprintf(stderr,"error in ac2rc_levdurb_c: dim must be in [0 3]\n"); return 1; }
+    if (dim>3u) { fprintf(stderr,"error in ac2rc_c: dim must be in [0 3]\n"); return 1; }
 
     const size_t N = R*C*S*H;
     const size_t Lx = (dim==0u) ? R : (dim==1u) ? C : (dim==2u) ? S : H;
@@ -358,8 +358,8 @@ int ac2rc_levdurb_c (float *Y, const float *X, const size_t R, const size_t C, c
     {
         const size_t P = Lx - 1u;
         float *A1, *A2, ar, ai, e, den;
-        if (!(A1=(float *)malloc(2u*P*sizeof(float)))) { fprintf(stderr,"error in ac2rc_levdurb_c: problem with malloc. "); perror("malloc"); return 1; }
-        if (!(A2=(float *)malloc(2u*(P-1u)*sizeof(float)))) { fprintf(stderr,"error in ac2rc_levdurb_c: problem with malloc. "); perror("malloc"); return 1; }
+        if (!(A1=(float *)malloc(2u*P*sizeof(float)))) { fprintf(stderr,"error in ac2rc_c: problem with malloc. "); perror("malloc"); return 1; }
+        if (!(A2=(float *)malloc(2u*(P-1u)*sizeof(float)))) { fprintf(stderr,"error in ac2rc_c: problem with malloc. "); perror("malloc"); return 1; }
         
         if (Lx==N)
         {
@@ -507,9 +507,9 @@ int ac2rc_levdurb_c (float *Y, const float *X, const size_t R, const size_t C, c
 }
 
 
-int ac2rc_levdurb_z (double *Y, const double *X, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t dim)
+int ac2rc_z (double *Y, const double *X, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t dim)
 {
-    if (dim>3u) { fprintf(stderr,"error in ac2rc_levdurb_z: dim must be in [0 3]\n"); return 1; }
+    if (dim>3u) { fprintf(stderr,"error in ac2rc_z: dim must be in [0 3]\n"); return 1; }
 
     const size_t N = R*C*S*H;
     const size_t Lx = (dim==0u) ? R : (dim==1u) ? C : (dim==2u) ? S : H;
@@ -557,8 +557,8 @@ int ac2rc_levdurb_z (double *Y, const double *X, const size_t R, const size_t C,
     {
         const size_t P = Lx - 1u;
         double *A1, *A2, ar, ai, e, den;
-        if (!(A1=(double *)malloc(2u*P*sizeof(double)))) { fprintf(stderr,"error in ac2rc_levdurb_z: problem with malloc. "); perror("malloc"); return 1; }
-        if (!(A2=(double *)malloc(2u*(P-1u)*sizeof(double)))) { fprintf(stderr,"error in ac2rc_levdurb_z: problem with malloc. "); perror("malloc"); return 1; }
+        if (!(A1=(double *)malloc(2u*P*sizeof(double)))) { fprintf(stderr,"error in ac2rc_z: problem with malloc. "); perror("malloc"); return 1; }
+        if (!(A2=(double *)malloc(2u*(P-1u)*sizeof(double)))) { fprintf(stderr,"error in ac2rc_z: problem with malloc. "); perror("malloc"); return 1; }
         
         if (Lx==N)
         {

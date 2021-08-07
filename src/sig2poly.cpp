@@ -11,8 +11,8 @@
 #include <valarray>
 #include <unordered_map>
 #include <argtable2.h>
-#include "cmli.hpp"
-#include "sig2poly_levdurb.c"
+#include "../util/cmli.hpp"
+#include "sig2poly.c"
 
 #ifdef I
 #undef I
@@ -66,9 +66,9 @@ int main(int argc, char *argv[])
     descr += "This uses N-l instead of N in the denominator (it is actually just less biased).\n";
     descr += "\n";
     descr += "Examples:\n";
-    descr += "$ sig2poly_levdurb -l3 X -o Y -o V \n";
-    descr += "$ sig2poly_levdurb -d1 -l5 X -o Y -o V \n";
-    descr += "$ cat X | sig2poly_levdurb -z -l7 > Y \n";
+    descr += "$ sig2poly -l3 X -o Y -o V \n";
+    descr += "$ sig2poly -d1 -l5 X -o Y -o V \n";
+    descr += "$ cat X | sig2poly -z -l7 > Y \n";
 
 
     //Argtable
@@ -94,14 +94,14 @@ int main(int argc, char *argv[])
 
 
     //Check stdin
-    stdi1 = (a_fi->count==0 || strlen(a_fi->filename[0])==0 || strcmp(a_fi->filename[0],"-")==0);
+    stdi1 = (a_fi->count==0 || strlen(a_fi->filename[0])==0u || strcmp(a_fi->filename[0],"-")==0);
     if (stdi1>0 && isatty(fileno(stdin))) { cerr << progstr+": " << __LINE__ << errstr << "no stdin detected" << endl; return 1; }
 
 
     //Check stdout
-    if (a_fo->count>0) { stdo1 = (strlen(a_fo->filename[0])==0 || strcmp(a_fo->filename[0],"-")==0); }
+    if (a_fo->count>0) { stdo1 = (strlen(a_fo->filename[0])==0u || strcmp(a_fo->filename[0],"-")==0); }
     else { stdo1 = (!isatty(fileno(stdout))); }
-    if (a_fo->count>1) { stdo2 = (strlen(a_fo->filename[1])==0 || strcmp(a_fo->filename[1],"-")==0); }
+    if (a_fo->count>1) { stdo2 = (strlen(a_fo->filename[1])==0u || strcmp(a_fo->filename[1],"-")==0); }
     else { stdo2 = (!isatty(fileno(stdout)) && a_fo->count==1 && stdo1==0); }
     if (stdo1+stdo2>1) { cerr << progstr+": " << __LINE__ << errstr << "can only use stdout for one output" << endl; return 1; }
     wo1 = (stdo1 || a_fo->count>0); wo2 = (stdo2 || a_fo->count>1);
@@ -196,7 +196,7 @@ int main(int argc, char *argv[])
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for output file 2 (V)" << endl; return 1; }
         try { ifs1.read(reinterpret_cast<char*>(X),i1.nbytes()); }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file (X)" << endl; return 1; }
-        if (codee::sig2poly_levdurb_s(Y,V,X,i1.R,i1.C,i1.S,i1.H,i1.iscolmajor(),dim,L,mnz,u)) { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
+        if (codee::sig2poly_s(Y,V,X,i1.R,i1.C,i1.S,i1.H,i1.iscolmajor(),dim,L,mnz,u)) { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
         if (wo1)
         {
             try { ofs1.write(reinterpret_cast<char*>(Y),o1.nbytes()); }
@@ -209,7 +209,7 @@ int main(int argc, char *argv[])
         }
         delete[] X; delete[] Y; delete[] V;
     }
-    else if (i1.T==2)
+    else if (i1.T==2u)
     {
         double *X, *Y, *V;
         try { X = new double[i1.N()]; }
@@ -220,7 +220,7 @@ int main(int argc, char *argv[])
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for output file 2 (V)" << endl; return 1; }
         try { ifs1.read(reinterpret_cast<char*>(X),i1.nbytes()); }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file (X)" << endl; return 1; }
-        if (codee::sig2poly_levdurb_d(Y,V,X,i1.R,i1.C,i1.S,i1.H,i1.iscolmajor(),dim,L,mnz,u)) { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
+        if (codee::sig2poly_d(Y,V,X,i1.R,i1.C,i1.S,i1.H,i1.iscolmajor(),dim,L,mnz,u)) { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
         if (wo1)
         {
             try { ofs1.write(reinterpret_cast<char*>(Y),o1.nbytes()); }
@@ -244,7 +244,7 @@ int main(int argc, char *argv[])
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for output file 2 (V)" << endl; return 1; }
         try { ifs1.read(reinterpret_cast<char*>(X),i1.nbytes()); }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file (X)" << endl; return 1; }
-        if (codee::sig2poly_levdurb_c(Y,V,X,i1.R,i1.C,i1.S,i1.H,i1.iscolmajor(),dim,L,mnz,u)) { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
+        if (codee::sig2poly_c(Y,V,X,i1.R,i1.C,i1.S,i1.H,i1.iscolmajor(),dim,L,mnz,u)) { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
         if (wo1)
         {
             try { ofs1.write(reinterpret_cast<char*>(Y),o1.nbytes()); }
@@ -268,7 +268,7 @@ int main(int argc, char *argv[])
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for output file 2 (V)" << endl; return 1; }
         try { ifs1.read(reinterpret_cast<char*>(X),i1.nbytes()); }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file (X)" << endl; return 1; }
-        if (codee::sig2poly_levdurb_z(Y,V,X,i1.R,i1.C,i1.S,i1.H,i1.iscolmajor(),dim,L,mnz,u)) { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
+        if (codee::sig2poly_z(Y,V,X,i1.R,i1.C,i1.S,i1.H,i1.iscolmajor(),dim,L,mnz,u)) { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
         if (wo1)
         {
             try { ofs1.write(reinterpret_cast<char*>(Y),o1.nbytes()); }
@@ -290,4 +290,3 @@ int main(int argc, char *argv[])
     //Exit
     return ret;
 }
-

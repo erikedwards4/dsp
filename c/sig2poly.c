@@ -1,17 +1,17 @@
-//Gets P autoregressive (AR) params (Y), and error variance (V), for each vector in X.
+//Gets polynomial params (Y), and error variance (V), for each vector in X.
 //Works along dim, such that each signal (vector) in X is converted
-//to one scalar in V and one vector (of length P) in Y.
+//to one scalar in V and one vector (of length L) in Y.
 
 //By default, the means of X are NOT subtracted.
 //The mnz option allows the mean to be zeroed first for each vec in X.
 //However, this also required the removal of the const qualifier for input *X.
 
-//This starts by getting the autocovariance (AC) for lags 0 to P for each vector in X.
+//This starts by getting the autocovariance (AC) for lags 0 to L-1 for each vector in X.
 //The "biased" version of AC uses N in the denominator,
 //whereas the "unbiased" version uses N-l in the denominator instead of N.
 //It is actually just "less biased", but is slower, has worse MSE, and doesn't match FFT estimate.
 
-//After getting the AC, Levinson-Durbin (levdurb) recursion is used to get the AR params (Y)
+//After getting the AC, Levinson-Durbin (levdurb) recursion is used to get the polynomial params (Y)
 //and the error variance (E).
 
 #include <stdio.h>
@@ -22,27 +22,28 @@ namespace codee {
 extern "C" {
 #endif
 
-int sig2ar_levdurb_s (float *Y, float *E, float *X, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t dim, const size_t P, const int mnz, const int unbiased);
-int sig2ar_levdurb_d (double *Y, double *E, double *X, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t dim, const size_t P, const int mnz, const int unbiased);
-int sig2ar_levdurb_c (float *Y, float *E, float *X, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t dim, const size_t P, const int mnz, const int unbiased);
-int sig2ar_levdurb_z (double *Y, double *E, double *X, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t dim, const size_t P, const int mnz, const int unbiased);
+int sig2poly_s (float *Y, float *E, float *X, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t dim, const size_t L, const int mnz, const int unbiased);
+int sig2poly_d (double *Y, double *E, double *X, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t dim, const size_t L, const int mnz, const int unbiased);
+int sig2poly_c (float *Y, float *E, float *X, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t dim, const size_t L, const int mnz, const int unbiased);
+int sig2poly_z (double *Y, double *E, double *X, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t dim, const size_t L, const int mnz, const int unbiased);
 
 
-int sig2ar_levdurb_s (float *Y, float *E, float *X, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t dim, const size_t P, const int mnz, const int unbiased)
+int sig2poly_s (float *Y, float *E, float *X, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t dim, const size_t L, const int mnz, const int unbiased)
 {
-    if (dim>3u) { fprintf(stderr,"error in sig2ar_levdurb_s: dim must be in [0 3]\n"); return 1; }
+    if (dim>3u) { fprintf(stderr,"error in sig2poly_s: dim must be in [0 3]\n"); return 1; }
+    if (L<1u) { fprintf(stderr,"error in sig2poly_s: L (length of ACF) must be positive\n"); return 1; }
 
     const size_t N = R*C*S*H;
     const size_t Lx = (dim==0u) ? R : (dim==1u) ? C : (dim==2u) ? S : H;
-    const size_t L = P + 1u;
-    if (P>=Lx) { fprintf(stderr,"error in sig2ar_levdurb_s: P (polynomial order) must be < Lx (length of vecs in X)\n"); return 1; }
+    const size_t P = L - 1u;
+    if (P>=Lx) { fprintf(stderr,"error in sig2poly_s: P (polynomial order) must be < Lx (length of vecs in X)\n"); return 1; }
 
     if (N==0u) {}
     else
     {
         float *AC, *A2, a, sm, e;
-        if (!(AC=(float *)malloc(L*sizeof(float)))) { fprintf(stderr,"error in sig2ar_levdurb_s: problem with malloc. "); perror("malloc"); return 1; }
-        if (!(A2=(float *)malloc((P-1u)*sizeof(float)))) { fprintf(stderr,"error in sig2ar_levdurb_s: problem with malloc. "); perror("malloc"); return 1; }
+        if (!(AC=(float *)malloc(L*sizeof(float)))) { fprintf(stderr,"error in sig2poly_s: problem with malloc. "); perror("malloc"); return 1; }
+        if (!(A2=(float *)malloc((P-1u)*sizeof(float)))) { fprintf(stderr,"error in sig2poly_s: problem with malloc. "); perror("malloc"); return 1; }
 
         if (Lx==N)
         {
@@ -68,15 +69,16 @@ int sig2ar_levdurb_s (float *Y, float *E, float *X, const size_t R, const size_t
                 AC -= L;
             }
 
+            *Y++ = 1.0f;
             a = -*(AC+1) / *AC;
-            *Y = -a;
+            *Y = a;
             e = *AC++; e += a * *AC++;
             for (size_t p=1u; p<P; ++p, AC+=p)
             {
                 a = *AC;
-                for (size_t q=0u; q<p; ++q, ++Y) { --AC; a -= *AC * *Y; }
+                for (size_t q=0u; q<p; ++q, ++Y) { --AC; a += *AC * *Y; }
                 a /= -e;
-                *Y = -a;
+                *Y = a;
                 for (size_t q=0u; q<p; ++q, ++A2) { --Y; *A2 = *Y; }
                 Y += p;
                 for (size_t q=0u; q<p; ++q) { --A2; --Y; *Y += a * *A2; }
@@ -119,15 +121,16 @@ int sig2ar_levdurb_s (float *Y, float *E, float *X, const size_t R, const size_t
                         AC -= L;
                     }
 
+                    *Y++ = 1.0f;
                     a = -*(AC+1) / *AC;
-                    *Y = -a;
+                    *Y = a;
                     e = *AC++; e += a * *AC++;
                     for (size_t p=1u; p<P; ++p, AC+=p)
                     {
                         a = *AC;
-                        for (size_t q=0u; q<p; ++q, ++Y) { --AC; a -= *AC * *Y; }
+                        for (size_t q=0u; q<p; ++q, ++Y) { --AC; a += *AC * *Y; }
                         a /= -e;
-                        *Y = -a;
+                        *Y = a;
                         for (size_t q=0u; q<p; ++q, ++A2) { --Y; *A2 = *Y; }
                         Y += p;
                         for (size_t q=0u; q<p; ++q) { --A2; --Y; *Y += a * *A2; }
@@ -139,9 +142,9 @@ int sig2ar_levdurb_s (float *Y, float *E, float *X, const size_t R, const size_t
             }
             else
             {
-                for (size_t g=0u; g<G; ++g, X+=B*(Lx-1u), Y+=B*(P-1u))
+                for (size_t g=0u; g<G; ++g, X+=B*(Lx-1u), Y+=B*P)
                 {
-                    for (size_t b=0u; b<B; ++b, ++X, ++Y, ++E)
+                    for (size_t b=0u; b<B; ++b, ++X, Y-=K-1u, ++E)
                     {
                         if (mnz)
                         {
@@ -165,16 +168,17 @@ int sig2ar_levdurb_s (float *Y, float *E, float *X, const size_t R, const size_t
                             AC -= L;
                         }
 
+                        *Y = 1.0f; Y += K;
                         a = -*(AC+1) / *AC;
-                        *Y = -a;
+                        *Y = a;
                         e = *AC; ++AC;
                         e += a * *AC; ++AC;
                         for (size_t p=1u; p<P; ++p, AC+=p)
                         {
                             a = *AC;
-                            for (size_t q=0u; q<p; ++q, Y+=K) { --AC; a -= *AC * *Y; }
+                            for (size_t q=0u; q<p; ++q, Y+=K) { --AC; a += *AC * *Y; }
                             a /= -e;
-                            *Y = -a;
+                            *Y = a;
                             for (size_t q=0u; q<p; ++q, ++A2) { Y-=K; *A2 = *Y; }
                             Y += p*K;
                             for (size_t q=0u; q<p; ++q) { --A2; Y-=K; *Y += a * *A2; }
@@ -193,21 +197,22 @@ int sig2ar_levdurb_s (float *Y, float *E, float *X, const size_t R, const size_t
 }
 
 
-int sig2ar_levdurb_d (double *Y, double *E, double *X, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t dim, const size_t P, const int mnz, const int unbiased)
+int sig2poly_d (double *Y, double *E, double *X, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t dim, const size_t L, const int mnz, const int unbiased)
 {
-    if (dim>3u) { fprintf(stderr,"error in sig2ar_levdurb_d: dim must be in [0 3]\n"); return 1; }
+    if (dim>3u) { fprintf(stderr,"error in sig2poly_d: dim must be in [0 3]\n"); return 1; }
+    if (L<1u) { fprintf(stderr,"error in sig2poly_d: L (length of ACF) must be positive\n"); return 1; }
 
     const size_t N = R*C*S*H;
     const size_t Lx = (dim==0u) ? R : (dim==1u) ? C : (dim==2u) ? S : H;
-    const size_t L = P + 1u;
-    if (P>=Lx) { fprintf(stderr,"error in sig2ar_levdurb_d: P (polynomial order) must be < Lx (length of vecs in X)\n"); return 1; }
+    const size_t P = L - 1u;
+    if (P>=Lx) { fprintf(stderr,"error in sig2poly_d: P (polynomial order) must be < Lx (length of vecs in X)\n"); return 1; }
 
     if (N==0u) {}
     else
     {
         double *AC, *A2, a, sm, e;
-        if (!(AC=(double *)malloc(L*sizeof(double)))) { fprintf(stderr,"error in sig2ar_levdurb_d: problem with malloc. "); perror("malloc"); return 1; }
-        if (!(A2=(double *)malloc((P-1u)*sizeof(double)))) { fprintf(stderr,"error in sig2ar_levdurb_d: problem with malloc. "); perror("malloc"); return 1; }
+        if (!(AC=(double *)malloc(L*sizeof(double)))) { fprintf(stderr,"error in sig2poly_d: problem with malloc. "); perror("malloc"); return 1; }
+        if (!(A2=(double *)malloc((P-1u)*sizeof(double)))) { fprintf(stderr,"error in sig2poly_d: problem with malloc. "); perror("malloc"); return 1; }
 
         if (Lx==N)
         {
@@ -233,15 +238,16 @@ int sig2ar_levdurb_d (double *Y, double *E, double *X, const size_t R, const siz
                 AC -= L;
             }
 
+            *Y++ = 1.0;
             a = -*(AC+1) / *AC;
-            *Y = -a;
+            *Y = a;
             e = *AC++; e += a * *AC++;
             for (size_t p=1u; p<P; ++p, AC+=p)
             {
                 a = *AC;
-                for (size_t q=0u; q<p; ++q, ++Y) { --AC; a -= *AC * *Y; }
+                for (size_t q=0u; q<p; ++q, ++Y) { --AC; a += *AC * *Y; }
                 a /= -e;
-                *Y = -a;
+                *Y = a;
                 for (size_t q=0u; q<p; ++q, ++A2) { --Y; *A2 = *Y; }
                 Y += p;
                 for (size_t q=0u; q<p; ++q) { --A2; --Y; *Y += a * *A2; }
@@ -284,15 +290,16 @@ int sig2ar_levdurb_d (double *Y, double *E, double *X, const size_t R, const siz
                         AC -= L;
                     }
 
+                    *Y++ = 1.0;
                     a = -*(AC+1) / *AC;
-                    *Y = -a;
+                    *Y = a;
                     e = *AC++; e += a * *AC++;
                     for (size_t p=1u; p<P; ++p, AC+=p)
                     {
                         a = *AC;
-                        for (size_t q=0u; q<p; ++q, ++Y) { --AC; a -= *AC * *Y; }
+                        for (size_t q=0u; q<p; ++q, ++Y) { --AC; a += *AC * *Y; }
                         a /= -e;
-                        *Y = -a;
+                        *Y = a;
                         for (size_t q=0u; q<p; ++q, ++A2) { --Y; *A2 = *Y; }
                         Y += p;
                         for (size_t q=0u; q<p; ++q) { --A2; --Y; *Y += a * *A2; }
@@ -304,9 +311,9 @@ int sig2ar_levdurb_d (double *Y, double *E, double *X, const size_t R, const siz
             }
             else
             {
-                for (size_t g=0u; g<G; ++g, X+=B*(Lx-1u), Y+=B*(P-1u))
+                for (size_t g=0u; g<G; ++g, X+=B*(Lx-1u), Y+=B*P)
                 {
-                    for (size_t b=0u; b<B; ++b, ++X, ++Y, ++E)
+                    for (size_t b=0u; b<B; ++b, ++X, Y-=K-1u, ++E)
                     {
                         if (mnz)
                         {
@@ -330,16 +337,17 @@ int sig2ar_levdurb_d (double *Y, double *E, double *X, const size_t R, const siz
                             AC -= L;
                         }
 
+                        *Y = 1.0; Y += K;
                         a = -*(AC+1) / *AC;
-                        *Y = -a;
+                        *Y = a;
                         e = *AC; ++AC;
                         e += a * *AC; ++AC;
                         for (size_t p=1u; p<P; ++p, AC+=p)
                         {
                             a = *AC;
-                            for (size_t q=0u; q<p; ++q, Y+=K) { --AC; a -= *AC * *Y; }
+                            for (size_t q=0u; q<p; ++q, Y+=K) { --AC; a += *AC * *Y; }
                             a /= -e;
-                            *Y = -a;
+                            *Y = a;
                             for (size_t q=0u; q<p; ++q, ++A2) { Y-=K; *A2 = *Y; }
                             Y += p*K;
                             for (size_t q=0u; q<p; ++q) { --A2; Y-=K; *Y += a * *A2; }
@@ -358,21 +366,22 @@ int sig2ar_levdurb_d (double *Y, double *E, double *X, const size_t R, const siz
 }
 
 
-int sig2ar_levdurb_c (float *Y, float *E, float *X, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t dim, const size_t P, const int mnz, const int unbiased)
+int sig2poly_c (float *Y, float *E, float *X, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t dim, const size_t L, const int mnz, const int unbiased)
 {
-    if (dim>3u) { fprintf(stderr,"error in sig2ar_levdurb_c: dim must be in [0 3]\n"); return 1; }
+    if (dim>3u) { fprintf(stderr,"error in sig2poly_c: dim must be in [0 3]\n"); return 1; }
+    if (L<1u) { fprintf(stderr,"error in sig2poly_c: L (length of ACF) must be positive\n"); return 1; }
 
     const size_t N = R*C*S*H;
     const size_t Lx = (dim==0u) ? R : (dim==1u) ? C : (dim==2u) ? S : H;
-    const size_t L = P + 1u;
-    if (P>=Lx) { fprintf(stderr,"error in sig2ar_levdurb_c: P (polynomial order) must be < Lx (length of vecs in X)\n"); return 1; }
+    const size_t P = L - 1u;
+    if (P>=Lx) { fprintf(stderr,"error in sig2poly_c: P (polynomial order) must be < Lx (length of vecs in X)\n"); return 1; }
 
     if (N==0u) {}
     else
     {
         float *AC, *A2, ar, ai, smr, smi, den, e;
-        if (!(AC=(float *)malloc(2u*L*sizeof(float)))) { fprintf(stderr,"error in sig2ar_levdurb_c: problem with malloc. "); perror("malloc"); return 1; }
-        if (!(A2=(float *)malloc(2u*(P-1u)*sizeof(float)))) { fprintf(stderr,"error in sig2ar_levdurb_c: problem with malloc. "); perror("malloc"); return 1; }
+        if (!(AC=(float *)malloc(2u*L*sizeof(float)))) { fprintf(stderr,"error in sig2poly_c: problem with malloc. "); perror("malloc"); return 1; }
+        if (!(A2=(float *)malloc(2u*(P-1u)*sizeof(float)))) { fprintf(stderr,"error in sig2poly_c: problem with malloc. "); perror("malloc"); return 1; }
 
         if (Lx==N)
         {
@@ -402,10 +411,11 @@ int sig2ar_levdurb_c (float *Y, float *E, float *X, const size_t R, const size_t
                 AC -= 2u*L;
             }
 
+            *Y++ = 1.0f; *Y++ = 0.0f;
             den = *AC**AC + *(AC+1)**(AC+1);
             ar = -(*(AC+2)**AC + *(AC+3)**(AC+1)) / den;
             ai = -(*(AC+3)**AC - *(AC+1)**(AC+2)) / den;
-            *Y = -ar; *(Y+1) = -ai;
+            *Y = ar; *(Y+1) = ai;
             e = *AC * (1.0f - (ar*ar+ai*ai));
             AC += 4;
             for (size_t p=1u; p<P; ++p, AC+=2u*p)
@@ -414,11 +424,11 @@ int sig2ar_levdurb_c (float *Y, float *E, float *X, const size_t R, const size_t
                 for (size_t q=0u; q<p; ++q, Y+=2)
                 {
                     AC -= 2;
-                    ar -= *AC**Y - *(AC+1)**(Y+1);
-                    ai -= *(AC+1)**Y + *AC**(Y+1);
+                    ar += *AC**Y - *(AC+1)**(Y+1);
+                    ai += *(AC+1)**Y + *AC**(Y+1);
                 }
                 ar /= -e; ai /= -e;
-                *Y = -ar; *(Y+1) = -ai;
+                *Y = ar; *(Y+1) = ai;
                 for (size_t q=0u; q<p; ++q, A2+=2) { Y-=2; *A2 = *Y; *(A2+1) = -*(Y+1); }
                 Y += 2u*p;
                 for (size_t q=0u; q<p; ++q)
@@ -429,7 +439,7 @@ int sig2ar_levdurb_c (float *Y, float *E, float *X, const size_t R, const size_t
                 }
                 e *= 1.0f - (ar*ar + ai*ai);
             }
-            AC -= 2u*P+2u;
+            AC -= 2u*L;
             *E = e;
         }
         else
@@ -455,16 +465,16 @@ int sig2ar_levdurb_c (float *Y, float *E, float *X, const size_t R, const size_t
                         smr = smi = 0.0f;
                         for (size_t n=0u; n<Lx-l; ++n, X+=2)
                         {
-                            smr += *X**(X+2u*l) + *(X+1u)**(X+2u*l+1u);
-                            smi += *(X+1u)**(X+2u*l) - *X**(X+2u*l+1u);
+                            smr += *X**(X+2u*l) + *(X+1)**(X+2u*l+1u);
+                            smi += *(X+1)**(X+2u*l) - *X**(X+2u*l+1u);
                         }
                         *AC++ = smr; *AC++ = smi;
                     }
                     smr = smi = 0.0f;
                     for (size_t n=0u; n<Lx-P; ++n, X+=2)
                     {
-                        smr += *X**(X+2u*P) + *(X+1u)**(X+2u*P+1u);
-                        smi += *(X+1u)**(X+2u*P) - *X**(X+2u*P+1u);
+                        smr += *X**(X+2u*P) + *(X+1)**(X+2u*P+1u);
+                        smi += *(X+1)**(X+2u*P) - *X**(X+2u*P+1u);
                     }
                     *AC = smr; *(AC+1) = smi; AC -= 2u*P;
 
@@ -474,10 +484,11 @@ int sig2ar_levdurb_c (float *Y, float *E, float *X, const size_t R, const size_t
                         AC -= 2u*L;
                     }
 
+                    *Y++ = 1.0f; *Y++ = 0.0f;
                     den = *AC**AC + *(AC+1)**(AC+1);
                     ar = -(*(AC+2)**AC + *(AC+3)**(AC+1)) / den;
                     ai = -(*(AC+3)**AC - *(AC+1)**(AC+2)) / den;
-                    *Y = -ar; *(Y+1) = -ai;
+                    *Y = ar; *(Y+1) = ai;
                     e = *AC * (1.0f - (ar*ar+ai*ai));
                     AC += 4;
                     for (size_t p=1u; p<P; ++p, AC+=2u*p)
@@ -486,11 +497,11 @@ int sig2ar_levdurb_c (float *Y, float *E, float *X, const size_t R, const size_t
                         for (size_t q=0u; q<p; ++q, Y+=2)
                         {
                             AC -= 2;
-                            ar -= *AC**Y - *(AC+1)**(Y+1);
-                            ai -= *(AC+1)**Y + *AC**(Y+1);
+                            ar += *AC**Y - *(AC+1)**(Y+1);
+                            ai += *(AC+1)**Y + *AC**(Y+1);
                         }
                         ar /= -e; ai /= -e;
-                        *Y = -ar; *(Y+1) = -ai;
+                        *Y = ar; *(Y+1) = ai;
                         for (size_t q=0u; q<p; ++q, A2+=2) { Y-=2; *A2 = *Y; *(A2+1) = -*(Y+1); }
                         Y += 2u*p;
                         for (size_t q=0u; q<p; ++q)
@@ -501,25 +512,25 @@ int sig2ar_levdurb_c (float *Y, float *E, float *X, const size_t R, const size_t
                         }
                         e *= 1.0f - (ar*ar + ai*ai);
                     }
-                    AC -= 2u*P+2u;
+                    AC -= 2u*L;
                     *E = e;
                 }
             }
             else
             {
-                for (size_t g=0u; g<G; ++g, X+=2u*B*(Lx-1u), Y+=2u*B*(P-1u))
+                for (size_t g=0u; g<G; ++g, X+=2u*B*(Lx-1u), Y+=2u*B*P)
                 {
-                    for (size_t b=0u; b<B; ++b, X+=2, Y+=2, ++E)
+                    for (size_t b=0u; b<B; ++b, X+=2, Y-=2u*K-2u, ++E)
                     {
                         if (mnz)
                         {
                             float mnr = 0.0f, mni = 0.0f;
                             for (size_t l=0u; l<Lx; ++l, X+=2u*K) { mnr += *X; mni += *(X+1); }
                             mnr /= (float)Lx; mni /= (float)Lx;
-                            for (size_t l=0u; l<Lx; ++l) { X-=2u*K; *X -= mnr; *(X+1) -= mni; }
+                            for (size_t l=0u; l<Lx; ++l) { X-=2u*K; *X -= mni; *(X+1) -= mnr; }
                         }
 
-                        for (size_t l=0u; l<L; ++l, X-=2u*K*(Lx-l+1u), AC+=2)
+                        for (size_t l=0u; l<L; ++l, X-=2u*K*(Lx-l+1u))
                         {
                             smr = smi = 0.0f;
                             for (size_t n=0u; n<Lx-l; ++n, X+=2u*K)
@@ -527,19 +538,21 @@ int sig2ar_levdurb_c (float *Y, float *E, float *X, const size_t R, const size_t
                                 smr += *X**(X+2u*l*K) + *(X+1)**(X+2u*l*K+1u);
                                 smi += *(X+1)**(X+2u*l*K) - *X**(X+2u*l*K+1u);
                             }
-                            *AC = smr; *(AC+1) = smi;
+                            *AC++ = smr; *AC++ = smi;
                         }
                         AC -= 2u*L;
 
                         if (unbiased)
                         {
-                            for (size_t l=0u; l<L; ++l, AC+=2u) { *AC /= (float)(Lx-l); *(AC+1) /= (float)(Lx-l); }
+                            for (size_t l=0u; l<L; ++l) { *AC++ /= (float)(Lx-l); *AC++ /= (float)(Lx-l); }
+                            AC -= 2u*L;
                         }
 
+                        *Y = 1.0f; *(Y+1) = 0.0f; Y += 2u*K;
                         den = *AC**AC + *(AC+1)**(AC+1);
                         ar = -(*(AC+2)**AC + *(AC+3)**(AC+1)) / den;
                         ai = -(*(AC+3)**AC - *(AC+1)**(AC+2)) / den;
-                        *Y = -ar; *(Y+1) = -ai;
+                        *Y = ar; *(Y+1) = ai;
                         e = *AC * (1.0f - (ar*ar+ai*ai));
                         AC += 4;
                         for (size_t p=1u; p<P; ++p, AC+=2u*p)
@@ -548,11 +561,11 @@ int sig2ar_levdurb_c (float *Y, float *E, float *X, const size_t R, const size_t
                             for (size_t q=0u; q<p; ++q, Y+=2u*K)
                             {
                                 AC -= 2;
-                                ar -= *AC**Y - *(AC+1)**(Y+1);
-                                ai -= *(AC+1)**Y + *AC**(Y+1);
+                                ar += *AC**Y - *(AC+1)**(Y+1);
+                                ai += *(AC+1)**Y + *AC**(Y+1);
                             }
                             ar /= -e; ai /= -e;
-                            *Y = -ar; *(Y+1) = -ai;
+                            *Y = ar; *(Y+1) = ai;
                             for (size_t q=0u; q<p; ++q, A2+=2) { Y-=2u*K; *A2 = *Y; *(A2+1) = -*(Y+1); }
                             Y += 2u*p*K;
                             for (size_t q=0u; q<p; ++q)
@@ -563,7 +576,7 @@ int sig2ar_levdurb_c (float *Y, float *E, float *X, const size_t R, const size_t
                             }
                             e *= 1.0f - (ar*ar + ai*ai);
                         }
-                        AC -= 2u*P+2u;
+                        AC -= 2u*L;
                         *E = e;
                     }
                 }
@@ -576,21 +589,22 @@ int sig2ar_levdurb_c (float *Y, float *E, float *X, const size_t R, const size_t
 }
 
 
-int sig2ar_levdurb_z (double *Y, double *E, double *X, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t dim, const size_t P, const int mnz, const int unbiased)
+int sig2poly_z (double *Y, double *E, double *X, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t dim, const size_t L, const int mnz, const int unbiased)
 {
-    if (dim>3u) { fprintf(stderr,"error in sig2ar_levdurb_z: dim must be in [0 3]\n"); return 1; }
+    if (dim>3u) { fprintf(stderr,"error in sig2poly_z: dim must be in [0 3]\n"); return 1; }
+    if (L<1u) { fprintf(stderr,"error in sig2poly_z: L (length of ACF) must be positive\n"); return 1; }
 
     const size_t N = R*C*S*H;
     const size_t Lx = (dim==0u) ? R : (dim==1u) ? C : (dim==2u) ? S : H;
-    const size_t L = P + 1u;
-    if (P>=Lx) { fprintf(stderr,"error in sig2ar_levdurb_z: P (polynomial order) must be < Lx (length of vecs in X)\n"); return 1; }
+    const size_t P = L - 1u;
+    if (P>=Lx) { fprintf(stderr,"error in sig2poly_z: P (polynomial order) must be < Lx (length of vecs in X)\n"); return 1; }
 
     if (N==0u) {}
     else
     {
         double *AC, *A2, ar, ai, smr, smi, den, e;
-        if (!(AC=(double *)malloc(2u*L*sizeof(double)))) { fprintf(stderr,"error in sig2ar_levdurb_z: problem with malloc. "); perror("malloc"); return 1; }
-        if (!(A2=(double *)malloc(2u*(P-1u)*sizeof(double)))) { fprintf(stderr,"error in sig2ar_levdurb_z: problem with malloc. "); perror("malloc"); return 1; }
+        if (!(AC=(double *)malloc(2u*L*sizeof(double)))) { fprintf(stderr,"error in sig2poly_z: problem with malloc. "); perror("malloc"); return 1; }
+        if (!(A2=(double *)malloc(2u*(P-1u)*sizeof(double)))) { fprintf(stderr,"error in sig2poly_z: problem with malloc. "); perror("malloc"); return 1; }
 
         if (Lx==N)
         {
@@ -620,10 +634,11 @@ int sig2ar_levdurb_z (double *Y, double *E, double *X, const size_t R, const siz
                 AC -= 2u*L;
             }
 
+            *Y++ = 1.0; *Y++ = 0.0;
             den = *AC**AC + *(AC+1)**(AC+1);
             ar = -(*(AC+2)**AC + *(AC+3)**(AC+1)) / den;
             ai = -(*(AC+3)**AC - *(AC+1)**(AC+2)) / den;
-            *Y = -ar; *(Y+1) = -ai;
+            *Y = ar; *(Y+1) = ai;
             e = *AC * (1.0 - (ar*ar+ai*ai));
             AC += 4;
             for (size_t p=1u; p<P; ++p, AC+=2u*p)
@@ -632,11 +647,11 @@ int sig2ar_levdurb_z (double *Y, double *E, double *X, const size_t R, const siz
                 for (size_t q=0u; q<p; ++q, Y+=2)
                 {
                     AC -= 2;
-                    ar -= *AC**Y - *(AC+1)**(Y+1);
-                    ai -= *(AC+1)**Y + *AC**(Y+1);
+                    ar += *AC**Y - *(AC+1)**(Y+1);
+                    ai += *(AC+1)**Y + *AC**(Y+1);
                 }
                 ar /= -e; ai /= -e;
-                *Y = -ar; *(Y+1) = -ai;
+                *Y = ar; *(Y+1) = ai;
                 for (size_t q=0u; q<p; ++q, A2+=2) { Y-=2; *A2 = *Y; *(A2+1) = -*(Y+1); }
                 Y += 2u*p;
                 for (size_t q=0u; q<p; ++q)
@@ -647,7 +662,7 @@ int sig2ar_levdurb_z (double *Y, double *E, double *X, const size_t R, const siz
                 }
                 e *= 1.0 - (ar*ar + ai*ai);
             }
-            AC -= 2u*P+2u;
+            AC -= 2u*L;
             *E = e;
         }
         else
@@ -673,16 +688,16 @@ int sig2ar_levdurb_z (double *Y, double *E, double *X, const size_t R, const siz
                         smr = smi = 0.0;
                         for (size_t n=0u; n<Lx-l; ++n, X+=2)
                         {
-                            smr += *X**(X+2u*l) + *(X+1u)**(X+2u*l+1u);
-                            smi += *(X+1u)**(X+2u*l) - *X**(X+2u*l+1u);
+                            smr += *X**(X+2u*l) + *(X+1)**(X+2u*l+1u);
+                            smi += *(X+1)**(X+2u*l) - *X**(X+2u*l+1u);
                         }
                         *AC++ = smr; *AC++ = smi;
                     }
                     smr = smi = 0.0;
                     for (size_t n=0u; n<Lx-P; ++n, X+=2)
                     {
-                        smr += *X**(X+2u*P) + *(X+1u)**(X+2u*P+1u);
-                        smi += *(X+1u)**(X+2u*P) - *X**(X+2u*P+1u);
+                        smr += *X**(X+2u*P) + *(X+1)**(X+2u*P+1u);
+                        smi += *(X+1)**(X+2u*P) - *X**(X+2u*P+1u);
                     }
                     *AC = smr; *(AC+1) = smi; AC -= 2u*P;
 
@@ -692,10 +707,11 @@ int sig2ar_levdurb_z (double *Y, double *E, double *X, const size_t R, const siz
                         AC -= 2u*L;
                     }
 
+                    *Y++ = 1.0; *Y++ = 0.0;
                     den = *AC**AC + *(AC+1)**(AC+1);
                     ar = -(*(AC+2)**AC + *(AC+3)**(AC+1)) / den;
                     ai = -(*(AC+3)**AC - *(AC+1)**(AC+2)) / den;
-                    *Y = -ar; *(Y+1) = -ai;
+                    *Y = ar; *(Y+1) = ai;
                     e = *AC * (1.0 - (ar*ar+ai*ai));
                     AC += 4;
                     for (size_t p=1u; p<P; ++p, AC+=2u*p)
@@ -704,11 +720,11 @@ int sig2ar_levdurb_z (double *Y, double *E, double *X, const size_t R, const siz
                         for (size_t q=0u; q<p; ++q, Y+=2)
                         {
                             AC -= 2;
-                            ar -= *AC**Y - *(AC+1)**(Y+1);
-                            ai -= *(AC+1)**Y + *AC**(Y+1);
+                            ar += *AC**Y - *(AC+1)**(Y+1);
+                            ai += *(AC+1)**Y + *AC**(Y+1);
                         }
                         ar /= -e; ai /= -e;
-                        *Y = -ar; *(Y+1) = -ai;
+                        *Y = ar; *(Y+1) = ai;
                         for (size_t q=0u; q<p; ++q, A2+=2) { Y-=2; *A2 = *Y; *(A2+1) = -*(Y+1); }
                         Y += 2u*p;
                         for (size_t q=0u; q<p; ++q)
@@ -719,25 +735,25 @@ int sig2ar_levdurb_z (double *Y, double *E, double *X, const size_t R, const siz
                         }
                         e *= 1.0 - (ar*ar + ai*ai);
                     }
-                    AC -= 2u*P+2u;
+                    AC -= 2u*L;
                     *E = e;
                 }
             }
             else
             {
-                for (size_t g=0u; g<G; ++g, X+=2u*B*(Lx-1u), Y+=2u*B*(P-1u))
+                for (size_t g=0u; g<G; ++g, X+=2u*B*(Lx-1u), Y+=2u*B*P)
                 {
-                    for (size_t b=0u; b<B; ++b, X+=2, Y+=2, ++E)
+                    for (size_t b=0u; b<B; ++b, X+=2, Y-=2u*K-2u, ++E)
                     {
                         if (mnz)
                         {
                             double mnr = 0.0, mni = 0.0;
                             for (size_t l=0u; l<Lx; ++l, X+=2u*K) { mnr += *X; mni += *(X+1); }
                             mnr /= (double)Lx; mni /= (double)Lx;
-                            for (size_t l=0u; l<Lx; ++l) { X-=2u*K; *X -= mnr; *(X+1) -= mni; }
+                            for (size_t l=0u; l<Lx; ++l) { X-=2u*K; *X -= mni; *(X+1) -= mnr; }
                         }
 
-                        for (size_t l=0u; l<L; ++l, X-=2u*K*(Lx-l+1u), AC+=2)
+                        for (size_t l=0u; l<L; ++l, X-=2u*K*(Lx-l+1u))
                         {
                             smr = smi = 0.0;
                             for (size_t n=0u; n<Lx-l; ++n, X+=2u*K)
@@ -745,19 +761,21 @@ int sig2ar_levdurb_z (double *Y, double *E, double *X, const size_t R, const siz
                                 smr += *X**(X+2u*l*K) + *(X+1)**(X+2u*l*K+1u);
                                 smi += *(X+1)**(X+2u*l*K) - *X**(X+2u*l*K+1u);
                             }
-                            *AC = smr; *(AC+1) = smi;
+                            *AC++ = smr; *AC++ = smi;
                         }
                         AC -= 2u*L;
 
                         if (unbiased)
                         {
-                            for (size_t l=0u; l<L; ++l, AC+=2u) { *AC /= (double)(Lx-l); *(AC+1) /= (double)(Lx-l); }
+                            for (size_t l=0u; l<L; ++l) { *AC++ /= (double)(Lx-l); *AC++ /= (double)(Lx-l); }
+                            AC -= 2u*L;
                         }
 
+                        *Y = 1.0; *(Y+1) = 0.0; Y += 2u*K;
                         den = *AC**AC + *(AC+1)**(AC+1);
                         ar = -(*(AC+2)**AC + *(AC+3)**(AC+1)) / den;
                         ai = -(*(AC+3)**AC - *(AC+1)**(AC+2)) / den;
-                        *Y = -ar; *(Y+1) = -ai;
+                        *Y = ar; *(Y+1) = ai;
                         e = *AC * (1.0 - (ar*ar+ai*ai));
                         AC += 4;
                         for (size_t p=1u; p<P; ++p, AC+=2u*p)
@@ -766,11 +784,11 @@ int sig2ar_levdurb_z (double *Y, double *E, double *X, const size_t R, const siz
                             for (size_t q=0u; q<p; ++q, Y+=2u*K)
                             {
                                 AC -= 2;
-                                ar -= *AC**Y - *(AC+1)**(Y+1);
-                                ai -= *(AC+1)**Y + *AC**(Y+1);
+                                ar += *AC**Y - *(AC+1)**(Y+1);
+                                ai += *(AC+1)**Y + *AC**(Y+1);
                             }
                             ar /= -e; ai /= -e;
-                            *Y = -ar; *(Y+1) = -ai;
+                            *Y = ar; *(Y+1) = ai;
                             for (size_t q=0u; q<p; ++q, A2+=2) { Y-=2u*K; *A2 = *Y; *(A2+1) = -*(Y+1); }
                             Y += 2u*p*K;
                             for (size_t q=0u; q<p; ++q)
@@ -781,7 +799,7 @@ int sig2ar_levdurb_z (double *Y, double *E, double *X, const size_t R, const siz
                             }
                             e *= 1.0 - (ar*ar + ai*ai);
                         }
-                        AC -= 2u*P+2u;
+                        AC -= 2u*L;
                         *E = e;
                     }
                 }

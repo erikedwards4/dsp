@@ -1,5 +1,5 @@
 //Includes
-#include "ac2rc_levdurb.c"
+#include "ac2rc.c"
 
 //Declarations
 const valarray<size_t> oktypes = {1u,2u,101u,102u};
@@ -21,9 +21,9 @@ descr += "If dim==2, then Y has size R x C x (S-1) x H.\n";
 descr += "If dim==3, then Y has size R x C x S x (H-1).\n";
 descr += "\n";
 descr += "Examples:\n";
-descr += "$ ac2rc_levdurb X -o Y \n";
-descr += "$ ac2rc_levdurb -d1 X -o Y \n";
-descr += "$ cat X | ac2rc_levdurb > Y \n";
+descr += "$ ac2rc X -o Y \n";
+descr += "$ ac2rc -d1 X -o Y \n";
+descr += "$ cat X | ac2rc > Y \n";
 
 //Argtable
 struct arg_file  *a_fi = arg_filen(nullptr,nullptr,"<file>",I-1,I,"input file (X)");
@@ -60,7 +60,7 @@ if (i1.T==1u)
     catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for output file 1 (Y)" << endl; return 1; }
     try { ifs1.read(reinterpret_cast<char*>(X),i1.nbytes()); }
     catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file (X)" << endl; return 1; }
-    if (codee::ac2rc_levdurb_s(Y,X,i1.R,i1.C,i1.S,i1.H,i1.iscolmajor(),dim)) { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
+    if (codee::ac2rc_s(Y,X,i1.R,i1.C,i1.S,i1.H,i1.iscolmajor(),dim)) { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
     if (wo1)
     {
         try { ofs1.write(reinterpret_cast<char*>(Y),o1.nbytes()); }
@@ -77,7 +77,7 @@ else if (i1.T==101u)
     catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for output file 1 (Y)" << endl; return 1; }
     try { ifs1.read(reinterpret_cast<char*>(X),i1.nbytes()); }
     catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file (X)" << endl; return 1; }
-    if (codee::ac2rc_levdurb_c(Y,X,i1.R,i1.C,i1.S,i1.H,i1.iscolmajor(),dim)) { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
+    if (codee::ac2rc_c(Y,X,i1.R,i1.C,i1.S,i1.H,i1.iscolmajor(),dim)) { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
     if (wo1)
     {
         try { ofs1.write(reinterpret_cast<char*>(Y),o1.nbytes()); }

@@ -11,7 +11,7 @@
 #include <valarray>
 #include <unordered_map>
 #include <argtable2.h>
-#include "cmli.hpp"
+#include "../util/cmli.hpp"
 #include "sig2ac.c"
 
 #ifdef I
@@ -99,12 +99,12 @@ int main(int argc, char *argv[])
 
 
     //Check stdin
-    stdi1 = (a_fi->count==0 || strlen(a_fi->filename[0])==0 || strcmp(a_fi->filename[0],"-")==0);
+    stdi1 = (a_fi->count==0 || strlen(a_fi->filename[0])==0u || strcmp(a_fi->filename[0],"-")==0);
     if (stdi1>0 && isatty(fileno(stdin))) { cerr << progstr+": " << __LINE__ << errstr << "no stdin detected" << endl; return 1; }
 
 
     //Check stdout
-    if (a_fo->count>0) { stdo1 = (strlen(a_fo->filename[0])==0 || strcmp(a_fo->filename[0],"-")==0); }
+    if (a_fo->count>0) { stdo1 = (strlen(a_fo->filename[0])==0u || strcmp(a_fo->filename[0],"-")==0); }
     else { stdo1 = (!isatty(fileno(stdout))); }
     wo1 = (stdo1 || a_fo->count>0);
 
@@ -126,16 +126,16 @@ int main(int argc, char *argv[])
 
     //Get options
 
-    //Get L
-    if (a_l->count==0) { L = 1u; }
-    else if (a_l->ival[0]<1) { cerr << progstr+": " << __LINE__ << errstr << "L (nlags) must be positive" << endl; return 1; }
-    else { L = size_t(a_l->ival[0]); }
-
     //Get dim
     if (a_d->count==0) { dim = i1.isrowvec() ? 1u : 0u; }
     else if (a_d->ival[0]<0) { cerr << progstr+": " << __LINE__ << errstr << "dim must be nonnegative" << endl; return 1; }
     else { dim = size_t(a_d->ival[0]); }
     if (dim>3u) { cerr << progstr+": " << __LINE__ << errstr << "dim must be in {0,1,2,3}" << endl; return 1; }
+
+    //Get L
+    if (a_l->count==0) { L = 1u; }
+    else if (a_l->ival[0]<1) { cerr << progstr+": " << __LINE__ << errstr << "L (nlags) must be positive" << endl; return 1; }
+    else { L = size_t(a_l->ival[0]); }
 
     //Get mnz
     mnz = (a_mnz->count>0);
@@ -195,7 +195,7 @@ int main(int argc, char *argv[])
         }
         delete[] X; delete[] Y;
     }
-    else if (i1.T==2)
+    else if (i1.T==2u)
     {
         double *X, *Y;
         try { X = new double[i1.N()]; }
@@ -255,4 +255,3 @@ int main(int argc, char *argv[])
     //Exit
     return ret;
 }
-
