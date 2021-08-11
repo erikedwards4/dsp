@@ -160,7 +160,7 @@ interp1t: srci/interp1t.cpp c/interp1t.c
 
 
 #ZC_LCs: zero-crossings, level-crossings and mean-crossings
-ZCs_LCs: #zcs lcs mcs zcr lcr mcr zcr_windowed lcr_windowed mcr_windowed
+ZCs_LCs: zcs lcs mcs zcr lcr mcr #zcr_windowed lcr_windowed mcr_windowed
 zcs: srci/zcs.cpp c/zcs.c
 	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2
 lcs: srci/lcs.cpp c/lcs.c
@@ -216,8 +216,6 @@ ac2ar: srci/ac2ar.cpp c/ac2ar.c
 	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lm
 ac2poly: srci/ac2poly.cpp c/ac2poly.c
 	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lm
-ac2cc: srci/ac2cc.cpp c/ac2cc.c
-	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lm
 ac2mvdr: srci/ac2mvdr.cpp c/ac2mvdr.c
 	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lfftw3f -lfftw3 -lm
 sig2ac: srci/sig2ac.cpp c/sig2ac.c
@@ -263,8 +261,10 @@ stft_flt: srci/stft_flt.cpp c/stft_flt.c
 
 
 #Spectrogram: steps to make a spectrogram (frequency-reweighted STFT)
-Spectrogram: convert_freqs
+Spectrogram: convert_freqs pow_compress
 convert_freqs: srci/convert_freqs.cpp c/convert_freqs.c
+	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lm
+pow_compress: srci/pow_compress.cpp c/pow_compress.c
 	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lm
 
 

@@ -27,7 +27,7 @@ descr += "Use -l (--winlength) to give L, the length of each frame [default=401]
 descr += "This is a positive int (because a window is a vector of int length).\n";
 descr += "\n";
 descr += "Use -w (--nframes) to give W, the number of frames [default=(N-1)/stp].\n";
-descr += "This is a positive int (use less than default to use only part of X).\n";
+descr += "This is a positive int (can use less than default to use only part of X).\n";
 descr += "\n";
 descr += "Only after the (floating-point) centers of each frame are set,\n";
 descr += "then the center of each frame is rounded to the nearest integer sample.\n";

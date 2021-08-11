@@ -1,114 +1,220 @@
-//Level-crossings
+//Level crossings, with Boolean (int) output.
 
 #include <stdio.h>
 
 #ifdef __cplusplus
-namespace ov {
+namespace codee {
 extern "C" {
 #endif
 
-int lcs_s (char *Y, const float *X, const int iscolmajor, const int R, const int C, const int dim, const int going, const float level);
-int lcs_d (char *Y, const double *X, const int iscolmajor, const int R, const int C, const int dim, const int going, const double level);
+int lcs_s (int *Y, const float *X, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t dim, const int going, const float lvl);
+int lcs_d (int *Y, const double *X, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t dim, const int going, const double lvl);
 
 
-int lcs_s (char *Y, const float *X, const int iscolmajor, const int R, const int C, const int dim, const int going, const float level)
+int lcs_s (int *Y, const float *X, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t dim, const int going, const float lvl)
 {
-    const int N = R*C;
-    int n = -1;
+    if (dim>3u) { fprintf(stderr,"error in lcs_s: dim must be in [0 3]\n"); return 1; }
 
-    //Checks
-    if (R<1) { fprintf(stderr,"error in lcs_s: R (nrows X) must be positive\n"); return 1; }
-    if (C<1) { fprintf(stderr,"error in lcs_s: C (ncols X) must be positive\n"); return 1; }
+    const size_t N = R*C*S*H;
+    const size_t L = (dim==0u) ? R : (dim==1u) ? C : (dim==2u) ? S : H;
+    int s, sp; //sign info and previous sign info
 
-    //Raw material
-    if (going>0) { while (++n<N) { Y[n] = (X[n]>=level); } }
-    else { while (++n<N) { Y[n] = (X[n]<level); } }
-
-    if (dim==0)
+    if (N==0u) {}
+    else if (L==N)
     {
-        if (iscolmajor)
+        if (going==0)
         {
-            if (going) { while (--n>0) { Y[n] *= (Y[n]!=Y[n-1]); } }
-            else { while (--n>0) { Y[n] = (Y[n]!=Y[n-1]); } }
-            while (n<N) { Y[n] = 0; n += R; }
+            sp = (*X++<lvl); *Y++ = 0;
+            for (size_t l=1u; l<L; ++l, ++X, ++Y) { s = (*X<lvl); *Y = (s!=sp); sp = s; }
         }
-        else
+        else if (going==1)
         {
-            if (going) { while (--n>=C) { Y[n] *= (Y[n]!=Y[n-C]); } }
-            else { while (--n>=C) { Y[n] = (Y[n]!=Y[n-C]); } }
-            while (n>=0) { Y[n--] = 0; }
+            sp = (*X++>=lvl); *Y++ = 0;
+            for (size_t l=1u; l<L; ++l, ++X, ++Y) { s = (*X>=lvl); *Y = s*(s!=sp); sp = s; }
         }
-    }
-    else if (dim==1)
-    {
-        if (iscolmajor)
+        else if (going==-1)
         {
-            if (going) { while (--n>=R) { Y[n] *= (Y[n]!=Y[n-R]); } }
-            else { while (--n>=R) { Y[n] = (Y[n]!=Y[n-R]); } }
-            while (n>=0) { Y[n--] = 0; }
+            sp = (*X++<lvl); *Y++ = 0;
+            for (size_t l=1u; l<L; ++l, ++X, ++Y) { s = (*X<lvl); *Y = s*(s!=sp); sp = s; }
         }
-        else
-        {
-            if (going) { while (--n>0) { Y[n] *= (Y[n]!=Y[n-1]); } }
-            else { while (--n>0) { Y[n] = (Y[n]!=Y[n-1]); } }
-            while (n<N) { Y[n] = 0; n += C; }
-        }
+        else { fprintf(stderr,"error in lcs_s: going must be in {-1,0,1}\n"); return 1; }
     }
     else
     {
-        fprintf(stderr,"error in lcs_s: dim must be 0 or 1.\n"); return 1;
+        const size_t K = (iscolmajor) ? ((dim==0u) ? 1u : (dim==1u) ? R : (dim==2u) ? R*C : R*C*S) : ((dim==0u) ? C*S*H : (dim==1u) ? S*H : (dim==2u) ? H : 1u);
+        const size_t B = (iscolmajor && dim==0u) ? C*S*H : K;
+        const size_t V = N/L, G = V/B;
+
+        if (K==1u && (G==1u || B==1u))
+        {
+            if (going==0)
+            {
+                for (size_t v=0u; v<V; ++v)
+                {
+                    sp = (*X++<lvl); *Y++ = 0;
+                    for (size_t l=1u; l<L; ++l, ++X, ++Y) { s = (*X<lvl); *Y = (s!=sp); sp = s; }
+                }
+            }
+            else if (going==1)
+            {
+                for (size_t v=0u; v<V; ++v)
+                {
+                    sp = (*X++>=lvl); *Y++ = 0;
+                    for (size_t l=1u; l<L; ++l, ++X, ++Y) { s = (*X>=lvl); *Y = s*(s!=sp); sp = s; }
+                }
+            }
+            else if (going==-1)
+            {
+                for (size_t v=0u; v<V; ++v)
+                {
+                    sp = (*X++<lvl); *Y++ = 0;
+                    for (size_t l=1u; l<L; ++l, ++X, ++Y) { s = (*X<lvl); *Y = s*(s!=sp); sp = s; }
+                }
+            }
+            else { fprintf(stderr,"error in lcs_s: going must be in {-1,0,1}\n"); return 1; }
+        }
+        else
+        {
+            if (going==0)
+            {
+                for (size_t g=0u; g<G; ++g, X+=B*(L-1u), Y+=B*(L-1u))
+                {
+                    for (size_t b=0u; b<B; ++b, X-=K*L-1u, Y-=K*L-1u)
+                    {
+                        sp = (*X<lvl); *Y = 0; X+=K; Y+=K;
+                        for (size_t l=1u; l<L; ++l, X+=K, Y+=K) { s = (*X<lvl); *Y = (s!=sp); sp = s; }
+                    }
+                }
+            }
+            else if (going==1)
+            {
+                for (size_t g=0u; g<G; ++g, X+=B*(L-1u), Y+=B*(L-1u))
+                {
+                    for (size_t b=0u; b<B; ++b, X-=K*L-1u, Y-=K*L-1u)
+                    {
+                        sp = (*X>=lvl); *Y = 0; X+=K; Y+=K;
+                        for (size_t l=1u; l<L; ++l, X+=K, Y+=K) { s = (*X>=lvl); *Y = s*(s!=sp); sp = s; }
+                    }
+                }
+            }
+            else if (going==-1)
+            {
+                for (size_t g=0u; g<G; ++g, X+=B*(L-1u), Y+=B*(L-1u))
+                {
+                    for (size_t b=0u; b<B; ++b, X-=K*L-1u, Y-=K*L-1u)
+                    {
+                        sp = (*X<lvl); *Y = 0; X+=K; Y+=K;
+                        for (size_t l=1u; l<L; ++l, X+=K, Y+=K) { s = (*X<lvl); *Y = s*(s!=sp); sp = s; }
+                    }
+                }
+            }
+            else { fprintf(stderr,"error in lcs_s: going must be in {-1,0,1}\n"); return 1; }
+        }
     }
 
     return 0;
 }
 
 
-int lcs_d (char *Y, const double *X, const int iscolmajor, const int R, const int C, const int dim, const int going, const double level)
+int lcs_d (int *Y, const double *X, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t dim, const int going, const double lvl)
 {
-    const int N = R*C;
-    int n = -1;
+    if (dim>3u) { fprintf(stderr,"error in lcs_d: dim must be in [0 3]\n"); return 1; }
 
-    //Checks
-    if (R<1) { fprintf(stderr,"error in lcs_d: R (nrows X) must be positive\n"); return 1; }
-    if (C<1) { fprintf(stderr,"error in lcs_d: C (ncols X) must be positive\n"); return 1; }
+    const size_t N = R*C*S*H;
+    const size_t L = (dim==0u) ? R : (dim==1u) ? C : (dim==2u) ? S : H;
+    int s, sp; //sign info and previous sign info
 
-    //Raw material
-    if (going>0) { while (++n<N) { Y[n] = (X[n]>=level); } }
-    else { while (++n<N) { Y[n] = (X[n]<level); } }
-
-    if (dim==0)
+    if (N==0u) {}
+    else if (L==N)
     {
-        if (iscolmajor)
+        if (going==0)
         {
-            if (going) { while (--n>0) { Y[n] *= (Y[n]!=Y[n-1]); } }
-            else { while (--n>0) { Y[n] = (Y[n]!=Y[n-1]); } }
-            while (n<N) { Y[n] = 0; n += R; }
+            sp = (*X++<lvl); *Y++ = 0;
+            for (size_t l=1u; l<L; ++l, ++X, ++Y) { s = (*X<lvl); *Y = (s!=sp); sp = s; }
         }
-        else
+        else if (going==1)
         {
-            if (going) { while (--n>=C) { Y[n] *= (Y[n]!=Y[n-C]); } }
-            else { while (--n>=C) { Y[n] = (Y[n]!=Y[n-C]); } }
-            while (n>=0) { Y[n--] = 0; }
+            sp = (*X++>=lvl); *Y++ = 0;
+            for (size_t l=1u; l<L; ++l, ++X, ++Y) { s = (*X>=lvl); *Y = s*(s!=sp); sp = s; }
         }
-    }
-    else if (dim==1)
-    {
-        if (iscolmajor)
+        else if (going==-1)
         {
-            if (going) { while (--n>=R) { Y[n] *= (Y[n]!=Y[n-R]); } }
-            else { while (--n>=R) { Y[n] = (Y[n]!=Y[n-R]); } }
-            while (n>=0) { Y[n--] = 0; }
+            sp = (*X++<lvl); *Y++ = 0;
+            for (size_t l=1u; l<L; ++l, ++X, ++Y) { s = (*X<lvl); *Y = s*(s!=sp); sp = s; }
         }
-        else
-        {
-            if (going) { while (--n>0) { Y[n] *= (Y[n]!=Y[n-1]); } }
-            else { while (--n>0) { Y[n] = (Y[n]!=Y[n-1]); } }
-            while (n<N) { Y[n] = 0; n += C; }
-        }
+        else { fprintf(stderr,"error in lcs_d: going must be in {-1,0,1}\n"); return 1; }
     }
     else
     {
-        fprintf(stderr,"error in lcs_d: dim must be 0 or 1.\n"); return 1;
+        const size_t K = (iscolmajor) ? ((dim==0u) ? 1u : (dim==1u) ? R : (dim==2u) ? R*C : R*C*S) : ((dim==0u) ? C*S*H : (dim==1u) ? S*H : (dim==2u) ? H : 1u);
+        const size_t B = (iscolmajor && dim==0u) ? C*S*H : K;
+        const size_t V = N/L, G = V/B;
+
+        if (K==1u && (G==1u || B==1u))
+        {
+            if (going==0)
+            {
+                for (size_t v=0u; v<V; ++v)
+                {
+                    sp = (*X++<lvl); *Y++ = 0;
+                    for (size_t l=1u; l<L; ++l, ++X, ++Y) { s = (*X<lvl); *Y = (s!=sp); sp = s; }
+                }
+            }
+            else if (going==1)
+            {
+                for (size_t v=0u; v<V; ++v)
+                {
+                    sp = (*X++>=lvl); *Y++ = 0;
+                    for (size_t l=1u; l<L; ++l, ++X, ++Y) { s = (*X>=lvl); *Y = s*(s!=sp); sp = s; }
+                }
+            }
+            else if (going==-1)
+            {
+                for (size_t v=0u; v<V; ++v)
+                {
+                    sp = (*X++<lvl); *Y++ = 0;
+                    for (size_t l=1u; l<L; ++l, ++X, ++Y) { s = (*X<lvl); *Y = s*(s!=sp); sp = s; }
+                }
+            }
+            else { fprintf(stderr,"error in lcs_d: going must be in {-1,0,1}\n"); return 1; }
+        }
+        else
+        {
+            if (going==0)
+            {
+                for (size_t g=0u; g<G; ++g, X+=B*(L-1u), Y+=B*(L-1u))
+                {
+                    for (size_t b=0u; b<B; ++b, X-=K*L-1u, Y-=K*L-1u)
+                    {
+                        sp = (*X<lvl); *Y = 0; X+=K; Y+=K;
+                        for (size_t l=1u; l<L; ++l, X+=K, Y+=K) { s = (*X<lvl); *Y = (s!=sp); sp = s; }
+                    }
+                }
+            }
+            else if (going==1)
+            {
+                for (size_t g=0u; g<G; ++g, X+=B*(L-1u), Y+=B*(L-1u))
+                {
+                    for (size_t b=0u; b<B; ++b, X-=K*L-1u, Y-=K*L-1u)
+                    {
+                        sp = (*X>=lvl); *Y = 0; X+=K; Y+=K;
+                        for (size_t l=1u; l<L; ++l, X+=K, Y+=K) { s = (*X>=lvl); *Y = s*(s!=sp); sp = s; }
+                    }
+                }
+            }
+            else if (going==-1)
+            {
+                for (size_t g=0u; g<G; ++g, X+=B*(L-1u), Y+=B*(L-1u))
+                {
+                    for (size_t b=0u; b<B; ++b, X-=K*L-1u, Y-=K*L-1u)
+                    {
+                        sp = (*X<lvl); *Y = 0; X+=K; Y+=K;
+                        for (size_t l=1u; l<L; ++l, X+=K, Y+=K) { s = (*X<lvl); *Y = s*(s!=sp); sp = s; }
+                    }
+                }
+            }
+            else { fprintf(stderr,"error in lcs_d: going must be in {-1,0,1}\n"); return 1; }
+        }
     }
 
     return 0;
@@ -119,4 +225,3 @@ int lcs_d (char *Y, const double *X, const int iscolmajor, const int R, const in
 }
 }
 #endif
-

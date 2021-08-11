@@ -1,173 +1,269 @@
-//Mean-crossings
+//Mean-crossings (MCs) by same method as zero-crossings (ZCs).
+//If mean happens to equal 0.0, then same output as zcs.
 
 #include <stdio.h>
-#include <cblas.h>
 
 #ifdef __cplusplus
-namespace ov {
+namespace codee {
 extern "C" {
 #endif
 
-int mcs_s (char *Y, const float *X, const int iscolmajor, const int R, const int C, const int dim, const int going);
-int mcs_d (char *Y, const double *X, const int iscolmajor, const int R, const int C, const int dim, const int going);
+int mcs_s (int *Y, const float *X, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t dim, const int going);
+int mcs_d (int *Y, const double *X, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t dim, const int going);
 
 
-int mcs_s (char *Y, const float *X, const int iscolmajor, const int R, const int C, const int dim, const int going)
+int mcs_s (int *Y, const float *X, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t dim, const int going)
 {
-    const float o = 1.0f;
-    const int N = R*C;
-    int n = -1, ns;
-    float m;
+    if (dim>3u) { fprintf(stderr,"error in mcs_s: dim must be in [0 3]\n"); return 1; }
 
-    //Checks
-    if (R<1) { fprintf(stderr,"error in mcs_s: R (nrows X) must be positive\n"); return 1; }
-    if (C<1) { fprintf(stderr,"error in mcs_s: C (ncols X) must be positive\n"); return 1; }
+    const size_t N = R*C*S*H;
+    const size_t L = (dim==0u) ? R : (dim==1u) ? C : (dim==2u) ? S : H;
+    int s, sp;
+    float mn;
 
-    //Get mean
-    if (dim==0)
+    if (N==0u) {}
+    else if (L==N)
     {
-        if (iscolmajor)
+        //Mean
+        mn = 0.0f;
+        for (size_t l=0u; l<L; ++l, ++X) { mn += *X; }
+        mn /= (float)L; X -= L;
+
+        if (going==0)
         {
-            for (ns=0; ns<N; ns+=R)
-            {
-                m = cblas_sdot(R,&X[ns],1,&o,0) / R;
-                n = ns - 1;
-                if (going>0) { while (++n<ns+R) { Y[n] = (X[n]>=m); } }
-                else { while (++n<ns+R) { Y[n] = (X[n]<m); } }
-                if (going) { while (--n>ns) { Y[n] *= (Y[n]!=Y[n-1]); } }
-                else { while (--n>ns) { Y[n] = (Y[n]!=Y[n-1]); } }
-            }
-            while (n<N) { Y[n] = 0; n += R; }
+            sp = (*X++<mn); *Y++ = 0;
+            for (size_t l=1u; l<L; ++l, ++X, ++Y) { s = (*X<mn); *Y = (s!=sp); sp = s; }
         }
-        else
+        else if (going==1)
         {
-            for (ns=0; ns<C; ns++)
-            {
-                m = cblas_sdot(R,&X[ns],C,&o,0) / R;
-                n = ns;
-                if (going>0) { while (n<N) { Y[n] = (X[n]>=m); n += C; } }
-                else { while (n<N) { Y[n] = (X[n]<m); n += C; } }
-                n -= C;
-                if (going) { while (n>ns) { Y[n] *= (Y[n]!=Y[n-C]); n -= C; } }
-                else { while (n>ns) { Y[n] = (Y[n]!=Y[n-C]); n -= C; } }
-            }
-            while (n>=0) { Y[n--] = 0; }
+            sp = (*X++>=mn); *Y++ = 0;
+            for (size_t l=1u; l<L; ++l, ++X, ++Y) { s = (*X>=mn); *Y = s*(s!=sp); sp = s; }
         }
-    }
-    else if (dim==1)
-    {
-        if (iscolmajor)
+        else if (going==-1)
         {
-            for (ns=0; ns<R; ns++)
-            {
-                m = cblas_sdot(C,&X[ns],R,&o,0) / C;
-                n = ns;
-                if (going>0) { while (n<N) { Y[n] = (X[n]>=m); n += R; } }
-                else { while (n<N) { Y[n] = (X[n]<m); n += R; } }
-                n -= R;
-                if (going) { while (n>ns) { Y[n] *= (Y[n]!=Y[n-R]); n -= R; } }
-                else { while (n>ns) { Y[n] = (Y[n]!=Y[n-R]); n -= R; }  }
-            }
-            while (n>=0) { Y[n--] = 0; }
+            sp = (*X++<mn); *Y++ = 0;
+            for (size_t l=1u; l<L; ++l, ++X, ++Y) { s = (*X<mn); *Y = s*(s!=sp); sp = s; }
         }
-        else
-        {
-            for (ns=0; ns<N; ns+=C)
-            {
-                m = cblas_sdot(C,&X[ns],1,&o,0) / C;
-                n = ns - 1;
-                if (going>0) { while (++n<ns+C) { Y[n] = (X[n]>=m); } }
-                else { while (++n<ns+C) { Y[n] = (X[n]<m); } }
-                if (going) { while (--n>ns) { Y[n] *= (Y[n]!=Y[n-1]); } }
-                else { while (--n>ns) { Y[n] = (Y[n]!=Y[n-1]); } }
-            }
-            while (n<N) { Y[n] = 0; n += C; }
-        }
+        else { fprintf(stderr,"error in mcs_s: going must be in {-1,0,1}\n"); return 1; }
     }
     else
     {
-        fprintf(stderr,"error in mcs_s: dim must be 0 or 1.\n"); return 1;
+        const size_t K = (iscolmajor) ? ((dim==0u) ? 1u : (dim==1u) ? R : (dim==2u) ? R*C : R*C*S) : ((dim==0u) ? C*S*H : (dim==1u) ? S*H : (dim==2u) ? H : 1u);
+        const size_t B = (iscolmajor && dim==0u) ? C*S*H : K;
+        const size_t V = N/L, G = V/B;
+
+        if (K==1u && (G==1u || B==1u))
+        {
+            if (going==0)
+            {
+                for (size_t v=0u; v<V; ++v)
+                {
+                    mn = 0.0f;
+                    for (size_t l=0u; l<L; ++l, ++X) { mn += *X; }
+                    mn /= (float)L; X -= L;
+                    sp = (*X++<mn); *Y++ = 0;
+                    for (size_t l=1u; l<L; ++l, ++X, ++Y) { s = (*X<mn); *Y = (s!=sp); sp = s; }
+                }
+            }
+            else if (going==1)
+            {
+                for (size_t v=0u; v<V; ++v)
+                {
+                    mn = 0.0f;
+                    for (size_t l=0u; l<L; ++l, ++X) { mn += *X; }
+                    mn /= (float)L; X -= L;
+                    sp = (*X++>=mn); *Y++ = 0;
+                    for (size_t l=1u; l<L; ++l, ++X, ++Y) { s = (*X>=mn); *Y = s*(s!=sp); sp = s; }
+                }
+            }
+            else if (going==-1)
+            {
+                for (size_t v=0u; v<V; ++v)
+                {
+                    mn = 0.0f;
+                    for (size_t l=0u; l<L; ++l, ++X) { mn += *X; }
+                    mn /= (float)L; X -= L;
+                    sp = (*X++<mn); *Y++ = 0;
+                    for (size_t l=1u; l<L; ++l, ++X, ++Y) { s = (*X<mn); *Y = s*(s!=sp); sp = s; }
+                }
+            }
+            else { fprintf(stderr,"error in mcs_s: going must be in {-1,0,1}\n"); return 1; }
+        }
+        else
+        {
+            if (going==0)
+            {
+                for (size_t g=0u; g<G; ++g, X+=B*(L-1u), Y+=B*(L-1u))
+                {
+                    for (size_t b=0u; b<B; ++b, X-=K*L-1u, Y-=K*L-1u)
+                    {
+                        mn = 0.0f;
+                        for (size_t l=0u; l<L; ++l, X+=K) { mn += *X; }
+                        mn /= (float)L; X -= L*K;
+                        sp = (*X<mn); *Y = 0; X+=K; Y+=K;
+                        for (size_t l=1u; l<L; ++l, X+=K, Y+=K) { s = (*X<mn); *Y = (s!=sp); sp = s; }
+                    }
+                }
+            }
+            else if (going==1)
+            {
+                for (size_t g=0u; g<G; ++g, X+=B*(L-1u), Y+=B*(L-1u))
+                {
+                    for (size_t b=0u; b<B; ++b, X-=K*L-1u, Y-=K*L-1u)
+                    {
+                        mn = 0.0f;
+                        for (size_t l=0u; l<L; ++l, X+=K) { mn += *X; }
+                        mn /= (float)L; X -= L*K;
+                        sp = (*X>=mn); *Y = 0; X+=K; Y+=K;
+                        for (size_t l=1u; l<L; ++l, X+=K, Y+=K) { s = (*X>=mn); *Y = s*(s!=sp); sp = s; }
+                    }
+                }
+            }
+            else if (going==-1)
+            {
+                for (size_t g=0u; g<G; ++g, X+=B*(L-1u), Y+=B*(L-1u))
+                {
+                    for (size_t b=0u; b<B; ++b, X-=K*L-1u, Y-=K*L-1u)
+                    {
+                        mn = 0.0f;
+                        for (size_t l=0u; l<L; ++l, X+=K) { mn += *X; }
+                        mn /= (float)L; X -= L*K;
+                        sp = (*X<mn); *Y = 0; X+=K; Y+=K;
+                        for (size_t l=1u; l<L; ++l, X+=K, Y+=K) { s = (*X<mn); *Y = s*(s!=sp); sp = s; }
+                    }
+                }
+            }
+            else { fprintf(stderr,"error in mcs_s: going must be in {-1,0,1}\n"); return 1; }
+        }
     }
 
     return 0;
 }
 
 
-int mcs_d (char *Y, const double *X, const int iscolmajor, const int R, const int C, const int dim, const int going)
+int mcs_d (int *Y, const double *X, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t dim, const int going)
 {
-    const double o = 1.0;
-    const int N = R*C;
-    int n = -1, ns;
-    double m;
+    if (dim>3u) { fprintf(stderr,"error in mcs_d: dim must be in [0 3]\n"); return 1; }
 
-    //Checks
-    if (R<1) { fprintf(stderr,"error in mcs_d: R (nrows X) must be positive\n"); return 1; }
-    if (C<1) { fprintf(stderr,"error in mcs_d: C (ncols X) must be positive\n"); return 1; }
+    const size_t N = R*C*S*H;
+    const size_t L = (dim==0u) ? R : (dim==1u) ? C : (dim==2u) ? S : H;
+    int s, sp;
+    double mn;
 
-    //Get mean
-    if (dim==0)
+    if (N==0u) {}
+    else if (L==N)
     {
-        if (iscolmajor)
+        //Mean
+        mn = 0.0;
+        for (size_t l=0u; l<L; ++l, ++X) { mn += *X; }
+        mn /= (double)L; X -= L;
+
+        if (going==0)
         {
-            for (ns=0; ns<N; ns+=R)
-            {
-                m = cblas_ddot(R,&X[ns],1,&o,0) / R;
-                n = ns - 1;
-                if (going>0) { while (++n<ns+R) { Y[n] = (X[n]>=m); } }
-                else { while (++n<ns+R) { Y[n] = (X[n]<m); } }
-                if (going) { while (--n>ns) { Y[n] *= (Y[n]!=Y[n-1]); } }
-                else { while (--n>ns) { Y[n] = (Y[n]!=Y[n-1]); } }
-            }
-            while (n<N) { Y[n] = 0; n += R; }
+            sp = (*X++<mn); *Y++ = 0;
+            for (size_t l=1u; l<L; ++l, ++X, ++Y) { s = (*X<mn); *Y = (s!=sp); sp = s; }
         }
-        else
+        else if (going==1)
         {
-            for (ns=0; ns<C; ns++)
-            {
-                m = cblas_ddot(R,&X[ns],C,&o,0) / R;
-                n = ns;
-                if (going>0) { while (n<N) { Y[n] = (X[n]>=m); n += C; } }
-                else { while (n<N) { Y[n] = (X[n]<m); n += C; } }
-                n -= C;
-                if (going) { while (n>ns) { Y[n] *= (Y[n]!=Y[n-C]); n -= C; } }
-                else { while (n>ns) { Y[n] = (Y[n]!=Y[n-C]); n -= C; } }
-            }
-            while (n>=0) { Y[n--] = 0; }
+            sp = (*X++>=mn); *Y++ = 0;
+            for (size_t l=1u; l<L; ++l, ++X, ++Y) { s = (*X>=mn); *Y = s*(s!=sp); sp = s; }
         }
-    }
-    else if (dim==1)
-    {
-        if (iscolmajor)
+        else if (going==-1)
         {
-            for (ns=0; ns<R; ns++)
-            {
-                m = cblas_ddot(C,&X[ns],R,&o,0) / C;
-                n = ns;
-                if (going>0) { while (n<N) { Y[n] = (X[n]>=m); n += R; } }
-                else { while (n<N) { Y[n] = (X[n]<m); n += R; } }
-                n -= R;
-                if (going) { while (n>ns) { Y[n] *= (Y[n]!=Y[n-R]); n -= R; } }
-                else { while (n>ns) { Y[n] = (Y[n]!=Y[n-R]); n -= R; } }
-            }
-            while (n>=0) { Y[n--] = 0; }
+            sp = (*X++<mn); *Y++ = 0;
+            for (size_t l=1u; l<L; ++l, ++X, ++Y) { s = (*X<mn); *Y = s*(s!=sp); sp = s; }
         }
-        else
-        {
-            for (ns=0; ns<N; ns+=C)
-            {
-                m = cblas_ddot(C,&X[ns],1,&o,0) / C;
-                n = ns - 1;
-                if (going>0) { while (++n<ns+C) { Y[n] = (X[n]>=m); } }
-                else { while (++n<ns+C) { Y[n] = (X[n]<m); } }
-                if (going) { while (--n>ns) { Y[n] *= (Y[n]!=Y[n-1]); } }
-                else { while (--n>ns) { Y[n] = (Y[n]!=Y[n-1]); } }
-            }
-            while (n<N) { Y[n] = 0; n += C; }
-        }
+        else { fprintf(stderr,"error in mcs_d: going must be in {-1,0,1}\n"); return 1; }
     }
     else
     {
-        fprintf(stderr,"error in mcs_d: dim must be 0 or 1.\n"); return 1;
+        const size_t K = (iscolmajor) ? ((dim==0u) ? 1u : (dim==1u) ? R : (dim==2u) ? R*C : R*C*S) : ((dim==0u) ? C*S*H : (dim==1u) ? S*H : (dim==2u) ? H : 1u);
+        const size_t B = (iscolmajor && dim==0u) ? C*S*H : K;
+        const size_t V = N/L, G = V/B;
+
+        if (K==1u && (G==1u || B==1u))
+        {
+            if (going==0)
+            {
+                for (size_t v=0u; v<V; ++v)
+                {
+                    mn = 0.0;
+                    for (size_t l=0u; l<L; ++l, ++X) { mn += *X; }
+                    mn /= (double)L; X -= L;
+                    sp = (*X++<mn); *Y++ = 0;
+                    for (size_t l=1u; l<L; ++l, ++X, ++Y) { s = (*X<mn); *Y = (s!=sp); sp = s; }
+                }
+            }
+            else if (going==1)
+            {
+                for (size_t v=0u; v<V; ++v)
+                {
+                    mn = 0.0;
+                    for (size_t l=0u; l<L; ++l, ++X) { mn += *X; }
+                    mn /= (double)L; X -= L;
+                    sp = (*X++>=mn); *Y++ = 0;
+                    for (size_t l=1u; l<L; ++l, ++X, ++Y) { s = (*X>=mn); *Y = s*(s!=sp); sp = s; }
+                }
+            }
+            else if (going==-1)
+            {
+                for (size_t v=0u; v<V; ++v)
+                {
+                    mn = 0.0;
+                    for (size_t l=0u; l<L; ++l, ++X) { mn += *X; }
+                    mn /= (double)L; X -= L;
+                    sp = (*X++<mn); *Y++ = 0;
+                    for (size_t l=1u; l<L; ++l, ++X, ++Y) { s = (*X<mn); *Y = s*(s!=sp); sp = s; }
+                }
+            }
+            else { fprintf(stderr,"error in mcs_d: going must be in {-1,0,1}\n"); return 1; }
+        }
+        else
+        {
+            if (going==0)
+            {
+                for (size_t g=0u; g<G; ++g, X+=B*(L-1u), Y+=B*(L-1u))
+                {
+                    for (size_t b=0u; b<B; ++b, X-=K*L-1u, Y-=K*L-1u)
+                    {
+                        mn = 0.0;
+                        for (size_t l=0u; l<L; ++l, X+=K) { mn += *X; }
+                        mn /= (double)L; X -= L*K;
+                        sp = (*X<mn); *Y = 0; X+=K; Y+=K;
+                        for (size_t l=1u; l<L; ++l, X+=K, Y+=K) { s = (*X<mn); *Y = (s!=sp); sp = s; }
+                    }
+                }
+            }
+            else if (going==1)
+            {
+                for (size_t g=0u; g<G; ++g, X+=B*(L-1u), Y+=B*(L-1u))
+                {
+                    for (size_t b=0u; b<B; ++b, X-=K*L-1u, Y-=K*L-1u)
+                    {
+                        mn = 0.0;
+                        for (size_t l=0u; l<L; ++l, X+=K) { mn += *X; }
+                        mn /= (double)L; X -= L*K;
+                        sp = (*X>=mn); *Y = 0; X+=K; Y+=K;
+                        for (size_t l=1u; l<L; ++l, X+=K, Y+=K) { s = (*X>=mn); *Y = s*(s!=sp); sp = s; }
+                    }
+                }
+            }
+            else if (going==-1)
+            {
+                for (size_t g=0u; g<G; ++g, X+=B*(L-1u), Y+=B*(L-1u))
+                {
+                    for (size_t b=0u; b<B; ++b, X-=K*L-1u, Y-=K*L-1u)
+                    {
+                        mn = 0.0;
+                        for (size_t l=0u; l<L; ++l, X+=K) { mn += *X; }
+                        mn /= (double)L; X -= L*K;
+                        sp = (*X<mn); *Y = 0; X+=K; Y+=K;
+                        for (size_t l=1u; l<L; ++l, X+=K, Y+=K) { s = (*X<mn); *Y = s*(s!=sp); sp = s; }
+                    }
+                }
+            }
+            else { fprintf(stderr,"error in mcs_d: going must be in {-1,0,1}\n"); return 1; }
+        }
     }
 
     return 0;
@@ -178,4 +274,3 @@ int mcs_d (char *Y, const double *X, const int iscolmajor, const int R, const in
 }
 }
 #endif
-
