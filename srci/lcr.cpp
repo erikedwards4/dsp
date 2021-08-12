@@ -15,7 +15,7 @@ descr += "This uses the usual definition (i.e., rectangular window of length Lw)
 descr += "\n";
 descr += "Use -l (--Lw) to give the length of the moving-average window.\n";
 descr += "\n";
-descr += "Use -v (--level) to give the level of X to test for.\n";
+descr += "Use -v (--level) to give the level of X to test for [default=0].\n";
 descr += "For -v0 [default], this is identical to zero crossings (ZCs).\n";
 descr += "\n";
 descr += "Use -g (--going) to specify positive- or negative-going LCs.\n";
@@ -50,9 +50,6 @@ struct arg_file  *a_fo = arg_filen("o","ofile","<file>",0,O,"output file (Y)");
 
 //Get options
 
-//Get lvl
-lvl = (a_lvl->count>0) ? a_lvl->dval[0] : 0.0;
-
 //Get dim
 if (a_d->count==0) { dim = i1.isrowvec() ? 1u : 0u; }
 else if (a_d->ival[0]<0) { cerr << progstr+": " << __LINE__ << errstr << "dim must be nonnegative" << endl; return 1; }
@@ -71,6 +68,9 @@ else { Lw = size_t(a_l->ival[0]); }
 //Get g
 g = (a_g->count>0) ? a_g->ival[0] : 0;
 if (g!=0 && g!=1 && g!=-1) { cerr << progstr+": " << __LINE__ << errstr << "g must be in {-1,0,1}" << endl; return 1; }
+
+//Get lvl
+lvl = (a_lvl->count>0) ? a_lvl->dval[0] : 0.0;
 
 //Get causal
 causal = (a_c->count>0);

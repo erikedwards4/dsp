@@ -18,7 +18,7 @@ descr += "Use -g0 to detect positive- and negative-going LCs [default].\n";
 descr += "Use -g1 to detect only positive-going LCs.\n";
 descr += "Use -g-1 to detect only negative-going LCs.\n";
 descr += "\n";
-descr += "Use -v (--level) to give the level of X to test for.\n";
+descr += "Use -v (--level) to give the level of X to test for [default=0].\n";
 descr += "For -v0 [default], this is identical to zero crossings (ZCs).\n";
 descr += "\n";
 descr += "Use -d (--dim) to give the dimension along which to operate.\n";

@@ -112,7 +112,7 @@ interp1t: interp1t.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 
 
 #ZC_LCs: zero-crossings, level-crossings and mean-crossings
-ZCs_LCs: zcs lcs mcs zcr lcr mcr #zcr_windowed lcr_windowed mcr_windowed
+ZCs_LCs: zcs lcs mcs zcr lcr mcr zcr_windowed lcr_windowed mcr_windowed
 zcs: zcs.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 lcs: lcs.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 mcs: mcs.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)

@@ -506,7 +506,7 @@ int zcr_c (float *Y, const float *X, const size_t R, const size_t C, const size_
         int *Z, s, sp, sm;
         if (!(Z=(int *)malloc(L*sizeof(int)))) { fprintf(stderr,"error in zcr_c: problem with malloc. "); perror("malloc"); return 1; }
         
-        //Comment this out to use real-valued ZCs
+        //Comment this out to use real part of X for ZCs
         ++X;
 
         if (L==N)
@@ -740,7 +740,7 @@ int zcr_z (double *Y, const double *X, const size_t R, const size_t C, const siz
         int *Z, s, sp, sm;
         if (!(Z=(int *)malloc(L*sizeof(int)))) { fprintf(stderr,"error in zcr_z: problem with malloc. "); perror("malloc"); return 1; }
         
-        //Comment this out to use real-valued ZCs
+        //Comment this out to use real part of X for ZCs
         ++X;
 
         if (L==N)
