@@ -54,7 +54,7 @@ int lcr_windowed_s (float *Y, const float *X1, const float *X2, const size_t R, 
         const size_t K = (iscolmajor) ? ((dim==0u) ? 1u : (dim==1u) ? R : (dim==2u) ? R*C : R*C*S) : ((dim==0u) ? C*S*H : (dim==1u) ? S*H : (dim==2u) ? H : 1u);
         const size_t B = (iscolmajor && dim==0u) ? C*S*H : K;
         const size_t V = N/Lx, G = V/B;
-
+        
         if (K==1u && (G==1u || B==1u))
         {
             //For each vec in X1
@@ -213,7 +213,7 @@ int lcr_windowed_s (float *Y, const float *X1, const float *X2, const size_t R, 
                 }
             }
         }
-        
+    clock_gettime(CLOCK_REALTIME,&toc); fprintf(stderr,"elapsed time = %.6f ms\n",(toc.tv_sec-tic.tv_sec)*1e3+(toc.tv_nsec-tic.tv_nsec)/1e6);    
         free(Z);
     }
 

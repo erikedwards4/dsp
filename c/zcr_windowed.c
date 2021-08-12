@@ -471,26 +471,25 @@ int zcr_windowed_c (float *Y, const float *X1, const float *X2, const size_t R, 
         //Comment this out to use real part of X1 for ZCs
         ++X1;
 
-        if (K==1u && (G==1u || B==1u))
+        for (size_t g=0u; g<G; ++g, X1+=2u*B*(Lx-1u), Y+=B*(W-1u))
         {
-            //For each vec in X1
-            for (size_t v=0u; v<V; ++v)
+            for (size_t b=0u; b<B; ++b, X1-=2u*K*Lx-2u, Y-=K*W-1u)
             {
                 //Get Z
                 if (going==0)
                 {
-                    sp = (*X1<0.0f); X1+=2; *Z++ = 0;
-                    for (size_t l=1u; l<Lx; ++l, X1+=2, ++Z) { s = (*X1<0.0f); *Z = (s!=sp); sp = s; }
+                    sp = (*X1<0.0f); X1+=2u*K; *Z++ = 0;
+                    for (size_t l=1u; l<Lx; ++l, X1+=2u*K, ++Z) { s = (*X1<0.0f); *Z = (s!=sp); sp = s; }
                 }
                 else if (going==1)
                 {
-                    sp = (*X1>=0.0f); X1+=2; *Z++ = 0;
-                    for (size_t l=1u; l<Lx; ++l, X1+=2, ++Z) { s = (*X1>=0.0f); *Z = s*(s!=sp); sp = s; }
+                    sp = (*X1>=0.0f); X1+=2u*K; *Z++ = 0;
+                    for (size_t l=1u; l<Lx; ++l, X1+=2u*K, ++Z) { s = (*X1>=0.0f); *Z = s*(s!=sp); sp = s; }
                 }
                 else if (going==-1)
                 {
-                    sp = (*X1<0.0f); X1+=2; *Z++ = 0;
-                    for (size_t l=1u; l<Lx; ++l, X1+=2, ++Z) { s = (*X1<0.0f); *Z = s*(s!=sp); sp = s; }
+                    sp = (*X1<0.0f); X1+=2u*K; *Z++ = 0;
+                    for (size_t l=1u; l<Lx; ++l, X1+=2u*K, ++Z) { s = (*X1<0.0f); *Z = s*(s!=sp); sp = s; }
                 }
                 Z -= Lx;
 
@@ -500,7 +499,7 @@ int zcr_windowed_c (float *Y, const float *X1, const float *X2, const size_t R, 
                 //Windows before first samp
                 while (es<0 && w<W)
                 {
-                    *Y++ = 0.0f;
+                    *Y = 0.0f; Y += K;
                     ++w; cc += stp; cs = (int)roundf(cc);
                     es = cs + (int)Lpost;
                 }
@@ -512,7 +511,7 @@ int zcr_windowed_c (float *Y, const float *X1, const float *X2, const size_t R, 
                 {
                     sm = 0.0f; X2 -= ss;
                     for (size_t l=(size_t)(-ss); l<Lw; ++l, ++X2, ++Z) { sm += (float)(*Z) * *X2; }
-                    *Y++ = sm;
+                    *Y = sm; Y += K;
                     ++w; cc += stp; cs = (int)roundf(cc);
                     Z -= (int)Lw + ss; X2 -= Lw;
                     ss = cs - (int)Lpre; prev_cs = cs;
@@ -525,7 +524,7 @@ int zcr_windowed_c (float *Y, const float *X1, const float *X2, const size_t R, 
                 {
                     sm = 0.0f;
                     for (size_t l=0u; l<Lw; ++l, ++Z, ++X2) { sm += (float)*Z * *X2; }
-                    *Y++ = sm;
+                    *Y = sm; Y += K;
                     ++w; cc += stp; cs = (int)roundf(cc);
                     Z += cs - prev_cs - (int)Lw; X2 -= Lw;
                     es = cs + (int)Lpost; prev_cs = cs;
@@ -537,7 +536,7 @@ int zcr_windowed_c (float *Y, const float *X1, const float *X2, const size_t R, 
                 {
                     sm = 0.0f;
                     for (size_t l=0u; l<Lx-(size_t)ss; ++l, ++Z, ++X2) { sm += (float)(*Z) * *X2; }
-                    *Y++ = sm;
+                    *Y = sm; Y += K;
                     X2 += ss - (int)Lx;
                     ++w; cc += stp; cs = (int)roundf(cc);
                     Z += cs - prev_cs - (int)Lx + ss;
@@ -546,87 +545,7 @@ int zcr_windowed_c (float *Y, const float *X1, const float *X2, const size_t R, 
                 Z -= cs - prev_cs + ss;
 
                 //Windows after last samp
-                while (w<W) { *Y++ = 0.0f; ++w; }
-            }
-        }
-        else
-        {
-            for (size_t g=0u; g<G; ++g, X1+=2u*B*(Lx-1u), Y+=B*(W-1u))
-            {
-                for (size_t b=0u; b<B; ++b, X1-=2u*K*Lx-2u, Y-=K*W-1u)
-                {
-                    //Get Z
-                    if (going==0)
-                    {
-                        sp = (*X1<0.0f); X1+=2u*K; *Z++ = 0;
-                        for (size_t l=1u; l<Lx; ++l, X1+=2u*K, ++Z) { s = (*X1<0.0f); *Z = (s!=sp); sp = s; }
-                    }
-                    else if (going==1)
-                    {
-                        sp = (*X1>=0.0f); X1+=2u*K; *Z++ = 0;
-                        for (size_t l=1u; l<Lx; ++l, X1+=2u*K, ++Z) { s = (*X1>=0.0f); *Z = s*(s!=sp); sp = s; }
-                    }
-                    else if (going==-1)
-                    {
-                        sp = (*X1<0.0f); X1+=2u*K; *Z++ = 0;
-                        for (size_t l=1u; l<Lx; ++l, X1+=2u*K, ++Z) { s = (*X1<0.0f); *Z = s*(s!=sp); sp = s; }
-                    }
-                    Z -= Lx;
-
-                    //Initialize windowing
-                    w = 0u; cc = c0; cs = (int)round(c0); es = cs + (int)Lpost;
-
-                    //Windows before first samp
-                    while (es<0 && w<W)
-                    {
-                        *Y = 0.0f; Y += K;
-                        ++w; cc += stp; cs = (int)roundf(cc);
-                        es = cs + (int)Lpost;
-                    }
-                    ss = cs - (int)Lpre;
-                    prev_cs = cs;
-
-                    //Windows overlapping first samp
-                    while (ss<0 && w<W)
-                    {
-                        sm = 0.0f; X2 -= ss;
-                        for (size_t l=(size_t)(-ss); l<Lw; ++l, ++X2, ++Z) { sm += (float)(*Z) * *X2; }
-                        *Y = sm; Y += K;
-                        ++w; cc += stp; cs = (int)roundf(cc);
-                        Z -= (int)Lw + ss; X2 -= Lw;
-                        ss = cs - (int)Lpre; prev_cs = cs;
-                    }
-                    Z += ss;
-                    es = cs + (int)Lpost;
-                    
-                    //Windows fully within sig
-                    while (es<(int)Lx && w<W)
-                    {
-                        sm = 0.0f;
-                        for (size_t l=0u; l<Lw; ++l, ++Z, ++X2) { sm += (float)*Z * *X2; }
-                        *Y = sm; Y += K;
-                        ++w; cc += stp; cs = (int)roundf(cc);
-                        Z += cs - prev_cs - (int)Lw; X2 -= Lw;
-                        es = cs + (int)Lpost; prev_cs = cs;
-                    }
-                    ss = cs - (int)Lpre;
-
-                    //Windows overlapping last samp
-                    while (ss<(int)Lx && w<W)
-                    {
-                        sm = 0.0f;
-                        for (size_t l=0u; l<Lx-(size_t)ss; ++l, ++Z, ++X2) { sm += (float)(*Z) * *X2; }
-                        *Y = sm; Y += K;
-                        X2 += ss - (int)Lx;
-                        ++w; cc += stp; cs = (int)roundf(cc);
-                        Z += cs - prev_cs - (int)Lx + ss;
-                        ss = cs - (int)Lpre; prev_cs = cs;
-                    }
-                    Z -= cs - prev_cs + ss;
-
-                    //Windows after last samp
-                    while (w<W) { *Y = 0.0f; Y += K; ++w; }
-                }
+                while (w<W) { *Y = 0.0f; Y += K; ++w; }
             }
         }
         
@@ -677,26 +596,25 @@ int zcr_windowed_z (double *Y, const double *X1, const double *X2, const size_t 
         //Comment this out to use real part of X1 for ZCs
         ++X1;
 
-        if (K==1u && (G==1u || B==1u))
+        for (size_t g=0u; g<G; ++g, X1+=2u*B*(Lx-1u), Y+=B*(W-1u))
         {
-            //For each vec in X1
-            for (size_t v=0u; v<V; ++v)
+            for (size_t b=0u; b<B; ++b, X1-=2u*K*Lx-2u, Y-=K*W-1u)
             {
                 //Get Z
                 if (going==0)
                 {
-                    sp = (*X1<0.0); X1+=2; *Z++ = 0;
-                    for (size_t l=1u; l<Lx; ++l, X1+=2, ++Z) { s = (*X1<0.0); *Z = (s!=sp); sp = s; }
+                    sp = (*X1<0.0); X1+=2u*K; *Z++ = 0;
+                    for (size_t l=1u; l<Lx; ++l, X1+=2u*K, ++Z) { s = (*X1<0.0); *Z = (s!=sp); sp = s; }
                 }
                 else if (going==1)
                 {
-                    sp = (*X1>=0.0); X1+=2; *Z++ = 0;
-                    for (size_t l=1u; l<Lx; ++l, X1+=2, ++Z) { s = (*X1>=0.0); *Z = s*(s!=sp); sp = s; }
+                    sp = (*X1>=0.0); X1+=2u*K; *Z++ = 0;
+                    for (size_t l=1u; l<Lx; ++l, X1+=2u*K, ++Z) { s = (*X1>=0.0); *Z = s*(s!=sp); sp = s; }
                 }
                 else if (going==-1)
                 {
-                    sp = (*X1<0.0); X1+=2; *Z++ = 0;
-                    for (size_t l=1u; l<Lx; ++l, X1+=2, ++Z) { s = (*X1<0.0); *Z = s*(s!=sp); sp = s; }
+                    sp = (*X1<0.0); X1+=2u*K; *Z++ = 0;
+                    for (size_t l=1u; l<Lx; ++l, X1+=2u*K, ++Z) { s = (*X1<0.0); *Z = s*(s!=sp); sp = s; }
                 }
                 Z -= Lx;
 
@@ -706,7 +624,7 @@ int zcr_windowed_z (double *Y, const double *X1, const double *X2, const size_t 
                 //Windows before first samp
                 while (es<0 && w<W)
                 {
-                    *Y++ = 0.0;
+                    *Y = 0.0; Y += K;
                     ++w; cc += stp; cs = (int)round(cc);
                     es = cs + (int)Lpost;
                 }
@@ -718,7 +636,7 @@ int zcr_windowed_z (double *Y, const double *X1, const double *X2, const size_t 
                 {
                     sm = 0.0; X2 -= ss;
                     for (size_t l=(size_t)(-ss); l<Lw; ++l, ++X2, ++Z) { sm += (double)(*Z) * *X2; }
-                    *Y++ = sm;
+                    *Y = sm; Y += K;
                     ++w; cc += stp; cs = (int)round(cc);
                     Z -= (int)Lw + ss; X2 -= Lw;
                     ss = cs - (int)Lpre; prev_cs = cs;
@@ -731,7 +649,7 @@ int zcr_windowed_z (double *Y, const double *X1, const double *X2, const size_t 
                 {
                     sm = 0.0;
                     for (size_t l=0u; l<Lw; ++l, ++Z, ++X2) { sm += (double)*Z * *X2; }
-                    *Y++ = sm;
+                    *Y = sm; Y += K;
                     ++w; cc += stp; cs = (int)round(cc);
                     Z += cs - prev_cs - (int)Lw; X2 -= Lw;
                     es = cs + (int)Lpost; prev_cs = cs;
@@ -743,7 +661,7 @@ int zcr_windowed_z (double *Y, const double *X1, const double *X2, const size_t 
                 {
                     sm = 0.0;
                     for (size_t l=0u; l<Lx-(size_t)ss; ++l, ++Z, ++X2) { sm += (double)(*Z) * *X2; }
-                    *Y++ = sm;
+                    *Y = sm; Y += K;
                     X2 += ss - (int)Lx;
                     ++w; cc += stp; cs = (int)round(cc);
                     Z += cs - prev_cs - (int)Lx + ss;
@@ -752,87 +670,7 @@ int zcr_windowed_z (double *Y, const double *X1, const double *X2, const size_t 
                 Z -= cs - prev_cs + ss;
 
                 //Windows after last samp
-                while (w<W) { *Y++ = 0.0; ++w; }
-            }
-        }
-        else
-        {
-            for (size_t g=0u; g<G; ++g, X1+=2u*B*(Lx-1u), Y+=B*(W-1u))
-            {
-                for (size_t b=0u; b<B; ++b, X1-=2u*K*Lx-2u, Y-=K*W-1u)
-                {
-                    //Get Z
-                    if (going==0)
-                    {
-                        sp = (*X1<0.0); X1+=2u*K; *Z++ = 0;
-                        for (size_t l=1u; l<Lx; ++l, X1+=2u*K, ++Z) { s = (*X1<0.0); *Z = (s!=sp); sp = s; }
-                    }
-                    else if (going==1)
-                    {
-                        sp = (*X1>=0.0); X1+=2u*K; *Z++ = 0;
-                        for (size_t l=1u; l<Lx; ++l, X1+=2u*K, ++Z) { s = (*X1>=0.0); *Z = s*(s!=sp); sp = s; }
-                    }
-                    else if (going==-1)
-                    {
-                        sp = (*X1<0.0); X1+=2u*K; *Z++ = 0;
-                        for (size_t l=1u; l<Lx; ++l, X1+=2u*K, ++Z) { s = (*X1<0.0); *Z = s*(s!=sp); sp = s; }
-                    }
-                    Z -= Lx;
-
-                    //Initialize windowing
-                    w = 0u; cc = c0; cs = (int)round(c0); es = cs + (int)Lpost;
-
-                    //Windows before first samp
-                    while (es<0 && w<W)
-                    {
-                        *Y = 0.0; Y += K;
-                        ++w; cc += stp; cs = (int)round(cc);
-                        es = cs + (int)Lpost;
-                    }
-                    ss = cs - (int)Lpre;
-                    prev_cs = cs;
-
-                    //Windows overlapping first samp
-                    while (ss<0 && w<W)
-                    {
-                        sm = 0.0; X2 -= ss;
-                        for (size_t l=(size_t)(-ss); l<Lw; ++l, ++X2, ++Z) { sm += (double)(*Z) * *X2; }
-                        *Y = sm; Y += K;
-                        ++w; cc += stp; cs = (int)round(cc);
-                        Z -= (int)Lw + ss; X2 -= Lw;
-                        ss = cs - (int)Lpre; prev_cs = cs;
-                    }
-                    Z += ss;
-                    es = cs + (int)Lpost;
-                    
-                    //Windows fully within sig
-                    while (es<(int)Lx && w<W)
-                    {
-                        sm = 0.0;
-                        for (size_t l=0u; l<Lw; ++l, ++Z, ++X2) { sm += (double)*Z * *X2; }
-                        *Y = sm; Y += K;
-                        ++w; cc += stp; cs = (int)round(cc);
-                        Z += cs - prev_cs - (int)Lw; X2 -= Lw;
-                        es = cs + (int)Lpost; prev_cs = cs;
-                    }
-                    ss = cs - (int)Lpre;
-
-                    //Windows overlapping last samp
-                    while (ss<(int)Lx && w<W)
-                    {
-                        sm = 0.0;
-                        for (size_t l=0u; l<Lx-(size_t)ss; ++l, ++Z, ++X2) { sm += (double)(*Z) * *X2; }
-                        *Y = sm; Y += K;
-                        X2 += ss - (int)Lx;
-                        ++w; cc += stp; cs = (int)round(cc);
-                        Z += cs - prev_cs - (int)Lx + ss;
-                        ss = cs - (int)Lpre; prev_cs = cs;
-                    }
-                    Z -= cs - prev_cs + ss;
-
-                    //Windows after last samp
-                    while (w<W) { *Y = 0.0; Y += K; ++w; }
-                }
+                while (w<W) { *Y = 0.0; Y += K; ++w; }
             }
         }
         
