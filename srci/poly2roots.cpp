@@ -8,7 +8,7 @@ size_t dim;
 
 //Description
 string descr;
-descr += "Roots of polynomials for each vector in X X.\n";
+descr += "Roots of polynomials for each vector in X.\n";
 descr += "\n";
 descr += "This uses the eig of the compan matrix, like the roots function of Octave.\n";
 descr += "Output (Y) is complex-valued.\n";
@@ -90,4 +90,3 @@ else if (i1.T==101u)
 }
 
 //Finish
-

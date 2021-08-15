@@ -4,7 +4,7 @@
 //Declarations
 const valarray<size_t> oktypes = {1u,2u,101u,102u};
 const size_t I = 1u, O = 1u;
-size_t dim, ndst;
+size_t dim, ndst, Lx;
 int sc;
 
 //Description
@@ -46,19 +46,17 @@ else { dim = size_t(a_d->ival[0]); }
 if (dim>3u) { cerr << progstr+": " << __LINE__ << errstr << "dim must be in {0,1,2,3}" << endl; return 1; }
 
 //Get ndst
-if (a_n->count==0) { ndst = (dim==0u) ? i1.R : (dim==1u) ? i1.C : (dim==2u) ? i1.S : i1.H; }
+Lx = (dim==0u) ? i1.R : (dim==1u) ? i1.C : (dim==2u) ? i1.S : i1.H;
+if (a_n->count==0) { ndst = Lx; }
 else if (a_n->ival[0]<1) { cerr << progstr+": " << __LINE__ << errstr << "ndst must be positive" << endl; return 1; }
 else { ndst = size_t(a_n->ival[0]); }
+if (ndst<Lx) { cerr << progstr+": " << __LINE__ << errstr << "ndst must be >= Lx (length of vecs in X)" << endl; return 1; }
 
 //Get sc
 sc = (a_sc->count>0);
 
 //Checks
 if (i1.isempty()) { cerr << progstr+": " << __LINE__ << errstr << "input (X) found to be empty" << endl; return 1; }
-if (dim==0u && ndst<i1.R) { cerr << progstr+": " << __LINE__ << errstr << "ndst must be >= nrows X for dim=0" << endl; return 1; }
-if (dim==1u && ndst<i1.C) { cerr << progstr+": " << __LINE__ << errstr << "ndst must be >= ncols X for dim=1" << endl; return 1; }
-if (dim==2u && ndst<i1.S) { cerr << progstr+": " << __LINE__ << errstr << "ndst must be >= nslices X for dim=2" << endl; return 1; }
-if (dim==3u && ndst<i1.H) { cerr << progstr+": " << __LINE__ << errstr << "ndst must be >= nhyperslices X for dim=3" << endl; return 1; }
 
 //Set output header info
 o1.F = i1.F; o1.T = i1.T;

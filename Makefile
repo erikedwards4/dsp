@@ -27,7 +27,7 @@ CFLAGS=$(WFLAG) $(STD) -O2 -ffast-math -march=native $(INCLS)
 
 
 All: all
-all: Dirs Generate Wins Transform Filter Conv Interp ZCs_LCs AR_Poly AC_LP Frame STFT Clean
+all: Dirs Generate Transform Hilbert Filter Conv Interp ZCs_LCs AR_Poly AC_LP Frame STFT Clean
 	rm -f 7 obj/*.o
 
 Dirs:
@@ -105,7 +105,7 @@ planck: srci/planck.cpp c/planck.c
 
 
 #Transform: common 1-D signal transforms
-Transform: fft fft.fftw fft.fftw.r2hc fft.rad2 ifft ifft.fftw ifft.rad2 dct idct dst idst hilbert
+Transform: fft fft.fftw fft.fftw.r2hc fft.rad2 ifft ifft.fftw ifft.rad2 dct idct dst idst
 fft: srci/fft.cpp c/fft.fftw.c c/fft.rad2.c
 	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lfftw3f -lfftw3 -lm
 fft.fftw: srci/fft.fftw.cpp c/fft.fftw.c
@@ -128,18 +128,36 @@ dst: srci/dst.cpp c/dst.c
 	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lfftw3f -lfftw3 -lm
 idst: srci/idst.cpp c/idst.c
 	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lfftw3f -lfftw3 -lm
+
+
+#Hilbert: Hilbert transform and related
+Hilbert: hilbert analytic_sig analytic_amp analytic_pow inst_phase inst_freq
 hilbert: srci/hilbert.cpp c/hilbert.c
+	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lfftw3f -lfftw3 -lm
+analytic_sig: srci/analytic_sig.cpp c/analytic_sig.c
+	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lfftw3f -lfftw3 -lm
+analytic_amp: srci/analytic_amp.cpp c/analytic_amp.c
+	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lfftw3f -lfftw3 -lm
+analytic_pow: srci/analytic_pow.cpp c/analytic_pow.c
+	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lfftw3f -lfftw3 -lm
+inst_phase: srci/inst_phase.cpp c/inst_phase.c
+	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lfftw3f -lfftw3 -lm
+inst_freq: srci/inst_freq.cpp c/inst_freq.c
 	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lfftw3f -lfftw3 -lm
 
 
 #Filter: FIR and IIR filters
-Filter: #fir iir #filter filtfilt fftfilt medfilt integrate spencer
-integrate: srci/integrate.cpp c/integrate.c
-	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lm
+Filter: fir iir filter fir_fft #fir_ola fftfilt medfilt spencer
 fir: srci/fir.cpp c/fir.c
 	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lopenblas -lm
 iir: srci/iir.cpp c/iir.c
 	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lm
+filter: srci/filter.cpp c/filter.c
+	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lopenblas -lm
+fir_fft: srci/fir_fft.cpp c/fir_fft.c
+	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lfftw3f -lfftw3 -lm
+filtfilt: srci/filtfilt.cpp c/filtfilt.c
+	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lopenblas -lm
 
 
 #Conv: 1-D convolution

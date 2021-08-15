@@ -43,7 +43,7 @@ int main(int argc, char *argv[])
     descr += "\n";
     descr += "If the polynomial is a0 a1 a2..., then the AR coeffs are -a1/a0 -a2/a0...\n";
     descr += "Since a0 cannot be recovered from AR coeffs, a0 is always set to 1 here.\n";
-    descr += "Thus, the output is just: Y = [1 X] (i.e., same as input with leading 1).\n";
+    descr += "Thus, the output is just: Y = [1 -X] (negative of input with leading 1).\n";
     descr += "\n";
     descr += "Use -d (--dim) to give the dimension along which to operate.\n";
     descr += "Default is 0 (along cols), unless X is a row vector.\n";

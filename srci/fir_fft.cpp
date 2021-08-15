@@ -1,5 +1,5 @@
 //Includes
-#include "fir.c"
+#include "fir_fft.c"
 
 //Declarations
 const valarray<size_t> oktypes = {1u,2u,101u,102u};
@@ -10,6 +10,7 @@ size_t dim, Q;
 string descr;
 descr += "FIR filter of each vector (1D signal) in X,\n";
 descr += "using FIR filter coefficients in vector B. \n";
+descr += "This uses the FFT of X and B and IFFT to get Y.\n";
 descr += "\n";
 descr += "B has length Q+1 (Q is the filter order). \n";
 descr += "B is in reverse chronological order (usual convention).\n";
@@ -67,7 +68,7 @@ if (i1.T==1u)
     catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 1 (X)" << endl; return 1; }
     try { ifs2.read(reinterpret_cast<char*>(B),i2.nbytes()); }
     catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 2 (B)" << endl; return 1; }
-    if (codee::fir_s(Y,X,B,i1.R,i1.C,i1.S,i1.H,i1.iscolmajor(),Q,dim))
+    if (codee::fir_fft_s(Y,X,B,i1.R,i1.C,i1.S,i1.H,i1.iscolmajor(),Q,dim))
     { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; } 
     if (wo1)
     {
@@ -89,7 +90,7 @@ else if (i1.T==101u)
     catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 1 (X)" << endl; return 1; }
     try { ifs2.read(reinterpret_cast<char*>(B),i2.nbytes()); }
     catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 2 (B)" << endl; return 1; }
-    if (codee::fir_c(Y,X,B,i1.R,i1.C,i1.S,i1.H,i1.iscolmajor(),Q,dim))
+    if (codee::fir_fft_c(Y,X,B,i1.R,i1.C,i1.S,i1.H,i1.iscolmajor(),Q,dim))
     { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; } 
     if (wo1)
     {

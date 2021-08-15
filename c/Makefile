@@ -28,7 +28,7 @@ CFLAGS=$(WFLAG) $(STD) -O3 -march=native -fPIC
 
 
 All: all
-all: Dirs Generate Transform Filter Conv Interp ZCs_LCs AR_Poly AC_LP Frame STFT Wavelets Clean
+all: Dirs Generate Transform Hilbert Filter Conv Interp ZCs_LCs AR_Poly AC_LP Frame STFT Wavelets Clean
 
 Dirs:
 	mkdir -pm 777 obj
@@ -88,13 +88,24 @@ dct: dct.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 idct: idct.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 dst: dst.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 idst: idst.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+
+
+Hilbert: hilbert analytic_sig analytic_amp analytic_pow inst_phase inst_freq
 hilbert: hilbert.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+analytic_sig: analytic_sig.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+analytic_amp: analytic_amp.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+analytic_pow: analytic_pow.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+inst_phase: inst_phase.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+inst_freq: inst_freq.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 
 
 #Filter: FIR and IIR filters
-Filter: #fir iir #fir_tau iir_tau filter filter_tau filtfilt spencer
+Filter: fir iir filter fir_fft #fir_tau iir_tau filter filter_tau filtfilt spencer
 fir: fir.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 iir: iir.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+filter: filter.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+fir_fft: fir_fft.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+filtfilt: filtfilt.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 
 
 #Conv: convolution

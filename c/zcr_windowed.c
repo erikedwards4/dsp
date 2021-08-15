@@ -110,11 +110,12 @@ int zcr_windowed_s (float *Y, const float *X1, const float *X2, const size_t R, 
                 }
                 Z += ss;
                 es = cs + (int)Lpost;
-                
+
                 //Windows fully within sig
                 while (es<(int)Lx && w<W)
                 {
                     sm = 0.0f;
+                    //for (size_t l=0u; l<Lw; ++l, ++Z, ++X2) { sm = fmaf((float)*Z,*X2,sm); }
                     for (size_t l=0u; l<Lw; ++l, ++Z, ++X2) { sm += (float)*Z * *X2; }
                     *Y++ = sm;
                     ++w; cc += stp; cs = (int)roundf(cc);

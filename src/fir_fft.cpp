@@ -12,7 +12,7 @@
 #include <unordered_map>
 #include <argtable2.h>
 #include "../util/cmli.hpp"
-#include "iir.c"
+#include "fir_fft.c"
 
 #ifdef I
 #undef I
@@ -34,37 +34,35 @@ int main(int argc, char *argv[])
     ifstream ifs1, ifs2; ofstream ofs1;
     int8_t stdi1, stdi2, stdo1, wo1;
     ioinfo i1, i2, o1;
-    size_t dim, P;
+    size_t dim, Q;
 
 
     //Description
     string descr;
-    descr += "IIR filter of each vector (1D signal) in X,\n";
-    descr += "using IIR filter coefficients in vector A. \n";
+    descr += "FIR filter of each vector (1D signal) in X,\n";
+    descr += "using FIR filter coefficients in vector B. \n";
+    descr += "This uses the FFT of X and B and IFFT to get Y.\n";
     descr += "\n";
-    descr += "A has length P+1, where P is the filter order. \n";
-    descr += "P=0 means that A has only a0, which usually equals 1. \n";
-    descr += "(I use P, since this is also the polynomial order.)\n";
+    descr += "B has length Q+1 (Q is the filter order). \n";
+    descr += "B is in reverse chronological order (usual convention).\n";
+    descr += "This performs causal filtering only! \n";
     descr += "\n";
     descr += "For a univariate signal X: \n";
-    descr += "A[0]*Y[t] = X[t] - A[1]*Y[t-1] - ... - A[P]*Y[t-P]\n";
-    descr += "\n";
-    descr += "Thus:\n";
-    descr += "Y[t] = X[t]/A[0] - (A[1]/A[0])*Y[t-1] - ... - (A[P]/A[0])*Y[t-P]\n";
+    descr += "Y[t] = B[0]*X[t] + B[1]*X[t-1] + ... + B[Q]*X[t-Q]\n";
     descr += "\n";
     descr += "Use -d (--dim) to give the dimension (axis) along which to filter.\n";
     descr += "Use -d0 to operate along cols, -d1 to operate along rows, etc.\n";
     descr += "The default is 0 (along cols), unless X is a row vector.\n";
     descr += "\n";
     descr += "Examples:\n";
-    descr += "$ iir X A -o Y \n";
-    descr += "$ iir -d1 X A > Y \n";
-    descr += "$ cat X | iir - A > Y \n";
+    descr += "$ fir X B -o Y \n";
+    descr += "$ fir -d1 X B > Y \n";
+    descr += "$ cat X | fir - B > Y \n";
 
 
     //Argtable
     int nerrs;
-    struct arg_file  *a_fi = arg_filen(nullptr,nullptr,"<file>",I-1,I,"input files (X,A)");
+    struct arg_file  *a_fi = arg_filen(nullptr,nullptr,"<file>",I-1,I,"input files (X,B)");
     struct arg_int    *a_d = arg_intn("d","dim","<uint>",0,1,"dimension along which to filter [default=0]");
     struct arg_file  *a_fo = arg_filen("o","ofile","<file>",0,O,"output file (Y)");
     struct arg_lit *a_help = arg_litn("h","help",0,1,"display this help and exit");
@@ -115,7 +113,7 @@ int main(int argc, char *argv[])
     //Get options
 
     //Get dim
-    if (a_d->count==0) { dim = i1.isrowvec() ? 1u : 0u; }
+    if (a_d->count==0) { dim = i1.isvec() ? i1.nonsingleton1() : 0u; }
     else if (a_d->ival[0]<0) { cerr << progstr+": " << __LINE__ << errstr << "dim must be nonnegative" << endl; return 1; }
     else { dim = size_t(a_d->ival[0]); }
     if (dim>3u) { cerr << progstr+": " << __LINE__ << errstr << "dim must be in {0,1,2,3}" << endl; return 1; }
@@ -124,8 +122,8 @@ int main(int argc, char *argv[])
     //Checks
     if (i1.T!=i2.T) { cerr << progstr+": " << __LINE__ << errstr << "inputs must have the same data type" << endl; return 1; }
     if (i1.isempty()) { cerr << progstr+": " << __LINE__ << errstr << "input 1 (X) found to be empty" << endl; return 1; }
-    if (i2.isempty()) { cerr << progstr+": " << __LINE__ << errstr << "input 2 (A) found to be empty" << endl; return 1; }
-    if (!i2.isvec()) { cerr << progstr+": " << __LINE__ << errstr << "input 2 (A) must be a vector" << endl; return 1; }
+    if (i2.isempty()) { cerr << progstr+": " << __LINE__ << errstr << "input 2 (B) found to be empty" << endl; return 1; }
+    if (!i2.isvec()) { cerr << progstr+": " << __LINE__ << errstr << "input 2 (B) must be a vector" << endl; return 1; }
 
 
     //Set output header info
@@ -146,101 +144,97 @@ int main(int argc, char *argv[])
 
 
     //Other prep
-    P = i2.N() - 1u;
+    Q = i2.N() - 1u;
     
 
     //Process
     if (i1.T==1u)
     {
-        float *X, *A; //*Y;
+        float *X, *B, *Y;
         try { X = new float[i1.N()]; }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for input file 1 (X)" << endl; return 1; }
-        try { A = new float[i2.N()]; }
-        catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for input file 2 (A)" << endl; return 1; }
-        //try { Y = new float[o1.N()]; }
-        //catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for output file (Y)" << endl; return 1; }
+        try { B = new float[i2.N()]; }
+        catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for input file 2 (B)" << endl; return 1; }
+        try { Y = new float[o1.N()]; }
+        catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for output file (Y)" << endl; return 1; }
         try { ifs1.read(reinterpret_cast<char*>(X),i1.nbytes()); }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 1 (X)" << endl; return 1; }
-        try { ifs2.read(reinterpret_cast<char*>(A),i2.nbytes()); }
-        catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 2 (A)" << endl; return 1; }
-        //if (codee::iir_s(Y,X,A,i1.R,i1.C,i1.S,i1.H,i1.iscolmajor(),P,dim))
-        if (codee::iir_inplace_s(X,A,i1.R,i1.C,i1.S,i1.H,i1.iscolmajor(),P,dim))
+        try { ifs2.read(reinterpret_cast<char*>(B),i2.nbytes()); }
+        catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 2 (B)" << endl; return 1; }
+        if (codee::fir_fft_s(Y,X,B,i1.R,i1.C,i1.S,i1.H,i1.iscolmajor(),Q,dim))
         { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; } 
         if (wo1)
         {
-            try { ofs1.write(reinterpret_cast<char*>(X),o1.nbytes()); }
+            try { ofs1.write(reinterpret_cast<char*>(Y),o1.nbytes()); }
             catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem writing output file (Y)" << endl; return 1; }
         }
-        delete[] X; delete[] A; //delete[] Y;
+        delete[] X; delete[] B; delete[] Y;
     }
     else if (i1.T==2u)
     {
-        double *X, *A; //*Y;
+        double *X, *B, *Y;
         try { X = new double[i1.N()]; }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for input file 1 (X)" << endl; return 1; }
-        try { A = new double[i2.N()]; }
-        catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for input file 2 (A)" << endl; return 1; }
-        //try { Y = new double[o1.N()]; }
-        //catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for output file (Y)" << endl; return 1; }
+        try { B = new double[i2.N()]; }
+        catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for input file 2 (B)" << endl; return 1; }
+        try { Y = new double[o1.N()]; }
+        catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for output file (Y)" << endl; return 1; }
         try { ifs1.read(reinterpret_cast<char*>(X),i1.nbytes()); }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 1 (X)" << endl; return 1; }
-        try { ifs2.read(reinterpret_cast<char*>(A),i2.nbytes()); }
-        catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 2 (A)" << endl; return 1; }
-        //if (codee::iir_d(Y,X,A,i1.R,i1.C,i1.S,i1.H,i1.iscolmajor(),P,dim))
-        if (codee::iir_inplace_d(X,A,i1.R,i1.C,i1.S,i1.H,i1.iscolmajor(),P,dim))
+        try { ifs2.read(reinterpret_cast<char*>(B),i2.nbytes()); }
+        catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 2 (B)" << endl; return 1; }
+        if (codee::fir_fft_d(Y,X,B,i1.R,i1.C,i1.S,i1.H,i1.iscolmajor(),Q,dim))
         { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; } 
         if (wo1)
         {
-            try { ofs1.write(reinterpret_cast<char*>(X),o1.nbytes()); }
+            try { ofs1.write(reinterpret_cast<char*>(Y),o1.nbytes()); }
             catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem writing output file (Y)" << endl; return 1; }
         }
-        delete[] X; delete[] A; //delete[] Y;
+        delete[] X; delete[] B; delete[] Y;
     }
     else if (i1.T==101u)
     {
-        float *X, *A; //*Y;
+        float *X, *B, *Y;
         try { X = new float[2u*i1.N()]; }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for input file 1 (X)" << endl; return 1; }
-        try { A = new float[2u*i2.N()]; }
-        catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for input file 2 (A)" << endl; return 1; }
-        //try { Y = new float[2u*o1.N()]; }
-        //catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for output file (Y)" << endl; return 1; }
+        try { B = new float[2u*i2.N()]; }
+        catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for input file 2 (B)" << endl; return 1; }
+        try { Y = new float[2u*o1.N()]; }
+        catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for output file (Y)" << endl; return 1; }
         try { ifs1.read(reinterpret_cast<char*>(X),i1.nbytes()); }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 1 (X)" << endl; return 1; }
-        try { ifs2.read(reinterpret_cast<char*>(A),i2.nbytes()); }
-        catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 2 (A)" << endl; return 1; }
-        //if (codee::iir_c(Y,X,A,i1.R,i1.C,i1.S,i1.H,i1.iscolmajor(),P,dim))
-        if (codee::iir_inplace_c(X,A,i1.R,i1.C,i1.S,i1.H,i1.iscolmajor(),P,dim))
+        try { ifs2.read(reinterpret_cast<char*>(B),i2.nbytes()); }
+        catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 2 (B)" << endl; return 1; }
+        if (codee::fir_fft_c(Y,X,B,i1.R,i1.C,i1.S,i1.H,i1.iscolmajor(),Q,dim))
         { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; } 
         if (wo1)
         {
-            try { ofs1.write(reinterpret_cast<char*>(X),o1.nbytes()); }
+            try { ofs1.write(reinterpret_cast<char*>(Y),o1.nbytes()); }
             catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem writing output file (Y)" << endl; return 1; }
         }
-        delete[] X; delete[] A; //delete[] Y;
+        delete[] X; delete[] B; delete[] Y;
     }
     else if (i1.T==102u)
     {
-        double *X, *A; //*Y;
+        double *X, *B, *Y;
         try { X = new double[2u*i1.N()]; }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for input file 1 (X)" << endl; return 1; }
-        try { A = new double[2u*i2.N()]; }
-        catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for input file 2 (A)" << endl; return 1; }
-        //try { Y = new double[2u*o1.N()]; }
-        //catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for output file (Y)" << endl; return 1; }
+        try { B = new double[2u*i2.N()]; }
+        catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for input file 2 (B)" << endl; return 1; }
+        try { Y = new double[2u*o1.N()]; }
+        catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for output file (Y)" << endl; return 1; }
         try { ifs1.read(reinterpret_cast<char*>(X),i1.nbytes()); }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 1 (X)" << endl; return 1; }
-        try { ifs2.read(reinterpret_cast<char*>(A),i2.nbytes()); }
-        catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 2 (A)" << endl; return 1; }
-        //if (codee::iir_z(Y,X,A,i1.R,i1.C,i1.S,i1.H,i1.iscolmajor(),P,dim))
-        if (codee::iir_inplace_z(X,A,i1.R,i1.C,i1.S,i1.H,i1.iscolmajor(),P,dim))
+        try { ifs2.read(reinterpret_cast<char*>(B),i2.nbytes()); }
+        catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 2 (B)" << endl; return 1; }
+        if (codee::fir_fft_z(Y,X,B,i1.R,i1.C,i1.S,i1.H,i1.iscolmajor(),Q,dim))
         { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; } 
         if (wo1)
         {
-            try { ofs1.write(reinterpret_cast<char*>(X),o1.nbytes()); }
+            try { ofs1.write(reinterpret_cast<char*>(Y),o1.nbytes()); }
             catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem writing output file (Y)" << endl; return 1; }
         }
-        delete[] X; delete[] A; //delete[] Y;
+        delete[] X; delete[] B; delete[] Y;
     }
     else
     {

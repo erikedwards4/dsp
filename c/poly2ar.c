@@ -30,7 +30,7 @@ int poly2ar_s (float *Y, const float *X, const size_t R, const size_t C, const s
     if (N==0u) {}
     else if (Lx==N)
     {
-        const float x0 = *X++;
+        const float x0 = -*X++;
         for (size_t l=0u; l<Ly; ++l, ++X, ++Y) { *Y = *X / x0; }
     }
     else
@@ -44,7 +44,7 @@ int poly2ar_s (float *Y, const float *X, const size_t R, const size_t C, const s
         {
             for (size_t v=0u; v<V; ++v)
             {
-                x0 = *X++;
+                x0 = -*X++;
                 for (size_t l=0u; l<Ly; ++l, ++X, ++Y) { *Y = *X / x0; }
             }
         }
@@ -76,7 +76,7 @@ int poly2ar_d (double *Y, const double *X, const size_t R, const size_t C, const
     if (N==0u) {}
     else if (Lx==N)
     {
-        const double x0 = *X++;
+        const double x0 = -*X++;
         for (size_t l=0u; l<Ly; ++l, ++X, ++Y) { *Y = *X / x0; }
     }
     else
@@ -90,7 +90,7 @@ int poly2ar_d (double *Y, const double *X, const size_t R, const size_t C, const
         {
             for (size_t v=0u; v<V; ++v)
             {
-                x0 = *X++;
+                x0 = -*X++;
                 for (size_t l=0u; l<Ly; ++l, ++X, ++Y) { *Y = *X / x0; }
             }
         }
@@ -122,7 +122,7 @@ int poly2ar_c (float *Y, const float *X, const size_t R, const size_t C, const s
     if (N==0u) {}
     else if (Lx==N)
     {
-        const float x0r = *X++, x0i = *X++;
+        const float x0r = -*X++, x0i = -*X++;
         const float x0a = x0r*x0r + x0i*x0i;
         for (size_t l=0u; l<Ly; ++l, X+=2)
         {
@@ -141,7 +141,7 @@ int poly2ar_c (float *Y, const float *X, const size_t R, const size_t C, const s
         {
             for (size_t v=0u; v<V; ++v)
             {
-                x0r = *X++; x0i = *X++;
+                x0r = -*X++; x0i = -*X++;
                 x0a = x0r*x0r + x0i*x0i;
                 for (size_t l=0u; l<Ly; ++l, X+=2)
                 {
@@ -156,7 +156,7 @@ int poly2ar_c (float *Y, const float *X, const size_t R, const size_t C, const s
             {
                 for (size_t b=0u; b<B; ++b, X-=2u*K*Lx-2u, Y-=2u*K*Ly-2u)
                 {
-                    x0r = *X++; x0i = *X;
+                    x0r = -*X++; x0i = -*X;
                     x0a = x0r*x0r + x0i*x0i;
                     X += 2u*K - 1u;
                     for (size_t l=0u; l<Ly; ++l, X+=2u*K, Y+=2u*K-1u)
@@ -184,7 +184,7 @@ int poly2ar_z (double *Y, const double *X, const size_t R, const size_t C, const
     if (N==0u) {}
     else if (Lx==N)
     {
-        const double x0r = *X++, x0i = *X++;
+        const double x0r = -*X++, x0i = -*X++;
         const double x0a = x0r*x0r + x0i*x0i;
         for (size_t l=0u; l<Ly; ++l, X+=2)
         {
@@ -203,7 +203,7 @@ int poly2ar_z (double *Y, const double *X, const size_t R, const size_t C, const
         {
             for (size_t v=0u; v<V; ++v)
             {
-                x0r = *X++; x0i = *X++;
+                x0r = -*X++; x0i = -*X++;
                 x0a = x0r*x0r + x0i*x0i;
                 for (size_t l=0u; l<Ly; ++l, X+=2)
                 {
@@ -218,7 +218,7 @@ int poly2ar_z (double *Y, const double *X, const size_t R, const size_t C, const
             {
                 for (size_t b=0u; b<B; ++b, X-=2u*K*Lx-2u, Y-=2u*K*Ly-2u)
                 {
-                    x0r = *X++; x0i = *X;
+                    x0r = -*X++; x0i = -*X;
                     x0a = x0r*x0r + x0i*x0i;
                     X += 2u*K - 1u;
                     for (size_t l=0u; l<Ly; ++l, X+=2u*K, Y+=2u*K-1u)

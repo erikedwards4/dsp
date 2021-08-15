@@ -12,7 +12,7 @@
 #include <unordered_map>
 #include <argtable2.h>
 #include "../util/cmli.hpp"
-#include "hilbert.c"
+#include "analytic_amp.c"
 
 #ifdef I
 #undef I
@@ -39,9 +39,8 @@ int main(int argc, char *argv[])
 
     //Description
     string descr;
-    descr += "1D Hilbert transform of each vector (1D signal) in X.\n";
-    descr += "The output (Y) is the imaginary part of the analytic signal (AS).\n";
-    descr += "That is unlike Octave where hilbert gives the AS.\n";
+    descr += "Gets analytic amplitude (AA) for each vector (1D signal) in X.\n";
+    descr += "This uses the Hilbert transform (which uses an FFT and IFFT).\n";
     descr += "\n";
     descr += "Use -d (--dim) to give the dimension along which to transform.\n";
     descr += "Use -d0 to operate along cols, -d1 to operate along rows, etc.\n";
@@ -51,19 +50,19 @@ int main(int argc, char *argv[])
     descr += "The default is the next power-of-2 of L (length of vecs in X).\n";
     descr += "X is zero-padded as necessary to match nfft.\n";
     descr += "\n";
-    descr += "The output (Y) is real-valued with the same size as X.\n";
+    descr += "The output (Y) is real-valued and non-negative with the same size as X.\n";
     descr += "\n";
     descr += "Examples:\n";
-    descr += "$ hilbert -n256 X -o Y \n";
-    descr += "$ hilbert -n256 -d1 X > Y \n";
-    descr += "$ cat X | hilbert -n256 > Y \n";
+    descr += "$ analytic_amp -n256 X -o Y \n";
+    descr += "$ analytic_amp -n256 -d1 X > Y \n";
+    descr += "$ cat X | analytic_amp -n256 > Y \n";
 
 
     //Argtable
     int nerrs;
     struct arg_file  *a_fi = arg_filen(nullptr,nullptr,"<file>",I-1,I,"input file (X)");
     struct arg_int    *a_d = arg_intn("d","dim","<uint>",0,1,"dimension along which to transform [default=0]");
-    struct arg_int    *a_n = arg_intn("n","nfft","<uint>",0,1,"transform length [default=nextpow2(L)]");
+    struct arg_int    *a_n = arg_intn("n","nfft","<uint>",0,1,"transform length [default=L]");
     struct arg_file  *a_fo = arg_filen("o","ofile","<file>",0,O,"output file (Y)");
     struct arg_lit *a_help = arg_litn("h","help",0,1,"display this help and exit");
     struct arg_end  *a_end = arg_end(5);
@@ -156,7 +155,7 @@ int main(int argc, char *argv[])
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for output file (Y)" << endl; return 1; }
         try { ifs1.read(reinterpret_cast<char*>(X),i1.nbytes()); }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file (X)" << endl; return 1; }
-        if (codee::hilbert_s(Y,X,i1.R,i1.C,i1.S,i1.H,i1.iscolmajor(),dim,nfft))
+        if (codee::analytic_amp_s(Y,X,i1.R,i1.C,i1.S,i1.H,i1.iscolmajor(),dim,nfft))
         { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
         if (wo1)
         {
@@ -174,7 +173,7 @@ int main(int argc, char *argv[])
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for output file (Y)" << endl; return 1; }
         try { ifs1.read(reinterpret_cast<char*>(X),i1.nbytes()); }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file (X)" << endl; return 1; }
-        if (codee::hilbert_d(Y,X,i1.R,i1.C,i1.S,i1.H,i1.iscolmajor(),dim,nfft))
+        if (codee::analytic_amp_d(Y,X,i1.R,i1.C,i1.S,i1.H,i1.iscolmajor(),dim,nfft))
         { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
         if (wo1)
         {

@@ -34,7 +34,7 @@ int main(int argc, char *argv[])
     ifstream ifs1, ifs2; ofstream ofs1;
     int8_t stdi1, stdi2, stdo1, wo1;
     ioinfo i1, i2, o1;
-    size_t dim;
+    size_t dim, Q;
 
 
     //Description
@@ -42,12 +42,12 @@ int main(int argc, char *argv[])
     descr += "FIR filter of each vector (1D signal) in X,\n";
     descr += "using FIR filter coefficients in vector B. \n";
     descr += "\n";
-    descr += "B has length L (filter order, or number of 'taps'). \n";
+    descr += "B has length Q+1 (Q is the filter order). \n";
     descr += "B is in reverse chronological order (usual convention).\n";
     descr += "This performs causal filtering only! \n";
     descr += "\n";
     descr += "For a univariate signal X: \n";
-    descr += "Y[t] = B[0]*x[t] + B[1]*X[t-1] + ... + B[L-1]*X[t-L+1]\n";
+    descr += "Y[t] = B[0]*X[t] + B[1]*X[t-1] + ... + B[Q]*X[t-Q]\n";
     descr += "\n";
     descr += "Use -d (--dim) to give the dimension (axis) along which to filter.\n";
     descr += "Use -d0 to operate along cols, -d1 to operate along rows, etc.\n";
@@ -79,14 +79,14 @@ int main(int argc, char *argv[])
 
 
     //Check stdin
-    stdi1 = (a_fi->count==0 || strlen(a_fi->filename[0])==0 || strcmp(a_fi->filename[0],"-")==0);
-    stdi2 = (a_fi->count<=1 || strlen(a_fi->filename[1])==0 || strcmp(a_fi->filename[1],"-")==0);
+    stdi1 = (a_fi->count==0 || strlen(a_fi->filename[0])==0u || strcmp(a_fi->filename[0],"-")==0);
+    stdi2 = (a_fi->count<=1 || strlen(a_fi->filename[1])==0u || strcmp(a_fi->filename[1],"-")==0);
     if (stdi1+stdi2>1) { cerr << progstr+": " << __LINE__ << errstr << "can only use stdin for one input" << endl; return 1; }
     if (stdi1+stdi2>0 && isatty(fileno(stdin))) { cerr << progstr+": " << __LINE__ << errstr << "no stdin detected" << endl; return 1; }
 
 
     //Check stdout
-    if (a_fo->count>0) { stdo1 = (strlen(a_fo->filename[0])==0 || strcmp(a_fo->filename[0],"-")==0); }
+    if (a_fo->count>0) { stdo1 = (strlen(a_fo->filename[0])==0u || strcmp(a_fo->filename[0],"-")==0); }
     else { stdo1 = (!isatty(fileno(stdout))); }
     wo1 = (stdo1 || a_fo->count>0);
 
@@ -143,7 +143,8 @@ int main(int argc, char *argv[])
 
 
     //Other prep
-
+    Q = i2.N() - 1u;
+    
 
     //Process
     if (i1.T==1u)
@@ -159,7 +160,7 @@ int main(int argc, char *argv[])
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 1 (X)" << endl; return 1; }
         try { ifs2.read(reinterpret_cast<char*>(B),i2.nbytes()); }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 2 (B)" << endl; return 1; }
-        if (codee::fir_s(Y,X,B,i1.R,i1.C,i1.S,i1.H,i2.N(),i1.iscolmajor(),dim))
+        if (codee::fir_s(Y,X,B,i1.R,i1.C,i1.S,i1.H,i1.iscolmajor(),Q,dim))
         { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; } 
         if (wo1)
         {
@@ -168,7 +169,7 @@ int main(int argc, char *argv[])
         }
         delete[] X; delete[] B; delete[] Y;
     }
-    else if (i1.T==2)
+    else if (i1.T==2u)
     {
         double *X, *B, *Y;
         try { X = new double[i1.N()]; }
@@ -181,7 +182,7 @@ int main(int argc, char *argv[])
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 1 (X)" << endl; return 1; }
         try { ifs2.read(reinterpret_cast<char*>(B),i2.nbytes()); }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 2 (B)" << endl; return 1; }
-        if (codee::fir_d(Y,X,B,i1.R,i1.C,i1.S,i1.H,i2.N(),i1.iscolmajor(),dim))
+        if (codee::fir_d(Y,X,B,i1.R,i1.C,i1.S,i1.H,i1.iscolmajor(),Q,dim))
         { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; } 
         if (wo1)
         {
@@ -203,7 +204,7 @@ int main(int argc, char *argv[])
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 1 (X)" << endl; return 1; }
         try { ifs2.read(reinterpret_cast<char*>(B),i2.nbytes()); }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 2 (B)" << endl; return 1; }
-        if (codee::fir_c(Y,X,B,i1.R,i1.C,i1.S,i1.H,i2.N(),i1.iscolmajor(),dim))
+        if (codee::fir_c(Y,X,B,i1.R,i1.C,i1.S,i1.H,i1.iscolmajor(),Q,dim))
         { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; } 
         if (wo1)
         {
@@ -225,7 +226,7 @@ int main(int argc, char *argv[])
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 1 (X)" << endl; return 1; }
         try { ifs2.read(reinterpret_cast<char*>(B),i2.nbytes()); }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 2 (B)" << endl; return 1; }
-        if (codee::fir_z(Y,X,B,i1.R,i1.C,i1.S,i1.H,i2.N(),i1.iscolmajor(),dim))
+        if (codee::fir_z(Y,X,B,i1.R,i1.C,i1.S,i1.H,i1.iscolmajor(),Q,dim))
         { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; } 
         if (wo1)
         {
@@ -243,4 +244,3 @@ int main(int argc, char *argv[])
     //Exit
     return ret;
 }
-

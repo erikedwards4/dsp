@@ -4,7 +4,7 @@
 //Declarations
 const valarray<size_t> oktypes = {1u,2u,101u,102u};
 const size_t I = 1u, O = 1u;
-size_t dim, nfft;
+size_t dim, nfft, Lx;
 int sc, rl;
 
 //Description
@@ -63,21 +63,19 @@ rl = (a_rl->count>0);
 sc = (a_sc->count>0);
 
 //Get nfft
+Lx = (dim==0u) ? i1.R : (dim==1u) ? i1.C : (dim==2u) ? i1.S : i1.H;
 if (a_n->count==0)
 {
-    nfft = (dim==0u) ? i1.R : (dim==1u) ? i1.C : (dim==2u) ? i1.S : i1.H;
+    nfft = Lx;
     if (rl) { nfft = 2u*(nfft-1u); }
 }
 else if (a_n->ival[0]<1) { cerr << progstr+": " << __LINE__ << errstr << "nfft must be positive" << endl; return 1; }
 else { nfft = size_t(a_n->ival[0]); }
+if (nfft<Lx) { cerr << progstr+": " << __LINE__ << errstr << "nfft must be >= Lx (length of vecs in X)" << endl; return 1; }
 
 //Checks
 if (i1.isempty()) { cerr << progstr+": " << __LINE__ << errstr << "input (X) found to be empty" << endl; return 1; }
 if (i1.isreal()) { cerr << progstr+": " << __LINE__ << errstr << "input (X) must be complex" << endl; return 1; }
-if (dim==0u && nfft<i1.R) { cerr << progstr+": " << __LINE__ << errstr << "nfft must be >= nrows X for dim=0" << endl; return 1; }
-if (dim==1u && nfft<i1.C) { cerr << progstr+": " << __LINE__ << errstr << "nfft must be >= ncols X for dim=1" << endl; return 1; }
-if (dim==2u && nfft<i1.S) { cerr << progstr+": " << __LINE__ << errstr << "nfft must be >= nslices X for dim=2" << endl; return 1; }
-if (dim==3u && nfft<i1.H) { cerr << progstr+": " << __LINE__ << errstr << "nfft must be >= nhyperslices X for dim=3" << endl; return 1; }
 
 //Set output header info
 o1.F = i1.F;

@@ -1,7 +1,7 @@
 //Gets polynomials from autoregressive (AR) parameters along rows or cols of X.
 //If the polynomial is a0 a1 a2..., then the AR coeffs are -a1/a0 -a2/a0...
 //Since a0 cannot be recovered from AR coeffs, a0 is always set to 1 here.
-//Thus, the output is just: Y = [1 X] (i.e., same as input with leading 1).
+//Thus, the output is just: Y = [1 -X] (i.e., negative of input with leading 1).
 
 #include <stdio.h>
 
@@ -27,7 +27,7 @@ int ar2poly_s (float *Y, const float *X, const size_t R, const size_t C, const s
     else if (Lx==N)
     {
         *Y++ = 1.0f;
-        for (size_t l=0u; l<Lx; ++l, ++X, ++Y) { *Y = *X; }
+        for (size_t l=0u; l<Lx; ++l, ++X, ++Y) { *Y = -*X; }
     }
     else
     {
@@ -41,7 +41,7 @@ int ar2poly_s (float *Y, const float *X, const size_t R, const size_t C, const s
             for (size_t v=0u; v<V; ++v)
             {
                 *Y++ = 1.0f;
-                for (size_t l=0u; l<Lx; ++l, ++X, ++Y) { *Y = *X; }
+                for (size_t l=0u; l<Lx; ++l, ++X, ++Y) { *Y = -*X; }
             }
         }
         else
@@ -51,7 +51,7 @@ int ar2poly_s (float *Y, const float *X, const size_t R, const size_t C, const s
                 for (size_t b=0u; b<B; ++b, X-=K*Lx-1u, Y-=K*Lx+K-1u)
                 {
                     *Y = 1.0f; Y += K;
-                    for (size_t l=0; l<Lx; ++l, X+=K, Y+=K) { *Y = *X; }
+                    for (size_t l=0; l<Lx; ++l, X+=K, Y+=K) { *Y = -*X; }
                 }
             }
         }
@@ -72,7 +72,7 @@ int ar2poly_d (double *Y, const double *X, const size_t R, const size_t C, const
     else if (Lx==N)
     {
         *Y++ = 1.0;
-        for (size_t l=0u; l<Lx; ++l, ++X, ++Y) { *Y = *X; }
+        for (size_t l=0u; l<Lx; ++l, ++X, ++Y) { *Y = -*X; }
     }
     else
     {
@@ -85,7 +85,7 @@ int ar2poly_d (double *Y, const double *X, const size_t R, const size_t C, const
             for (size_t v=0u; v<V; ++v)
             {
                 *Y++ = 1.0;
-                for (size_t l=0u; l<Lx; ++l, ++X, ++Y) { *Y = *X; }
+                for (size_t l=0u; l<Lx; ++l, ++X, ++Y) { *Y = -*X; }
             }
         }
         else
@@ -95,7 +95,7 @@ int ar2poly_d (double *Y, const double *X, const size_t R, const size_t C, const
                 for (size_t b=0u; b<B; ++b, X-=K*Lx-1u, Y-=K*Lx+K-1u)
                 {
                     *Y = 1.0; Y += K;
-                    for (size_t l=0; l<Lx; ++l, X+=K, Y+=K) { *Y = *X; }
+                    for (size_t l=0; l<Lx; ++l, X+=K, Y+=K) { *Y = -*X; }
                 }
             }
         }
@@ -116,7 +116,7 @@ int ar2poly_c (float *Y, const float *X, const size_t R, const size_t C, const s
     else if (Lx==N)
     {
         *Y++ = 1.0f; *Y++ = 0.0f;
-        for (size_t l=0u; l<2u*Lx; ++l, ++X, ++Y) { *Y = *X; }
+        for (size_t l=0u; l<2u*Lx; ++l, ++X, ++Y) { *Y = -*X; }
     }
     else
     {
@@ -129,7 +129,7 @@ int ar2poly_c (float *Y, const float *X, const size_t R, const size_t C, const s
             for (size_t v=0u; v<V; ++v)
             {
                 *Y++ = 1.0f; *Y++ = 0.0f;
-                for (size_t l=0u; l<2u*Lx; ++l, ++X, ++Y) { *Y = *X; }
+                for (size_t l=0u; l<2u*Lx; ++l, ++X, ++Y) { *Y = -*X; }
             }
         }
         else
@@ -139,7 +139,7 @@ int ar2poly_c (float *Y, const float *X, const size_t R, const size_t C, const s
                 for (size_t b=0u; b<B; ++b, X-=2u*K*Lx-2u, Y-=2u*(K*Lx+K-1u))
                 {
                     *Y = 1.0f; *(Y+1) = 0.0f; Y += 2u*K;
-                    for (size_t l=0; l<Lx; ++l, X+=2u*K, Y+=2u*K) { *Y = *X; *(Y+1) = *(X+1); }
+                    for (size_t l=0; l<Lx; ++l, X+=2u*K, Y+=2u*K) { *Y = -*X; *(Y+1) = -*(X+1); }
                 }
             }
         }
@@ -160,7 +160,7 @@ int ar2poly_z (double *Y, const double *X, const size_t R, const size_t C, const
     else if (Lx==N)
     {
         *Y++ = 1.0; *Y++ = 0.0;
-        for (size_t l=0u; l<2u*Lx; ++l, ++X, ++Y) { *Y = *X; }
+        for (size_t l=0u; l<2u*Lx; ++l, ++X, ++Y) { *Y = -*X; }
     }
     else
     {
@@ -173,7 +173,7 @@ int ar2poly_z (double *Y, const double *X, const size_t R, const size_t C, const
             for (size_t v=0u; v<V; ++v)
             {
                 *Y++ = 1.0; *Y++ = 0.0;
-                for (size_t l=0u; l<2u*Lx; ++l, ++X, ++Y) { *Y = *X; }
+                for (size_t l=0u; l<2u*Lx; ++l, ++X, ++Y) { *Y = -*X; }
             }
         }
         else
@@ -183,7 +183,7 @@ int ar2poly_z (double *Y, const double *X, const size_t R, const size_t C, const
                 for (size_t b=0u; b<B; ++b, X-=2u*K*Lx-2u, Y-=2u*(K*Lx+K-1u))
                 {
                     *Y = 1.0; *(Y+1) = 0.0; Y += 2u*K;
-                    for (size_t l=0; l<Lx; ++l, X+=2u*K, Y+=2u*K) { *Y = *X; *(Y+1) = *(X+1); }
+                    for (size_t l=0; l<Lx; ++l, X+=2u*K, Y+=2u*K) { *Y = -*X; *(Y+1) = -*(X+1); }
                 }
             }
         }
