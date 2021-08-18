@@ -109,11 +109,15 @@ filtfilt: filtfilt.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 
 
 #Conv: convolution
-Conv: #conv1d conv2d conv1d_fft conv2d_fft
-conv1d: conv1d.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
-conv2d: conv2d.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
-conv1d_fft: conv1d_fft.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
-conv2d_fft: conv2d_fft.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+Conv: conv conv1d conv_fft conv1d_fft xcorr xcorr1d xcorr_fft xcorr1d_fft
+conv: conv1d.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+conv1d: conv2d.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+conv_fft: conv1d_fft.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+conv1d_fft: conv2d_fft.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+xcorr: xcorr.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+xcorr1d: xcorr1d.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+xcorr_fft: xcorr_fft.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+xcorr1d_fft: xcorr1d_fft.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 
 
 #Interp: interpolation

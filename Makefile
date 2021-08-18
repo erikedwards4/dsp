@@ -160,13 +160,24 @@ filtfilt: srci/filtfilt.cpp c/filtfilt.c
 	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lopenblas -lm
 
 
-#Conv: 1-D convolution
-Conv: #conv1 conv1_fft
-conv1: srci/conv1.cpp c/conv1.c
+#Conv: 1-D convolution and cross-correlation
+Conv: conv conv_fft conv1d conv1d_fft xcorr xcorr_fft xcorr1d xcorr1d_fft
+conv: srci/conv.cpp c/conv.c
+	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2
+conv_fft: srci/conv_fft.cpp c/conv_fft.c
 	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lm
-conv1_fft: srci/conv1_fft.cpp c/conv1_fft.c
+conv1d: srci/conv1d.cpp c/conv1d.c
+	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2
+conv1d_fft: srci/conv1d_fft.cpp c/conv1d_fft.c
 	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lm
-
+xcorr: srci/xcorr.cpp c/xcorr.c
+	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2
+xcorr_fft: srci/xcorr_fft.cpp c/xcorr_fft.c
+	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lm
+xcorr1d: srci/xcorr1d.cpp c/xcorr1d.c
+	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2
+xcorr1d_fft: srci/xcorr1d_fft.cpp c/xcorr1d_fft.c
+	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lm
 
 
 #Interp: 1-D interpolation

@@ -1,35 +1,51 @@
 //Includes
-#include "fir_fft.c"
+#include "xcorr1d.c"
 
 //Declarations
 const valarray<size_t> oktypes = {1u,2u,101u,102u};
 const size_t I = 2u, O = 1u;
-size_t dim, Q;
+size_t dim, Lx, stp, W, dil;
+int c0;
 
 //Description
 string descr;
-descr += "FIR filter of each vector (1D signal) in X,\n";
-descr += "using FIR filter coefficients in vector B. \n";
-descr += "This uses the FFT of X and B and IFFT to get Y.\n";
+descr += "1D cross-correlation with B of each vector (1D signal) in X,\n";
+descr += "This version gives full control over stride, dilation, etc.\n";
+descr += "For a simpler interface with less flexibility, see xcorr.\n";
 descr += "\n";
-descr += "B has length Q+1 (Q is the filter order). \n";
-descr += "B is in reverse chronological order (usual convention).\n";
-descr += "This performs causal filtering; use conv for non-causal.\n";
-descr += "\n";
-descr += "For a univariate signal X: \n";
-descr += "Y[t] = B[0]*X[t] + B[1]*X[t-1] + ... + B[Q]*X[t-Q]\n";
+descr += "B is NOT in flipped order (as is correct for cross-correlation).\n";
+descr += "Note that some \"convolution\" functions actually do cross-corr.\n";
+descr += "To use B in flipped order (convolution), use conv1d.\n";
 descr += "\n";
 descr += "Use -d (--dim) to give the dimension (axis) along which to filter.\n";
 descr += "Use -d0 to operate along cols, -d1 to operate along rows, etc.\n";
 descr += "The default is 0 (along cols), unless X is a row vector.\n";
 descr += "\n";
+descr += "Use -s (--step) to give the step-size (frame-shift) in samples [default=1].\n";
+descr += "\n";
+descr += "Use -c (--c0) to give the center-sample of the first frame [default=0].\n";
+descr += "This is a signed int so that negative start samps are allowed.\n";
+descr += "If using dilation>1, then this is relative to the expanded time-line.\n";
+descr += "If Lb is the length of B, and Nb is 1 + dil*(Lb-1) (new length a trous),\n";
+descr += "then the end-sample of the first frame is c0 + Nb/2. \n";
+descr += "\n";
+descr += "Use -w (--W) to give W, the number of frames [default=(Lx-c0-1)/stp].\n";
+descr += "This is a positive int (can use less than default to use only part of X).\n";
+descr += "The output Y has length W along dim.\n";
+descr += "\n";
+descr += "Use -d (--dilation) to give the dilation factor [default=1].\n";
+descr += "\n";
 descr += "Examples:\n";
-descr += "$ fir X B -o Y \n";
-descr += "$ fir -d1 X B > Y \n";
-descr += "$ cat X | fir - B > Y \n";
+descr += "$ xcorr1d X B -o Y \n";
+descr += "$ xcorr1d -d1 X B > Y \n";
+descr += "$ cat X | xcorr1d - B > Y \n";
 
 //Argtable
 struct arg_file  *a_fi = arg_filen(nullptr,nullptr,"<file>",I-1,I,"input files (X,B)");
+struct arg_int  *a_stp = arg_intn("s","step","<uint>",0,1,"step size in samps [default=1]");
+struct arg_int   *a_c0 = arg_intn("c","c0","<uint>",0,1,"center samp of first frame [default=0]");
+struct arg_int    *a_w = arg_intn("w","W","<uint>",0,1,"number of frames [default=(N-c0-1)/stp]");
+struct arg_int  *a_dil = arg_intn("i","dilation","<uint>",0,1,"dilation factor [default=1]");
 struct arg_int    *a_d = arg_intn("d","dim","<uint>",0,1,"dimension along which to filter [default=0]");
 struct arg_file  *a_fo = arg_filen("o","ofile","<file>",0,O,"output file (Y)");
 
@@ -40,6 +56,27 @@ if (a_d->count==0) { dim = i1.isvec() ? i1.nonsingleton1() : 0u; }
 else if (a_d->ival[0]<0) { cerr << progstr+": " << __LINE__ << errstr << "dim must be nonnegative" << endl; return 1; }
 else { dim = size_t(a_d->ival[0]); }
 if (dim>3u) { cerr << progstr+": " << __LINE__ << errstr << "dim must be in {0,1,2,3}" << endl; return 1; }
+Lx = (dim==0u) ? i1.R : (dim==1u) ? i1.C : (dim==2u) ? i1.S : i1.H;
+
+//Get c0
+if (a_c0->count==0) { c0 = 0u; }
+else { c0 = a_c0->ival[0]; }
+if (c0>=(int)Lx) { cerr << progstr+": " << __LINE__ << errstr << "c0 must be less than Lx (length of vecs in X)" << endl; return 1; }
+
+//Get stp
+if (a_stp->count==0) { stp = 1u; }
+else if (a_stp->ival[0]<1) { cerr << progstr+": " << __LINE__ << errstr << "stp must be positive" << endl; return 1; }
+else { stp = size_t(a_stp->ival[0]); }
+
+//Get W
+if (a_w->count==0) { W = (size_t)(int(Lx)-c0-1) / stp; }
+else if (a_w->ival[0]<1) { cerr << progstr+": " << __LINE__ << errstr << "W (nframes) must be positive" << endl; return 1; }
+else { W = size_t(a_w->ival[0]); }
+
+//Get dil
+if (a_dil->count==0) { dil = 1u; }
+else if (a_dil->ival[0]<1) { cerr << progstr+": " << __LINE__ << errstr << "dilation must be positive" << endl; return 1; }
+else { dil = size_t(a_dil->ival[0]); }
 
 //Checks
 if (i1.T!=i2.T) { cerr << progstr+": " << __LINE__ << errstr << "inputs must have the same data type" << endl; return 1; }
@@ -49,10 +86,12 @@ if (!i2.isvec()) { cerr << progstr+": " << __LINE__ << errstr << "input 2 (B) mu
 
 //Set output header info
 o1.F = i1.F; o1.T = i1.T;
-o1.R = i1.R; o1.C = i1.C; o1.S = i1.S; o1.H = i1.H;
+o1.R = (dim==0u) ? W : i1.R;
+o1.C = (dim==1u) ? W : i1.C;
+o1.S = (dim==2u) ? W : i1.S;
+o1.H = (dim==3u) ? W : i1.H;
 
 //Other prep
-Q = i2.N() - 1u;
 
 //Process
 if (i1.T==1u)
@@ -68,7 +107,7 @@ if (i1.T==1u)
     catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 1 (X)" << endl; return 1; }
     try { ifs2.read(reinterpret_cast<char*>(B),i2.nbytes()); }
     catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 2 (B)" << endl; return 1; }
-    if (codee::fir_fft_s(Y,X,B,i1.R,i1.C,i1.S,i1.H,i1.iscolmajor(),Q,dim))
+    if (codee::xcorr1d_s(Y,X,B,i1.R,i1.C,i1.S,i1.H,i1.iscolmajor(),i2.N(),W,c0,stp,dil,dim))
     { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; } 
     if (wo1)
     {
@@ -90,7 +129,7 @@ else if (i1.T==101u)
     catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 1 (X)" << endl; return 1; }
     try { ifs2.read(reinterpret_cast<char*>(B),i2.nbytes()); }
     catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 2 (B)" << endl; return 1; }
-    if (codee::fir_fft_c(Y,X,B,i1.R,i1.C,i1.S,i1.H,i1.iscolmajor(),Q,dim))
+    if (codee::xcorr1d_c(Y,X,B,i1.R,i1.C,i1.S,i1.H,i1.iscolmajor(),i2.N(),W,c0,stp,dil,dim))
     { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; } 
     if (wo1)
     {
