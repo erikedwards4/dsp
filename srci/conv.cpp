@@ -2,36 +2,37 @@
 #include "conv.c"
 
 //Declarations
-const valarray<size_t> oktypes = {1u};
+const valarray<size_t> oktypes = {1u,2u,101u,102u};
 const size_t I = 2u, O = 1u;
-size_t dim, Lx, W;
+size_t dim, L1, W;
 string shape;
 
 //Description
 string descr;
-descr += "1D convolution by B of each vector (1D signal) in X.\n";
+descr += "1D convolution of each vector in X1 by X2.\n";
 descr += "This version emulates the conv function of Octave.\n";
 descr += "For more options (stride, dilation), see conv1d.\n";
 descr += "\n";
-descr += "B is in reverse chronological order (usual convention).\n";
-descr += "This performs non-causal convolution; use fir for causal.\n";
+descr += "X2 is a vector in reverse chronological order (usual convention).\n";
+descr += "This performs non-causal convolution.\n";
+descr += "Use fir for causal (where X2 is B).\n";
 descr += "\n";
 descr += "Use -d (--dim) to give the dimension (axis) along which to filter.\n";
 descr += "Use -d0 to operate along cols, -d1 to operate along rows, etc.\n";
 descr += "The default is 0 (along cols), unless X is a row vector.\n";
 descr += "\n";
 descr += "Use -s (--shape) to give the shape as 'full', 'same' or 'valid' [default='full'].\n";
-descr += "For 'same', Y has length Lx along dim (same as X).\n";
-descr += "For 'full', Y has length Lx+2*Lb-2 along dim.\n";
-descr += "For 'valid', Y has length Lx-Lb+1 along dim.\n";
+descr += "For 'same', Y has length L1 along dim (same as X1).\n";
+descr += "For 'full', Y has length L1+2*L2-2 along dim.\n";
+descr += "For 'valid', Y has length L1-L2+1 along dim.\n";
 descr += "\n";
 descr += "Examples:\n";
-descr += "$ conv X B -o Y \n";
-descr += "$ conv -d1 X B > Y \n";
-descr += "$ cat X | conv -d1 -s'full' - B > Y \n";
+descr += "$ conv X1 X2 -o Y \n";
+descr += "$ conv -d1 -s'same' X1 X2 > Y \n";
+descr += "$ cat X2 | conv -d1 -s'valid' X1 - > Y \n";
 
 //Argtable
-struct arg_file  *a_fi = arg_filen(nullptr,nullptr,"<file>",I-1,I,"input files (X,B)");
+struct arg_file  *a_fi = arg_filen(nullptr,nullptr,"<file>",I-1,I,"input files (X1,X2)");
 struct arg_str   *a_sh = arg_strn("s","shape","<str>",0,1,"shape [default='full']");
 struct arg_int    *a_d = arg_intn("d","dim","<uint>",0,1,"dimension along which to filter [default=0]");
 struct arg_file  *a_fo = arg_filen("o","ofile","<file>",0,O,"output file (Y)");
@@ -56,15 +57,15 @@ if (shape!="full" && shape!="same" && shape!="valid") { cerr << progstr+": " << 
 
 //Checks
 if (i1.T!=i2.T) { cerr << progstr+": " << __LINE__ << errstr << "inputs must have the same data type" << endl; return 1; }
-if (i1.isempty()) { cerr << progstr+": " << __LINE__ << errstr << "input 1 (X) found to be empty" << endl; return 1; }
-if (i2.isempty()) { cerr << progstr+": " << __LINE__ << errstr << "input 2 (B) found to be empty" << endl; return 1; }
-if (!i2.isvec()) { cerr << progstr+": " << __LINE__ << errstr << "input 2 (B) must be a vector" << endl; return 1; }
+if (i1.isempty()) { cerr << progstr+": " << __LINE__ << errstr << "input 1 (X1) found to be empty" << endl; return 1; }
+if (i2.isempty()) { cerr << progstr+": " << __LINE__ << errstr << "input 2 (X2) found to be empty" << endl; return 1; }
+if (!i2.isvec()) { cerr << progstr+": " << __LINE__ << errstr << "input 2 (X2) must be a vector" << endl; return 1; }
 
 //Set output header info
-Lx = (dim==0u) ? i1.R : (dim==1u) ? i1.C : (dim==2u) ? i1.S : i1.H;
-if (shape=="full") { W = Lx + i2.N() - 1u; }
-else if (shape=="same") { W = Lx; }
-else { W = (Lx>=i2.N()) ? Lx-i2.N()+1u : 0u; }
+L1 = (dim==0u) ? i1.R : (dim==1u) ? i1.C : (dim==2u) ? i1.S : i1.H;
+if (shape=="full") { W = L1 + i2.N() - 1u; }
+else if (shape=="same") { W = L1; }
+else { W = (L1>=i2.N()) ? L1-i2.N()+1u : 0u; }
 o1.F = i1.F; o1.T = i1.T;
 o1.R = (dim==0u) ? W : i1.R;
 o1.C = (dim==1u) ? W : i1.C;
@@ -76,47 +77,47 @@ o1.H = (dim==3u) ? W : i1.H;
 //Process
 if (i1.T==1u)
 {
-    float *X, *B, *Y;
-    try { X = new float[i1.N()]; }
-    catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for input file 1 (X)" << endl; return 1; }
-    try { B = new float[i2.N()]; }
-    catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for input file 2 (B)" << endl; return 1; }
+    float *X1, *X2, *Y;
+    try { X1 = new float[i1.N()]; }
+    catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for input file 1 (X1)" << endl; return 1; }
+    try { X2 = new float[i2.N()]; }
+    catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for input file 2 (X2)" << endl; return 1; }
     try { Y = new float[o1.N()]; }
     catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for output file (Y)" << endl; return 1; }
-    try { ifs1.read(reinterpret_cast<char*>(X),i1.nbytes()); }
-    catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 1 (X)" << endl; return 1; }
-    try { ifs2.read(reinterpret_cast<char*>(B),i2.nbytes()); }
-    catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 2 (B)" << endl; return 1; }
-    if (codee::conv_s(Y,X,B,i1.R,i1.C,i1.S,i1.H,i1.iscolmajor(),i2.N(),shape.c_str(),dim))
+    try { ifs1.read(reinterpret_cast<char*>(X1),i1.nbytes()); }
+    catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 1 (X1)" << endl; return 1; }
+    try { ifs2.read(reinterpret_cast<char*>(X2),i2.nbytes()); }
+    catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 2 (X2)" << endl; return 1; }
+    if (codee::conv_s(Y,X1,X2,i1.R,i1.C,i1.S,i1.H,i1.iscolmajor(),i2.N(),shape.c_str(),dim))
     { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; } 
     if (wo1)
     {
         try { ofs1.write(reinterpret_cast<char*>(Y),o1.nbytes()); }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem writing output file (Y)" << endl; return 1; }
     }
-    delete[] X; delete[] B; delete[] Y;
+    delete[] X1; delete[] X2; delete[] Y;
+}
+else if (i1.T==101u)
+{
+    float *X1, *X2, *Y;
+    try { X1 = new float[2u*i1.N()]; }
+    catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for input file 1 (X1)" << endl; return 1; }
+    try { X2 = new float[2u*i2.N()]; }
+    catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for input file 2 (X2)" << endl; return 1; }
+    try { Y = new float[2u*o1.N()]; }
+    catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for output file (Y)" << endl; return 1; }
+    try { ifs1.read(reinterpret_cast<char*>(X1),i1.nbytes()); }
+    catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 1 (X1)" << endl; return 1; }
+    try { ifs2.read(reinterpret_cast<char*>(X2),i2.nbytes()); }
+    catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 2 (X2)" << endl; return 1; }
+    if (codee::conv_c(Y,X1,X2,i1.R,i1.C,i1.S,i1.H,i1.iscolmajor(),i2.N(),shape.c_str(),dim))
+    { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; } 
+    if (wo1)
+    {
+        try { ofs1.write(reinterpret_cast<char*>(Y),o1.nbytes()); }
+        catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem writing output file (Y)" << endl; return 1; }
+    }
+    delete[] X1; delete[] X2; delete[] Y;
 }
 
 //Finish
-// else if (i1.T==101u)
-// {
-//     float *X, *B, *Y;
-//     try { X = new float[2u*i1.N()]; }
-//     catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for input file 1 (X)" << endl; return 1; }
-//     try { B = new float[2u*i2.N()]; }
-//     catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for input file 2 (B)" << endl; return 1; }
-//     try { Y = new float[2u*o1.N()]; }
-//     catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for output file (Y)" << endl; return 1; }
-//     try { ifs1.read(reinterpret_cast<char*>(X),i1.nbytes()); }
-//     catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 1 (X)" << endl; return 1; }
-//     try { ifs2.read(reinterpret_cast<char*>(B),i2.nbytes()); }
-//     catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 2 (B)" << endl; return 1; }
-//     if (codee::fir_c(Y,X,B,i1.R,i1.C,i1.S,i1.H,i1.iscolmajor(),Q,shape.c_str(),dim))
-//     { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; } 
-//     if (wo1)
-//     {
-//         try { ofs1.write(reinterpret_cast<char*>(Y),o1.nbytes()); }
-//         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem writing output file (Y)" << endl; return 1; }
-//     }
-//     delete[] X; delete[] B; delete[] Y;
-// }

@@ -4,18 +4,18 @@
 //Declarations
 const valarray<size_t> oktypes = {1u,2u,101u,102u};
 const size_t I = 2u, O = 1u;
-size_t dim, Lx, stp, W, dil;
+size_t dim, L1, stp, W, dil;
 int c0;
 
 //Description
 string descr;
-descr += "1D cross-correlation with B of each vector (1D signal) in X,\n";
+descr += "1D cross-correlation of each vector in X1 with X2.\n";
 descr += "This version gives full control over stride, dilation, etc.\n";
 descr += "For a simpler interface with less flexibility, see xcorr.\n";
 descr += "\n";
-descr += "B is NOT in flipped order (as is correct for cross-correlation).\n";
+descr += "X2 is a vector that is NOT in flipped order.\n";
 descr += "Note that some \"convolution\" functions actually do cross-corr.\n";
-descr += "To use B in flipped order (convolution), use conv1d.\n";
+descr += "To use X2 in flipped order (convolution), use conv1d.\n";
 descr += "\n";
 descr += "Use -d (--dim) to give the dimension (axis) along which to filter.\n";
 descr += "Use -d0 to operate along cols, -d1 to operate along rows, etc.\n";
@@ -26,22 +26,22 @@ descr += "\n";
 descr += "Use -c (--c0) to give the center-sample of the first frame [default=0].\n";
 descr += "This is a signed int so that negative start samps are allowed.\n";
 descr += "If using dilation>1, then this is relative to the expanded time-line.\n";
-descr += "If Lb is the length of B, and Nb is 1 + dil*(Lb-1) (new length a trous),\n";
+descr += "If L2 is the length of X2, and Nb is 1 + dil*(L2-1) (new length a trous),\n";
 descr += "then the end-sample of the first frame is c0 + Nb/2. \n";
 descr += "\n";
-descr += "Use -w (--W) to give W, the number of frames [default=(Lx-c0-1)/stp].\n";
+descr += "Use -w (--W) to give W, the number of frames [default=(L1-c0-1)/stp].\n";
 descr += "This is a positive int (can use less than default to use only part of X).\n";
 descr += "The output Y has length W along dim.\n";
 descr += "\n";
 descr += "Use -d (--dilation) to give the dilation factor [default=1].\n";
 descr += "\n";
 descr += "Examples:\n";
-descr += "$ xcorr1d X B -o Y \n";
-descr += "$ xcorr1d -d1 X B > Y \n";
-descr += "$ cat X | xcorr1d - B > Y \n";
+descr += "$ xcorr1d X1 X2 -o Y \n";
+descr += "$ xcorr1d -d1 X1 X2 > Y \n";
+descr += "$ cat X2 | xcorr1d -d1 X2 > Y \n";
 
 //Argtable
-struct arg_file  *a_fi = arg_filen(nullptr,nullptr,"<file>",I-1,I,"input files (X,B)");
+struct arg_file  *a_fi = arg_filen(nullptr,nullptr,"<file>",I-1,I,"input files (X1,X2)");
 struct arg_int  *a_stp = arg_intn("s","step","<uint>",0,1,"step size in samps [default=1]");
 struct arg_int   *a_c0 = arg_intn("c","c0","<uint>",0,1,"center samp of first frame [default=0]");
 struct arg_int    *a_w = arg_intn("w","W","<uint>",0,1,"number of frames [default=(N-c0-1)/stp]");
@@ -56,12 +56,12 @@ if (a_d->count==0) { dim = i1.isvec() ? i1.nonsingleton1() : 0u; }
 else if (a_d->ival[0]<0) { cerr << progstr+": " << __LINE__ << errstr << "dim must be nonnegative" << endl; return 1; }
 else { dim = size_t(a_d->ival[0]); }
 if (dim>3u) { cerr << progstr+": " << __LINE__ << errstr << "dim must be in {0,1,2,3}" << endl; return 1; }
-Lx = (dim==0u) ? i1.R : (dim==1u) ? i1.C : (dim==2u) ? i1.S : i1.H;
+L1 = (dim==0u) ? i1.R : (dim==1u) ? i1.C : (dim==2u) ? i1.S : i1.H;
 
 //Get c0
 if (a_c0->count==0) { c0 = 0u; }
 else { c0 = a_c0->ival[0]; }
-if (c0>=(int)Lx) { cerr << progstr+": " << __LINE__ << errstr << "c0 must be less than Lx (length of vecs in X)" << endl; return 1; }
+if (c0>=(int)L1) { cerr << progstr+": " << __LINE__ << errstr << "c0 must be less than L1 (length of vecs in X1)" << endl; return 1; }
 
 //Get stp
 if (a_stp->count==0) { stp = 1u; }
@@ -69,7 +69,7 @@ else if (a_stp->ival[0]<1) { cerr << progstr+": " << __LINE__ << errstr << "stp 
 else { stp = size_t(a_stp->ival[0]); }
 
 //Get W
-if (a_w->count==0) { W = (size_t)(int(Lx)-c0-1) / stp; }
+if (a_w->count==0) { W = (size_t)(int(L1)-c0-1) / stp; }
 else if (a_w->ival[0]<1) { cerr << progstr+": " << __LINE__ << errstr << "W (nframes) must be positive" << endl; return 1; }
 else { W = size_t(a_w->ival[0]); }
 
@@ -80,9 +80,9 @@ else { dil = size_t(a_dil->ival[0]); }
 
 //Checks
 if (i1.T!=i2.T) { cerr << progstr+": " << __LINE__ << errstr << "inputs must have the same data type" << endl; return 1; }
-if (i1.isempty()) { cerr << progstr+": " << __LINE__ << errstr << "input 1 (X) found to be empty" << endl; return 1; }
-if (i2.isempty()) { cerr << progstr+": " << __LINE__ << errstr << "input 2 (B) found to be empty" << endl; return 1; }
-if (!i2.isvec()) { cerr << progstr+": " << __LINE__ << errstr << "input 2 (B) must be a vector" << endl; return 1; }
+if (i1.isempty()) { cerr << progstr+": " << __LINE__ << errstr << "input 1 (X1) found to be empty" << endl; return 1; }
+if (i2.isempty()) { cerr << progstr+": " << __LINE__ << errstr << "input 2 (X2) found to be empty" << endl; return 1; }
+if (!i2.isvec()) { cerr << progstr+": " << __LINE__ << errstr << "input 2 (X2) must be a vector" << endl; return 1; }
 
 //Set output header info
 o1.F = i1.F; o1.T = i1.T;
@@ -96,47 +96,47 @@ o1.H = (dim==3u) ? W : i1.H;
 //Process
 if (i1.T==1u)
 {
-    float *X, *B, *Y;
-    try { X = new float[i1.N()]; }
-    catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for input file 1 (X)" << endl; return 1; }
-    try { B = new float[i2.N()]; }
-    catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for input file 2 (B)" << endl; return 1; }
+    float *X1, *X2, *Y;
+    try { X1 = new float[i1.N()]; }
+    catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for input file 1 (X1)" << endl; return 1; }
+    try { X2 = new float[i2.N()]; }
+    catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for input file 2 (X2)" << endl; return 1; }
     try { Y = new float[o1.N()]; }
     catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for output file (Y)" << endl; return 1; }
-    try { ifs1.read(reinterpret_cast<char*>(X),i1.nbytes()); }
-    catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 1 (X)" << endl; return 1; }
-    try { ifs2.read(reinterpret_cast<char*>(B),i2.nbytes()); }
-    catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 2 (B)" << endl; return 1; }
-    if (codee::xcorr1d_s(Y,X,B,i1.R,i1.C,i1.S,i1.H,i1.iscolmajor(),i2.N(),W,c0,stp,dil,dim))
+    try { ifs1.read(reinterpret_cast<char*>(X1),i1.nbytes()); }
+    catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 1 (X1)" << endl; return 1; }
+    try { ifs2.read(reinterpret_cast<char*>(X2),i2.nbytes()); }
+    catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 2 (X2)" << endl; return 1; }
+    if (codee::xcorr1d_s(Y,X1,X2,i1.R,i1.C,i1.S,i1.H,i1.iscolmajor(),i2.N(),W,c0,stp,dil,dim))
     { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; } 
     if (wo1)
     {
         try { ofs1.write(reinterpret_cast<char*>(Y),o1.nbytes()); }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem writing output file (Y)" << endl; return 1; }
     }
-    delete[] X; delete[] B; delete[] Y;
+    delete[] X1; delete[] X2; delete[] Y;
 }
 else if (i1.T==101u)
 {
-    float *X, *B, *Y;
-    try { X = new float[2u*i1.N()]; }
-    catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for input file 1 (X)" << endl; return 1; }
-    try { B = new float[2u*i2.N()]; }
-    catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for input file 2 (B)" << endl; return 1; }
+    float *X1, *X2, *Y;
+    try { X1 = new float[2u*i1.N()]; }
+    catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for input file 1 (X1)" << endl; return 1; }
+    try { X2 = new float[2u*i2.N()]; }
+    catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for input file 2 (X2)" << endl; return 1; }
     try { Y = new float[2u*o1.N()]; }
     catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for output file (Y)" << endl; return 1; }
-    try { ifs1.read(reinterpret_cast<char*>(X),i1.nbytes()); }
-    catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 1 (X)" << endl; return 1; }
-    try { ifs2.read(reinterpret_cast<char*>(B),i2.nbytes()); }
-    catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 2 (B)" << endl; return 1; }
-    if (codee::xcorr1d_c(Y,X,B,i1.R,i1.C,i1.S,i1.H,i1.iscolmajor(),i2.N(),W,c0,stp,dil,dim))
+    try { ifs1.read(reinterpret_cast<char*>(X1),i1.nbytes()); }
+    catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 1 (X1)" << endl; return 1; }
+    try { ifs2.read(reinterpret_cast<char*>(X2),i2.nbytes()); }
+    catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 2 (X2)" << endl; return 1; }
+    if (codee::xcorr1d_c(Y,X1,X2,i1.R,i1.C,i1.S,i1.H,i1.iscolmajor(),i2.N(),W,c0,stp,dil,dim))
     { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; } 
     if (wo1)
     {
         try { ofs1.write(reinterpret_cast<char*>(Y),o1.nbytes()); }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem writing output file (Y)" << endl; return 1; }
     }
-    delete[] X; delete[] B; delete[] Y;
+    delete[] X1; delete[] X2; delete[] Y;
 }
 
 //Finish

@@ -12,7 +12,7 @@
 #include <unordered_map>
 #include <argtable2.h>
 #include "../util/cmli.hpp"
-#include "conv.c"
+#include "xcorr.c"
 
 #ifdef I
 #undef I
@@ -40,13 +40,13 @@ int main(int argc, char *argv[])
 
     //Description
     string descr;
-    descr += "1D convolution of each vector in X1 by X2.\n";
-    descr += "This version emulates the conv function of Octave.\n";
-    descr += "For more options (stride, dilation), see conv1d.\n";
+    descr += "1D cross-correlation of each vector in X1 by X2.\n";
+    descr += "This is not identical to the xcorr function of Octave.\n";
+    descr += "Rather, it is identical to conv, but without flipping X2.\n";
     descr += "\n";
-    descr += "X2 is in reverse chronological order (usual convention).\n";
-    descr += "This performs non-causal convolution.\n";
-    descr += "Use fir for causal (where X2 is B).\n";
+    descr += "X2 is NOT in flipped order (as is correct for cross-correlation).\n";
+    descr += "Note that some \"convolution\" functions actually do cross-corr.\n";
+    descr += "To use X2 in flipped order (convolution), use conv.\n";
     descr += "\n";
     descr += "Use -d (--dim) to give the dimension (axis) along which to filter.\n";
     descr += "Use -d0 to operate along cols, -d1 to operate along rows, etc.\n";
@@ -58,9 +58,9 @@ int main(int argc, char *argv[])
     descr += "For 'valid', Y has length L1-L2+1 along dim.\n";
     descr += "\n";
     descr += "Examples:\n";
-    descr += "$ conv X1 X2 -o Y \n";
-    descr += "$ conv -d1 -s'same' X1 X2 > Y \n";
-    descr += "$ cat X2 | conv -d1 -s'valid' X1 - > Y \n";
+    descr += "$ xcorr X1 X2 -o Y \n";
+    descr += "$ xcorr -d1 -s'same' X1 X2 > Y \n";
+    descr += "$ cat X2 | xcorr -d1 -s'valid' X1 - > Y \n";
 
 
     //Argtable
@@ -181,7 +181,7 @@ int main(int argc, char *argv[])
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 1 (X1)" << endl; return 1; }
         try { ifs2.read(reinterpret_cast<char*>(X2),i2.nbytes()); }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 2 (X2)" << endl; return 1; }
-        if (codee::conv_s(Y,X1,X2,i1.R,i1.C,i1.S,i1.H,i1.iscolmajor(),i2.N(),shape.c_str(),dim))
+        if (codee::xcorr_s(Y,X1,X2,i1.R,i1.C,i1.S,i1.H,i1.iscolmajor(),i2.N(),shape.c_str(),dim))
         { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; } 
         if (wo1)
         {
@@ -203,7 +203,7 @@ int main(int argc, char *argv[])
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 1 (X1)" << endl; return 1; }
         try { ifs2.read(reinterpret_cast<char*>(X2),i2.nbytes()); }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 2 (X2)" << endl; return 1; }
-        if (codee::conv_d(Y,X1,X2,i1.R,i1.C,i1.S,i1.H,i1.iscolmajor(),i2.N(),shape.c_str(),dim))
+        if (codee::xcorr_d(Y,X1,X2,i1.R,i1.C,i1.S,i1.H,i1.iscolmajor(),i2.N(),shape.c_str(),dim))
         { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; } 
         if (wo1)
         {
@@ -225,7 +225,7 @@ int main(int argc, char *argv[])
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 1 (X1)" << endl; return 1; }
         try { ifs2.read(reinterpret_cast<char*>(X2),i2.nbytes()); }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 2 (X2)" << endl; return 1; }
-        if (codee::conv_c(Y,X1,X2,i1.R,i1.C,i1.S,i1.H,i1.iscolmajor(),i2.N(),shape.c_str(),dim))
+        if (codee::xcorr_c(Y,X1,X2,i1.R,i1.C,i1.S,i1.H,i1.iscolmajor(),i2.N(),shape.c_str(),dim))
         { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; } 
         if (wo1)
         {
@@ -247,7 +247,7 @@ int main(int argc, char *argv[])
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 1 (X1)" << endl; return 1; }
         try { ifs2.read(reinterpret_cast<char*>(X2),i2.nbytes()); }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 2 (X2)" << endl; return 1; }
-        if (codee::conv_z(Y,X1,X2,i1.R,i1.C,i1.S,i1.H,i1.iscolmajor(),i2.N(),shape.c_str(),dim))
+        if (codee::xcorr_z(Y,X1,X2,i1.R,i1.C,i1.S,i1.H,i1.iscolmajor(),i2.N(),shape.c_str(),dim))
         { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; } 
         if (wo1)
         {
