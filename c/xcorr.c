@@ -26,7 +26,7 @@ int xcorr_s (float *Y, const float *X1, const float *X2, const size_t R, const s
 
     const int inc = 1 - (int)L2;       //fixed increment for X1 below
     size_t w=0u, W;                    //current frame and total frames
-    int ss, es;                        //current start-samp, end-sampe
+    int ss, es;                        //current start-samp, end-samp
     float sm;                          //intermediate sum
 
     //Set ss, es, W according to shape
@@ -181,7 +181,7 @@ int xcorr_d (double *Y, const double *X1, const double *X2, const size_t R, cons
 
     const int inc = 1 - (int)L2;       //fixed increment for X1 below
     size_t w=0u, W;                    //current frame and total frames
-    int ss, es;                        //current start-samp, end-sampe
+    int ss, es;                        //current start-samp, end-samp
     double sm;                         //intermediate sum
 
     //Set ss, es, W according to shape
@@ -336,7 +336,7 @@ int xcorr_c (float *Y, const float *X1, const float *X2, const size_t R, const s
 
     const int inc = 2 - 2*(int)L2;     //fixed increment for X1 below
     size_t w=0u, W;                    //current frame and total frames
-    int ss, es;                        //current start-samp, end-sampe
+    int ss, es;                        //current start-samp, end-samp
     float smr, smi;                    //intermediate sums
 
     //Set ss, es, W according to shape
@@ -526,7 +526,7 @@ int xcorr_z (double *Y, const double *X1, const double *X2, const size_t R, cons
 
     const int inc = 2 - 2*(int)L2;     //fixed increment for X1 below
     size_t w=0u, W;                    //current frame and total frames
-    int ss, es;                        //current start-samp, end-sampe
+    int ss, es;                        //current start-samp, end-samp
     double smr, smi;                   //intermediate sums
 
     //Set ss, es, W according to shape
