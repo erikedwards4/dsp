@@ -113,7 +113,7 @@ int sig2ac_s (float *Y, float *X, const size_t R, const size_t C, const size_t S
 
             if (K==1u && (G==1u || B==1u))
             {
-                for (size_t v=0u; v<V; ++v, X+=L-1u)
+                for (size_t v=V; v>0u; --v, X+=L-1u)
                 {
                     if (mnz)
                     {
@@ -151,9 +151,9 @@ int sig2ac_s (float *Y, float *X, const size_t R, const size_t C, const size_t S
             }
             else
             {
-                for (size_t g=0u; g<G; ++g, X+=B*(Lx-1u), Y+=B*(L-1u))
+                for (size_t g=G; g>0u; --g, X+=B*(Lx-1u), Y+=B*(L-1u))
                 {
-                    for (size_t b=0u; b<B; ++b, ++X, Y-=K*L-1u)
+                    for (size_t b=B; b>0u; --b, ++X, Y-=K*L-1u)
                     {
                         if (mnz)
                         {
@@ -277,7 +277,7 @@ int sig2ac_d (double *Y, double *X, const size_t R, const size_t C, const size_t
 
             if (K==1u && (G==1u || B==1u))
             {
-                for (size_t v=0u; v<V; ++v, X+=L-1u)
+                for (size_t v=V; v>0u; --v, X+=L-1u)
                 {
                     if (mnz)
                     {
@@ -315,9 +315,9 @@ int sig2ac_d (double *Y, double *X, const size_t R, const size_t C, const size_t
             }
             else
             {
-                for (size_t g=0u; g<G; ++g, X+=B*(Lx-1u), Y+=B*(L-1u))
+                for (size_t g=G; g>0u; --g, X+=B*(Lx-1u), Y+=B*(L-1u))
                 {
-                    for (size_t b=0u; b<B; ++b, ++X, Y-=K*L-1u)
+                    for (size_t b=B; b>0u; --b, ++X, Y-=K*L-1u)
                     {
                         if (mnz)
                         {
@@ -441,7 +441,7 @@ int sig2ac_c (float *Y, float *X, const size_t R, const size_t C, const size_t S
 
             if (K==1u && (G==1u || B==1u))
             {
-                for (size_t v=0u; v<V; ++v, X+=2u*L-2u)
+                for (size_t v=V; v>0u; --v, X+=2u*L-2u)
                 {
                     if (mnz)
                     {
@@ -493,9 +493,9 @@ int sig2ac_c (float *Y, float *X, const size_t R, const size_t C, const size_t S
             }
             else
             {
-                for (size_t g=0u; g<G; ++g, X+=2u*B*(Lx-1u), Y+=2u*B*(L-1u))
+                for (size_t g=G; g>0u; --g, X+=2u*B*(Lx-1u), Y+=2u*B*(L-1u))
                 {
-                    for (size_t b=0u; b<B; ++b, X+=2, Y-=2u*K*L-2u)
+                    for (size_t b=B; b>0u; --b, X+=2, Y-=2u*K*L-2u)
                     {
                         if (mnz)
                         {
@@ -629,7 +629,7 @@ int sig2ac_z (double *Y, double *X, const size_t R, const size_t C, const size_t
 
             if (K==1u && (G==1u || B==1u))
             {
-                for (size_t v=0u; v<V; ++v, X+=2u*L-2u)
+                for (size_t v=V; v>0u; --v, X+=2u*L-2u)
                 {
                     if (mnz)
                     {
@@ -681,9 +681,9 @@ int sig2ac_z (double *Y, double *X, const size_t R, const size_t C, const size_t
             }
             else
             {
-                for (size_t g=0u; g<G; ++g, X+=2u*B*(Lx-1u), Y+=2u*B*(L-1u))
+                for (size_t g=G; g>0u; --g, X+=2u*B*(Lx-1u), Y+=2u*B*(L-1u))
                 {
-                    for (size_t b=0u; b<B; ++b, X+=2, Y-=2u*K*L-2u)
+                    for (size_t b=B; b>0u; --b, X+=2, Y-=2u*K*L-2u)
                     {
                         if (mnz)
                         {

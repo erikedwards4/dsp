@@ -40,13 +40,13 @@ int poly2roots_s (float *Y, const float *X, const size_t R, const size_t C, cons
 
             if (K==1u && (G==1u || B==1u))
             {
-                for (size_t v=0u; v<V; ++v, ++X, ++Y) { ++X; *Y = -*X; *++Y = 0.0f; }
+                for (size_t v=V; v>0u; --v, ++X, ++Y) { ++X; *Y = -*X; *++Y = 0.0f; }
             }
             else
             {
-                for (size_t g=0u; g<G; ++g, X+=B)
+                for (size_t g=G; g>0u; --g, X+=B)
                 {
-                    for (size_t b=0u; b<B; ++b, ++X, ++Y) { *Y = -*(X+K); *++Y = 0.0f; }
+                    for (size_t b=B; b>0u; --b, ++X, ++Y) { *Y = -*(X+K); *++Y = 0.0f; }
                 }
             }
         }
@@ -85,7 +85,7 @@ int poly2roots_s (float *Y, const float *X, const size_t R, const size_t C, cons
 
             if (K==1u && (G==1u || B==1u))
             {
-                for (size_t v=0u; v<V; ++v)
+                for (size_t v=V; v>0u; --v)
                 {
                     for (size_t l=0u; l<Ly*Ly; ++l, ++compan) { *compan = 0.0f; }
                     compan -= Lx;
@@ -102,9 +102,9 @@ int poly2roots_s (float *Y, const float *X, const size_t R, const size_t C, cons
             }
             else
             {
-                for (size_t g=0u; g<G; ++g, X+=B*(Lx-1u), Y+=2u*B*(Ly-1u))
+                for (size_t g=G; g>0u; --g, X+=B*(Lx-1u), Y+=2u*B*(Ly-1u))
                 {
-                    for (size_t b=0u; b<B; ++b, X-=K*Lx-1u, Y-=2u*K*Ly-2u)
+                    for (size_t b=B; b>0u; --b, X-=K*Lx-1u, Y-=2u*K*Ly-2u)
                     {
                         for (size_t l=0u; l<Ly*Ly; ++l, ++compan) { *compan = 0.0f; }
                         compan -= Lx;
@@ -148,13 +148,13 @@ int poly2roots_d (double *Y, const double *X, const size_t R, const size_t C, co
 
             if (K==1u && (G==1u || B==1u))
             {
-                for (size_t v=0u; v<V; ++v, ++X, ++Y) { ++X; *Y = -*X; *++Y = 0.0; }
+                for (size_t v=V; v>0u; --v, ++X, ++Y) { ++X; *Y = -*X; *++Y = 0.0; }
             }
             else
             {
-                for (size_t g=0u; g<G; ++g, X+=B)
+                for (size_t g=G; g>0u; --g, X+=B)
                 {
-                    for (size_t b=0u; b<B; ++b, ++X, ++Y) { *Y = -*(X+K); *++Y = 0.0; }
+                    for (size_t b=B; b>0u; --b, ++X, ++Y) { *Y = -*(X+K); *++Y = 0.0; }
                 }
             }
         }
@@ -194,7 +194,7 @@ int poly2roots_d (double *Y, const double *X, const size_t R, const size_t C, co
 
             if (K==1u && (G==1u || B==1u))
             {
-                for (size_t v=0u; v<V; ++v)
+                for (size_t v=V; v>0u; --v)
                 {
                     for (size_t l=0u; l<Ly*Ly; ++l, ++compan) { *compan = 0.0; }
                     compan -= Lx;
@@ -211,9 +211,9 @@ int poly2roots_d (double *Y, const double *X, const size_t R, const size_t C, co
             }
             else
             {
-                for (size_t g=0u; g<G; ++g, X+=B*(Lx-1u), Y+=2u*B*(Ly-1u))
+                for (size_t g=G; g>0u; --g, X+=B*(Lx-1u), Y+=2u*B*(Ly-1u))
                 {
-                    for (size_t b=0u; b<B; ++b, X-=K*Lx-1u, Y-=2u*K*Ly-2u)
+                    for (size_t b=B; b>0u; --b, X-=K*Lx-1u, Y-=2u*K*Ly-2u)
                     {
                         for (size_t l=0u; l<Ly*Ly; ++l, ++compan) { *compan = 0.0; }
                         compan -= Lx;
@@ -280,7 +280,7 @@ int poly2roots_c (float *Y, const float *X, const size_t R, const size_t C, cons
 
             if (K==1u && (G==1u || B==1u))
             {
-                for (size_t v=0u; v<V; ++v, Y+=2u*Ly)
+                for (size_t v=V; v>0u; --v, Y+=2u*Ly)
                 {
                     if (Ly>1u)
                     {
@@ -306,9 +306,9 @@ int poly2roots_c (float *Y, const float *X, const size_t R, const size_t C, cons
                 float *roots;
                 if (!(roots=(float *)malloc((size_t)(2*n)*sizeof(float)))) { fprintf(stderr,"error in poly2roots_c: problem with malloc. "); perror("malloc"); return 1; }
                 
-                for (size_t g=0u; g<G; ++g, X+=2u*B*(Lx-1u), Y+=2u*B*(Ly-1u))
+                for (size_t g=G; g>0u; --g, X+=2u*B*(Lx-1u), Y+=2u*B*(Ly-1u))
                 {
-                    for (size_t b=0u; b<B; ++b, X-=2u*K*Lx-2u, Y-=2u*K*Ly-2u)
+                    for (size_t b=B; b>0u; --b, X-=2u*K*Lx-2u, Y-=2u*K*Ly-2u)
                     {
                         if (Ly>1u)
                         {
@@ -383,7 +383,7 @@ int poly2roots_z (double *Y, const double *X, const size_t R, const size_t C, co
 
             if (K==1u && (G==1u || B==1u))
             {
-                for (size_t v=0u; v<V; ++v, Y+=2u*Ly)
+                for (size_t v=V; v>0u; --v, Y+=2u*Ly)
                 {
                     if (Ly>1u)
                     {
@@ -409,9 +409,9 @@ int poly2roots_z (double *Y, const double *X, const size_t R, const size_t C, co
                 double *roots;
                 if (!(roots=(double *)malloc((size_t)(2*n)*sizeof(double)))) { fprintf(stderr,"error in poly2roots_z: problem with malloc. "); perror("malloc"); return 1; }
                 
-                for (size_t g=0u; g<G; ++g, X+=2u*B*(Lx-1u), Y+=2u*B*(Ly-1u))
+                for (size_t g=G; g>0u; --g, X+=2u*B*(Lx-1u), Y+=2u*B*(Ly-1u))
                 {
-                    for (size_t b=0u; b<B; ++b, X-=2u*K*Lx-2u, Y-=2u*K*Ly-2u)
+                    for (size_t b=B; b>0u; --b, X-=2u*K*Lx-2u, Y-=2u*K*Ly-2u)
                     {
                         if (Ly>1u)
                         {

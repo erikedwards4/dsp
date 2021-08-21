@@ -56,7 +56,7 @@ int ar2rc_s (float *Y, const float *X, const size_t R, const size_t C, const siz
 
             if (K==1u && (G==1u || B==1u))
             {
-                for (size_t v=0u; v<V; ++v, Y+=L)
+                for (size_t v=V; v>0u; --v, Y+=L)
                 {
                     for (size_t l=0u; l<L; ++l, ++X, ++Y) { *Y = -*X; }
                     Y -= L;
@@ -74,9 +74,9 @@ int ar2rc_s (float *Y, const float *X, const size_t R, const size_t C, const siz
             }
             else
             {
-                for (size_t g=0u; g<G; ++g, X+=B*(L-1u), Y+=B*(L-1u))
+                for (size_t g=G; g>0u; --g, X+=B*(L-1u), Y+=B*(L-1u))
                 {
-                    for (size_t b=0u; b<B; ++b, X-=K*L-1u, ++Y)
+                    for (size_t b=B; b>0u; --b, X-=K*L-1u, ++Y)
                     {
                         for (size_t l=0u; l<L; ++l, X+=K, Y+=K) { *Y = -*X; }
                         Y -= L*K;
@@ -137,7 +137,7 @@ int ar2rc_d (double *Y, const double *X, const size_t R, const size_t C, const s
 
             if (K==1u && (G==1u || B==1u))
             {
-                for (size_t v=0u; v<V; ++v, Y+=L)
+                for (size_t v=V; v>0u; --v, Y+=L)
                 {
                     for (size_t l=0u; l<L; ++l, ++X, ++Y) { *Y = -*X; }
                     Y -= L;
@@ -155,9 +155,9 @@ int ar2rc_d (double *Y, const double *X, const size_t R, const size_t C, const s
             }
             else
             {
-                for (size_t g=0u; g<G; ++g, X+=B*(L-1u), Y+=B*(L-1u))
+                for (size_t g=G; g>0u; --g, X+=B*(L-1u), Y+=B*(L-1u))
                 {
-                    for (size_t b=0u; b<B; ++b, X-=K*L-1u, ++Y)
+                    for (size_t b=B; b>0u; --b, X-=K*L-1u, ++Y)
                     {
                         for (size_t l=0u; l<L; ++l, X+=K, Y+=K) { *Y = -*X; }
                         Y -= L*K;
@@ -232,7 +232,7 @@ int ar2rc_c (float *Y, const float *X, const size_t R, const size_t C, const siz
 
             if (K==1u && (G==1u || B==1u))
             {
-                for (size_t v=0u; v<V; ++v, Y+=2u*L)
+                for (size_t v=V; v>0u; --v, Y+=2u*L)
                 {
                     for (size_t l=0u; l<2u*L; ++l, ++X, ++Y) { *Y = -*X; }
                     Y -= 2u*L;
@@ -264,9 +264,9 @@ int ar2rc_c (float *Y, const float *X, const size_t R, const size_t C, const siz
             }
             else
             {
-                for (size_t g=0u; g<G; ++g, X+=2u*B*(L-1u), Y+=2u*B*(L-1u))
+                for (size_t g=G; g>0u; --g, X+=2u*B*(L-1u), Y+=2u*B*(L-1u))
                 {
-                    for (size_t b=0u; b<B; ++b, X-=2u*K*L-2u, Y+=2u)
+                    for (size_t b=B; b>0u; --b, X-=2u*K*L-2u, Y+=2u)
                     {
                         for (size_t l=0u; l<L; ++l, X+=2u*K, Y+=2u*K)
                         {
@@ -359,7 +359,7 @@ int ar2rc_z (double *Y, const double *X, const size_t R, const size_t C, const s
 
             if (K==1u && (G==1u || B==1u))
             {
-                for (size_t v=0u; v<V; ++v, Y+=2u*L)
+                for (size_t v=V; v>0u; --v, Y+=2u*L)
                 {
                     for (size_t l=0u; l<2u*L; ++l, ++X, ++Y) { *Y = -*X; }
                     Y -= 2u*L;
@@ -391,9 +391,9 @@ int ar2rc_z (double *Y, const double *X, const size_t R, const size_t C, const s
             }
             else
             {
-                for (size_t g=0u; g<G; ++g, X+=2u*B*(L-1u), Y+=2u*B*(L-1u))
+                for (size_t g=G; g>0u; --g, X+=2u*B*(L-1u), Y+=2u*B*(L-1u))
                 {
-                    for (size_t b=0u; b<B; ++b, X-=2u*K*L-2u, Y+=2u)
+                    for (size_t b=B; b>0u; --b, X-=2u*K*L-2u, Y+=2u)
                     {
                         for (size_t l=0u; l<L; ++l, X+=2u*K, Y+=2u*K)
                         {

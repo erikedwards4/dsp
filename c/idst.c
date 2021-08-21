@@ -78,9 +78,9 @@ int idst_s (float *Y, const float *X, const size_t R, const size_t C, const size
                 X1 += L;
                 for (size_t l=L; l<ndst; ++l, ++X1) { *X1 = 0.0f; }
                 X1 -= ndst;
-                for (size_t g=0u; g<G; ++g, X+=B*(L-1u), Y+=B*(ndst-1u))
+                for (size_t g=G; g>0u; --g, X+=B*(L-1u), Y+=B*(ndst-1u))
                 {
-                    for (size_t b=0u; b<B; ++b, X-=K*L-1u, Y1-=ndst, Y-=K*ndst-1u)
+                    for (size_t b=B; b>0u; --b, X-=K*L-1u, Y1-=ndst, Y-=K*ndst-1u)
                     {
                         *X1++ = *X; X += K;
                         for (size_t l=1u; l<L; ++l, X+=K, ++X1) { *X1 = *X; }
@@ -161,9 +161,9 @@ int idst_d (double *Y, const double *X, const size_t R, const size_t C, const si
                 X1 += L;
                 for (size_t l=L; l<ndst; ++l, ++X1) { *X1 = 0.0; }
                 X1 -= ndst;
-                for (size_t g=0u; g<G; ++g, X+=B*(L-1u), Y+=B*(ndst-1u))
+                for (size_t g=G; g>0u; --g, X+=B*(L-1u), Y+=B*(ndst-1u))
                 {
-                    for (size_t b=0u; b<B; ++b, X-=K*L-1u, Y1-=ndst, Y-=K*ndst-1u)
+                    for (size_t b=B; b>0u; --b, X-=K*L-1u, Y1-=ndst, Y-=K*ndst-1u)
                     {
                         *X1++ = *X; X += K;
                         for (size_t l=1u; l<L; ++l, X+=K, ++X1) { *X1 = *X; }
@@ -248,9 +248,9 @@ int idst_c (float *Y, const float *X, const size_t R, const size_t C, const size
                 X1r += L; X1i += L;
                 for (size_t l=L; l<ndst; ++l, ++X1r, ++X1i) { *X1r = *X1i = 0.0f; }
                 X1r -= ndst; X1i -= ndst;
-                for (size_t g=0u; g<G; ++g, X+=2u*B*(L-1u), Y+=2u*B*(ndst-1u))
+                for (size_t g=G; g>0u; --g, X+=2u*B*(L-1u), Y+=2u*B*(ndst-1u))
                 {
-                    for (size_t b=0u; b<B; ++b, X-=2u*K*L-2u, Y1r-=ndst, Y1i-=ndst, Y-=2u*K*ndst-2u)
+                    for (size_t b=B; b>0u; --b, X-=2u*K*L-2u, Y1r-=ndst, Y1i-=ndst, Y-=2u*K*ndst-2u)
                     {
                         *X1r++ = *X; *X1i++ = *++X; X += 2u*K-1u;
                         for (size_t l=1u; l<L; ++l, X+=2u*K-1u, ++X1r, ++X1i) { *X1r = *X; *X1i = *++X; }
@@ -336,9 +336,9 @@ int idst_z (double *Y, const double *X, const size_t R, const size_t C, const si
                 X1r += L; X1i += L;
                 for (size_t l=L; l<ndst; ++l, ++X1r, ++X1i) { *X1r = *X1i = 0.0; }
                 X1r -= ndst; X1i -= ndst;
-                for (size_t g=0u; g<G; ++g, X+=2u*B*(L-1u), Y+=2u*B*(ndst-1u))
+                for (size_t g=G; g>0u; --g, X+=2u*B*(L-1u), Y+=2u*B*(ndst-1u))
                 {
-                    for (size_t b=0u; b<B; ++b, X-=2u*K*L-2u, Y1r-=ndst, Y1i-=ndst, Y-=2u*K*ndst-2u)
+                    for (size_t b=B; b>0u; --b, X-=2u*K*L-2u, Y1r-=ndst, Y1i-=ndst, Y-=2u*K*ndst-2u)
                     {
                         *X1r++ = *X; *X1i++ = *++X; X += 2u*K-1u;
                         for (size_t l=1u; l<L; ++l, X+=2u*K-1u, ++X1r, ++X1i) { *X1r = *X; *X1i = *++X; }

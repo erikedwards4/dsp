@@ -29,7 +29,7 @@ int main(int argc, char *argv[])
     const string errstr = ": \033[1;31merror:\033[0m ";
     const string warstr = ": \033[1;35mwarning:\033[0m ";
     const string progstr(__FILE__,string(__FILE__).find_last_of("/")+1,strlen(__FILE__)-string(__FILE__).find_last_of("/")-5);
-    const valarray<size_t> oktypes = {1u};
+    const valarray<size_t> oktypes = {1u,2u,101u,102u};
     const size_t I = 2u, O = 1u;
     ifstream ifs1, ifs2; ofstream ofs1;
     int8_t stdi1, stdi2, stdo1, wo1;
@@ -201,36 +201,77 @@ int main(int argc, char *argv[])
         }
         delete[] X1; delete[] X2; delete[] Y;
     }
+    else if (i1.T==2u)
+    {
+        double *X1, *X2, *Y;
+        try { X1 = new double[i1.N()]; }
+        catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for input file 1 (X1)" << endl; return 1; }
+        try { X2 = new double[i2.N()]; }
+        catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for input file 2 (X2)" << endl; return 1; }
+        try { Y = new double[o1.N()]; }
+        catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for output file (Y)" << endl; return 1; }
+        try { ifs1.read(reinterpret_cast<char*>(X1),i1.nbytes()); }
+        catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 1 (X1)" << endl; return 1; }
+        try { ifs2.read(reinterpret_cast<char*>(X2),i2.nbytes()); }
+        catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 2 (X2)" << endl; return 1; }
+        if (codee::xcorr1d_d(Y,X1,X2,i1.R,i1.C,i1.S,i1.H,i1.iscolmajor(),i2.N(),pad,str,dil,dim))
+        { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; } 
+        if (wo1)
+        {
+            try { ofs1.write(reinterpret_cast<char*>(Y),o1.nbytes()); }
+            catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem writing output file (Y)" << endl; return 1; }
+        }
+        delete[] X1; delete[] X2; delete[] Y;
+    }
+    else if (i1.T==101u)
+    {
+        float *X1, *X2, *Y;
+        try { X1 = new float[2u*i1.N()]; }
+        catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for input file 1 (X1)" << endl; return 1; }
+        try { X2 = new float[2u*i2.N()]; }
+        catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for input file 2 (X2)" << endl; return 1; }
+        try { Y = new float[2u*o1.N()]; }
+        catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for output file (Y)" << endl; return 1; }
+        try { ifs1.read(reinterpret_cast<char*>(X1),i1.nbytes()); }
+        catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 1 (X1)" << endl; return 1; }
+        try { ifs2.read(reinterpret_cast<char*>(X2),i2.nbytes()); }
+        catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 2 (X2)" << endl; return 1; }
+        if (codee::xcorr1d_c(Y,X1,X2,i1.R,i1.C,i1.S,i1.H,i1.iscolmajor(),i2.N(),pad,str,dil,dim))
+        { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; } 
+        if (wo1)
+        {
+            try { ofs1.write(reinterpret_cast<char*>(Y),o1.nbytes()); }
+            catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem writing output file (Y)" << endl; return 1; }
+        }
+        delete[] X1; delete[] X2; delete[] Y;
+    }
+    else if (i1.T==102u)
+    {
+        double *X1, *X2, *Y;
+        try { X1 = new double[2u*i1.N()]; }
+        catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for input file 1 (X1)" << endl; return 1; }
+        try { X2 = new double[2u*i2.N()]; }
+        catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for input file 2 (X2)" << endl; return 1; }
+        try { Y = new double[2u*o1.N()]; }
+        catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for output file (Y)" << endl; return 1; }
+        try { ifs1.read(reinterpret_cast<char*>(X1),i1.nbytes()); }
+        catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 1 (X1)" << endl; return 1; }
+        try { ifs2.read(reinterpret_cast<char*>(X2),i2.nbytes()); }
+        catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 2 (X2)" << endl; return 1; }
+        if (codee::xcorr1d_z(Y,X1,X2,i1.R,i1.C,i1.S,i1.H,i1.iscolmajor(),i2.N(),pad,str,dil,dim))
+        { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; } 
+        if (wo1)
+        {
+            try { ofs1.write(reinterpret_cast<char*>(Y),o1.nbytes()); }
+            catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem writing output file (Y)" << endl; return 1; }
+        }
+        delete[] X1; delete[] X2; delete[] Y;
+    }
     else
     {
         cerr << progstr+": " << __LINE__ << errstr << "data type not supported" << endl; return 1;
     }
     
-
-    //Finish
-    // else if (i1.T==101u)
-    // {
-    //     float *X1, *X2, *Y;
-    //     try { X1 = new float[2u*i1.N()]; }
-    //     catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for input file 1 (X1)" << endl; return 1; }
-    //     try { X2 = new float[2u*i2.N()]; }
-    //     catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for input file 2 (X2)" << endl; return 1; }
-    //     try { Y = new float[2u*o1.N()]; }
-    //     catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for output file (Y)" << endl; return 1; }
-    //     try { ifs1.read(reinterpret_cast<char*>(X1),i1.nbytes()); }
-    //     catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 1 (X1)" << endl; return 1; }
-    //     try { ifs2.read(reinterpret_cast<char*>(X2),i2.nbytes()); }
-    //     catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 2 (X2)" << endl; return 1; }
-    //     if (codee::xcorr1d_c(Y,X1,X2,i1.R,i1.C,i1.S,i1.H,i1.iscolmajor(),i2.N(),pad,str,dil,dim))
-    //     { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; } 
-    //     if (wo1)
-    //     {
-    //         try { ofs1.write(reinterpret_cast<char*>(Y),o1.nbytes()); }
-    //         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem writing output file (Y)" << endl; return 1; }
-    //     }
-    //     delete[] X1; delete[] X2; delete[] Y;
-    // }
-
 
     //Exit
     return ret;

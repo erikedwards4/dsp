@@ -58,7 +58,7 @@ int lcr_windowed_s (float *Y, const float *X1, const float *X2, const size_t R, 
         if (K==1u && (G==1u || B==1u))
         {
             //For each vec in X1
-            for (size_t v=0u; v<V; ++v)
+            for (size_t v=V; v>0u; --v)
             {
                 //Get Z
                 if (going==0)
@@ -135,9 +135,9 @@ int lcr_windowed_s (float *Y, const float *X1, const float *X2, const size_t R, 
         }
         else
         {
-            for (size_t g=0u; g<G; ++g, X1+=B*(Lx-1u), Y+=B*(W-1u))
+            for (size_t g=G; g>0u; --g, X1+=B*(Lx-1u), Y+=B*(W-1u))
             {
-                for (size_t b=0u; b<B; ++b, X1-=K*Lx-1u, Y-=K*W-1u)
+                for (size_t b=B; b>0u; --b, X1-=K*Lx-1u, Y-=K*W-1u)
                 {
                     //Get Z
                     if (going==0)
@@ -261,7 +261,7 @@ int lcr_windowed_d (double *Y, const double *X1, const double *X2, const size_t 
         if (K==1u && (G==1u || B==1u))
         {
             //For each vec in X1
-            for (size_t v=0u; v<V; ++v)
+            for (size_t v=V; v>0u; --v)
             {
                 //Get Z
                 if (going==0)
@@ -338,9 +338,9 @@ int lcr_windowed_d (double *Y, const double *X1, const double *X2, const size_t 
         }
         else
         {
-            for (size_t g=0u; g<G; ++g, X1+=B*(Lx-1u), Y+=B*(W-1u))
+            for (size_t g=G; g>0u; --g, X1+=B*(Lx-1u), Y+=B*(W-1u))
             {
-                for (size_t b=0u; b<B; ++b, X1-=K*Lx-1u, Y-=K*W-1u)
+                for (size_t b=B; b>0u; --b, X1-=K*Lx-1u, Y-=K*W-1u)
                 {
                     //Get Z
                     if (going==0)

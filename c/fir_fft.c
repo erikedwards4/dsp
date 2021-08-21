@@ -94,7 +94,7 @@ int fir_fft_s (float *Y, const float *X, const float *B, const size_t R, const s
 
             if (K==1u && (G==1u || BS==1u))
             {
-                for (size_t v=0u; v<V; ++v)
+                for (size_t v=V; v>0u; --v)
                 {
                     for (size_t l=0u; l<L; ++l, ++X, ++X1) { *X1 = *X; }
                     X1 -= L;
@@ -116,7 +116,7 @@ int fir_fft_s (float *Y, const float *X, const float *B, const size_t R, const s
             }
             else
             {
-                for (size_t g=0u; g<G; ++g, X+=BS*(L-1u), Y+=BS*(L-1u))
+                for (size_t g=G; g>0u; --g, X+=BS*(L-1u), Y+=BS*(L-1u))
                 {
                     for (size_t bs=0u; bs<BS; ++bs, X-=K*L-1u, Y-=K*L-1u)
                     {
@@ -220,7 +220,7 @@ int fir_fft_d (double *Y, const double *X, const double *B, const size_t R, cons
 
             if (K==1u && (G==1u || BS==1u))
             {
-                for (size_t v=0u; v<V; ++v)
+                for (size_t v=V; v>0u; --v)
                 {
                     for (size_t l=0u; l<L; ++l, ++X, ++X1) { *X1 = *X; }
                     X1 -= L;
@@ -242,7 +242,7 @@ int fir_fft_d (double *Y, const double *X, const double *B, const size_t R, cons
             }
             else
             {
-                for (size_t g=0u; g<G; ++g, X+=BS*(L-1u), Y+=BS*(L-1u))
+                for (size_t g=G; g>0u; --g, X+=BS*(L-1u), Y+=BS*(L-1u))
                 {
                     for (size_t bs=0u; bs<BS; ++bs, X-=K*L-1u, Y-=K*L-1u)
                     {
@@ -337,7 +337,7 @@ int fir_fft_c (float *Y, const float *X, const float *B, const size_t R, const s
 
             if (K==1u && (G==1u || BS==1u))
             {
-                for (size_t v=0u; v<V; ++v)
+                for (size_t v=V; v>0u; --v)
                 {
                     for (size_t l=0u; l<2u*L; ++l, ++X, ++X1) { *X1 = *X; }
                     X1 -= 2u*L;
@@ -357,7 +357,7 @@ int fir_fft_c (float *Y, const float *X, const float *B, const size_t R, const s
             }
             else
             {
-                for (size_t g=0u; g<G; ++g, X+=2u*BS*(L-1u), Y+=2u*BS*(L-1u))
+                for (size_t g=G; g>0u; --g, X+=2u*BS*(L-1u), Y+=2u*BS*(L-1u))
                 {
                     for (size_t bs=0u; bs<BS; ++bs, X-=2u*K*L-2u, Y-=2u*K*L-2u)
                     {
@@ -450,7 +450,7 @@ int fir_fft_z (double *Y, const double *X, const double *B, const size_t R, cons
 
             if (K==1u && (G==1u || BS==1u))
             {
-                for (size_t v=0u; v<V; ++v)
+                for (size_t v=V; v>0u; --v)
                 {
                     for (size_t l=0u; l<2u*L; ++l, ++X, ++X1) { *X1 = *X; }
                     X1 -= 2u*L;
@@ -470,7 +470,7 @@ int fir_fft_z (double *Y, const double *X, const double *B, const size_t R, cons
             }
             else
             {
-                for (size_t g=0u; g<G; ++g, X+=2u*BS*(L-1u), Y+=2u*BS*(L-1u))
+                for (size_t g=G; g>0u; --g, X+=2u*BS*(L-1u), Y+=2u*BS*(L-1u))
                 {
                     for (size_t bs=0u; bs<BS; ++bs, X-=2u*K*L-2u, Y-=2u*K*L-2u)
                     {

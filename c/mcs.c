@@ -56,7 +56,7 @@ int mcs_s (int *Y, const float *X, const size_t R, const size_t C, const size_t 
         {
             if (going==0)
             {
-                for (size_t v=0u; v<V; ++v)
+                for (size_t v=V; v>0u; --v)
                 {
                     mn = 0.0f;
                     for (size_t l=0u; l<L; ++l, ++X) { mn += *X; }
@@ -67,7 +67,7 @@ int mcs_s (int *Y, const float *X, const size_t R, const size_t C, const size_t 
             }
             else if (going==1)
             {
-                for (size_t v=0u; v<V; ++v)
+                for (size_t v=V; v>0u; --v)
                 {
                     mn = 0.0f;
                     for (size_t l=0u; l<L; ++l, ++X) { mn += *X; }
@@ -78,7 +78,7 @@ int mcs_s (int *Y, const float *X, const size_t R, const size_t C, const size_t 
             }
             else if (going==-1)
             {
-                for (size_t v=0u; v<V; ++v)
+                for (size_t v=V; v>0u; --v)
                 {
                     mn = 0.0f;
                     for (size_t l=0u; l<L; ++l, ++X) { mn += *X; }
@@ -93,9 +93,9 @@ int mcs_s (int *Y, const float *X, const size_t R, const size_t C, const size_t 
         {
             if (going==0)
             {
-                for (size_t g=0u; g<G; ++g, X+=B*(L-1u), Y+=B*(L-1u))
+                for (size_t g=G; g>0u; --g, X+=B*(L-1u), Y+=B*(L-1u))
                 {
-                    for (size_t b=0u; b<B; ++b, X-=K*L-1u, Y-=K*L-1u)
+                    for (size_t b=B; b>0u; --b, X-=K*L-1u, Y-=K*L-1u)
                     {
                         mn = 0.0f;
                         for (size_t l=0u; l<L; ++l, X+=K) { mn += *X; }
@@ -107,9 +107,9 @@ int mcs_s (int *Y, const float *X, const size_t R, const size_t C, const size_t 
             }
             else if (going==1)
             {
-                for (size_t g=0u; g<G; ++g, X+=B*(L-1u), Y+=B*(L-1u))
+                for (size_t g=G; g>0u; --g, X+=B*(L-1u), Y+=B*(L-1u))
                 {
-                    for (size_t b=0u; b<B; ++b, X-=K*L-1u, Y-=K*L-1u)
+                    for (size_t b=B; b>0u; --b, X-=K*L-1u, Y-=K*L-1u)
                     {
                         mn = 0.0f;
                         for (size_t l=0u; l<L; ++l, X+=K) { mn += *X; }
@@ -121,9 +121,9 @@ int mcs_s (int *Y, const float *X, const size_t R, const size_t C, const size_t 
             }
             else if (going==-1)
             {
-                for (size_t g=0u; g<G; ++g, X+=B*(L-1u), Y+=B*(L-1u))
+                for (size_t g=G; g>0u; --g, X+=B*(L-1u), Y+=B*(L-1u))
                 {
-                    for (size_t b=0u; b<B; ++b, X-=K*L-1u, Y-=K*L-1u)
+                    for (size_t b=B; b>0u; --b, X-=K*L-1u, Y-=K*L-1u)
                     {
                         mn = 0.0f;
                         for (size_t l=0u; l<L; ++l, X+=K) { mn += *X; }
@@ -185,7 +185,7 @@ int mcs_d (int *Y, const double *X, const size_t R, const size_t C, const size_t
         {
             if (going==0)
             {
-                for (size_t v=0u; v<V; ++v)
+                for (size_t v=V; v>0u; --v)
                 {
                     mn = 0.0;
                     for (size_t l=0u; l<L; ++l, ++X) { mn += *X; }
@@ -196,7 +196,7 @@ int mcs_d (int *Y, const double *X, const size_t R, const size_t C, const size_t
             }
             else if (going==1)
             {
-                for (size_t v=0u; v<V; ++v)
+                for (size_t v=V; v>0u; --v)
                 {
                     mn = 0.0;
                     for (size_t l=0u; l<L; ++l, ++X) { mn += *X; }
@@ -207,7 +207,7 @@ int mcs_d (int *Y, const double *X, const size_t R, const size_t C, const size_t
             }
             else if (going==-1)
             {
-                for (size_t v=0u; v<V; ++v)
+                for (size_t v=V; v>0u; --v)
                 {
                     mn = 0.0;
                     for (size_t l=0u; l<L; ++l, ++X) { mn += *X; }
@@ -222,9 +222,9 @@ int mcs_d (int *Y, const double *X, const size_t R, const size_t C, const size_t
         {
             if (going==0)
             {
-                for (size_t g=0u; g<G; ++g, X+=B*(L-1u), Y+=B*(L-1u))
+                for (size_t g=G; g>0u; --g, X+=B*(L-1u), Y+=B*(L-1u))
                 {
-                    for (size_t b=0u; b<B; ++b, X-=K*L-1u, Y-=K*L-1u)
+                    for (size_t b=B; b>0u; --b, X-=K*L-1u, Y-=K*L-1u)
                     {
                         mn = 0.0;
                         for (size_t l=0u; l<L; ++l, X+=K) { mn += *X; }
@@ -236,9 +236,9 @@ int mcs_d (int *Y, const double *X, const size_t R, const size_t C, const size_t
             }
             else if (going==1)
             {
-                for (size_t g=0u; g<G; ++g, X+=B*(L-1u), Y+=B*(L-1u))
+                for (size_t g=G; g>0u; --g, X+=B*(L-1u), Y+=B*(L-1u))
                 {
-                    for (size_t b=0u; b<B; ++b, X-=K*L-1u, Y-=K*L-1u)
+                    for (size_t b=B; b>0u; --b, X-=K*L-1u, Y-=K*L-1u)
                     {
                         mn = 0.0;
                         for (size_t l=0u; l<L; ++l, X+=K) { mn += *X; }
@@ -250,9 +250,9 @@ int mcs_d (int *Y, const double *X, const size_t R, const size_t C, const size_t
             }
             else if (going==-1)
             {
-                for (size_t g=0u; g<G; ++g, X+=B*(L-1u), Y+=B*(L-1u))
+                for (size_t g=G; g>0u; --g, X+=B*(L-1u), Y+=B*(L-1u))
                 {
-                    for (size_t b=0u; b<B; ++b, X-=K*L-1u, Y-=K*L-1u)
+                    for (size_t b=B; b>0u; --b, X-=K*L-1u, Y-=K*L-1u)
                     {
                         mn = 0.0;
                         for (size_t l=0u; l<L; ++l, X+=K) { mn += *X; }

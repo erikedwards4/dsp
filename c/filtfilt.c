@@ -88,7 +88,7 @@ int filtfilt_s (float *Y, const float *X, float *A, float *B, const size_t R, co
 
         if (K==1u && (G==1u || BS==1u))
         {
-            for (size_t v=0u; v<V; ++v)
+            for (size_t v=V; v>0u; --v)
             {
                 //FIR
                 if (L<30000u)
@@ -121,7 +121,7 @@ int filtfilt_s (float *Y, const float *X, float *A, float *B, const size_t R, co
         }
         else
         {
-            for (size_t g=0u; g<G; ++g, X+=BS*(L-1u), Y+=BS*(L-1u))
+            for (size_t g=G; g>0u; --g, X+=BS*(L-1u), Y+=BS*(L-1u))
             {
                 for (size_t bs=0u; bs<BS; ++bs, ++X, Y-=K*L-1u)
                 {
@@ -207,7 +207,7 @@ int filtfilt_d (double *Y, const double *X, double *A, double *B, const size_t R
 
         if (K==1u && (G==1u || BS==1u))
         {
-            for (size_t v=0u; v<V; ++v)
+            for (size_t v=V; v>0u; --v)
             {
                 //FIR
                 if (L<30000u)
@@ -240,7 +240,7 @@ int filtfilt_d (double *Y, const double *X, double *A, double *B, const size_t R
         }
         else
         {
-            for (size_t g=0u; g<G; ++g, X+=BS*(L-1u), Y+=BS*(L-1u))
+            for (size_t g=G; g>0u; --g, X+=BS*(L-1u), Y+=BS*(L-1u))
             {
                 for (size_t bs=0u; bs<BS; ++bs, ++X, Y-=K*L-1u)
                 {
@@ -347,7 +347,7 @@ int filtfilt_c (float *Y, const float *X, float *A, float *B, const size_t R, co
 
         if (K==1u && (G==1u || BS==1u))
         {
-            for (size_t v=0u; v<V; ++v)
+            for (size_t v=V; v>0u; --v)
             {
                 //FIR
                 for (size_t q=1u; q<=Q; ++q)
@@ -390,7 +390,7 @@ int filtfilt_c (float *Y, const float *X, float *A, float *B, const size_t R, co
         }
         else
         {
-            for (size_t g=0u; g<G; ++g, X+=2u*BS*(L-1u), Y+=2u*BS*(L-1u))
+            for (size_t g=G; g>0u; --g, X+=2u*BS*(L-1u), Y+=2u*BS*(L-1u))
             {
                 for (size_t bs=0u; bs<BS; ++bs, X-=2u*K*L-2u, Y-=2u*K*L-2u)
                 {
@@ -522,7 +522,7 @@ int filtfilt_z (double *Y, const double *X, double *A, double *B, const size_t R
 
         if (K==1u && (G==1u || BS==1u))
         {
-            for (size_t v=0u; v<V; ++v)
+            for (size_t v=V; v>0u; --v)
             {
                 //FIR
                 for (size_t q=1u; q<=Q; ++q)
@@ -565,7 +565,7 @@ int filtfilt_z (double *Y, const double *X, double *A, double *B, const size_t R
         }
         else
         {
-            for (size_t g=0u; g<G; ++g, X+=2u*BS*(L-1u), Y+=2u*BS*(L-1u))
+            for (size_t g=G; g>0u; --g, X+=2u*BS*(L-1u), Y+=2u*BS*(L-1u))
             {
                 for (size_t bs=0u; bs<BS; ++bs, X-=2u*K*L-2u, Y-=2u*K*L-2u)
                 {

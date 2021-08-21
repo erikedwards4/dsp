@@ -41,13 +41,13 @@ int ac2ar_s (float *Y, const float *X, const size_t R, const size_t C, const siz
 
             if (K==1u && (G==1u || B==1u))
             {
-                for (size_t v=0u; v<V; ++v, X+=2) { *Y++ = *(X+1) / *X; }
+                for (size_t v=V; v>0u; --v, X+=2) { *Y++ = *(X+1) / *X; }
             }
             else
             {
-                for (size_t g=0u; g<G; ++g, X+=B)
+                for (size_t g=G; g>0u; --g, X+=B)
                 {
-                    for (size_t b=0u; b<B; ++b, ++X, ++Y) { *Y = *(X+K) / *X; }
+                    for (size_t b=B; b>0u; --b, ++X, ++Y) { *Y = *(X+K) / *X; }
                 }
             }
         }
@@ -83,7 +83,7 @@ int ac2ar_s (float *Y, const float *X, const size_t R, const size_t C, const siz
 
             if (K==1u && (G==1u || B==1u))
             {
-                for (size_t v=0u; v<V; ++v, Y+=P)
+                for (size_t v=V; v>0u; --v, Y+=P)
                 {
                     a = -*(X+1) / *X;
                     *Y = -a;
@@ -103,9 +103,9 @@ int ac2ar_s (float *Y, const float *X, const size_t R, const size_t C, const siz
             }
             else
             {
-                for (size_t g=0u; g<G; ++g, X+=B*P, Y+=B*(P-1u))
+                for (size_t g=G; g>0u; --g, X+=B*P, Y+=B*(P-1u))
                 {
-                    for (size_t b=0u; b<B; ++b, X-=K*Lx-1u, ++Y)
+                    for (size_t b=B; b>0u; --b, X-=K*Lx-1u, ++Y)
                     {
                         a = -*(X+K) / *X;
                         *Y = -a;
@@ -152,13 +152,13 @@ int ac2ar_d (double *Y, const double *X, const size_t R, const size_t C, const s
 
             if (K==1u && (G==1u || B==1u))
             {
-                for (size_t v=0u; v<V; ++v, X+=2) { *Y++ = *(X+1) / *X; }
+                for (size_t v=V; v>0u; --v, X+=2) { *Y++ = *(X+1) / *X; }
             }
             else
             {
-                for (size_t g=0u; g<G; ++g, X+=B)
+                for (size_t g=G; g>0u; --g, X+=B)
                 {
-                    for (size_t b=0u; b<B; ++b, ++X, ++Y) { *Y = *(X+K) / *X; }
+                    for (size_t b=B; b>0u; --b, ++X, ++Y) { *Y = *(X+K) / *X; }
                 }
             }
         }
@@ -194,7 +194,7 @@ int ac2ar_d (double *Y, const double *X, const size_t R, const size_t C, const s
 
             if (K==1u && (G==1u || B==1u))
             {
-                for (size_t v=0u; v<V; ++v, Y+=P)
+                for (size_t v=V; v>0u; --v, Y+=P)
                 {
                     a = -*(X+1) / *X;
                     *Y = -a;
@@ -214,9 +214,9 @@ int ac2ar_d (double *Y, const double *X, const size_t R, const size_t C, const s
             }
             else
             {
-                for (size_t g=0u; g<G; ++g, X+=B*P, Y+=B*(P-1u))
+                for (size_t g=G; g>0u; --g, X+=B*P, Y+=B*(P-1u))
                 {
-                    for (size_t b=0u; b<B; ++b, X-=K*Lx-1u, ++Y)
+                    for (size_t b=B; b>0u; --b, X-=K*Lx-1u, ++Y)
                     {
                         a = -*(X+K) / *X;
                         *Y = -a;
@@ -269,7 +269,7 @@ int ac2ar_c (float *Y, const float *X, const size_t R, const size_t C, const siz
 
             if (K==1u && (G==1u || B==1u))
             {
-                for (size_t v=0u; v<V; ++v, X+=4)
+                for (size_t v=V; v>0u; --v, X+=4)
                 {
                     den = *X**X + *(X+1)**(X+1);
                     *Y++ = (*X**(X+2) + *(X+1)**(X+3)) / den;
@@ -278,9 +278,9 @@ int ac2ar_c (float *Y, const float *X, const size_t R, const size_t C, const siz
             }
             else
             {
-                for (size_t g=0u; g<G; ++g, X+=2u*B)
+                for (size_t g=G; g>0u; --g, X+=2u*B)
                 {
-                    for (size_t b=0u; b<B; ++b, X+=2u, Y+=2)
+                    for (size_t b=B; b>0u; --b, X+=2u, Y+=2)
                     {
                         *Y = *(X+K) / *X;
                         den = *X**X + *(X+1)**(X+1);
@@ -335,7 +335,7 @@ int ac2ar_c (float *Y, const float *X, const size_t R, const size_t C, const siz
 
             if (K==1u && (G==1u || B==1u))
             {
-                for (size_t v=0u; v<V; ++v, Y+=2u*P)
+                for (size_t v=V; v>0u; --v, Y+=2u*P)
                 {
                     den = *X**X + *(X+1)**(X+1);
                     ar = -(*(X+2)**X + *(X+3)**(X+1)) / den;
@@ -368,9 +368,9 @@ int ac2ar_c (float *Y, const float *X, const size_t R, const size_t C, const siz
             }
             else
             {
-                for (size_t g=0u; g<G; ++g, X+=2u*B*P, Y+=2u*B*(P-1u))
+                for (size_t g=G; g>0u; --g, X+=2u*B*P, Y+=2u*B*(P-1u))
                 {
-                    for (size_t b=0u; b<B; ++b, X-=2u*K*Lx-2u, Y+=2)
+                    for (size_t b=B; b>0u; --b, X-=2u*K*Lx-2u, Y+=2)
                     {
                         den = *X**X + *(X+1)**(X+1);
                         ar = -(*(X+2u*K)**X + *(X+2u*K+1u)**(X+1)) / den;
@@ -435,7 +435,7 @@ int ac2ar_z (double *Y, const double *X, const size_t R, const size_t C, const s
 
             if (K==1u && (G==1u || B==1u))
             {
-                for (size_t v=0u; v<V; ++v, X+=4)
+                for (size_t v=V; v>0u; --v, X+=4)
                 {
                     den = *X**X + *(X+1)**(X+1);
                     *Y++ = (*X**(X+2) + *(X+1)**(X+3)) / den;
@@ -444,9 +444,9 @@ int ac2ar_z (double *Y, const double *X, const size_t R, const size_t C, const s
             }
             else
             {
-                for (size_t g=0u; g<G; ++g, X+=2u*B)
+                for (size_t g=G; g>0u; --g, X+=2u*B)
                 {
-                    for (size_t b=0u; b<B; ++b, X+=2u, Y+=2)
+                    for (size_t b=B; b>0u; --b, X+=2u, Y+=2)
                     {
                         *Y = *(X+K) / *X;
                         den = *X**X + *(X+1)**(X+1);
@@ -501,7 +501,7 @@ int ac2ar_z (double *Y, const double *X, const size_t R, const size_t C, const s
 
             if (K==1u && (G==1u || B==1u))
             {
-                for (size_t v=0u; v<V; ++v, Y+=2u*P)
+                for (size_t v=V; v>0u; --v, Y+=2u*P)
                 {
                     den = *X**X + *(X+1)**(X+1);
                     ar = -(*(X+2)**X + *(X+3)**(X+1)) / den;
@@ -534,9 +534,9 @@ int ac2ar_z (double *Y, const double *X, const size_t R, const size_t C, const s
             }
             else
             {
-                for (size_t g=0u; g<G; ++g, X+=2u*B*P, Y+=2u*B*(P-1u))
+                for (size_t g=G; g>0u; --g, X+=2u*B*P, Y+=2u*B*(P-1u))
                 {
-                    for (size_t b=0u; b<B; ++b, X-=2u*K*Lx-2u, Y+=2)
+                    for (size_t b=B; b>0u; --b, X-=2u*K*Lx-2u, Y+=2)
                     {
                         den = *X**X + *(X+1)**(X+1);
                         ar = -(*(X+2u*K)**X + *(X+2u*K+1u)**(X+1)) / den;

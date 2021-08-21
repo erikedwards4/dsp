@@ -399,7 +399,7 @@ int fft_rad2_s (float *Y, const float *X, const size_t R, const size_t C, const 
 
             if (K==1u && (G==1u || B==1u))
             {
-                for (size_t v=0u; v<V; ++v, Y1-=2u*Ly)
+                for (size_t v=V; v>0u; --v, Y1-=2u*Ly)
                 {
                     for (size_t l=0u; l<Lx; ++l, ++X) { *Y1++ = *X; *Y1++ = 0.0f; }
                     for (size_t l=Lx; l<nfft; ++l) { *Y1++ = 0.0f; *Y1++ = 0.0f; }
@@ -411,7 +411,7 @@ int fft_rad2_s (float *Y, const float *X, const size_t R, const size_t C, const 
             }
             else
             {
-                for (size_t g=0u; g<G; ++g, X+=B*(Lx-1u), Y+=2u*B*(Ly-1u))
+                for (size_t g=G; g>0u; --g, X+=B*(Lx-1u), Y+=2u*B*(Ly-1u))
                 {
                     for (size_t b=0; b<B; ++b, X-=K*Lx-1u, Y1-=2u*Ly, Y-=2u*K*Ly-2u)
                     {
@@ -483,7 +483,7 @@ int fft_rad2_d (double *Y, const double *X, const size_t R, const size_t C, cons
 
             if (K==1u && (G==1u || B==1u))
             {
-                for (size_t v=0u; v<V; ++v, Y1-=2u*Ly)
+                for (size_t v=V; v>0u; --v, Y1-=2u*Ly)
                 {
                     for (size_t l=0u; l<Lx; ++l, ++X) { *Y1++ = *X; *Y1++ = 0.0; }
                     for (size_t l=Lx; l<nfft; ++l) { *Y1++ = 0.0; *Y1++ = 0.0; }
@@ -495,7 +495,7 @@ int fft_rad2_d (double *Y, const double *X, const size_t R, const size_t C, cons
             }
             else
             {
-                for (size_t g=0u; g<G; ++g, X+=B*(Lx-1u), Y+=2u*B*(Ly-1u))
+                for (size_t g=G; g>0u; --g, X+=B*(Lx-1u), Y+=2u*B*(Ly-1u))
                 {
                     for (size_t b=0; b<B; ++b, X-=K*Lx-1u, Y1-=2u*Ly, Y-=2u*K*Ly-2u)
                     {
@@ -562,7 +562,7 @@ int fft_rad2_c (float *Y, const float *X, const size_t R, const size_t C, const 
 
             if (K==1u && (G==1u || B==1u))
             {
-                for (size_t v=0u; v<V; ++v, Y+=2u*Ly)
+                for (size_t v=V; v>0u; --v, Y+=2u*Ly)
                 {
                     for (size_t l=0u; l<2u*Lx; ++l, ++X, ++Y) { *Y = *X; }
                     for (size_t l=2u*Lx; l<2u*Ly; ++l) { *Y = 0.0f; }
@@ -575,7 +575,7 @@ int fft_rad2_c (float *Y, const float *X, const size_t R, const size_t C, const 
             {
                 float *Y1;
                 if (!(Y1=(float *)malloc(2u*Ly*sizeof(float)))) { fprintf(stderr,"error in fft_rad2_c: problem with malloc. "); perror("malloc"); return 1; }
-                for (size_t g=0u; g<G; ++g, X+=2u*B*(Lx-1u), Y+=2u*B*(Ly-1u))
+                for (size_t g=G; g>0u; --g, X+=2u*B*(Lx-1u), Y+=2u*B*(Ly-1u))
                 {
                     for (size_t b=0; b<B; ++b, X-=2u*K*Lx-1u, Y1-=2u*Ly, Y-=2u*K*Ly-2u)
                     {
@@ -642,7 +642,7 @@ int fft_rad2_z (double *Y, const double *X, const size_t R, const size_t C, cons
 
             if (K==1u && (G==1u || B==1u))
             {
-                for (size_t v=0u; v<V; ++v, Y+=2u*Ly)
+                for (size_t v=V; v>0u; --v, Y+=2u*Ly)
                 {
                     for (size_t l=0u; l<2u*Lx; ++l, ++X, ++Y) { *Y = *X; }
                     for (size_t l=2u*Lx; l<2u*Ly; ++l) { *Y = 0.0; }
@@ -655,7 +655,7 @@ int fft_rad2_z (double *Y, const double *X, const size_t R, const size_t C, cons
             {
                 double *Y1;
                 if (!(Y1=(double *)malloc(2u*Ly*sizeof(double)))) { fprintf(stderr,"error in fft_rad2_z: problem with malloc. "); perror("malloc"); return 1; }
-                for (size_t g=0u; g<G; ++g, X+=2u*B*(Lx-1u), Y+=2u*B*(Ly-1u))
+                for (size_t g=G; g>0u; --g, X+=2u*B*(Lx-1u), Y+=2u*B*(Ly-1u))
                 {
                     for (size_t b=0; b<B; ++b, X-=2u*K*Lx-1u, Y1-=2u*Ly, Y-=2u*K*Ly-2u)
                     {

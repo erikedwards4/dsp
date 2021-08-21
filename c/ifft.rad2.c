@@ -389,9 +389,9 @@ int ifft_rad2_s (float *Y, const float *X, const size_t R, const size_t C, const
             }
             else
             {
-                for (size_t g=0u; g<G; ++g, X+=2u*B*(Lx-1u), Y+=B*(nfft-1u))
+                for (size_t g=G; g>0u; --g, X+=2u*B*(Lx-1u), Y+=B*(nfft-1u))
                 {
-                    for (size_t b=0u; b<B; ++b, X+=2u, Y1-=2u*nfft, Y-=K*nfft-1u)
+                    for (size_t b=B; b>0u; --b, X+=2u, Y1-=2u*nfft, Y-=K*nfft-1u)
                     {
                         for (size_t l=0u; l<Lx; ++l, X+=2u*K, ++Y1) { *Y1 = *X; *++Y1 = *(X+1u); }
                         X -= K*(2u + 2u*(1u-nfft%2u));
@@ -472,9 +472,9 @@ int ifft_rad2_d (double *Y, const double *X, const size_t R, const size_t C, con
             }
             else
             {
-                for (size_t g=0u; g<G; ++g, X+=2u*B*(Lx-1u), Y+=B*(nfft-1u))
+                for (size_t g=G; g>0u; --g, X+=2u*B*(Lx-1u), Y+=B*(nfft-1u))
                 {
-                    for (size_t b=0u; b<B; ++b, X+=2u, Y1-=2u*nfft, Y-=K*nfft-1u)
+                    for (size_t b=B; b>0u; --b, X+=2u, Y1-=2u*nfft, Y-=K*nfft-1u)
                     {
                         for (size_t l=0u; l<Lx; ++l, X+=2u*K, ++Y1) { *Y1 = *X; *++Y1 = *(X+1u); }
                         X -= K*(2u + 2u*(1u-nfft%2u));
@@ -533,7 +533,7 @@ int ifft_rad2_c (float *Y, const float *X, const size_t R, const size_t C, const
 
             if (K==1u && (G==1u || B==1u))
             {
-                for (size_t v=0u; v<V; ++v)
+                for (size_t v=V; v>0u; --v)
                 {
                     for (size_t l=0u; l<2u*Lx; ++l, ++X, ++Y) { *Y = *X; }
                     Y -= 2u*nfft;
@@ -545,9 +545,9 @@ int ifft_rad2_c (float *Y, const float *X, const size_t R, const size_t C, const
             {
                 float *Y1;
                 if (!(Y1=(float *)malloc(2u*Ly*sizeof(float)))) { fprintf(stderr,"error in ifft_rad2_c: problem with malloc. "); perror("malloc"); return 1; }
-                for (size_t g=0u; g<G; ++g, X+=2u*B*(Lx-1u), Y+=2u*B*(nfft-1u))
+                for (size_t g=G; g>0u; --g, X+=2u*B*(Lx-1u), Y+=2u*B*(nfft-1u))
                 {
-                    for (size_t b=0u; b<B; ++b, X-=2u*K*Lx-2u, Y1-=2u*nfft, Y-=2u*K*nfft-2u)
+                    for (size_t b=B; b>0u; --b, X-=2u*K*Lx-2u, Y1-=2u*nfft, Y-=2u*K*nfft-2u)
                     {
                         for (size_t l=0u; l<Lx; ++l, X+=2u*K, ++Y1) { *Y1 = *X; *++Y1 = *(X+1u); }
                         Y1 -= 2u*nfft;
@@ -605,7 +605,7 @@ int ifft_rad2_z (double *Y, const double *X, const size_t R, const size_t C, con
 
             if (K==1u && (G==1u || B==1u))
             {
-                for (size_t v=0u; v<V; ++v)
+                for (size_t v=V; v>0u; --v)
                 {
                     for (size_t l=0u; l<2u*Lx; ++l, ++X, ++Y) { *Y = *X; }
                     Y -= 2u*nfft;
@@ -617,9 +617,9 @@ int ifft_rad2_z (double *Y, const double *X, const size_t R, const size_t C, con
             {
                 double *Y1;
                 if (!(Y1=(double *)malloc(2u*Ly*sizeof(double)))) { fprintf(stderr,"error in ifft_rad2_z: problem with malloc. "); perror("malloc"); return 1; }
-                for (size_t g=0u; g<G; ++g, X+=2u*B*(Lx-1u), Y+=2u*B*(nfft-1u))
+                for (size_t g=G; g>0u; --g, X+=2u*B*(Lx-1u), Y+=2u*B*(nfft-1u))
                 {
-                    for (size_t b=0u; b<B; ++b, X-=2u*K*Lx-2u, Y1-=2u*nfft, Y-=2u*K*nfft-2u)
+                    for (size_t b=B; b>0u; --b, X-=2u*K*Lx-2u, Y1-=2u*nfft, Y-=2u*K*nfft-2u)
                     {
                         for (size_t l=0u; l<Lx; ++l, X+=2u*K, ++Y1) { *Y1 = *X; *++Y1 = *(X+1u); }
                         Y1 -= 2u*nfft;

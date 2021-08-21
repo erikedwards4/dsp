@@ -78,7 +78,7 @@ int poly2psd_s (float *Y, const float *X, const float *E, const float *W, const 
 
             if (K==1u && (G==1u || B==1u))
             {
-                for (size_t v=0u; v<V; ++v, X+=P)
+                for (size_t v=V; v>0u; --v, X+=P)
                 {
                     v2 = 2.0f**E++; ++X;
                     for (size_t f=0u; f<F; ++f, X-=P, ++Y)
@@ -96,9 +96,9 @@ int poly2psd_s (float *Y, const float *X, const float *E, const float *W, const 
             }
             else
             {
-                for (size_t g=0u; g<G; ++g, X+=B*P, Y+=B*(F-1u))
+                for (size_t g=G; g>0u; --g, X+=B*P, Y+=B*(F-1u))
                 {
-                    for (size_t b=0u; b<B; ++b, X-=K-1u, Y-=K*F-1u)
+                    for (size_t b=B; b>0u; --b, X-=K-1u, Y-=K*F-1u)
                     {
                         v2 = 2.0f**E++; X += K;
                         for (size_t f=0u; f<F; ++f, X-=K*P, Y+=K)
@@ -176,7 +176,7 @@ int poly2psd_d (double *Y, const double *X, const double *E, const double *W, co
 
             if (K==1u && (G==1u || B==1u))
             {
-                for (size_t v=0u; v<V; ++v, X+=P)
+                for (size_t v=V; v>0u; --v, X+=P)
                 {
                     v2 = 2.0**E++; ++X;
                     for (size_t f=0u; f<F; ++f, X-=P, ++Y)
@@ -194,9 +194,9 @@ int poly2psd_d (double *Y, const double *X, const double *E, const double *W, co
             }
             else
             {
-                for (size_t g=0u; g<G; ++g, X+=B*P, Y+=B*(F-1u))
+                for (size_t g=G; g>0u; --g, X+=B*P, Y+=B*(F-1u))
                 {
-                    for (size_t b=0u; b<B; ++b, X-=K-1u, Y-=K*F-1u)
+                    for (size_t b=B; b>0u; --b, X-=K-1u, Y-=K*F-1u)
                     {
                         v2 = 2.0**E++; X += K;
                         for (size_t f=0u; f<F; ++f, X-=K*P, Y+=K)
@@ -274,7 +274,7 @@ int poly2psd_c (float *Y, const float *X, const float *E, const float *W, const 
 
             if (K==1u && (G==1u || B==1u))
             {
-                for (size_t v=0u; v<V; ++v, X+=2u*P)
+                for (size_t v=V; v>0u; --v, X+=2u*P)
                 {
                     v2 = *E++; X += 2;
                     for (size_t f=0u; f<F; ++f, X-=2u*P, ++Y)
@@ -292,9 +292,9 @@ int poly2psd_c (float *Y, const float *X, const float *E, const float *W, const 
             }
             else
             {
-                for (size_t g=0u; g<G; ++g, X+=2u*B*P, Y+=B*(F-1u))
+                for (size_t g=G; g>0u; --g, X+=2u*B*P, Y+=B*(F-1u))
                 {
-                    for (size_t b=0u; b<B; ++b, X-=2u*K-2u, Y-=K*F-1u)
+                    for (size_t b=B; b>0u; --b, X-=2u*K-2u, Y-=K*F-1u)
                     {
                         v2 = *E++; X += 2u*K;
                         for (size_t f=0u; f<F; ++f, X-=2u*K*P, Y+=K)
@@ -372,7 +372,7 @@ int poly2psd_z (double *Y, const double *X, const double *E, const double *W, co
 
             if (K==1u && (G==1u || B==1u))
             {
-                for (size_t v=0u; v<V; ++v, X+=2u*P)
+                for (size_t v=V; v>0u; --v, X+=2u*P)
                 {
                     v2 = *E++; X += 2;
                     for (size_t f=0u; f<F; ++f, X-=2u*P, ++Y)
@@ -390,9 +390,9 @@ int poly2psd_z (double *Y, const double *X, const double *E, const double *W, co
             }
             else
             {
-                for (size_t g=0u; g<G; ++g, X+=2u*B*P, Y+=B*(F-1u))
+                for (size_t g=G; g>0u; --g, X+=2u*B*P, Y+=B*(F-1u))
                 {
-                    for (size_t b=0u; b<B; ++b, X-=2u*K-2u, Y-=K*F-1u)
+                    for (size_t b=B; b>0u; --b, X-=2u*K-2u, Y-=K*F-1u)
                     {
                         v2 = *E++; X += 2u*K;
                         for (size_t f=0u; f<F; ++f, X-=2u*K*P, Y+=K)

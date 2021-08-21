@@ -58,7 +58,7 @@ int poly2rc_s (float *Y, const float *X, const size_t R, const size_t C, const s
 
             if (K==1u && (G==1u || B==1u))
             {
-                for (size_t v=0u; v<V; ++v, Y+=Ly)
+                for (size_t v=V; v>0u; --v, Y+=Ly)
                 {
                     x0 = *X++;
                     for (size_t l=0u; l<Ly; ++l, ++X, ++Y) { *Y = *X / x0; }
@@ -77,9 +77,9 @@ int poly2rc_s (float *Y, const float *X, const size_t R, const size_t C, const s
             }
             else
             {
-                for (size_t g=0u; g<G; ++g, X+=B*(Lx-1u), Y+=B*(Ly-1u))
+                for (size_t g=G; g>0u; --g, X+=B*(Lx-1u), Y+=B*(Ly-1u))
                 {
-                    for (size_t b=0u; b<B; ++b, X-=K*Lx-1u, ++Y)
+                    for (size_t b=B; b>0u; --b, X-=K*Lx-1u, ++Y)
                     {
                         x0 = *X; X += K;
                         for (size_t l=0u; l<Ly; ++l, X+=K, Y+=K) { *Y = *X / x0; }
@@ -144,7 +144,7 @@ int poly2rc_d (double *Y, const double *X, const size_t R, const size_t C, const
 
             if (K==1u && (G==1u || B==1u))
             {
-                for (size_t v=0u; v<V; ++v, Y+=Ly)
+                for (size_t v=V; v>0u; --v, Y+=Ly)
                 {
                     x0 = *X++;
                     for (size_t l=0u; l<Ly; ++l, ++X, ++Y) { *Y = *X / x0; }
@@ -163,9 +163,9 @@ int poly2rc_d (double *Y, const double *X, const size_t R, const size_t C, const
             }
             else
             {
-                for (size_t g=0u; g<G; ++g, X+=B*(Lx-1u), Y+=B*(Ly-1u))
+                for (size_t g=G; g>0u; --g, X+=B*(Lx-1u), Y+=B*(Ly-1u))
                 {
-                    for (size_t b=0u; b<B; ++b, X-=K*Lx-1u, ++Y)
+                    for (size_t b=B; b>0u; --b, X-=K*Lx-1u, ++Y)
                     {
                         x0 = *X; X += K;
                         for (size_t l=0u; l<Ly; ++l, X+=K, Y+=K) { *Y = *X / x0; }
@@ -249,7 +249,7 @@ int poly2rc_c (float *Y, const float *X, const size_t R, const size_t C, const s
 
             if (K==1u && (G==1u || B==1u))
             {
-                for (size_t v=0u; v<V; ++v, Y+=2u*Ly)
+                for (size_t v=V; v>0u; --v, Y+=2u*Ly)
                 {
                     x0r = *X++; x0i = *X++;
                     x0a = x0r*x0r + x0i*x0i;
@@ -287,9 +287,9 @@ int poly2rc_c (float *Y, const float *X, const size_t R, const size_t C, const s
             }
             else
             {
-                for (size_t g=0u; g<G; ++g, X+=2u*B*(Lx-1u), Y+=2u*B*(Ly-1u))
+                for (size_t g=G; g>0u; --g, X+=2u*B*(Lx-1u), Y+=2u*B*(Ly-1u))
                 {
-                    for (size_t b=0u; b<B; ++b, X-=2u*K*Lx-2u, Y+=2u)
+                    for (size_t b=B; b>0u; --b, X-=2u*K*Lx-2u, Y+=2u)
                     {
                         x0r = *X; x0i = *(X+1); X += 2u*K;
                         x0a = x0r*x0r + x0i*x0i;
@@ -393,7 +393,7 @@ int poly2rc_z (double *Y, const double *X, const size_t R, const size_t C, const
 
             if (K==1u && (G==1u || B==1u))
             {
-                for (size_t v=0u; v<V; ++v, Y+=2u*Ly)
+                for (size_t v=V; v>0u; --v, Y+=2u*Ly)
                 {
                     x0r = *X++; x0i = *X++;
                     x0a = x0r*x0r + x0i*x0i;
@@ -431,9 +431,9 @@ int poly2rc_z (double *Y, const double *X, const size_t R, const size_t C, const
             }
             else
             {
-                for (size_t g=0u; g<G; ++g, X+=2u*B*(Lx-1u), Y+=2u*B*(Ly-1u))
+                for (size_t g=G; g>0u; --g, X+=2u*B*(Lx-1u), Y+=2u*B*(Ly-1u))
                 {
-                    for (size_t b=0u; b<B; ++b, X-=2u*K*Lx-2u, Y+=2u)
+                    for (size_t b=B; b>0u; --b, X-=2u*K*Lx-2u, Y+=2u)
                     {
                         x0r = *X; x0i = *(X+1); X += 2u*K;
                         x0a = x0r*x0r + x0i*x0i;

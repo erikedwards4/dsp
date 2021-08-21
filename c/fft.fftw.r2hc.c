@@ -66,7 +66,7 @@ int fft_fftw_r2hc_s (float *Y, const float *X, const size_t R, const size_t C, c
 
             if (K==1u && (G==1u || B==1u))
             {
-                for (size_t v=0u; v<V; ++v, Y1-=2u*Ly-2u, Y+=2u*Ly-1u)
+                for (size_t v=V; v>0u; --v, Y1-=2u*Ly-2u, Y+=2u*Ly-1u)
                 {
                     for (size_t l=0u; l<Lx; ++l, ++X, ++X1) { *X1 = *X; }
                     X1 -= Lx;
@@ -79,9 +79,9 @@ int fft_fftw_r2hc_s (float *Y, const float *X, const size_t R, const size_t C, c
             }
             else
             {
-                for (size_t g=0u; g<G; ++g, X+=B*(Lx-1u), Y+=2u*B*(Ly-1u))
+                for (size_t g=G; g>0u; --g, X+=B*(Lx-1u), Y+=2u*B*(Ly-1u))
                 {
-                    for (size_t b=0u; b<B; ++b, X-=K*Lx-1u, Y1-=2u*Ly-2u, ++Y)
+                    for (size_t b=B; b>0u; --b, X-=K*Lx-1u, Y1-=2u*Ly-2u, ++Y)
                     {
                         for (size_t l=0u; l<Lx; ++l, X+=K, ++X1) { *X1 = *X; }
                         X1 -= Lx;
@@ -153,7 +153,7 @@ int fft_fftw_r2hc_d (double *Y, const double *X, const size_t R, const size_t C,
 
             if (K==1u && (G==1u || B==1u))
             {
-                for (size_t v=0u; v<V; ++v, Y1-=2u*Ly-2u, Y+=2u*Ly-1u)
+                for (size_t v=V; v>0u; --v, Y1-=2u*Ly-2u, Y+=2u*Ly-1u)
                 {
                     for (size_t l=0u; l<Lx; ++l, ++X, ++X1) { *X1 = *X; }
                     X1 -= Lx;
@@ -167,9 +167,9 @@ int fft_fftw_r2hc_d (double *Y, const double *X, const size_t R, const size_t C,
             }
             else
             {
-                for (size_t g=0u; g<G; ++g, X+=B*(Lx-1u), Y+=2u*B*(Ly-1u))
+                for (size_t g=G; g>0u; --g, X+=B*(Lx-1u), Y+=2u*B*(Ly-1u))
                 {
-                    for (size_t b=0u; b<B; ++b, X-=K*Lx-1u, Y1-=2u*Ly-2u, ++Y)
+                    for (size_t b=B; b>0u; --b, X-=K*Lx-1u, Y1-=2u*Ly-2u, ++Y)
                     {
                         for (size_t l=0u; l<Lx; ++l, X+=K, ++X1) { *X1 = *X; }
                         X1 -= Lx;

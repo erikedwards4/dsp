@@ -68,7 +68,7 @@ int hilbert_s (float *Y, const float *X, const size_t R, const size_t C, const s
 
             if (K==1u && (G==1u || B==1u))
             {
-                for (size_t v=0u; v<V; ++v, Z1-=2u*L)
+                for (size_t v=V; v>0u; --v, Z1-=2u*L)
                 {
                     for (size_t l=0u; l<L; ++l, ++X, ++X1) { *X1 = *X; }
                     X1 -= L;
@@ -83,9 +83,9 @@ int hilbert_s (float *Y, const float *X, const size_t R, const size_t C, const s
             }
             else
             {
-                for (size_t g=0u; g<G; ++g, X+=B*(L-1u), Y+=B*(L-1u))
+                for (size_t g=G; g>0u; --g, X+=B*(L-1u), Y+=B*(L-1u))
                 {
-                    for (size_t b=0u; b<B; ++b, X-=K*L-1u, Z1-=2u*L, Y-=K*L-1u)
+                    for (size_t b=B; b>0u; --b, X-=K*L-1u, Z1-=2u*L, Y-=K*L-1u)
                     {
                         for (size_t l=0u; l<L; ++l, X+=K, ++X1) { *X1 = *X; }
                         X1 -= L;
@@ -158,7 +158,7 @@ int hilbert_d (double *Y, const double *X, const size_t R, const size_t C, const
 
             if (K==1u && (G==1u || B==1u))
             {
-                for (size_t v=0u; v<V; ++v, Z1-=2u*L)
+                for (size_t v=V; v>0u; --v, Z1-=2u*L)
                 {
                     for (size_t l=0u; l<L; ++l, ++X, ++X1) { *X1 = *X; }
                     X1 -= L;
@@ -173,9 +173,9 @@ int hilbert_d (double *Y, const double *X, const size_t R, const size_t C, const
             }
             else
             {
-                for (size_t g=0u; g<G; ++g, X+=B*(L-1u), Y+=B*(L-1u))
+                for (size_t g=G; g>0u; --g, X+=B*(L-1u), Y+=B*(L-1u))
                 {
-                    for (size_t b=0u; b<B; ++b, X-=K*L-1u, Z1-=2u*L, Y-=K*L-1u)
+                    for (size_t b=B; b>0u; --b, X-=K*L-1u, Z1-=2u*L, Y-=K*L-1u)
                     {
                         for (size_t l=0u; l<L; ++l, X+=K, ++X1) { *X1 = *X; }
                         X1 -= L;

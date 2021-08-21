@@ -70,7 +70,7 @@ int iir_s (float *Y, const float *X, float *A, const size_t R, const size_t C, c
 
         if (K==1u && (G==1u || BS==1u))
         {
-            for (size_t v=0u; v<V; ++v)
+            for (size_t v=V; v>0u; --v)
             {
                 for (size_t l=0u; l<P; A-=l, ++l, ++Y)
                 {
@@ -84,7 +84,7 @@ int iir_s (float *Y, const float *X, float *A, const size_t R, const size_t C, c
         }
         else
         {
-            for (size_t g=0u; g<G; ++g, Y+=BS*(L-1u))
+            for (size_t g=G; g>0u; --g, Y+=BS*(L-1u))
             {
                 for (size_t b=0u; b<BS; ++b, Y-=K*L-1u)
                 {
@@ -147,7 +147,7 @@ int iir_d (double *Y, const double *X, double *A, const size_t R, const size_t C
 
         if (K==1u && (G==1u || BS==1u))
         {
-            for (size_t v=0u; v<V; ++v)
+            for (size_t v=V; v>0u; --v)
             {
                 for (size_t l=0u; l<P; A-=l, ++l, ++Y)
                 {
@@ -161,7 +161,7 @@ int iir_d (double *Y, const double *X, double *A, const size_t R, const size_t C
         }
         else
         {
-            for (size_t g=0u; g<G; ++g, Y+=BS*(L-1u))
+            for (size_t g=G; g>0u; --g, Y+=BS*(L-1u))
             {
                 for (size_t b=0u; b<BS; ++b, Y-=K*L-1u)
                 {
@@ -248,7 +248,7 @@ int iir_c (float *Y, const float *X, float *A, const size_t R, const size_t C, c
 
         if (K==1u && (G==1u || BS==1u))
         {
-            for (size_t v=0u; v<V; ++v)
+            for (size_t v=V; v>0u; --v)
             {
                 for (size_t l=0u; l<P; ++l, A-=2u*l-2u, Y+=2u)
                 {
@@ -274,7 +274,7 @@ int iir_c (float *Y, const float *X, float *A, const size_t R, const size_t C, c
         }
         else
         {
-            for (size_t g=0u; g<G; ++g, Y+=2u*BS*(L-1u))
+            for (size_t g=G; g>0u; --g, Y+=2u*BS*(L-1u))
             {
                 for (size_t b=0u; b<BS; ++b, Y-=2u*K*L-2u)
                 {
@@ -373,7 +373,7 @@ int iir_z (double *Y, const double *X, double *A, const size_t R, const size_t C
 
         if (K==1u && (G==1u || BS==1u))
         {
-            for (size_t v=0u; v<V; ++v)
+            for (size_t v=V; v>0u; --v)
             {
                 for (size_t l=0u; l<P; ++l, A-=2u*l-2u, Y+=2u)
                 {
@@ -399,7 +399,7 @@ int iir_z (double *Y, const double *X, double *A, const size_t R, const size_t C
         }
         else
         {
-            for (size_t g=0u; g<G; ++g, Y+=2u*BS*(L-1u))
+            for (size_t g=G; g>0u; --g, Y+=2u*BS*(L-1u))
             {
                 for (size_t b=0u; b<BS; ++b, Y-=2u*K*L-2u)
                 {
@@ -473,7 +473,7 @@ int iir_inplace_s (float *X, float *A, const size_t R, const size_t C, const siz
 
         if (K==1u && (G==1u || BS==1u))
         {
-            for (size_t v=0u; v<V; ++v)
+            for (size_t v=V; v>0u; --v)
             {
                 for (size_t l=0u; l<P; A-=l, ++l, ++X)
                 {
@@ -487,7 +487,7 @@ int iir_inplace_s (float *X, float *A, const size_t R, const size_t C, const siz
         }
         else
         {
-            for (size_t g=0u; g<G; ++g, X+=BS*(L-1u))
+            for (size_t g=G; g>0u; --g, X+=BS*(L-1u))
             {
                 for (size_t b=0u; b<BS; ++b, X-=K*L-1u)
                 {
@@ -549,7 +549,7 @@ int iir_inplace_d (double *X, double *A, const size_t R, const size_t C, const s
 
         if (K==1u && (G==1u || BS==1u))
         {
-            for (size_t v=0u; v<V; ++v)
+            for (size_t v=V; v>0u; --v)
             {
                 for (size_t l=0u; l<P; A-=l, ++l, ++X)
                 {
@@ -563,7 +563,7 @@ int iir_inplace_d (double *X, double *A, const size_t R, const size_t C, const s
         }
         else
         {
-            for (size_t g=0u; g<G; ++g, X+=BS*(L-1u))
+            for (size_t g=G; g>0u; --g, X+=BS*(L-1u))
             {
                 for (size_t b=0u; b<BS; ++b, X-=K*L-1u)
                 {
@@ -647,7 +647,7 @@ int iir_inplace_c (float *X, float *A, const size_t R, const size_t C, const siz
 
         if (K==1u && (G==1u || BS==1u))
         {
-            for (size_t v=0u; v<V; ++v)
+            for (size_t v=V; v>0u; --v)
             {
                 for (size_t l=0u; l<P; ++l, A-=2u*l-2u, X+=2u)
                 {
@@ -673,7 +673,7 @@ int iir_inplace_c (float *X, float *A, const size_t R, const size_t C, const siz
         }
         else
         {
-            for (size_t g=0u; g<G; ++g, X+=2u*BS*(L-1u))
+            for (size_t g=G; g>0u; --g, X+=2u*BS*(L-1u))
             {
                 for (size_t b=0u; b<BS; ++b, X-=2u*K*L-2u)
                 {
@@ -769,7 +769,7 @@ int iir_inplace_z (double *X, double *A, const size_t R, const size_t C, const s
 
         if (K==1u && (G==1u || BS==1u))
         {
-            for (size_t v=0u; v<V; ++v)
+            for (size_t v=V; v>0u; --v)
             {
                 for (size_t l=0u; l<P; ++l, A-=2u*l-2u, X+=2u)
                 {
@@ -795,7 +795,7 @@ int iir_inplace_z (double *X, double *A, const size_t R, const size_t C, const s
         }
         else
         {
-            for (size_t g=0u; g<G; ++g, X+=2u*BS*(L-1u))
+            for (size_t g=G; g>0u; --g, X+=2u*BS*(L-1u))
             {
                 for (size_t b=0u; b<BS; ++b, X-=2u*K*L-2u)
                 {

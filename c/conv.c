@@ -66,8 +66,8 @@ int conv_s (float *Y, const float *X1, const float *X2, const size_t R, const si
         while (ss<0 && es<(int)L1 && w<W)
         {
             sm = 0.0f; X1 += es;
-            //for (int n=0; n<es; ++n, --X1, ++X2) { sm = fmaf(*X1,*X2,sm); }
-            for (int n=0; n<es; ++n, --X1, ++X2) { sm += *X1 * *X2; }
+            //for (int n=es; n>0; --n, --X1, ++X2) { sm = fmaf(*X1,*X2,sm); }
+            for (int n=es; n>0; --n, --X1, ++X2) { sm += *X1 * *X2; }
             *Y++ = sm + *X1**X2;
             X2 -= es;
             ++ss; ++es; ++w;
@@ -79,7 +79,7 @@ int conv_s (float *Y, const float *X1, const float *X2, const size_t R, const si
             while (ss<=0 && w<W)
             {
                 sm = 0.0f;
-                for (size_t l=0u; l<L1; ++l, ++X1, --X2) { sm += *X1 * *X2; }
+                for (size_t l=L1; l>0u; --l, ++X1, --X2) { sm += *X1 * *X2; }
                 *Y++ = sm;
                 X1 -= L1; X2 += L1+1u;
                 ++ss; ++w;
@@ -92,7 +92,7 @@ int conv_s (float *Y, const float *X1, const float *X2, const size_t R, const si
             while (es<(int)L1 && w<W)
             {
                 sm = 0.0f;
-                for (size_t l=0u; l<L2; ++l, ++X1, --X2) { sm += *X1 * *X2; }
+                for (size_t l=L2; l>0u; --l, ++X1, --X2) { sm += *X1 * *X2; }
                 *Y++ = sm;
                 X1 += inc; X2 += L2;
                 ++es; ++w;
@@ -118,15 +118,15 @@ int conv_s (float *Y, const float *X1, const float *X2, const size_t R, const si
         const size_t B = (iscolmajor && dim==0u) ? C*S*H : K;
         const size_t V = N/L1, G = V/B;
 
-        for (size_t g=0u; g<G; ++g, X1+=B*(L1-1u), Y+=B*(W-1u))
+        for (size_t g=G; g>0u; --g, X1+=B*(L1-1u), Y+=B*(W-1u))
         {
-            for (size_t b=0u; b<B; ++b, ++X1, Y-=K*W-1u)
+            for (size_t b=B; b>0u; --b, ++X1, Y-=K*W-1u)
             {
                 //X2 overlaps first samp of X1
                 while (ss<0 && es<(int)L1 && w<W)
                 {
                     sm = 0.0f; X1 += es*(int)K;
-                    for (int n=0; n<es; ++n, X1-=K, ++X2) { sm += *X1 * *X2; }
+                    for (int n=es; n>0; --n, X1-=K, ++X2) { sm += *X1 * *X2; }
                     *Y = sm + *X1**X2; Y += K;
                     X2 -= es;
                     ++ss; ++es; ++w;
@@ -138,7 +138,7 @@ int conv_s (float *Y, const float *X1, const float *X2, const size_t R, const si
                     while (ss<=0 && w<W)
                     {
                         sm = 0.0f;
-                        for (size_t l=0u; l<L1; ++l, X1+=K, --X2) { sm += *X1 * *X2; }
+                        for (size_t l=L1; l>0u; --l, X1+=K, --X2) { sm += *X1 * *X2; }
                         *Y = sm; Y += K;
                         X1 -= K*L1; X2 += L1+1u;
                         ++ss; ++w;
@@ -151,7 +151,7 @@ int conv_s (float *Y, const float *X1, const float *X2, const size_t R, const si
                     while (es<(int)L1 && w<W)
                     {
                         sm = 0.0f;
-                        for (size_t l=0u; l<L2; ++l, X1+=K, --X2) { sm += *X1 * *X2; }
+                        for (size_t l=L2; l>0u; --l, X1+=K, --X2) { sm += *X1 * *X2; }
                         *Y = sm; Y += K;
                         X1 += inc*(int)K; X2 += L2;
                         ++es; ++w;
@@ -170,7 +170,7 @@ int conv_s (float *Y, const float *X1, const float *X2, const size_t R, const si
                     ++ss; ++w;
                 }
                 X1 -= (int)K*ss; X2 -= L2 - 1u;
-                ss -= (int)W; es = ss + (int)L2 - 1; w = 0;
+                ss -= (int)W; es = ss + (int)L2 - 1; w = 0u;
             }
         }
     }
@@ -221,7 +221,7 @@ int conv_d (double *Y, const double *X1, const double *X2, const size_t R, const
         while (ss<0 && es<(int)L1 && w<W)
         {
             sm = 0.0; X1 += es;
-            for (int n=0; n<es; ++n, --X1, ++X2) { sm += *X1 * *X2; }
+            for (int n=es; n>0; --n, --X1, ++X2) { sm += *X1 * *X2; }
             *Y++ = sm + *X1**X2;
             X2 -= es;
             ++ss; ++es; ++w;
@@ -233,7 +233,7 @@ int conv_d (double *Y, const double *X1, const double *X2, const size_t R, const
             while (ss<=0 && w<W)
             {
                 sm = 0.0;
-                for (size_t l=0u; l<L1; ++l, ++X1, --X2) { sm += *X1 * *X2; }
+                for (size_t l=L1; l>0u; --l, ++X1, --X2) { sm += *X1 * *X2; }
                 *Y++ = sm;
                 X1 -= L1; X2 += L1+1u;
                 ++ss; ++w;
@@ -246,7 +246,7 @@ int conv_d (double *Y, const double *X1, const double *X2, const size_t R, const
             while (es<(int)L1 && w<W)
             {
                 sm = 0.0;
-                for (size_t l=0u; l<L2; ++l, ++X1, --X2) { sm += *X1 * *X2; }
+                for (size_t l=L2; l>0u; --l, ++X1, --X2) { sm += *X1 * *X2; }
                 *Y++ = sm;
                 X1 += inc; X2 += L2;
                 ++es; ++w;
@@ -270,15 +270,15 @@ int conv_d (double *Y, const double *X1, const double *X2, const size_t R, const
         const size_t B = (iscolmajor && dim==0u) ? C*S*H : K;
         const size_t V = N/L1, G = V/B;
 
-        for (size_t g=0u; g<G; ++g, X1+=B*(L1-1u), Y+=B*(W-1u))
+        for (size_t g=G; g>0u; --g, X1+=B*(L1-1u), Y+=B*(W-1u))
         {
-            for (size_t b=0u; b<B; ++b, ++X1, Y-=K*W-1u)
+            for (size_t b=B; b>0u; --b, ++X1, Y-=K*W-1u)
             {
                 //X2 overlaps first samp of X1
                 while (ss<0 && es<(int)L1 && w<W)
                 {
                     sm = 0.0; X1 += es*(int)K;
-                    for (int n=0; n<es; ++n, X1-=K, ++X2) { sm += *X1 * *X2; }
+                    for (int n=es; n>0; --n, X1-=K, ++X2) { sm += *X1 * *X2; }
                     *Y = sm + *X1**X2; Y += K;
                     X2 -= es;
                     ++ss; ++es; ++w;
@@ -290,7 +290,7 @@ int conv_d (double *Y, const double *X1, const double *X2, const size_t R, const
                     while (ss<=0 && w<W)
                     {
                         sm = 0.0;
-                        for (size_t l=0u; l<L1; ++l, X1+=K, --X2) { sm += *X1 * *X2; }
+                        for (size_t l=L1; l>0u; --l, X1+=K, --X2) { sm += *X1 * *X2; }
                         *Y = sm; Y += K;
                         X1 -= K*L1; X2 += L1+1u;
                         ++ss; ++w;
@@ -303,7 +303,7 @@ int conv_d (double *Y, const double *X1, const double *X2, const size_t R, const
                     while (es<(int)L1 && w<W)
                     {
                         sm = 0.0;
-                        for (size_t l=0u; l<L2; ++l, X1+=K, --X2) { sm += *X1 * *X2; }
+                        for (size_t l=L2; l>0u; --l, X1+=K, --X2) { sm += *X1 * *X2; }
                         *Y = sm; Y += K;
                         X1 += inc*(int)K; X2 += L2;
                         ++es; ++w;
@@ -322,7 +322,7 @@ int conv_d (double *Y, const double *X1, const double *X2, const size_t R, const
                     ++ss; ++w;
                 }
                 X1 -= (int)K*ss; X2 -= L2 - 1u;
-                ss -= (int)W; es = ss + (int)L2 - 1; w = 0;
+                ss -= (int)W; es = ss + (int)L2 - 1; w = 0u;
             }
         }
     }
@@ -373,7 +373,7 @@ int conv_c (float *Y, const float *X1, const float *X2, const size_t R, const si
         while (ss<0 && es<(int)L1 && w<W)
         {
             smr = smi = 0.0f; X1 += 2*es;
-            for (int n=0; n<es; ++n, X1-=2, X2+=2)
+            for (int n=es; n>0; --n, X1-=2, X2+=2)
             {
                 smr += *X1**X2 - *(X1+1)**(X2+1);
                 smi += *X1**(X2+1) + *(X1+1)**X2;
@@ -390,7 +390,7 @@ int conv_c (float *Y, const float *X1, const float *X2, const size_t R, const si
             while (ss<=0 && w<W)
             {
                 smr = smi = 0.0f;
-                for (size_t l=0u; l<L1; ++l, X1+=2, X2-=2)
+                for (size_t l=L1; l>0u; --l, X1+=2, X2-=2)
                 {
                     smr += *X1**X2 - *(X1+1)**(X2+1);
                     smi += *X1**(X2+1) + *(X1+1)**X2;
@@ -407,7 +407,7 @@ int conv_c (float *Y, const float *X1, const float *X2, const size_t R, const si
             while (es<(int)L1 && w<W)
             {
                 smr = smi = 0.0f;
-                for (size_t l=0u; l<L2; ++l, X1+=2, X2-=2)
+                for (size_t l=L2; l>0u; --l, X1+=2, X2-=2)
                 {
                     smr += *X1**X2 - *(X1+1)**(X2+1);
                     smi += *X1**(X2+1) + *(X1+1)**X2;
@@ -439,15 +439,15 @@ int conv_c (float *Y, const float *X1, const float *X2, const size_t R, const si
         const size_t B = (iscolmajor && dim==0u) ? C*S*H : K;
         const size_t V = N/L1, G = V/B;
 
-        for (size_t g=0u; g<G; ++g, X1+=2u*B*(L1-1u), Y+=2u*B*(W-1u))
+        for (size_t g=G; g>0u; --g, X1+=2u*B*(L1-1u), Y+=2u*B*(W-1u))
         {
-            for (size_t b=0u; b<B; ++b, X1+=2, Y-=2u*K*W-2u)
+            for (size_t b=B; b>0u; --b, X1+=2, Y-=2u*K*W-2u)
             {
                 //X2 overlaps first samp of X1
                 while (ss<0 && es<(int)L1 && w<W)
                 {
                     smr = smi = 0.0f; X1 += 2*es*(int)K;
-                    for (int n=0; n<es; ++n, X1-=2u*K, X2+=2)
+                    for (int n=es; n>0; --n, X1-=2u*K, X2+=2)
                     {
                         smr += *X1**X2 - *(X1+1)**(X2+1);
                         smi += *X1**(X2+1) + *(X1+1)**X2;
@@ -465,7 +465,7 @@ int conv_c (float *Y, const float *X1, const float *X2, const size_t R, const si
                     while (ss<=0 && w<W)
                     {
                         smr = smi = 0.0f;
-                        for (size_t l=0u; l<L1; ++l, X1+=2u*K, X2-=2)
+                        for (size_t l=L1; l>0u; --l, X1+=2u*K, X2-=2)
                         {
                             smr += *X1**X2 - *(X1+1)**(X2+1);
                             smi += *X1**(X2+1) + *(X1+1)**X2;
@@ -482,7 +482,7 @@ int conv_c (float *Y, const float *X1, const float *X2, const size_t R, const si
                     while (es<(int)L1 && w<W)
                     {
                         smr = smi = 0.0f;
-                        for (size_t l=0u; l<L2; ++l, X1+=2u*K, X2-=2)
+                        for (size_t l=L2; l>0u; --l, X1+=2u*K, X2-=2)
                         {
                             smr += *X1**X2 - *(X1+1)**(X2+1);
                             smi += *X1**(X2+1) + *(X1+1)**X2;
@@ -509,7 +509,7 @@ int conv_c (float *Y, const float *X1, const float *X2, const size_t R, const si
                     ++ss; ++w;
                 }
                 X1 -= 2*(int)K*ss; X2 -= 2u*L2 - 2u;
-                ss -= (int)W; es = ss + (int)L2 - 1; w = 0;
+                ss -= (int)W; es = ss + (int)L2 - 1; w = 0u;
             }
         }
     }
@@ -560,7 +560,7 @@ int conv_z (double *Y, const double *X1, const double *X2, const size_t R, const
         while (ss<0 && es<(int)L1 && w<W)
         {
             smr = smi = 0.0; X1 += 2*es;
-            for (int n=0; n<es; ++n, X1-=2, X2+=2)
+            for (int n=es; n>0; --n, X1-=2, X2+=2)
             {
                 smr += *X1**X2 - *(X1+1)**(X2+1);
                 smi += *X1**(X2+1) + *(X1+1)**X2;
@@ -577,7 +577,7 @@ int conv_z (double *Y, const double *X1, const double *X2, const size_t R, const
             while (ss<=0 && w<W)
             {
                 smr = smi = 0.0;
-                for (size_t l=0u; l<L1; ++l, X1+=2, X2-=2)
+                for (size_t l=L1; l>0u; --l, X1+=2, X2-=2)
                 {
                     smr += *X1**X2 - *(X1+1)**(X2+1);
                     smi += *X1**(X2+1) + *(X1+1)**X2;
@@ -594,7 +594,7 @@ int conv_z (double *Y, const double *X1, const double *X2, const size_t R, const
             while (es<(int)L1 && w<W)
             {
                 smr = smi = 0.0;
-                for (size_t l=0u; l<L2; ++l, X1+=2, X2-=2)
+                for (size_t l=L2; l>0u; --l, X1+=2, X2-=2)
                 {
                     smr += *X1**X2 - *(X1+1)**(X2+1);
                     smi += *X1**(X2+1) + *(X1+1)**X2;
@@ -626,15 +626,15 @@ int conv_z (double *Y, const double *X1, const double *X2, const size_t R, const
         const size_t B = (iscolmajor && dim==0u) ? C*S*H : K;
         const size_t V = N/L1, G = V/B;
 
-        for (size_t g=0u; g<G; ++g, X1+=2u*B*(L1-1u), Y+=2u*B*(W-1u))
+        for (size_t g=G; g>0u; --g, X1+=2u*B*(L1-1u), Y+=2u*B*(W-1u))
         {
-            for (size_t b=0u; b<B; ++b, X1+=2, Y-=2u*K*W-2u)
+            for (size_t b=B; b>0u; --b, X1+=2, Y-=2u*K*W-2u)
             {
                 //X2 overlaps first samp of X1
                 while (ss<0 && es<(int)L1 && w<W)
                 {
                     smr = smi = 0.0; X1 += 2*es*(int)K;
-                    for (int n=0; n<es; ++n, X1-=2u*K, X2+=2)
+                    for (int n=es; n>0; --n, X1-=2u*K, X2+=2)
                     {
                         smr += *X1**X2 - *(X1+1)**(X2+1);
                         smi += *X1**(X2+1) + *(X1+1)**X2;
@@ -652,7 +652,7 @@ int conv_z (double *Y, const double *X1, const double *X2, const size_t R, const
                     while (ss<=0 && w<W)
                     {
                         smr = smi = 0.0;
-                        for (size_t l=0u; l<L1; ++l, X1+=2u*K, X2-=2)
+                        for (size_t l=L1; l>0u; --l, X1+=2u*K, X2-=2)
                         {
                             smr += *X1**X2 - *(X1+1)**(X2+1);
                             smi += *X1**(X2+1) + *(X1+1)**X2;
@@ -669,7 +669,7 @@ int conv_z (double *Y, const double *X1, const double *X2, const size_t R, const
                     while (es<(int)L1 && w<W)
                     {
                         smr = smi = 0.0;
-                        for (size_t l=0u; l<L2; ++l, X1+=2u*K, X2-=2)
+                        for (size_t l=L2; l>0u; --l, X1+=2u*K, X2-=2)
                         {
                             smr += *X1**X2 - *(X1+1)**(X2+1);
                             smi += *X1**(X2+1) + *(X1+1)**X2;
@@ -696,7 +696,7 @@ int conv_z (double *Y, const double *X1, const double *X2, const size_t R, const
                     ++ss; ++w;
                 }
                 X1 -= 2*(int)K*ss; X2 -= 2u*L2 - 2u;
-                ss -= (int)W; es = ss + (int)L2 - 1; w = 0;
+                ss -= (int)W; es = ss + (int)L2 - 1; w = 0u;
             }
         }
     }

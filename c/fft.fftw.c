@@ -70,7 +70,7 @@ int fft_fftw_s (float *Y, const float *X, const size_t R, const size_t C, const 
 
             if (K==1u && (G==1u || B==1u))
             {
-                for (size_t v=0u; v<V; ++v, Y1-=2u*Ly)
+                for (size_t v=V; v>0u; --v, Y1-=2u*Ly)
                 {
                     for (size_t l=0u; l<Lx; ++l, ++X, ++X1) { *X1 = *X; }
                     X1 -= Lx;
@@ -81,9 +81,9 @@ int fft_fftw_s (float *Y, const float *X, const size_t R, const size_t C, const 
             }
             else
             {
-                for (size_t g=0u; g<G; ++g, X+=B*(Lx-1u), Y+=2u*B*(Ly-1u))
+                for (size_t g=G; g>0u; --g, X+=B*(Lx-1u), Y+=2u*B*(Ly-1u))
                 {
-                    for (size_t b=0u; b<B; ++b, X-=K*Lx-1u, Y1-=2u*Ly, Y-=2u*K*Ly-2u)
+                    for (size_t b=B; b>0u; --b, X-=K*Lx-1u, Y1-=2u*Ly, Y-=2u*K*Ly-2u)
                     {
                         for (size_t l=0u; l<Lx; ++l, X+=K, ++X1) { *X1 = *X; }
                         X1 -= Lx;
@@ -151,7 +151,7 @@ int fft_fftw_d (double *Y, const double *X, const size_t R, const size_t C, cons
 
             if (K==1u && (G==1u || B==1u))
             {
-                for (size_t v=0u; v<V; ++v, Y1-=2u*Ly)
+                for (size_t v=V; v>0u; --v, Y1-=2u*Ly)
                 {
                     for (size_t l=0u; l<Lx; ++l, ++X, ++X1) { *X1 = *X; }
                     X1 -= Lx;
@@ -162,9 +162,9 @@ int fft_fftw_d (double *Y, const double *X, const size_t R, const size_t C, cons
             }
             else
             {
-                for (size_t g=0u; g<G; ++g, X+=B*(Lx-1u), Y+=2u*B*(Ly-1u))
+                for (size_t g=G; g>0u; --g, X+=B*(Lx-1u), Y+=2u*B*(Ly-1u))
                 {
-                    for (size_t b=0u; b<B; ++b, X-=K*Lx-1u, Y1-=2u*Ly, Y-=2u*K*Ly-2u)
+                    for (size_t b=B; b>0u; --b, X-=K*Lx-1u, Y1-=2u*Ly, Y-=2u*K*Ly-2u)
                     {
                         for (size_t l=0u; l<Lx; ++l, X+=K, ++X1) { *X1 = *X; }
                         X1 -= Lx;
@@ -230,7 +230,7 @@ int fft_fftw_c (float *Y, const float *X, const size_t R, const size_t C, const 
 
             if (K==1u && (G==1u || B==1u))
             {
-                for (size_t v=0u; v<V; ++v, Y1-=2u*nfft)
+                for (size_t v=V; v>0u; --v, Y1-=2u*nfft)
                 {
                     for (size_t l=0u; l<2u*Lx; ++l, ++X, ++X1) { *X1 = *X; }
                     X1 -= 2u*Lx;
@@ -241,9 +241,9 @@ int fft_fftw_c (float *Y, const float *X, const size_t R, const size_t C, const 
             }
             else
             {
-                for (size_t g=0u; g<G; ++g, X+=2u*B*(Lx-1u), Y+=2u*B*(nfft-1))
+                for (size_t g=G; g>0u; --g, X+=2u*B*(Lx-1u), Y+=2u*B*(nfft-1))
                 {
-                    for (size_t b=0u; b<B; ++b, X-=2u*K*Lx-1u, Y1-=2u*nfft, Y-=2u*K*nfft-2u)
+                    for (size_t b=B; b>0u; --b, X-=2u*K*Lx-1u, Y1-=2u*nfft, Y-=2u*K*nfft-2u)
                     {
                         for (size_t l=0u; l<Lx; ++l, X+=2u*K-1u, ++X1) { *X1 = *X; *++X1 = *++X; }
                         X1 -= 2u*Lx;
@@ -309,7 +309,7 @@ int fft_fftw_z (double *Y, const double *X, const size_t R, const size_t C, cons
 
             if (K==1u && (G==1u || B==1u))
             {
-                for (size_t v=0u; v<V; ++v, Y1-=2u*nfft)
+                for (size_t v=V; v>0u; --v, Y1-=2u*nfft)
                 {
                     for (size_t l=0u; l<2u*Lx; ++l, ++X, ++X1) { *X1 = *X; }
                     X1 -= 2u*Lx;
@@ -320,9 +320,9 @@ int fft_fftw_z (double *Y, const double *X, const size_t R, const size_t C, cons
             }
             else
             {
-                for (size_t g=0u; g<G; ++g, X+=2u*B*(Lx-1u), Y+=2u*B*(nfft-1))
+                for (size_t g=G; g>0u; --g, X+=2u*B*(Lx-1u), Y+=2u*B*(nfft-1))
                 {
-                    for (size_t b=0u; b<B; ++b, X-=2u*K*Lx-1u, Y1-=2u*nfft, Y-=2u*K*nfft-2u)
+                    for (size_t b=B; b>0u; --b, X-=2u*K*Lx-1u, Y1-=2u*nfft, Y-=2u*K*nfft-2u)
                     {
                         for (size_t l=0u; l<Lx; ++l, X+=2u*K-1u, ++X1) { *X1 = *X; *++X1 = *++X; }
                         X1 -= 2u*Lx;

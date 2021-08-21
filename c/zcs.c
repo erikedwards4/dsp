@@ -55,7 +55,7 @@ int zcs_s (int *Y, const float *X, const size_t R, const size_t C, const size_t 
         {
             if (going==0)
             {
-                for (size_t v=0u; v<V; ++v)
+                for (size_t v=V; v>0u; --v)
                 {
                     sp = (*X++<0.0f); *Y++ = 0;
                     for (size_t l=1u; l<L; ++l, ++X, ++Y) { s = (*X<0.0f); *Y = (s!=sp); sp = s; }
@@ -63,7 +63,7 @@ int zcs_s (int *Y, const float *X, const size_t R, const size_t C, const size_t 
             }
             else if (going==1)
             {
-                for (size_t v=0u; v<V; ++v)
+                for (size_t v=V; v>0u; --v)
                 {
                     sp = (*X++>=0.0f); *Y++ = 0;
                     for (size_t l=1u; l<L; ++l, ++X, ++Y) { s = (*X>=0.0f); *Y = s*(s!=sp); sp = s; }
@@ -71,7 +71,7 @@ int zcs_s (int *Y, const float *X, const size_t R, const size_t C, const size_t 
             }
             else if (going==-1)
             {
-                for (size_t v=0u; v<V; ++v)
+                for (size_t v=V; v>0u; --v)
                 {
                     sp = (*X++<0.0f); *Y++ = 0;
                     for (size_t l=1u; l<L; ++l, ++X, ++Y) { s = (*X<0.0f); *Y = s*(s!=sp); sp = s; }
@@ -83,9 +83,9 @@ int zcs_s (int *Y, const float *X, const size_t R, const size_t C, const size_t 
         {
             if (going==0)
             {
-                for (size_t g=0u; g<G; ++g, X+=B*(L-1u), Y+=B*(L-1u))
+                for (size_t g=G; g>0u; --g, X+=B*(L-1u), Y+=B*(L-1u))
                 {
-                    for (size_t b=0u; b<B; ++b, X-=K*L-1u, Y-=K*L-1u)
+                    for (size_t b=B; b>0u; --b, X-=K*L-1u, Y-=K*L-1u)
                     {
                         sp = (*X<0.0f); *Y = 0; X+=K; Y+=K;
                         for (size_t l=1u; l<L; ++l, X+=K, Y+=K) { s = (*X<0.0f); *Y = (s!=sp); sp = s; }
@@ -94,9 +94,9 @@ int zcs_s (int *Y, const float *X, const size_t R, const size_t C, const size_t 
             }
             else if (going==1)
             {
-                for (size_t g=0u; g<G; ++g, X+=B*(L-1u), Y+=B*(L-1u))
+                for (size_t g=G; g>0u; --g, X+=B*(L-1u), Y+=B*(L-1u))
                 {
-                    for (size_t b=0u; b<B; ++b, X-=K*L-1u, Y-=K*L-1u)
+                    for (size_t b=B; b>0u; --b, X-=K*L-1u, Y-=K*L-1u)
                     {
                         sp = (*X>=0.0f); *Y = 0; X+=K; Y+=K;
                         for (size_t l=1u; l<L; ++l, X+=K, Y+=K) { s = (*X>=0.0f); *Y = s*(s!=sp); sp = s; }
@@ -105,9 +105,9 @@ int zcs_s (int *Y, const float *X, const size_t R, const size_t C, const size_t 
             }
             else if (going==-1)
             {
-                for (size_t g=0u; g<G; ++g, X+=B*(L-1u), Y+=B*(L-1u))
+                for (size_t g=G; g>0u; --g, X+=B*(L-1u), Y+=B*(L-1u))
                 {
-                    for (size_t b=0u; b<B; ++b, X-=K*L-1u, Y-=K*L-1u)
+                    for (size_t b=B; b>0u; --b, X-=K*L-1u, Y-=K*L-1u)
                     {
                         sp = (*X<0.0f); *Y = 0; X+=K; Y+=K;
                         for (size_t l=1u; l<L; ++l, X+=K, Y+=K) { s = (*X<0.0f); *Y = s*(s!=sp); sp = s; }
@@ -160,7 +160,7 @@ int zcs_d (int *Y, const double *X, const size_t R, const size_t C, const size_t
         {
             if (going==0)
             {
-                for (size_t v=0u; v<V; ++v)
+                for (size_t v=V; v>0u; --v)
                 {
                     sp = (*X++<0.0); *Y++ = 0;
                     for (size_t l=1u; l<L; ++l, ++X, ++Y) { s = (*X<0.0); *Y = (s!=sp); sp = s; }
@@ -168,7 +168,7 @@ int zcs_d (int *Y, const double *X, const size_t R, const size_t C, const size_t
             }
             else if (going==1)
             {
-                for (size_t v=0u; v<V; ++v)
+                for (size_t v=V; v>0u; --v)
                 {
                     sp = (*X++>=0.0); *Y++ = 0;
                     for (size_t l=1u; l<L; ++l, ++X, ++Y) { s = (*X>=0.0); *Y = s*(s!=sp); sp = s; }
@@ -176,7 +176,7 @@ int zcs_d (int *Y, const double *X, const size_t R, const size_t C, const size_t
             }
             else if (going==-1)
             {
-                for (size_t v=0u; v<V; ++v)
+                for (size_t v=V; v>0u; --v)
                 {
                     sp = (*X++<0.0); *Y++ = 0;
                     for (size_t l=1u; l<L; ++l, ++X, ++Y) { s = (*X<0.0); *Y = s*(s!=sp); sp = s; }
@@ -188,9 +188,9 @@ int zcs_d (int *Y, const double *X, const size_t R, const size_t C, const size_t
         {
             if (going==0)
             {
-                for (size_t g=0u; g<G; ++g, X+=B*(L-1u), Y+=B*(L-1u))
+                for (size_t g=G; g>0u; --g, X+=B*(L-1u), Y+=B*(L-1u))
                 {
-                    for (size_t b=0u; b<B; ++b, X-=K*L-1u, Y-=K*L-1u)
+                    for (size_t b=B; b>0u; --b, X-=K*L-1u, Y-=K*L-1u)
                     {
                         sp = (*X<0.0); *Y = 0; X+=K; Y+=K;
                         for (size_t l=1u; l<L; ++l, X+=K, Y+=K) { s = (*X<0.0); *Y = (s!=sp); sp = s; }
@@ -199,9 +199,9 @@ int zcs_d (int *Y, const double *X, const size_t R, const size_t C, const size_t
             }
             else if (going==1)
             {
-                for (size_t g=0u; g<G; ++g, X+=B*(L-1u), Y+=B*(L-1u))
+                for (size_t g=G; g>0u; --g, X+=B*(L-1u), Y+=B*(L-1u))
                 {
-                    for (size_t b=0u; b<B; ++b, X-=K*L-1u, Y-=K*L-1u)
+                    for (size_t b=B; b>0u; --b, X-=K*L-1u, Y-=K*L-1u)
                     {
                         sp = (*X>=0.0); *Y = 0; X+=K; Y+=K;
                         for (size_t l=1u; l<L; ++l, X+=K, Y+=K) { s = (*X>=0.0); *Y = s*(s!=sp); sp = s; }
@@ -210,9 +210,9 @@ int zcs_d (int *Y, const double *X, const size_t R, const size_t C, const size_t
             }
             else if (going==-1)
             {
-                for (size_t g=0u; g<G; ++g, X+=B*(L-1u), Y+=B*(L-1u))
+                for (size_t g=G; g>0u; --g, X+=B*(L-1u), Y+=B*(L-1u))
                 {
-                    for (size_t b=0u; b<B; ++b, X-=K*L-1u, Y-=K*L-1u)
+                    for (size_t b=B; b>0u; --b, X-=K*L-1u, Y-=K*L-1u)
                     {
                         sp = (*X<0.0); *Y = 0; X+=K; Y+=K;
                         for (size_t l=1u; l<L; ++l, X+=K, Y+=K) { s = (*X<0.0); *Y = s*(s!=sp); sp = s; }
@@ -265,7 +265,7 @@ int zcs_c (int *Y, const float *X, const size_t R, const size_t C, const size_t 
         {
             if (going==0)
             {
-                for (size_t v=0u; v<V; ++v)
+                for (size_t v=V; v>0u; --v)
                 {
                     sp = (*++X<0.0f); *Y++ = 0; X+=2;
                     for (size_t l=1u; l<L; ++l, X+=2, ++Y) { s = (*X<0.0f); *Y = (s!=sp); sp = s; }
@@ -273,7 +273,7 @@ int zcs_c (int *Y, const float *X, const size_t R, const size_t C, const size_t 
             }
             else if (going==1)
             {
-                for (size_t v=0u; v<V; ++v)
+                for (size_t v=V; v>0u; --v)
                 {
                     sp = (*++X>=0.0f); *Y++ = 0; X+=2;
                     for (size_t l=1u; l<L; ++l, X+=2, ++Y) { s = (*X>=0.0f); *Y = s*(s!=sp); sp = s; }
@@ -281,7 +281,7 @@ int zcs_c (int *Y, const float *X, const size_t R, const size_t C, const size_t 
             }
             else if (going==-1)
             {
-                for (size_t v=0u; v<V; ++v)
+                for (size_t v=V; v>0u; --v)
                 {
                     sp = (*++X<0.0f); *Y++ = 0; X+=2;
                     for (size_t l=1u; l<L; ++l, X+=2, ++Y) { s = (*X<0.0f); *Y = s*(s!=sp); sp = s; }
@@ -293,9 +293,9 @@ int zcs_c (int *Y, const float *X, const size_t R, const size_t C, const size_t 
         {
             if (going==0)
             {
-                for (size_t g=0u; g<G; ++g, X+=2u*B*(L-1u), Y+=2u*B*(L-1u))
+                for (size_t g=G; g>0u; --g, X+=2u*B*(L-1u), Y+=2u*B*(L-1u))
                 {
-                    for (size_t b=0u; b<B; ++b, X-=2u*K*L-1u, Y-=2u*K*L-1u)
+                    for (size_t b=B; b>0u; --b, X-=2u*K*L-1u, Y-=2u*K*L-1u)
                     {
                         sp = (*++X<0.0f); *Y = 0; X+=2u*K; Y+=2u*K;
                         for (size_t l=1u; l<L; ++l, X+=2u*K, Y+=2u*K) { s = (*X<0.0f); *Y = (s!=sp); sp = s; }
@@ -304,9 +304,9 @@ int zcs_c (int *Y, const float *X, const size_t R, const size_t C, const size_t 
             }
             else if (going==1)
             {
-                for (size_t g=0u; g<G; ++g, X+=2u*B*(L-1u), Y+=2u*B*(L-1u))
+                for (size_t g=G; g>0u; --g, X+=2u*B*(L-1u), Y+=2u*B*(L-1u))
                 {
-                    for (size_t b=0u; b<B; ++b, X-=2u*K*L-1u, Y-=2u*K*L-1u)
+                    for (size_t b=B; b>0u; --b, X-=2u*K*L-1u, Y-=2u*K*L-1u)
                     {
                         sp = (*++X>=0.0f); *Y = 0; X+=2u*K; Y+=2u*K;
                         for (size_t l=1u; l<L; ++l, X+=2u*K, Y+=2u*K) { s = (*X>=0.0f); *Y = s*(s!=sp); sp = s; }
@@ -315,9 +315,9 @@ int zcs_c (int *Y, const float *X, const size_t R, const size_t C, const size_t 
             }
             else if (going==-1)
             {
-                for (size_t g=0u; g<G; ++g, X+=2u*B*(L-1u), Y+=2u*B*(L-1u))
+                for (size_t g=G; g>0u; --g, X+=2u*B*(L-1u), Y+=2u*B*(L-1u))
                 {
-                    for (size_t b=0u; b<B; ++b, X-=2u*K*L-1u, Y-=2u*K*L-1u)
+                    for (size_t b=B; b>0u; --b, X-=2u*K*L-1u, Y-=2u*K*L-1u)
                     {
                         sp = (*++X<0.0f); *Y = 0; X+=2u*K; Y+=2u*K;
                         for (size_t l=1u; l<L; ++l, X+=2u*K, Y+=2u*K) { s = (*X<0.0f); *Y = s*(s!=sp); sp = s; }
@@ -370,7 +370,7 @@ int zcs_z (int *Y, const double *X, const size_t R, const size_t C, const size_t
         {
             if (going==0)
             {
-                for (size_t v=0u; v<V; ++v)
+                for (size_t v=V; v>0u; --v)
                 {
                     sp = (*++X<0.0); *Y++ = 0; X+=2;
                     for (size_t l=1u; l<L; ++l, X+=2, ++Y) { s = (*X<0.0); *Y = (s!=sp); sp = s; }
@@ -378,7 +378,7 @@ int zcs_z (int *Y, const double *X, const size_t R, const size_t C, const size_t
             }
             else if (going==1)
             {
-                for (size_t v=0u; v<V; ++v)
+                for (size_t v=V; v>0u; --v)
                 {
                     sp = (*++X>=0.0); *Y++ = 0; X+=2;
                     for (size_t l=1u; l<L; ++l, X+=2, ++Y) { s = (*X>=0.0); *Y = s*(s!=sp); sp = s; }
@@ -386,7 +386,7 @@ int zcs_z (int *Y, const double *X, const size_t R, const size_t C, const size_t
             }
             else if (going==-1)
             {
-                for (size_t v=0u; v<V; ++v)
+                for (size_t v=V; v>0u; --v)
                 {
                     sp = (*++X<0.0); *Y++ = 0; X+=2;
                     for (size_t l=1u; l<L; ++l, X+=2, ++Y) { s = (*X<0.0); *Y = s*(s!=sp); sp = s; }
@@ -398,9 +398,9 @@ int zcs_z (int *Y, const double *X, const size_t R, const size_t C, const size_t
         {
             if (going==0)
             {
-                for (size_t g=0u; g<G; ++g, X+=2u*B*(L-1u), Y+=2u*B*(L-1u))
+                for (size_t g=G; g>0u; --g, X+=2u*B*(L-1u), Y+=2u*B*(L-1u))
                 {
-                    for (size_t b=0u; b<B; ++b, X-=2u*K*L-1u, Y-=2u*K*L-1u)
+                    for (size_t b=B; b>0u; --b, X-=2u*K*L-1u, Y-=2u*K*L-1u)
                     {
                         sp = (*++X<0.0); *Y = 0; X+=2u*K; Y+=2u*K;
                         for (size_t l=1u; l<L; ++l, X+=2u*K, Y+=2u*K) { s = (*X<0.0); *Y = (s!=sp); sp = s; }
@@ -409,9 +409,9 @@ int zcs_z (int *Y, const double *X, const size_t R, const size_t C, const size_t
             }
             else if (going==1)
             {
-                for (size_t g=0u; g<G; ++g, X+=2u*B*(L-1u), Y+=2u*B*(L-1u))
+                for (size_t g=G; g>0u; --g, X+=2u*B*(L-1u), Y+=2u*B*(L-1u))
                 {
-                    for (size_t b=0u; b<B; ++b, X-=2u*K*L-1u, Y-=2u*K*L-1u)
+                    for (size_t b=B; b>0u; --b, X-=2u*K*L-1u, Y-=2u*K*L-1u)
                     {
                         sp = (*++X>=0.0); *Y = 0; X+=2u*K; Y+=2u*K;
                         for (size_t l=1u; l<L; ++l, X+=2u*K, Y+=2u*K) { s = (*X>=0.0); *Y = s*(s!=sp); sp = s; }
@@ -420,9 +420,9 @@ int zcs_z (int *Y, const double *X, const size_t R, const size_t C, const size_t
             }
             else if (going==-1)
             {
-                for (size_t g=0u; g<G; ++g, X+=2u*B*(L-1u), Y+=2u*B*(L-1u))
+                for (size_t g=G; g>0u; --g, X+=2u*B*(L-1u), Y+=2u*B*(L-1u))
                 {
-                    for (size_t b=0u; b<B; ++b, X-=2u*K*L-1u, Y-=2u*K*L-1u)
+                    for (size_t b=B; b>0u; --b, X-=2u*K*L-1u, Y-=2u*K*L-1u)
                     {
                         sp = (*++X<0.0); *Y = 0; X+=2u*K; Y+=2u*K;
                         for (size_t l=1u; l<L; ++l, X+=2u*K, Y+=2u*K) { s = (*X<0.0); *Y = s*(s!=sp); sp = s; }

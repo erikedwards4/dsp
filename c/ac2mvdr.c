@@ -106,7 +106,7 @@ int ac2mvdr_s (float *Y, const float *X, const size_t R, const size_t C, const s
 
             if (K==1u && (G==1u || B==1u))
             {
-                for (size_t v=0u; v<V; ++v, X+=Lx-F, ++Y)
+                for (size_t v=V; v>0u; --v, X+=Lx-F, ++Y)
                 {
                     a = -*(X+1) / *X;
                     *A1 = a;
@@ -126,9 +126,9 @@ int ac2mvdr_s (float *Y, const float *X, const size_t R, const size_t C, const s
             }
             else
             {
-                for (size_t g=0u; g<G; ++g, X+=B*(Lx-1u), Y+=B*(F-1u))
+                for (size_t g=G; g>0u; --g, X+=B*(Lx-1u), Y+=B*(F-1u))
                 {
-                    for (size_t b=0u; b<B; ++b, X-=K*F-1u, Y-=K*P-1u)
+                    for (size_t b=B; b>0u; --b, X-=K*F-1u, Y-=K*P-1u)
                     {
                         a = -*(X+K) / *X;
                         *A1 = a;
@@ -175,13 +175,13 @@ int ac2mvdr_s (float *Y, const float *X, const size_t R, const size_t C, const s
 
 //             if (K==1u && (G==1u || B==1u))
 //             {
-//                 for (size_t v=0u; v<V; ++v, X+=2) { *Y++ = -*(X+1) / *X; }
+//                 for (size_t v=V; v>0u; --v, X+=2) { *Y++ = -*(X+1) / *X; }
 //             }
 //             else
 //             {
-//                 for (size_t g=0u; g<G; ++g, X+=B)
+//                 for (size_t g=G; g>0u; --g, X+=B)
 //                 {
-//                     for (size_t b=0u; b<B; ++b, ++X, ++Y) { *Y = -*(X+K) / *X; }
+//                     for (size_t b=B; b>0u; --b, ++X, ++Y) { *Y = -*(X+K) / *X; }
 //                 }
 //             }
 //         }
@@ -222,7 +222,7 @@ int ac2mvdr_s (float *Y, const float *X, const size_t R, const size_t C, const s
 
 //             if (K==1u && (G==1u || B==1u))
 //             {
-//                 for (size_t v=0u; v<V; ++v, X+=Lx, ++Y)
+//                 for (size_t v=V; v>0u; --v, X+=Lx, ++Y)
 //                 {
 //                     a = -*(X+1) / *X;
 //                     *A1 = a; *Y++ = a;
@@ -246,9 +246,9 @@ int ac2mvdr_s (float *Y, const float *X, const size_t R, const size_t C, const s
 //             }
 //             else
 //             {
-//                 for (size_t g=0u; g<G; ++g, X+=B*(Lx-1u), Y+=B*(P-1u))
+//                 for (size_t g=G; g>0u; --g, X+=B*(Lx-1u), Y+=B*(P-1u))
 //                 {
-//                     for (size_t b=0u; b<B; ++b, X-=K*Lx-K-1u, Y-=K*P-K-1u)
+//                     for (size_t b=B; b>0u; --b, X-=K*Lx-K-1u, Y-=K*P-K-1u)
 //                     {
 //                         a = -*(X+1) / *X;
 //                         *A1 = a; *Y = a; Y += K;
@@ -305,7 +305,7 @@ int ac2mvdr_s (float *Y, const float *X, const size_t R, const size_t C, const s
 
 //             if (K==1u && (G==1u || B==1u))
 //             {
-//                 for (size_t v=0u; v<V; ++v, X+=4)
+//                 for (size_t v=V; v>0u; --v, X+=4)
 //                 {
 //                     den = *X**X + *(X+1)**(X+1);
 //                     *Y++ = -(*X**(X+2) + *(X+1)**(X+3)) / den;
@@ -314,9 +314,9 @@ int ac2mvdr_s (float *Y, const float *X, const size_t R, const size_t C, const s
 //             }
 //             else
 //             {
-//                 for (size_t g=0u; g<G; ++g, X+=2u*B)
+//                 for (size_t g=G; g>0u; --g, X+=2u*B)
 //                 {
-//                     for (size_t b=0u; b<B; ++b, X+=2u, Y+=2u)
+//                     for (size_t b=B; b>0u; --b, X+=2u, Y+=2u)
 //                     {
 //                         den = *X**X + *(X+1)**(X+1);
 //                         *Y = -(*X**(X+2u*K) + *(X+1)**(X+2u*K+1u)) / den;
@@ -382,7 +382,7 @@ int ac2mvdr_s (float *Y, const float *X, const size_t R, const size_t C, const s
 
 //             if (K==1u && (G==1u || B==1u))
 //             {
-//                 for (size_t v=0u; v<V; ++v, X+=2u*Lx)
+//                 for (size_t v=V; v>0u; --v, X+=2u*Lx)
 //                 {
 //                     den = *X**X + *(X+1)**(X+1);
 //                     ar = -(*(X+2)**X + *(X+3)**(X+1)) / den;
@@ -426,9 +426,9 @@ int ac2mvdr_s (float *Y, const float *X, const size_t R, const size_t C, const s
 //             }
 //             else
 //             {
-//                 for (size_t g=0u; g<G; ++g, X+=2u*B*(Lx-1u), Y+=2u*B*(P-1u))
+//                 for (size_t g=G; g>0u; --g, X+=2u*B*(Lx-1u), Y+=2u*B*(P-1u))
 //                 {
-//                     for (size_t b=0u; b<B; ++b, X+=2, Y-=2u*(K*P-K-1u))
+//                     for (size_t b=B; b>0u; --b, X+=2, Y-=2u*(K*P-K-1u))
 //                     {
 //                         den = *X**X + *(X+1)**(X+1);
 //                         ar = -(*(X+2u*K)**X + *(X+2u*K+1u)**(X+1)) / den;
@@ -504,7 +504,7 @@ int ac2mvdr_s (float *Y, const float *X, const size_t R, const size_t C, const s
 
 //             if (K==1u && (G==1u || B==1u))
 //             {
-//                 for (size_t v=0u; v<V; ++v, X+=4)
+//                 for (size_t v=V; v>0u; --v, X+=4)
 //                 {
 //                     den = *X**X + *(X+1)**(X+1);
 //                     *Y++ = -(*X**(X+2) + *(X+1)**(X+3)) / den;
@@ -513,9 +513,9 @@ int ac2mvdr_s (float *Y, const float *X, const size_t R, const size_t C, const s
 //             }
 //             else
 //             {
-//                 for (size_t g=0u; g<G; ++g, X+=2u*B)
+//                 for (size_t g=G; g>0u; --g, X+=2u*B)
 //                 {
-//                     for (size_t b=0u; b<B; ++b, X+=2u, Y+=2u)
+//                     for (size_t b=B; b>0u; --b, X+=2u, Y+=2u)
 //                     {
 //                         den = *X**X + *(X+1)**(X+1);
 //                         *Y = -(*X**(X+2u*K) + *(X+1)**(X+2u*K+1u)) / den;
@@ -581,7 +581,7 @@ int ac2mvdr_s (float *Y, const float *X, const size_t R, const size_t C, const s
 
 //             if (K==1u && (G==1u || B==1u))
 //             {
-//                 for (size_t v=0u; v<V; ++v, X+=2u*Lx)
+//                 for (size_t v=V; v>0u; --v, X+=2u*Lx)
 //                 {
 //                     den = *X**X + *(X+1)**(X+1);
 //                     ar = -(*(X+2)**X + *(X+3)**(X+1)) / den;
@@ -625,9 +625,9 @@ int ac2mvdr_s (float *Y, const float *X, const size_t R, const size_t C, const s
 //             }
 //             else
 //             {
-//                 for (size_t g=0u; g<G; ++g, X+=2u*B*(Lx-1u), Y+=2u*B*(P-1u))
+//                 for (size_t g=G; g>0u; --g, X+=2u*B*(Lx-1u), Y+=2u*B*(P-1u))
 //                 {
-//                     for (size_t b=0u; b<B; ++b, X+=2, Y-=2u*(K*P-K-1u))
+//                     for (size_t b=B; b>0u; --b, X+=2, Y-=2u*(K*P-K-1u))
 //                     {
 //                         den = *X**X + *(X+1)**(X+1);
 //                         ar = -(*(X+2u*K)**X + *(X+2u*K+1u)**(X+1)) / den;

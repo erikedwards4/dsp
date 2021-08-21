@@ -98,7 +98,7 @@ int lcr_s (float *Y, const float *X, const size_t R, const size_t C, const size_
             {
                 if (going==0)
                 {
-                    for (size_t v=0u; v<V; ++v)
+                    for (size_t v=V; v>0u; --v)
                     {
                         sp = (*X++<lvl); *Z++ = sm = 0;
                         for (size_t l=1u; l<L; ++l, ++X, ++Z) { s = (*X<lvl); sm += (s!=sp); *Z = sm; sp = s; }
@@ -119,7 +119,7 @@ int lcr_s (float *Y, const float *X, const size_t R, const size_t C, const size_
                 }
                 else if (going==1)
                 {
-                    for (size_t v=0u; v<V; ++v)
+                    for (size_t v=V; v>0u; --v)
                     {
                         sp = (*X++>=lvl); *Z++ = sm = 0;
                         for (size_t l=1u; l<L; ++l, ++X, ++Z) { s = (*X>=lvl); sm += s*(s!=sp); *Z = sm; sp = s; }
@@ -140,7 +140,7 @@ int lcr_s (float *Y, const float *X, const size_t R, const size_t C, const size_
                 }
                 else if (going==-1)
                 {
-                    for (size_t v=0u; v<V; ++v)
+                    for (size_t v=V; v>0u; --v)
                     {
                         sp = (*X++<lvl); *Z++ = sm = 0;
                         for (size_t l=1u; l<L; ++l, ++X, ++Z) { s = (*X<lvl); sm += s*(s!=sp); *Z = sm; sp = s; }
@@ -165,9 +165,9 @@ int lcr_s (float *Y, const float *X, const size_t R, const size_t C, const size_
             {
                 if (going==0)
                 {
-                    for (size_t g=0u; g<G; ++g, X+=B*(L-1u), Y+=B*(L-1u))
+                    for (size_t g=G; g>0u; --g, X+=B*(L-1u), Y+=B*(L-1u))
                     {
-                        for (size_t b=0u; b<B; ++b, X-=K*L-1u, Y-=K*L-1u)
+                        for (size_t b=B; b>0u; --b, X-=K*L-1u, Y-=K*L-1u)
                         {
                             sp = (*X<lvl); X+=K; *Z++ = sm = 0;
                             for (size_t l=1u; l<L; ++l, X+=K, ++Z) { s = (*X<lvl); sm += (s!=sp); *Z = sm; sp = s; }
@@ -189,9 +189,9 @@ int lcr_s (float *Y, const float *X, const size_t R, const size_t C, const size_
                 }
                 else if (going==1)
                 {
-                    for (size_t g=0u; g<G; ++g, X+=B*(L-1u), Y+=B*(L-1u))
+                    for (size_t g=G; g>0u; --g, X+=B*(L-1u), Y+=B*(L-1u))
                     {
-                        for (size_t b=0u; b<B; ++b, X-=K*L-1u, Y-=K*L-1u)
+                        for (size_t b=B; b>0u; --b, X-=K*L-1u, Y-=K*L-1u)
                         {
                             sp = (*X>=lvl); X+=K; *Z++ = sm = 0;
                             for (size_t l=1u; l<L; ++l, X+=K, ++Z) { s = (*X>=lvl); sm += s*(s!=sp); *Z = sm; sp = s; }
@@ -213,9 +213,9 @@ int lcr_s (float *Y, const float *X, const size_t R, const size_t C, const size_
                 }
                 else if (going==-1)
                 {
-                    for (size_t g=0u; g<G; ++g, X+=B*(L-1u), Y+=B*(L-1u))
+                    for (size_t g=G; g>0u; --g, X+=B*(L-1u), Y+=B*(L-1u))
                     {
-                        for (size_t b=0u; b<B; ++b, X-=K*L-1u, Y-=K*L-1u)
+                        for (size_t b=B; b>0u; --b, X-=K*L-1u, Y-=K*L-1u)
                         {
                             sp = (*X<lvl); X+=K; *Z++ = sm = 0;
                             for (size_t l=1u; l<L; ++l, X+=K, ++Z) { s = (*X<lvl); sm += s*(s!=sp); *Z = sm; sp = s; }
@@ -329,7 +329,7 @@ int lcr_d (double *Y, const double *X, const size_t R, const size_t C, const siz
             {
                 if (going==0)
                 {
-                    for (size_t v=0u; v<V; ++v)
+                    for (size_t v=V; v>0u; --v)
                     {
                         sp = (*X++<lvl); *Z++ = sm = 0;
                         for (size_t l=1u; l<L; ++l, ++X, ++Z) { s = (*X<lvl); sm += (s!=sp); *Z = sm; sp = s; }
@@ -350,7 +350,7 @@ int lcr_d (double *Y, const double *X, const size_t R, const size_t C, const siz
                 }
                 else if (going==1)
                 {
-                    for (size_t v=0u; v<V; ++v)
+                    for (size_t v=V; v>0u; --v)
                     {
                         sp = (*X++>=lvl); *Z++ = sm = 0;
                         for (size_t l=1u; l<L; ++l, ++X, ++Z) { s = (*X>=lvl); sm += s*(s!=sp); *Z = sm; sp = s; }
@@ -371,7 +371,7 @@ int lcr_d (double *Y, const double *X, const size_t R, const size_t C, const siz
                 }
                 else if (going==-1)
                 {
-                    for (size_t v=0u; v<V; ++v)
+                    for (size_t v=V; v>0u; --v)
                     {
                         sp = (*X++<lvl); *Z++ = sm = 0;
                         for (size_t l=1u; l<L; ++l, ++X, ++Z) { s = (*X<lvl); sm += s*(s!=sp); *Z = sm; sp = s; }
@@ -396,9 +396,9 @@ int lcr_d (double *Y, const double *X, const size_t R, const size_t C, const siz
             {
                 if (going==0)
                 {
-                    for (size_t g=0u; g<G; ++g, X+=B*(L-1u), Y+=B*(L-1u))
+                    for (size_t g=G; g>0u; --g, X+=B*(L-1u), Y+=B*(L-1u))
                     {
-                        for (size_t b=0u; b<B; ++b, X-=K*L-1u, Y-=K*L-1u)
+                        for (size_t b=B; b>0u; --b, X-=K*L-1u, Y-=K*L-1u)
                         {
                             sp = (*X<lvl); X+=K; *Z++ = sm = 0;
                             for (size_t l=1u; l<L; ++l, X+=K, ++Z) { s = (*X<lvl); sm += (s!=sp); *Z = sm; sp = s; }
@@ -420,9 +420,9 @@ int lcr_d (double *Y, const double *X, const size_t R, const size_t C, const siz
                 }
                 else if (going==1)
                 {
-                    for (size_t g=0u; g<G; ++g, X+=B*(L-1u), Y+=B*(L-1u))
+                    for (size_t g=G; g>0u; --g, X+=B*(L-1u), Y+=B*(L-1u))
                     {
-                        for (size_t b=0u; b<B; ++b, X-=K*L-1u, Y-=K*L-1u)
+                        for (size_t b=B; b>0u; --b, X-=K*L-1u, Y-=K*L-1u)
                         {
                             sp = (*X>=lvl); X+=K; *Z++ = sm = 0;
                             for (size_t l=1u; l<L; ++l, X+=K, ++Z) { s = (*X>=lvl); sm += s*(s!=sp); *Z = sm; sp = s; }
@@ -444,9 +444,9 @@ int lcr_d (double *Y, const double *X, const size_t R, const size_t C, const siz
                 }
                 else if (going==-1)
                 {
-                    for (size_t g=0u; g<G; ++g, X+=B*(L-1u), Y+=B*(L-1u))
+                    for (size_t g=G; g>0u; --g, X+=B*(L-1u), Y+=B*(L-1u))
                     {
-                        for (size_t b=0u; b<B; ++b, X-=K*L-1u, Y-=K*L-1u)
+                        for (size_t b=B; b>0u; --b, X-=K*L-1u, Y-=K*L-1u)
                         {
                             sp = (*X<lvl); X+=K; *Z++ = sm = 0;
                             for (size_t l=1u; l<L; ++l, X+=K, ++Z) { s = (*X<lvl); sm += s*(s!=sp); *Z = sm; sp = s; }
