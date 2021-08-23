@@ -67,10 +67,10 @@ static void get_cstbl_s (float* cstbl, const size_t nfft)
     t = 2.0f * dc;
     ds = sqrtf(t-dc*dc);
 
-    for (size_t i=0u; i<nfft8; ++i, ++cstbl, s+=ds, ds-=t*s) { *cstbl = s; }
+    for (size_t i=nfft8; i>0u; --i, ++cstbl, s+=ds, ds-=t*s) { *cstbl = s; }
     if (nfft8>0u) { *cstbl = (float)M_SQRT1_2; }
     cstbl += nfft4 - nfft8;
-    for (size_t i=0u; i<nfft8; ++i, --cstbl, c-=dc, dc+=t*c) { *cstbl = c; }
+    for (size_t i=nfft8; i>0u; --i, --cstbl, c-=dc, dc+=t*c) { *cstbl = c; }
     cstbl -= nfft4 - nfft8;
     for (size_t i=0u; i<nfft4; ++i) { cstbl[nfft2-i] = cstbl[i]; }
     for (size_t i=0u; i<nfft2+nfft4; ++i) { cstbl[i+nfft2] = -cstbl[i]; }
@@ -87,10 +87,10 @@ static void get_cstbl_d (double* cstbl, const size_t nfft)
     t = 2.0 * dc;
     ds = sqrt(t-dc*dc);
 
-    for (size_t i=0u; i<nfft8; ++i, ++cstbl, s+=ds, ds-=t*s) { *cstbl = s; }
+    for (size_t i=nfft8; i>0u; --i, ++cstbl, s+=ds, ds-=t*s) { *cstbl = s; }
     if (nfft8>0u) { *cstbl = M_SQRT1_2; }
     cstbl += nfft4 - nfft8;
-    for (size_t i=0u; i<nfft8; ++i, --cstbl, c-=dc, dc+=t*c) { *cstbl = c; }
+    for (size_t i=nfft8; i>0u; --i, --cstbl, c-=dc, dc+=t*c) { *cstbl = c; }
     cstbl -= nfft4 - nfft8;
     for (size_t i=0u; i<nfft4; ++i) { cstbl[nfft2-i] = cstbl[i]; }
     for (size_t i=0u; i<nfft2+nfft4; ++i) { cstbl[i+nfft2] = -cstbl[i]; }
@@ -340,7 +340,7 @@ int ifft_rad2_s (float *Y, const float *X, const size_t R, const size_t C, const
     if (nfft==0u || N==0u) {}
     else if (nfft==1u)
     {
-        for (size_t n=0u; n<N; ++n, ++X, ++Y) { *Y = *X * s; }
+        for (size_t n=N; n>0u; --n, ++X, ++Y) { *Y = *X * s; }
     }
     else
     {
@@ -354,12 +354,12 @@ int ifft_rad2_s (float *Y, const float *X, const size_t R, const size_t C, const
     
         if (Lx==N)
         {
-            for (size_t l=0u; l<Lx; ++l, ++X, ++Y1) { *Y1 = *X; *++Y1 = *++X; }
+            for (size_t l=Lx; l>0u; --l, ++X, ++Y1) { *Y1 = *X; *++Y1 = *++X; }
             X -= 2u + 2u*(1u-nfft%2u);
-            for (size_t l=Lx; l<nfft; ++l, X-=2u, ++Y1) { *Y1 = *X; *++Y1 = -*(X+1u); }
+            for (size_t l=nfft-Lx; l>0u; --l, X-=2u, ++Y1) { *Y1 = *X; *++Y1 = -*(X+1u); }
             Y1 -= 2u*nfft;
             ifft_1d_s(Y1,nfft,bittbl,cstbl);
-            for (size_t l=0u; l<nfft; ++l, Y1+=2u, ++Y) { *Y = *Y1 * s; }
+            for (size_t l=nfft; l>0u; --l, Y1+=2u, ++Y) { *Y = *Y1 * s; }
             Y1 -= 2u*nfft;
         }
         else
@@ -370,21 +370,21 @@ int ifft_rad2_s (float *Y, const float *X, const size_t R, const size_t C, const
 
             if (K==1u && (G==1u || B==1u))
             {
-                for (size_t l=0u; l<Lx; ++l, ++X, ++Y1) { *Y1 = *X; *++Y1 = *++X; }
+                for (size_t l=Lx; l>0u; --l, ++X, ++Y1) { *Y1 = *X; *++Y1 = *++X; }
                 X -= 2u + 2u*(1u-nfft%2u);
-                for (size_t l=Lx; l<nfft; ++l, X-=2u, ++Y1) { *Y1 = *X; *++Y1 = -*(X+1u); }
+                for (size_t l=nfft-Lx; l>0u; --l, X-=2u, ++Y1) { *Y1 = *X; *++Y1 = -*(X+1u); }
                 X+=2u*Lx; Y1 -= 2u*nfft;
                 ifft_1d_s(Y1,nfft,bittbl,cstbl);
-                for (size_t l=0u; l<nfft; ++l, Y1+=2u, ++Y) { *Y = *Y1 * s; }
+                for (size_t l=nfft; l>0u; --l, Y1+=2u, ++Y) { *Y = *Y1 * s; }
                 Y1 -= 2u*nfft;
                 for (size_t v=1u; v<V; ++v, X+=2u*Lx, Y1-=2u*nfft)
                 {
-                    for (size_t l=0u; l<Lx; ++l, ++X, ++Y1) { *Y1 = *X; *++Y1 = *++X; }
+                    for (size_t l=Lx; l>0u; --l, ++X, ++Y1) { *Y1 = *X; *++Y1 = *++X; }
                     X -= 2u + 2u*(1u-nfft%2u);
-                    for (size_t l=Lx; l<nfft; ++l, X-=2u, ++Y1) { *Y1 = *X; *++Y1 = -*(X+1u); }
+                    for (size_t l=nfft-Lx; l>0u; --l, X-=2u, ++Y1) { *Y1 = *X; *++Y1 = -*(X+1u); }
                     Y1 -= 2u*nfft;
                     ifft_1d_s(Y1,nfft,bittbl,cstbl);
-                    for (size_t l=0u; l<nfft; ++l, Y1+=2u, ++Y) { *Y = *Y1 * s; }
+                    for (size_t l=nfft; l>0u; --l, Y1+=2u, ++Y) { *Y = *Y1 * s; }
                 }
             }
             else
@@ -393,12 +393,12 @@ int ifft_rad2_s (float *Y, const float *X, const size_t R, const size_t C, const
                 {
                     for (size_t b=B; b>0u; --b, X+=2u, Y1-=2u*nfft, Y-=K*nfft-1u)
                     {
-                        for (size_t l=0u; l<Lx; ++l, X+=2u*K, ++Y1) { *Y1 = *X; *++Y1 = *(X+1u); }
+                        for (size_t l=Lx; l>0u; --l, X+=2u*K, ++Y1) { *Y1 = *X; *++Y1 = *(X+1u); }
                         X -= K*(2u + 2u*(1u-nfft%2u));
-                        for (size_t l=Lx; l<nfft; ++l, X-=2u*K, ++Y1) { *Y1 = *X; *++Y1 = -*(X+1u); }
+                        for (size_t l=nfft-Lx; l>0u; --l, X-=2u*K, ++Y1) { *Y1 = *X; *++Y1 = -*(X+1u); }
                         Y1 -= 2u*nfft;
                         ifft_1d_s(Y1,nfft,bittbl,cstbl);
-                        for (size_t l=0u; l<nfft; ++l, Y1+=2u, Y+=K) { *Y = *Y1 * s; }
+                        for (size_t l=nfft; l>0u; --l, Y1+=2u, Y+=K) { *Y = *Y1 * s; }
                     }
                 }
             }
@@ -423,7 +423,7 @@ int ifft_rad2_d (double *Y, const double *X, const size_t R, const size_t C, con
     if (nfft==0u || N==0u) {}
     else if (nfft==1u)
     {
-        for (size_t n=0u; n<N; ++n, ++X, ++Y) { *Y = *X * s; }
+        for (size_t n=N; n>0u; --n, ++X, ++Y) { *Y = *X * s; }
     }
     else
     {
@@ -437,12 +437,12 @@ int ifft_rad2_d (double *Y, const double *X, const size_t R, const size_t C, con
     
         if (Lx==N)
         {
-            for (size_t l=0u; l<Lx; ++l, ++X, ++Y1) { *Y1 = *X; *++Y1 = *++X; }
+            for (size_t l=Lx; l>0u; --l, ++X, ++Y1) { *Y1 = *X; *++Y1 = *++X; }
             X -= 2u + 2u*(1u-nfft%2u);
-            for (size_t l=Lx; l<nfft; ++l, X-=2u, ++Y1) { *Y1 = *X; *++Y1 = -*(X+1u); }
+            for (size_t l=nfft-Lx; l>0u; --l, X-=2u, ++Y1) { *Y1 = *X; *++Y1 = -*(X+1u); }
             Y1 -= 2u*nfft;
             ifft_1d_d(Y1,nfft,bittbl,cstbl);
-            for (size_t l=0u; l<nfft; ++l, Y1+=2u, ++Y) { *Y = *Y1 * s; }
+            for (size_t l=nfft; l>0u; --l, Y1+=2u, ++Y) { *Y = *Y1 * s; }
             Y1 -= 2u*nfft;
         }
         else
@@ -453,21 +453,21 @@ int ifft_rad2_d (double *Y, const double *X, const size_t R, const size_t C, con
 
             if (K==1u && (G==1u || B==1u))
             {
-                for (size_t l=0u; l<Lx; ++l, ++X, ++Y1) { *Y1 = *X; *++Y1 = *++X; }
+                for (size_t l=Lx; l>0u; --l, ++X, ++Y1) { *Y1 = *X; *++Y1 = *++X; }
                 X -= 2u + 2u*(1u-nfft%2u);
-                for (size_t l=Lx; l<nfft; ++l, X-=2u, ++Y1) { *Y1 = *X; *++Y1 = -*(X+1u); }
+                for (size_t l=nfft-Lx; l>0u; --l, X-=2u, ++Y1) { *Y1 = *X; *++Y1 = -*(X+1u); }
                 X+=2u*Lx; Y1 -= 2u*nfft;
                 ifft_1d_d(Y1,nfft,bittbl,cstbl);
-                for (size_t l=0u; l<nfft; ++l, Y1+=2u, ++Y) { *Y = *Y1 * s; }
+                for (size_t l=nfft; l>0u; --l, Y1+=2u, ++Y) { *Y = *Y1 * s; }
                 Y1 -= 2u*nfft;
                 for (size_t v=1u; v<V; ++v, X+=2u*Lx, Y1-=2u*nfft)
                 {
-                    for (size_t l=0u; l<Lx; ++l, ++X, ++Y1) { *Y1 = *X; *++Y1 = *++X; }
+                    for (size_t l=Lx; l>0u; --l, ++X, ++Y1) { *Y1 = *X; *++Y1 = *++X; }
                     X -= 2u + 2u*(1u-nfft%2u);
-                    for (size_t l=Lx; l<nfft; ++l, X-=2u, ++Y1) { *Y1 = *X; *++Y1 = -*(X+1u); }
+                    for (size_t l=nfft-Lx; l>0u; --l, X-=2u, ++Y1) { *Y1 = *X; *++Y1 = -*(X+1u); }
                     Y1 -= 2u*nfft;
                     ifft_1d_d(Y1,nfft,bittbl,cstbl);
-                    for (size_t l=0u; l<nfft; ++l, Y1+=2u, ++Y) { *Y = *Y1 * s; }
+                    for (size_t l=nfft; l>0u; --l, Y1+=2u, ++Y) { *Y = *Y1 * s; }
                 }
             }
             else
@@ -476,12 +476,12 @@ int ifft_rad2_d (double *Y, const double *X, const size_t R, const size_t C, con
                 {
                     for (size_t b=B; b>0u; --b, X+=2u, Y1-=2u*nfft, Y-=K*nfft-1u)
                     {
-                        for (size_t l=0u; l<Lx; ++l, X+=2u*K, ++Y1) { *Y1 = *X; *++Y1 = *(X+1u); }
+                        for (size_t l=Lx; l>0u; --l, X+=2u*K, ++Y1) { *Y1 = *X; *++Y1 = *(X+1u); }
                         X -= K*(2u + 2u*(1u-nfft%2u));
-                        for (size_t l=Lx; l<nfft; ++l, X-=2u*K, ++Y1) { *Y1 = *X; *++Y1 = -*(X+1u); }
+                        for (size_t l=nfft-Lx; l>0u; --l, X-=2u*K, ++Y1) { *Y1 = *X; *++Y1 = -*(X+1u); }
                         Y1 -= 2u*nfft;
                         ifft_1d_d(Y1,nfft,bittbl,cstbl);
-                        for (size_t l=0u; l<nfft; ++l, Y1+=2u, Y+=K) { *Y = *Y1 * s; }
+                        for (size_t l=nfft; l>0u; --l, Y1+=2u, Y+=K) { *Y = *Y1 * s; }
                     }
                 }
             }
@@ -507,7 +507,7 @@ int ifft_rad2_c (float *Y, const float *X, const size_t R, const size_t C, const
     if (nfft==0u || N==0u) {}
     else if (nfft==1u)
     {
-        for (size_t n=0u; n<2u*N; ++n, ++X, ++Y) { *Y = *X * s; }
+        for (size_t n=2u*N; n>0u; --n, ++X, ++Y) { *Y = *X * s; }
     }
     else
     {
@@ -520,10 +520,10 @@ int ifft_rad2_c (float *Y, const float *X, const size_t R, const size_t C, const
 
         if (Lx==N)
         {
-            for (size_t l=0u; l<2u*Lx; ++l, ++X, ++Y) { *Y = *X; }
+            for (size_t l=2u*Lx; l>0u; --l, ++X, ++Y) { *Y = *X; }
             Y -= 2u*nfft;
             ifft_1d_c(Y,nfft,bittbl,cstbl);
-            for (size_t l=0u; l<2u*nfft; ++l, ++Y) { *Y *= s; }
+            for (size_t l=2u*nfft; l>0u; --l, ++Y) { *Y *= s; }
         }
         else
         {
@@ -535,10 +535,10 @@ int ifft_rad2_c (float *Y, const float *X, const size_t R, const size_t C, const
             {
                 for (size_t v=V; v>0u; --v)
                 {
-                    for (size_t l=0u; l<2u*Lx; ++l, ++X, ++Y) { *Y = *X; }
+                    for (size_t l=2u*Lx; l>0u; --l, ++X, ++Y) { *Y = *X; }
                     Y -= 2u*nfft;
                     ifft_1d_c(Y,nfft,bittbl,cstbl);
-                    for (size_t l=0u; l<2u*nfft; ++l, ++Y) { *Y *= s; }
+                    for (size_t l=2u*nfft; l>0u; --l, ++Y) { *Y *= s; }
                 }
             }
             else
@@ -549,10 +549,10 @@ int ifft_rad2_c (float *Y, const float *X, const size_t R, const size_t C, const
                 {
                     for (size_t b=B; b>0u; --b, X-=2u*K*Lx-2u, Y1-=2u*nfft, Y-=2u*K*nfft-2u)
                     {
-                        for (size_t l=0u; l<Lx; ++l, X+=2u*K, ++Y1) { *Y1 = *X; *++Y1 = *(X+1u); }
+                        for (size_t l=Lx; l>0u; --l, X+=2u*K, ++Y1) { *Y1 = *X; *++Y1 = *(X+1u); }
                         Y1 -= 2u*nfft;
                         ifft_1d_c(Y1,nfft,bittbl,cstbl);
-                        for (size_t l=0u; l<nfft; ++l, ++Y1, Y+=2u*K-1u) { *Y = *Y1 * s; *++Y = *++Y1 * s; }
+                        for (size_t l=nfft; l>0u; --l, ++Y1, Y+=2u*K-1u) { *Y = *Y1 * s; *++Y = *++Y1 * s; }
                     }
                 }
                 free(Y1);
@@ -579,7 +579,7 @@ int ifft_rad2_z (double *Y, const double *X, const size_t R, const size_t C, con
     if (nfft==0u || N==0u) {}
     else if (nfft==1u)
     {
-        for (size_t n=0u; n<2u*N; ++n, ++X, ++Y) { *Y = *X * s; }
+        for (size_t n=2u*N; n>0u; --n, ++X, ++Y) { *Y = *X * s; }
     }
     else
     {
@@ -592,10 +592,10 @@ int ifft_rad2_z (double *Y, const double *X, const size_t R, const size_t C, con
 
         if (Lx==N)
         {
-            for (size_t l=0u; l<2u*Lx; ++l, ++X, ++Y) { *Y = *X; }
+            for (size_t l=2u*Lx; l>0u; --l, ++X, ++Y) { *Y = *X; }
             Y -= 2u*nfft;
             ifft_1d_z(Y,nfft,bittbl,cstbl);
-            for (size_t l=0u; l<2u*nfft; ++l, ++Y) { *Y *= s; }
+            for (size_t l=2u*nfft; l>0u; --l, ++Y) { *Y *= s; }
         }
         else
         {
@@ -607,10 +607,10 @@ int ifft_rad2_z (double *Y, const double *X, const size_t R, const size_t C, con
             {
                 for (size_t v=V; v>0u; --v)
                 {
-                    for (size_t l=0u; l<2u*Lx; ++l, ++X, ++Y) { *Y = *X; }
+                    for (size_t l=2u*Lx; l>0u; --l, ++X, ++Y) { *Y = *X; }
                     Y -= 2u*nfft;
                     ifft_1d_z(Y,nfft,bittbl,cstbl);
-                    for (size_t l=0u; l<2u*nfft; ++l, ++Y) { *Y *= s; }
+                    for (size_t l=2u*nfft; l>0u; --l, ++Y) { *Y *= s; }
                 }
             }
             else
@@ -621,10 +621,10 @@ int ifft_rad2_z (double *Y, const double *X, const size_t R, const size_t C, con
                 {
                     for (size_t b=B; b>0u; --b, X-=2u*K*Lx-2u, Y1-=2u*nfft, Y-=2u*K*nfft-2u)
                     {
-                        for (size_t l=0u; l<Lx; ++l, X+=2u*K, ++Y1) { *Y1 = *X; *++Y1 = *(X+1u); }
+                        for (size_t l=Lx; l>0u; --l, X+=2u*K, ++Y1) { *Y1 = *X; *++Y1 = *(X+1u); }
                         Y1 -= 2u*nfft;
                         ifft_1d_z(Y1,nfft,bittbl,cstbl);
-                        for (size_t l=0u; l<nfft; ++l, ++Y1, Y+=2u*K-1u) { *Y = *Y1 * s; *++Y = *++Y1 * s; }
+                        for (size_t l=nfft; l>0u; --l, ++Y1, Y+=2u*K-1u) { *Y = *Y1 * s; *++Y = *++Y1 * s; }
                     }
                 }
                 free(Y1);

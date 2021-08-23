@@ -26,7 +26,7 @@ int idst_s (float *Y, const float *X, const size_t R, const size_t C, const size
     if (N==0u) {}
     else if (L==1u && ndst==1u)
     {
-        for (size_t n=0u; n<N; ++n, ++X, ++Y) { *Y = *X; }
+        for (size_t n=N; n>0u; --n, ++X, ++Y) { *Y = *X; }
     }
     else
     {
@@ -46,7 +46,7 @@ int idst_s (float *Y, const float *X, const size_t R, const size_t C, const size
             for (size_t l=L; l<ndst; ++l, ++X1) { *X1 = 0.0f; }
             X1 -= ndst;
             fftwf_execute(plan);
-            for (size_t l=0u; l<ndst; ++l, ++Y1, ++Y) { *Y = *Y1 * ysc; }
+            for (size_t l=ndst; l>0u; --l, ++Y1, ++Y) { *Y = *Y1 * ysc; }
             Y1 -= ndst;
         }
         else
@@ -57,20 +57,18 @@ int idst_s (float *Y, const float *X, const size_t R, const size_t C, const size
 
             if (K==1u && (G==1u || B==1u))
             {
-                *X1++ = *X++;
-                for (size_t l=1u; l<L; ++l, ++X, ++X1) { *X1 = *X; }
+                for (size_t l=L; l>0u; --l, ++X, ++X1) { *X1 = *X; }
                 for (size_t l=L; l<ndst; ++l, ++X1) { *X1 = 0.0f; }
                 X1 -= ndst;
                 fftwf_execute(plan);
-                for (size_t l=0u; l<ndst; ++l, ++Y1, ++Y) { *Y = *Y1 * ysc; }
+                for (size_t l=ndst; l>0u; --l, ++Y1, ++Y) { *Y = *Y1 * ysc; }
                 Y1 -= ndst;
                 for (size_t v=1u; v<V; ++v, Y1-=ndst)
                 {
-                    *X1++ = *X++;
-                    for (size_t l=1u; l<L; ++l, ++X, ++X1) { *X1 = *X; }
+                    for (size_t l=L; l>0u; --l, ++X, ++X1) { *X1 = *X; }
                     X1 -= L;
                     fftwf_execute(plan);
-                    for (size_t l=0u; l<ndst; ++l, ++Y1, ++Y) { *Y = *Y1 * ysc; }
+                    for (size_t l=ndst; l>0u; --l, ++Y1, ++Y) { *Y = *Y1 * ysc; }
                 }
             }
             else
@@ -82,11 +80,10 @@ int idst_s (float *Y, const float *X, const size_t R, const size_t C, const size
                 {
                     for (size_t b=B; b>0u; --b, X-=K*L-1u, Y1-=ndst, Y-=K*ndst-1u)
                     {
-                        *X1++ = *X; X += K;
-                        for (size_t l=1u; l<L; ++l, X+=K, ++X1) { *X1 = *X; }
+                        for (size_t l=L; l>0u; --l, X+=K, ++X1) { *X1 = *X; }
                         X1 -= L;
                         fftwf_execute(plan);
-                        for (size_t l=0u; l<ndst; ++l, ++Y1, Y+=K) { *Y = *Y1 * ysc; }
+                        for (size_t l=ndst; l>0u; --l, ++Y1, Y+=K) { *Y = *Y1 * ysc; }
                     }
                 }
             }
@@ -109,7 +106,7 @@ int idst_d (double *Y, const double *X, const size_t R, const size_t C, const si
     if (N==0u) {}
     else if (L==1u && ndst==1u)
     {
-        for (size_t n=0u; n<N; ++n, ++X, ++Y) { *Y = *X; }
+        for (size_t n=N; n>0u; --n, ++X, ++Y) { *Y = *X; }
     }
     else
     {
@@ -129,7 +126,7 @@ int idst_d (double *Y, const double *X, const size_t R, const size_t C, const si
             for (size_t l=L; l<ndst; ++l, ++X1) { *X1 = 0.0; }
             X1 -= ndst;
             fftw_execute(plan);
-            for (size_t l=0u; l<ndst; ++l, ++Y1, ++Y) { *Y = *Y1 * ysc; }
+            for (size_t l=ndst; l>0u; --l, ++Y1, ++Y) { *Y = *Y1 * ysc; }
             Y1 -= ndst;
         }
         else
@@ -140,20 +137,18 @@ int idst_d (double *Y, const double *X, const size_t R, const size_t C, const si
 
             if (K==1u && (G==1u || B==1u))
             {
-                *X1++ = *X++;
-                for (size_t l=1u; l<L; ++l, ++X, ++X1) { *X1 = *X; }
+                for (size_t l=L; l>0u; --l, ++X, ++X1) { *X1 = *X; }
                 for (size_t l=L; l<ndst; ++l, ++X1) { *X1 = 0.0; }
                 X1 -= ndst;
                 fftw_execute(plan);
-                for (size_t l=0u; l<ndst; ++l, ++Y1, ++Y) { *Y = *Y1 * ysc; }
+                for (size_t l=ndst; l>0u; --l, ++Y1, ++Y) { *Y = *Y1 * ysc; }
                 Y1 -= ndst;
                 for (size_t v=1u; v<V; ++v, Y1-=ndst)
                 {
-                    *X1++ = *X++;
-                    for (size_t l=1u; l<L; ++l, ++X, ++X1) { *X1 = *X; }
+                    for (size_t l=L; l>0u; --l, ++X, ++X1) { *X1 = *X; }
                     X1 -= L;
                     fftw_execute(plan);
-                    for (size_t l=0u; l<ndst; ++l, ++Y1, ++Y) { *Y = *Y1 * ysc; }
+                    for (size_t l=ndst; l>0u; --l, ++Y1, ++Y) { *Y = *Y1 * ysc; }
                 }
             }
             else
@@ -165,11 +160,10 @@ int idst_d (double *Y, const double *X, const size_t R, const size_t C, const si
                 {
                     for (size_t b=B; b>0u; --b, X-=K*L-1u, Y1-=ndst, Y-=K*ndst-1u)
                     {
-                        *X1++ = *X; X += K;
-                        for (size_t l=1u; l<L; ++l, X+=K, ++X1) { *X1 = *X; }
+                        for (size_t l=L; l>0u; --l, X+=K, ++X1) { *X1 = *X; }
                         X1 -= L;
                         fftw_execute(plan);
-                        for (size_t l=0u; l<ndst; ++l, ++Y1, Y+=K) { *Y = *Y1 * ysc; }
+                        for (size_t l=ndst; l>0u; --l, ++Y1, Y+=K) { *Y = *Y1 * ysc; }
                     }
                 }
             }
@@ -192,7 +186,7 @@ int idst_c (float *Y, const float *X, const size_t R, const size_t C, const size
     if (N==0u) {}
     else if (L==1u && ndst==1u)
     {
-        for (size_t n=0u; n<2u*N; ++n, ++X, ++Y) { *Y = *X; }
+        for (size_t n=2u*N; n>0u; --n, ++X, ++Y) { *Y = *X; }
     }
     else
     {
@@ -211,12 +205,11 @@ int idst_c (float *Y, const float *X, const size_t R, const size_t C, const size
     
         if (L==N)
         {
-            *X1r++ = *X++; *X1i++ = *X++;
-            for (size_t l=1u; l<L; ++l, ++X, ++X1r, ++X1i) { *X1r = *X; *X1i = *++X; }
+            for (size_t l=L; l>0u; --l, ++X, ++X1r, ++X1i) { *X1r = *X; *X1i = *++X; }
             for (size_t l=L; l<ndst; ++l, ++X1r, ++X1i) { *X1r = *X1i = 0.0f; }
             X1r -= ndst; X1i -= ndst;
             fftwf_execute(rplan); fftwf_execute(iplan);
-            for (size_t l=0u; l<ndst; ++l, ++Y1r, ++Y1i, ++Y) { *Y = *Y1r*ysc; *++Y = *Y1i*ysc; }
+            for (size_t l=ndst; l>0u; --l, ++Y1r, ++Y1i, ++Y) { *Y = *Y1r*ysc; *++Y = *Y1i*ysc; }
             Y1r -= ndst; Y1i -= ndst;
         }
         else
@@ -227,20 +220,18 @@ int idst_c (float *Y, const float *X, const size_t R, const size_t C, const size
 
             if (K==1u && (G==1u || B==1u))
             {
-                *X1r++ = *X++; *X1i++ = *X++;
-                for (size_t l=1u; l<L; ++l, ++X, ++X1r, ++X1i) { *X1r = *X; *X1i = *++X; }
+                for (size_t l=L; l>0u; --l, ++X, ++X1r, ++X1i) { *X1r = *X; *X1i = *++X; }
                 for (size_t l=L; l<ndst; ++l, ++X1r, ++X1i) { *X1r = *X1i = 0.0f; }
                 X1r -= ndst; X1i -= ndst;
                 fftwf_execute(rplan); fftwf_execute(iplan);
-                for (size_t l=0u; l<ndst; ++l, ++Y1r, ++Y1i, ++Y) { *Y = *Y1r*ysc; *++Y = *Y1i*ysc; }
+                for (size_t l=ndst; l>0u; --l, ++Y1r, ++Y1i, ++Y) { *Y = *Y1r*ysc; *++Y = *Y1i*ysc; }
                 Y1r -= ndst; Y1i -= ndst;
                 for (size_t v=1u; v<V; ++v, Y1r-=ndst, Y1i-=ndst)
                 {
-                    *X1r++ = *X++; *X1i++ = *X++;
-                    for (size_t l=1u; l<L; ++l, ++X, ++X1r, ++X1i) { *X1r = *X; *X1i = *++X; }
+                    for (size_t l=L; l>0u; --l, ++X, ++X1r, ++X1i) { *X1r = *X; *X1i = *++X; }
                     X1r -= L; X1i -= L;
                     fftwf_execute(rplan); fftwf_execute(iplan);
-                    for (size_t l=0u; l<ndst; ++l, ++Y1r, ++Y1i, ++Y) { *Y = *Y1r*ysc; *++Y = *Y1i*ysc; }
+                    for (size_t l=ndst; l>0u; --l, ++Y1r, ++Y1i, ++Y) { *Y = *Y1r*ysc; *++Y = *Y1i*ysc; }
                 }
             }
             else
@@ -252,11 +243,10 @@ int idst_c (float *Y, const float *X, const size_t R, const size_t C, const size
                 {
                     for (size_t b=B; b>0u; --b, X-=2u*K*L-2u, Y1r-=ndst, Y1i-=ndst, Y-=2u*K*ndst-2u)
                     {
-                        *X1r++ = *X; *X1i++ = *++X; X += 2u*K-1u;
-                        for (size_t l=1u; l<L; ++l, X+=2u*K-1u, ++X1r, ++X1i) { *X1r = *X; *X1i = *++X; }
+                        for (size_t l=L; l>0u; --l, X+=2u*K-1u, ++X1r, ++X1i) { *X1r = *X; *X1i = *++X; }
                         X1r -= L; X1i -= L;
                         fftwf_execute(rplan); fftwf_execute(iplan);
-                        for (size_t l=0u; l<ndst; ++l, ++Y1r, ++Y1i, Y+=2u*K-1u) { *Y = *Y1r*ysc; *++Y = *Y1i*ysc; }
+                        for (size_t l=ndst; l>0u; --l, ++Y1r, ++Y1i, Y+=2u*K-1u) { *Y = *Y1r*ysc; *++Y = *Y1i*ysc; }
                     }
                 }
             }
@@ -280,7 +270,7 @@ int idst_z (double *Y, const double *X, const size_t R, const size_t C, const si
     if (N==0u) {}
     else if (L==1u && ndst==1u)
     {
-        for (size_t n=0u; n<2u*N; ++n, ++X, ++Y) { *Y = *X; }
+        for (size_t n=2u*N; n>0u; --n, ++X, ++Y) { *Y = *X; }
     }
     else
     {
@@ -299,12 +289,11 @@ int idst_z (double *Y, const double *X, const size_t R, const size_t C, const si
     
         if (L==N)
         {
-            *X1r++ = *X++; *X1i++ = *X++;
-            for (size_t l=1u; l<L; ++l, ++X, ++X1r, ++X1i) { *X1r = *X; *X1i = *++X; }
+            for (size_t l=L; l>0u; --l, ++X, ++X1r, ++X1i) { *X1r = *X; *X1i = *++X; }
             for (size_t l=L; l<ndst; ++l, ++X1r, ++X1i) { *X1r = *X1i = 0.0; }
             X1r -= ndst; X1i -= ndst;
             fftw_execute(rplan); fftw_execute(iplan);
-            for (size_t l=0u; l<ndst; ++l, ++Y1r, ++Y1i, ++Y) { *Y = *Y1r*ysc; *++Y = *Y1i*ysc; }
+            for (size_t l=ndst; l>0u; --l, ++Y1r, ++Y1i, ++Y) { *Y = *Y1r*ysc; *++Y = *Y1i*ysc; }
             Y1r -= ndst; Y1i -= ndst;
         }
         else
@@ -315,20 +304,18 @@ int idst_z (double *Y, const double *X, const size_t R, const size_t C, const si
 
             if (K==1u && (G==1u || B==1u))
             {
-                *X1r++ = *X++; *X1i++ = *X++;
-                for (size_t l=1u; l<L; ++l, ++X, ++X1r, ++X1i) { *X1r = *X; *X1i = *++X; }
+                for (size_t l=L; l>0u; --l, ++X, ++X1r, ++X1i) { *X1r = *X; *X1i = *++X; }
                 for (size_t l=L; l<ndst; ++l, ++X1r, ++X1i) { *X1r = *X1i = 0.0; }
                 X1r -= ndst; X1i -= ndst;
                 fftw_execute(rplan); fftw_execute(iplan);
-                for (size_t l=0u; l<ndst; ++l, ++Y1r, ++Y1i, ++Y) { *Y = *Y1r*ysc; *++Y = *Y1i*ysc; }
+                for (size_t l=ndst; l>0u; --l, ++Y1r, ++Y1i, ++Y) { *Y = *Y1r*ysc; *++Y = *Y1i*ysc; }
                 Y1r -= ndst; Y1i -= ndst;
                 for (size_t v=1u; v<V; ++v, Y1r-=ndst, Y1i-=ndst)
                 {
-                    *X1r++ = *X++; *X1i++ = *X++;
-                    for (size_t l=1u; l<L; ++l, ++X, ++X1r, ++X1i) { *X1r = *X; *X1i = *++X; }
+                    for (size_t l=L; l>0u; --l, ++X, ++X1r, ++X1i) { *X1r = *X; *X1i = *++X; }
                     X1r -= L; X1i -= L;
                     fftw_execute(rplan); fftw_execute(iplan);
-                    for (size_t l=0u; l<ndst; ++l, ++Y1r, ++Y1i, ++Y) { *Y = *Y1r*ysc; *++Y = *Y1i*ysc; }
+                    for (size_t l=ndst; l>0u; --l, ++Y1r, ++Y1i, ++Y) { *Y = *Y1r*ysc; *++Y = *Y1i*ysc; }
                 }
             }
             else
@@ -340,11 +327,10 @@ int idst_z (double *Y, const double *X, const size_t R, const size_t C, const si
                 {
                     for (size_t b=B; b>0u; --b, X-=2u*K*L-2u, Y1r-=ndst, Y1i-=ndst, Y-=2u*K*ndst-2u)
                     {
-                        *X1r++ = *X; *X1i++ = *++X; X += 2u*K-1u;
-                        for (size_t l=1u; l<L; ++l, X+=2u*K-1u, ++X1r, ++X1i) { *X1r = *X; *X1i = *++X; }
+                        for (size_t l=L; l>0u; --l, X+=2u*K-1u, ++X1r, ++X1i) { *X1r = *X; *X1i = *++X; }
                         X1r -= L; X1i -= L;
                         fftw_execute(rplan); fftw_execute(iplan);
-                        for (size_t l=0u; l<ndst; ++l, ++Y1r, ++Y1i, Y+=2u*K-1u) { *Y = *Y1r*ysc; *++Y = *Y1i*ysc; }
+                        for (size_t l=ndst; l>0u; --l, ++Y1r, ++Y1i, Y+=2u*K-1u) { *Y = *Y1r*ysc; *++Y = *Y1i*ysc; }
                     }
                 }
             }

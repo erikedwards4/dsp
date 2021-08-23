@@ -44,13 +44,13 @@ int main(int argc, char *argv[])
     descr += "This version emulates the conv function of Octave.\n";
     descr += "For more options (stride, dilation), see conv1d.\n";
     descr += "\n";
-    descr += "X2 is in reverse chronological order (usual convention).\n";
+    descr += "X2 is a vector in reverse chronological order (usual convention).\n";
     descr += "This performs non-causal convolution.\n";
     descr += "Use fir for causal (where X2 is B).\n";
     descr += "\n";
-    descr += "Use -d (--dim) to give the dimension (axis) along which to filter.\n";
+    descr += "Use -d (--dim) to give the dimension (axis) along which to operate.\n";
     descr += "Use -d0 to operate along cols, -d1 to operate along rows, etc.\n";
-    descr += "The default is 0 (along cols), unless X is a row vector.\n";
+    descr += "The default is 0 (along cols), unless X1 is a row vector.\n";
     descr += "\n";
     descr += "Use -s (--shape) to give the shape as 'full', 'same' or 'valid' [default='full'].\n";
     descr += "For 'same', Y has length L1 along dim (same as X1).\n";
@@ -67,7 +67,7 @@ int main(int argc, char *argv[])
     int nerrs;
     struct arg_file  *a_fi = arg_filen(nullptr,nullptr,"<file>",I-1,I,"input files (X1,X2)");
     struct arg_str   *a_sh = arg_strn("s","shape","<str>",0,1,"shape [default='full']");
-    struct arg_int    *a_d = arg_intn("d","dim","<uint>",0,1,"dimension along which to filter [default=0]");
+    struct arg_int    *a_d = arg_intn("d","dim","<uint>",0,1,"dimension along which to convolve [default=0]");
     struct arg_file  *a_fo = arg_filen("o","ofile","<file>",0,O,"output file (Y)");
     struct arg_lit *a_help = arg_litn("h","help",0,1,"display this help and exit");
     struct arg_end  *a_end = arg_end(5);

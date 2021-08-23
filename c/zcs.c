@@ -31,17 +31,17 @@ int zcs_s (int *Y, const float *X, const size_t R, const size_t C, const size_t 
         if (going==0)
         {
             sp = (*X++<0.0f); *Y++ = 0;
-            for (size_t l=1u; l<L; ++l, ++X, ++Y) { s = (*X<0.0f); *Y = (s!=sp); sp = s; }
+            for (size_t l=L; l>1u; --l, ++X, ++Y) { s = (*X<0.0f); *Y = (s!=sp); sp = s; }
         }
         else if (going==1)
         {
             sp = (*X++>=0.0f); *Y++ = 0;
-            for (size_t l=1u; l<L; ++l, ++X, ++Y) { s = (*X>=0.0f); *Y = s*(s!=sp); sp = s; }
+            for (size_t l=L; l>1u; --l, ++X, ++Y) { s = (*X>=0.0f); *Y = s*(s!=sp); sp = s; }
         }
         else if (going==-1)
         {
             sp = (*X++<0.0f); *Y++ = 0;
-            for (size_t l=1u; l<L; ++l, ++X, ++Y) { s = (*X<0.0f); *Y = s*(s!=sp); sp = s; }
+            for (size_t l=L; l>1u; --l, ++X, ++Y) { s = (*X<0.0f); *Y = s*(s!=sp); sp = s; }
         }
         else { fprintf(stderr,"error in zcs_s: going must be in {-1,0,1}\n"); return 1; }
     }
@@ -58,7 +58,7 @@ int zcs_s (int *Y, const float *X, const size_t R, const size_t C, const size_t 
                 for (size_t v=V; v>0u; --v)
                 {
                     sp = (*X++<0.0f); *Y++ = 0;
-                    for (size_t l=1u; l<L; ++l, ++X, ++Y) { s = (*X<0.0f); *Y = (s!=sp); sp = s; }
+                    for (size_t l=L; l>1u; --l, ++X, ++Y) { s = (*X<0.0f); *Y = (s!=sp); sp = s; }
                 }
             }
             else if (going==1)
@@ -66,7 +66,7 @@ int zcs_s (int *Y, const float *X, const size_t R, const size_t C, const size_t 
                 for (size_t v=V; v>0u; --v)
                 {
                     sp = (*X++>=0.0f); *Y++ = 0;
-                    for (size_t l=1u; l<L; ++l, ++X, ++Y) { s = (*X>=0.0f); *Y = s*(s!=sp); sp = s; }
+                    for (size_t l=L; l>1u; --l, ++X, ++Y) { s = (*X>=0.0f); *Y = s*(s!=sp); sp = s; }
                 }
             }
             else if (going==-1)
@@ -74,7 +74,7 @@ int zcs_s (int *Y, const float *X, const size_t R, const size_t C, const size_t 
                 for (size_t v=V; v>0u; --v)
                 {
                     sp = (*X++<0.0f); *Y++ = 0;
-                    for (size_t l=1u; l<L; ++l, ++X, ++Y) { s = (*X<0.0f); *Y = s*(s!=sp); sp = s; }
+                    for (size_t l=L; l>1u; --l, ++X, ++Y) { s = (*X<0.0f); *Y = s*(s!=sp); sp = s; }
                 }
             }
             else { fprintf(stderr,"error in zcs_s: going must be in {-1,0,1}\n"); return 1; }
@@ -88,7 +88,7 @@ int zcs_s (int *Y, const float *X, const size_t R, const size_t C, const size_t 
                     for (size_t b=B; b>0u; --b, X-=K*L-1u, Y-=K*L-1u)
                     {
                         sp = (*X<0.0f); *Y = 0; X+=K; Y+=K;
-                        for (size_t l=1u; l<L; ++l, X+=K, Y+=K) { s = (*X<0.0f); *Y = (s!=sp); sp = s; }
+                        for (size_t l=L; l>1u; --l, X+=K, Y+=K) { s = (*X<0.0f); *Y = (s!=sp); sp = s; }
                     }
                 }
             }
@@ -99,7 +99,7 @@ int zcs_s (int *Y, const float *X, const size_t R, const size_t C, const size_t 
                     for (size_t b=B; b>0u; --b, X-=K*L-1u, Y-=K*L-1u)
                     {
                         sp = (*X>=0.0f); *Y = 0; X+=K; Y+=K;
-                        for (size_t l=1u; l<L; ++l, X+=K, Y+=K) { s = (*X>=0.0f); *Y = s*(s!=sp); sp = s; }
+                        for (size_t l=L; l>1u; --l, X+=K, Y+=K) { s = (*X>=0.0f); *Y = s*(s!=sp); sp = s; }
                     }
                 }
             }
@@ -110,7 +110,7 @@ int zcs_s (int *Y, const float *X, const size_t R, const size_t C, const size_t 
                     for (size_t b=B; b>0u; --b, X-=K*L-1u, Y-=K*L-1u)
                     {
                         sp = (*X<0.0f); *Y = 0; X+=K; Y+=K;
-                        for (size_t l=1u; l<L; ++l, X+=K, Y+=K) { s = (*X<0.0f); *Y = s*(s!=sp); sp = s; }
+                        for (size_t l=L; l>1u; --l, X+=K, Y+=K) { s = (*X<0.0f); *Y = s*(s!=sp); sp = s; }
                     }
                 }
             }
@@ -136,17 +136,17 @@ int zcs_d (int *Y, const double *X, const size_t R, const size_t C, const size_t
         if (going==0)
         {
             sp = (*X++<0.0); *Y++ = 0;
-            for (size_t l=1u; l<L; ++l, ++X, ++Y) { s = (*X<0.0); *Y = (s!=sp); sp = s; }
+            for (size_t l=L; l>1u; --l, ++X, ++Y) { s = (*X<0.0); *Y = (s!=sp); sp = s; }
         }
         else if (going==1)
         {
             sp = (*X++>=0.0); *Y++ = 0;
-            for (size_t l=1u; l<L; ++l, ++X, ++Y) { s = (*X>=0.0); *Y = s*(s!=sp); sp = s; }
+            for (size_t l=L; l>1u; --l, ++X, ++Y) { s = (*X>=0.0); *Y = s*(s!=sp); sp = s; }
         }
         else if (going==-1)
         {
             sp = (*X++<0.0); *Y++ = 0;
-            for (size_t l=1u; l<L; ++l, ++X, ++Y) { s = (*X<0.0); *Y = s*(s!=sp); sp = s; }
+            for (size_t l=L; l>1u; --l, ++X, ++Y) { s = (*X<0.0); *Y = s*(s!=sp); sp = s; }
         }
         else { fprintf(stderr,"error in zcs_d: going must be in {-1,0,1}\n"); return 1; }
     }
@@ -163,7 +163,7 @@ int zcs_d (int *Y, const double *X, const size_t R, const size_t C, const size_t
                 for (size_t v=V; v>0u; --v)
                 {
                     sp = (*X++<0.0); *Y++ = 0;
-                    for (size_t l=1u; l<L; ++l, ++X, ++Y) { s = (*X<0.0); *Y = (s!=sp); sp = s; }
+                    for (size_t l=L; l>1u; --l, ++X, ++Y) { s = (*X<0.0); *Y = (s!=sp); sp = s; }
                 }
             }
             else if (going==1)
@@ -171,7 +171,7 @@ int zcs_d (int *Y, const double *X, const size_t R, const size_t C, const size_t
                 for (size_t v=V; v>0u; --v)
                 {
                     sp = (*X++>=0.0); *Y++ = 0;
-                    for (size_t l=1u; l<L; ++l, ++X, ++Y) { s = (*X>=0.0); *Y = s*(s!=sp); sp = s; }
+                    for (size_t l=L; l>1u; --l, ++X, ++Y) { s = (*X>=0.0); *Y = s*(s!=sp); sp = s; }
                 }
             }
             else if (going==-1)
@@ -179,7 +179,7 @@ int zcs_d (int *Y, const double *X, const size_t R, const size_t C, const size_t
                 for (size_t v=V; v>0u; --v)
                 {
                     sp = (*X++<0.0); *Y++ = 0;
-                    for (size_t l=1u; l<L; ++l, ++X, ++Y) { s = (*X<0.0); *Y = s*(s!=sp); sp = s; }
+                    for (size_t l=L; l>1u; --l, ++X, ++Y) { s = (*X<0.0); *Y = s*(s!=sp); sp = s; }
                 }
             }
             else { fprintf(stderr,"error in zcs_d: going must be in {-1,0,1}\n"); return 1; }
@@ -193,7 +193,7 @@ int zcs_d (int *Y, const double *X, const size_t R, const size_t C, const size_t
                     for (size_t b=B; b>0u; --b, X-=K*L-1u, Y-=K*L-1u)
                     {
                         sp = (*X<0.0); *Y = 0; X+=K; Y+=K;
-                        for (size_t l=1u; l<L; ++l, X+=K, Y+=K) { s = (*X<0.0); *Y = (s!=sp); sp = s; }
+                        for (size_t l=L; l>1u; --l, X+=K, Y+=K) { s = (*X<0.0); *Y = (s!=sp); sp = s; }
                     }
                 }
             }
@@ -204,7 +204,7 @@ int zcs_d (int *Y, const double *X, const size_t R, const size_t C, const size_t
                     for (size_t b=B; b>0u; --b, X-=K*L-1u, Y-=K*L-1u)
                     {
                         sp = (*X>=0.0); *Y = 0; X+=K; Y+=K;
-                        for (size_t l=1u; l<L; ++l, X+=K, Y+=K) { s = (*X>=0.0); *Y = s*(s!=sp); sp = s; }
+                        for (size_t l=L; l>1u; --l, X+=K, Y+=K) { s = (*X>=0.0); *Y = s*(s!=sp); sp = s; }
                     }
                 }
             }
@@ -215,7 +215,7 @@ int zcs_d (int *Y, const double *X, const size_t R, const size_t C, const size_t
                     for (size_t b=B; b>0u; --b, X-=K*L-1u, Y-=K*L-1u)
                     {
                         sp = (*X<0.0); *Y = 0; X+=K; Y+=K;
-                        for (size_t l=1u; l<L; ++l, X+=K, Y+=K) { s = (*X<0.0); *Y = s*(s!=sp); sp = s; }
+                        for (size_t l=L; l>1u; --l, X+=K, Y+=K) { s = (*X<0.0); *Y = s*(s!=sp); sp = s; }
                     }
                 }
             }
@@ -241,17 +241,17 @@ int zcs_c (int *Y, const float *X, const size_t R, const size_t C, const size_t 
         if (going==0)
         {
             sp = (*++X<0.0f); *Y++ = 0; X+=2;
-            for (size_t l=1u; l<L; ++l, X+=2, ++Y) { s = (*X<0.0f); *Y = (s!=sp); sp = s; }
+            for (size_t l=L; l>1u; --l, X+=2, ++Y) { s = (*X<0.0f); *Y = (s!=sp); sp = s; }
         }
         else if (going==1)
         {
             sp = (*++X>=0.0f); *Y++ = 0; X+=2;
-            for (size_t l=1u; l<L; ++l, X+=2, ++Y) { s = (*X>=0.0f); *Y = s*(s!=sp); sp = s; }
+            for (size_t l=L; l>1u; --l, X+=2, ++Y) { s = (*X>=0.0f); *Y = s*(s!=sp); sp = s; }
         }
         else if (going==-1)
         {
             sp = (*++X<0.0f); *Y++ = 0; X+=2;
-            for (size_t l=1u; l<L; ++l, X+=2, ++Y) { s = (*X<0.0f); *Y = s*(s!=sp); sp = s; }
+            for (size_t l=L; l>1u; --l, X+=2, ++Y) { s = (*X<0.0f); *Y = s*(s!=sp); sp = s; }
         }
         else { fprintf(stderr,"error in zcs_c: going must be in {-1,0,1}\n"); return 1; }
     }
@@ -268,7 +268,7 @@ int zcs_c (int *Y, const float *X, const size_t R, const size_t C, const size_t 
                 for (size_t v=V; v>0u; --v)
                 {
                     sp = (*++X<0.0f); *Y++ = 0; X+=2;
-                    for (size_t l=1u; l<L; ++l, X+=2, ++Y) { s = (*X<0.0f); *Y = (s!=sp); sp = s; }
+                    for (size_t l=L; l>1u; --l, X+=2, ++Y) { s = (*X<0.0f); *Y = (s!=sp); sp = s; }
                 }
             }
             else if (going==1)
@@ -276,7 +276,7 @@ int zcs_c (int *Y, const float *X, const size_t R, const size_t C, const size_t 
                 for (size_t v=V; v>0u; --v)
                 {
                     sp = (*++X>=0.0f); *Y++ = 0; X+=2;
-                    for (size_t l=1u; l<L; ++l, X+=2, ++Y) { s = (*X>=0.0f); *Y = s*(s!=sp); sp = s; }
+                    for (size_t l=L; l>1u; --l, X+=2, ++Y) { s = (*X>=0.0f); *Y = s*(s!=sp); sp = s; }
                 }
             }
             else if (going==-1)
@@ -284,7 +284,7 @@ int zcs_c (int *Y, const float *X, const size_t R, const size_t C, const size_t 
                 for (size_t v=V; v>0u; --v)
                 {
                     sp = (*++X<0.0f); *Y++ = 0; X+=2;
-                    for (size_t l=1u; l<L; ++l, X+=2, ++Y) { s = (*X<0.0f); *Y = s*(s!=sp); sp = s; }
+                    for (size_t l=L; l>1u; --l, X+=2, ++Y) { s = (*X<0.0f); *Y = s*(s!=sp); sp = s; }
                 }
             }
             else { fprintf(stderr,"error in zcs_c: going must be in {-1,0,1}\n"); return 1; }
@@ -298,7 +298,7 @@ int zcs_c (int *Y, const float *X, const size_t R, const size_t C, const size_t 
                     for (size_t b=B; b>0u; --b, X-=2u*K*L-1u, Y-=2u*K*L-1u)
                     {
                         sp = (*++X<0.0f); *Y = 0; X+=2u*K; Y+=2u*K;
-                        for (size_t l=1u; l<L; ++l, X+=2u*K, Y+=2u*K) { s = (*X<0.0f); *Y = (s!=sp); sp = s; }
+                        for (size_t l=L; l>1u; --l, X+=2u*K, Y+=2u*K) { s = (*X<0.0f); *Y = (s!=sp); sp = s; }
                     }
                 }
             }
@@ -309,7 +309,7 @@ int zcs_c (int *Y, const float *X, const size_t R, const size_t C, const size_t 
                     for (size_t b=B; b>0u; --b, X-=2u*K*L-1u, Y-=2u*K*L-1u)
                     {
                         sp = (*++X>=0.0f); *Y = 0; X+=2u*K; Y+=2u*K;
-                        for (size_t l=1u; l<L; ++l, X+=2u*K, Y+=2u*K) { s = (*X>=0.0f); *Y = s*(s!=sp); sp = s; }
+                        for (size_t l=L; l>1u; --l, X+=2u*K, Y+=2u*K) { s = (*X>=0.0f); *Y = s*(s!=sp); sp = s; }
                     }
                 }
             }
@@ -320,7 +320,7 @@ int zcs_c (int *Y, const float *X, const size_t R, const size_t C, const size_t 
                     for (size_t b=B; b>0u; --b, X-=2u*K*L-1u, Y-=2u*K*L-1u)
                     {
                         sp = (*++X<0.0f); *Y = 0; X+=2u*K; Y+=2u*K;
-                        for (size_t l=1u; l<L; ++l, X+=2u*K, Y+=2u*K) { s = (*X<0.0f); *Y = s*(s!=sp); sp = s; }
+                        for (size_t l=L; l>1u; --l, X+=2u*K, Y+=2u*K) { s = (*X<0.0f); *Y = s*(s!=sp); sp = s; }
                     }
                 }
             }
@@ -346,17 +346,17 @@ int zcs_z (int *Y, const double *X, const size_t R, const size_t C, const size_t
         if (going==0)
         {
             sp = (*++X<0.0); *Y++ = 0; X+=2;
-            for (size_t l=1u; l<L; ++l, X+=2, ++Y) { s = (*X<0.0); *Y = (s!=sp); sp = s; }
+            for (size_t l=L; l>1u; --l, X+=2, ++Y) { s = (*X<0.0); *Y = (s!=sp); sp = s; }
         }
         else if (going==1)
         {
             sp = (*++X>=0.0); *Y++ = 0; X+=2;
-            for (size_t l=1u; l<L; ++l, X+=2, ++Y) { s = (*X>=0.0); *Y = s*(s!=sp); sp = s; }
+            for (size_t l=L; l>1u; --l, X+=2, ++Y) { s = (*X>=0.0); *Y = s*(s!=sp); sp = s; }
         }
         else if (going==-1)
         {
             sp = (*++X<0.0); *Y++ = 0; X+=2;
-            for (size_t l=1u; l<L; ++l, X+=2, ++Y) { s = (*X<0.0); *Y = s*(s!=sp); sp = s; }
+            for (size_t l=L; l>1u; --l, X+=2, ++Y) { s = (*X<0.0); *Y = s*(s!=sp); sp = s; }
         }
         else { fprintf(stderr,"error in zcs_z: going must be in {-1,0,1}\n"); return 1; }
     }
@@ -373,7 +373,7 @@ int zcs_z (int *Y, const double *X, const size_t R, const size_t C, const size_t
                 for (size_t v=V; v>0u; --v)
                 {
                     sp = (*++X<0.0); *Y++ = 0; X+=2;
-                    for (size_t l=1u; l<L; ++l, X+=2, ++Y) { s = (*X<0.0); *Y = (s!=sp); sp = s; }
+                    for (size_t l=L; l>1u; --l, X+=2, ++Y) { s = (*X<0.0); *Y = (s!=sp); sp = s; }
                 }
             }
             else if (going==1)
@@ -381,7 +381,7 @@ int zcs_z (int *Y, const double *X, const size_t R, const size_t C, const size_t
                 for (size_t v=V; v>0u; --v)
                 {
                     sp = (*++X>=0.0); *Y++ = 0; X+=2;
-                    for (size_t l=1u; l<L; ++l, X+=2, ++Y) { s = (*X>=0.0); *Y = s*(s!=sp); sp = s; }
+                    for (size_t l=L; l>1u; --l, X+=2, ++Y) { s = (*X>=0.0); *Y = s*(s!=sp); sp = s; }
                 }
             }
             else if (going==-1)
@@ -389,7 +389,7 @@ int zcs_z (int *Y, const double *X, const size_t R, const size_t C, const size_t
                 for (size_t v=V; v>0u; --v)
                 {
                     sp = (*++X<0.0); *Y++ = 0; X+=2;
-                    for (size_t l=1u; l<L; ++l, X+=2, ++Y) { s = (*X<0.0); *Y = s*(s!=sp); sp = s; }
+                    for (size_t l=L; l>1u; --l, X+=2, ++Y) { s = (*X<0.0); *Y = s*(s!=sp); sp = s; }
                 }
             }
             else { fprintf(stderr,"error in zcs_z: going must be in {-1,0,1}\n"); return 1; }
@@ -403,7 +403,7 @@ int zcs_z (int *Y, const double *X, const size_t R, const size_t C, const size_t
                     for (size_t b=B; b>0u; --b, X-=2u*K*L-1u, Y-=2u*K*L-1u)
                     {
                         sp = (*++X<0.0); *Y = 0; X+=2u*K; Y+=2u*K;
-                        for (size_t l=1u; l<L; ++l, X+=2u*K, Y+=2u*K) { s = (*X<0.0); *Y = (s!=sp); sp = s; }
+                        for (size_t l=L; l>1u; --l, X+=2u*K, Y+=2u*K) { s = (*X<0.0); *Y = (s!=sp); sp = s; }
                     }
                 }
             }
@@ -414,7 +414,7 @@ int zcs_z (int *Y, const double *X, const size_t R, const size_t C, const size_t
                     for (size_t b=B; b>0u; --b, X-=2u*K*L-1u, Y-=2u*K*L-1u)
                     {
                         sp = (*++X>=0.0); *Y = 0; X+=2u*K; Y+=2u*K;
-                        for (size_t l=1u; l<L; ++l, X+=2u*K, Y+=2u*K) { s = (*X>=0.0); *Y = s*(s!=sp); sp = s; }
+                        for (size_t l=L; l>1u; --l, X+=2u*K, Y+=2u*K) { s = (*X>=0.0); *Y = s*(s!=sp); sp = s; }
                     }
                 }
             }
@@ -425,7 +425,7 @@ int zcs_z (int *Y, const double *X, const size_t R, const size_t C, const size_t
                     for (size_t b=B; b>0u; --b, X-=2u*K*L-1u, Y-=2u*K*L-1u)
                     {
                         sp = (*++X<0.0); *Y = 0; X+=2u*K; Y+=2u*K;
-                        for (size_t l=1u; l<L; ++l, X+=2u*K, Y+=2u*K) { s = (*X<0.0); *Y = s*(s!=sp); sp = s; }
+                        for (size_t l=L; l>1u; --l, X+=2u*K, Y+=2u*K) { s = (*X<0.0); *Y = s*(s!=sp); sp = s; }
                     }
                 }
             }

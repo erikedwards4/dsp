@@ -25,17 +25,17 @@ int lcs_s (int *Y, const float *X, const size_t R, const size_t C, const size_t 
         if (going==0)
         {
             sp = (*X++<lvl); *Y++ = 0;
-            for (size_t l=1u; l<L; ++l, ++X, ++Y) { s = (*X<lvl); *Y = (s!=sp); sp = s; }
+            for (size_t l=L; l>1u; --l, ++X, ++Y) { s = (*X<lvl); *Y = (s!=sp); sp = s; }
         }
         else if (going==1)
         {
             sp = (*X++>=lvl); *Y++ = 0;
-            for (size_t l=1u; l<L; ++l, ++X, ++Y) { s = (*X>=lvl); *Y = s*(s!=sp); sp = s; }
+            for (size_t l=L; l>1u; --l, ++X, ++Y) { s = (*X>=lvl); *Y = s*(s!=sp); sp = s; }
         }
         else if (going==-1)
         {
             sp = (*X++<lvl); *Y++ = 0;
-            for (size_t l=1u; l<L; ++l, ++X, ++Y) { s = (*X<lvl); *Y = s*(s!=sp); sp = s; }
+            for (size_t l=L; l>1u; --l, ++X, ++Y) { s = (*X<lvl); *Y = s*(s!=sp); sp = s; }
         }
         else { fprintf(stderr,"error in lcs_s: going must be in {-1,0,1}\n"); return 1; }
     }
@@ -52,7 +52,7 @@ int lcs_s (int *Y, const float *X, const size_t R, const size_t C, const size_t 
                 for (size_t v=V; v>0u; --v)
                 {
                     sp = (*X++<lvl); *Y++ = 0;
-                    for (size_t l=1u; l<L; ++l, ++X, ++Y) { s = (*X<lvl); *Y = (s!=sp); sp = s; }
+                    for (size_t l=L; l>1u; --l, ++X, ++Y) { s = (*X<lvl); *Y = (s!=sp); sp = s; }
                 }
             }
             else if (going==1)
@@ -60,7 +60,7 @@ int lcs_s (int *Y, const float *X, const size_t R, const size_t C, const size_t 
                 for (size_t v=V; v>0u; --v)
                 {
                     sp = (*X++>=lvl); *Y++ = 0;
-                    for (size_t l=1u; l<L; ++l, ++X, ++Y) { s = (*X>=lvl); *Y = s*(s!=sp); sp = s; }
+                    for (size_t l=L; l>1u; --l, ++X, ++Y) { s = (*X>=lvl); *Y = s*(s!=sp); sp = s; }
                 }
             }
             else if (going==-1)
@@ -68,7 +68,7 @@ int lcs_s (int *Y, const float *X, const size_t R, const size_t C, const size_t 
                 for (size_t v=V; v>0u; --v)
                 {
                     sp = (*X++<lvl); *Y++ = 0;
-                    for (size_t l=1u; l<L; ++l, ++X, ++Y) { s = (*X<lvl); *Y = s*(s!=sp); sp = s; }
+                    for (size_t l=L; l>1u; --l, ++X, ++Y) { s = (*X<lvl); *Y = s*(s!=sp); sp = s; }
                 }
             }
             else { fprintf(stderr,"error in lcs_s: going must be in {-1,0,1}\n"); return 1; }
@@ -82,7 +82,7 @@ int lcs_s (int *Y, const float *X, const size_t R, const size_t C, const size_t 
                     for (size_t b=B; b>0u; --b, X-=K*L-1u, Y-=K*L-1u)
                     {
                         sp = (*X<lvl); *Y = 0; X+=K; Y+=K;
-                        for (size_t l=1u; l<L; ++l, X+=K, Y+=K) { s = (*X<lvl); *Y = (s!=sp); sp = s; }
+                        for (size_t l=L; l>1u; --l, X+=K, Y+=K) { s = (*X<lvl); *Y = (s!=sp); sp = s; }
                     }
                 }
             }
@@ -93,7 +93,7 @@ int lcs_s (int *Y, const float *X, const size_t R, const size_t C, const size_t 
                     for (size_t b=B; b>0u; --b, X-=K*L-1u, Y-=K*L-1u)
                     {
                         sp = (*X>=lvl); *Y = 0; X+=K; Y+=K;
-                        for (size_t l=1u; l<L; ++l, X+=K, Y+=K) { s = (*X>=lvl); *Y = s*(s!=sp); sp = s; }
+                        for (size_t l=L; l>1u; --l, X+=K, Y+=K) { s = (*X>=lvl); *Y = s*(s!=sp); sp = s; }
                     }
                 }
             }
@@ -104,7 +104,7 @@ int lcs_s (int *Y, const float *X, const size_t R, const size_t C, const size_t 
                     for (size_t b=B; b>0u; --b, X-=K*L-1u, Y-=K*L-1u)
                     {
                         sp = (*X<lvl); *Y = 0; X+=K; Y+=K;
-                        for (size_t l=1u; l<L; ++l, X+=K, Y+=K) { s = (*X<lvl); *Y = s*(s!=sp); sp = s; }
+                        for (size_t l=L; l>1u; --l, X+=K, Y+=K) { s = (*X<lvl); *Y = s*(s!=sp); sp = s; }
                     }
                 }
             }
@@ -130,17 +130,17 @@ int lcs_d (int *Y, const double *X, const size_t R, const size_t C, const size_t
         if (going==0)
         {
             sp = (*X++<lvl); *Y++ = 0;
-            for (size_t l=1u; l<L; ++l, ++X, ++Y) { s = (*X<lvl); *Y = (s!=sp); sp = s; }
+            for (size_t l=L; l>1u; --l, ++X, ++Y) { s = (*X<lvl); *Y = (s!=sp); sp = s; }
         }
         else if (going==1)
         {
             sp = (*X++>=lvl); *Y++ = 0;
-            for (size_t l=1u; l<L; ++l, ++X, ++Y) { s = (*X>=lvl); *Y = s*(s!=sp); sp = s; }
+            for (size_t l=L; l>1u; --l, ++X, ++Y) { s = (*X>=lvl); *Y = s*(s!=sp); sp = s; }
         }
         else if (going==-1)
         {
             sp = (*X++<lvl); *Y++ = 0;
-            for (size_t l=1u; l<L; ++l, ++X, ++Y) { s = (*X<lvl); *Y = s*(s!=sp); sp = s; }
+            for (size_t l=L; l>1u; --l, ++X, ++Y) { s = (*X<lvl); *Y = s*(s!=sp); sp = s; }
         }
         else { fprintf(stderr,"error in lcs_d: going must be in {-1,0,1}\n"); return 1; }
     }
@@ -157,7 +157,7 @@ int lcs_d (int *Y, const double *X, const size_t R, const size_t C, const size_t
                 for (size_t v=V; v>0u; --v)
                 {
                     sp = (*X++<lvl); *Y++ = 0;
-                    for (size_t l=1u; l<L; ++l, ++X, ++Y) { s = (*X<lvl); *Y = (s!=sp); sp = s; }
+                    for (size_t l=L; l>1u; --l, ++X, ++Y) { s = (*X<lvl); *Y = (s!=sp); sp = s; }
                 }
             }
             else if (going==1)
@@ -165,7 +165,7 @@ int lcs_d (int *Y, const double *X, const size_t R, const size_t C, const size_t
                 for (size_t v=V; v>0u; --v)
                 {
                     sp = (*X++>=lvl); *Y++ = 0;
-                    for (size_t l=1u; l<L; ++l, ++X, ++Y) { s = (*X>=lvl); *Y = s*(s!=sp); sp = s; }
+                    for (size_t l=L; l>1u; --l, ++X, ++Y) { s = (*X>=lvl); *Y = s*(s!=sp); sp = s; }
                 }
             }
             else if (going==-1)
@@ -173,7 +173,7 @@ int lcs_d (int *Y, const double *X, const size_t R, const size_t C, const size_t
                 for (size_t v=V; v>0u; --v)
                 {
                     sp = (*X++<lvl); *Y++ = 0;
-                    for (size_t l=1u; l<L; ++l, ++X, ++Y) { s = (*X<lvl); *Y = s*(s!=sp); sp = s; }
+                    for (size_t l=L; l>1u; --l, ++X, ++Y) { s = (*X<lvl); *Y = s*(s!=sp); sp = s; }
                 }
             }
             else { fprintf(stderr,"error in lcs_d: going must be in {-1,0,1}\n"); return 1; }
@@ -187,7 +187,7 @@ int lcs_d (int *Y, const double *X, const size_t R, const size_t C, const size_t
                     for (size_t b=B; b>0u; --b, X-=K*L-1u, Y-=K*L-1u)
                     {
                         sp = (*X<lvl); *Y = 0; X+=K; Y+=K;
-                        for (size_t l=1u; l<L; ++l, X+=K, Y+=K) { s = (*X<lvl); *Y = (s!=sp); sp = s; }
+                        for (size_t l=L; l>1u; --l, X+=K, Y+=K) { s = (*X<lvl); *Y = (s!=sp); sp = s; }
                     }
                 }
             }
@@ -198,7 +198,7 @@ int lcs_d (int *Y, const double *X, const size_t R, const size_t C, const size_t
                     for (size_t b=B; b>0u; --b, X-=K*L-1u, Y-=K*L-1u)
                     {
                         sp = (*X>=lvl); *Y = 0; X+=K; Y+=K;
-                        for (size_t l=1u; l<L; ++l, X+=K, Y+=K) { s = (*X>=lvl); *Y = s*(s!=sp); sp = s; }
+                        for (size_t l=L; l>1u; --l, X+=K, Y+=K) { s = (*X>=lvl); *Y = s*(s!=sp); sp = s; }
                     }
                 }
             }
@@ -209,7 +209,7 @@ int lcs_d (int *Y, const double *X, const size_t R, const size_t C, const size_t
                     for (size_t b=B; b>0u; --b, X-=K*L-1u, Y-=K*L-1u)
                     {
                         sp = (*X<lvl); *Y = 0; X+=K; Y+=K;
-                        for (size_t l=1u; l<L; ++l, X+=K, Y+=K) { s = (*X<lvl); *Y = s*(s!=sp); sp = s; }
+                        for (size_t l=L; l>1u; --l, X+=K, Y+=K) { s = (*X<lvl); *Y = s*(s!=sp); sp = s; }
                     }
                 }
             }

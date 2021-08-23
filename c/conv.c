@@ -1,9 +1,9 @@
-//1D convolution by X2 of each vector in X1 along dim.
+//1D convolution of each vector in X1 by X2 along dim.
 //Each vector in X1 has length L1. X2 has length L2.
 
 //FIR filtering is similar, except FIR is causal and conv is non-causal.
 //Note that some "convolution" functions actually do cross-correlation.
-//For actual cross-correlation (no flip of X2), see xcorr1d.
+//For actual cross-correlation (no flip of X2), see xcorr.
 
 //Profile note: sm = fma(X1,X2,sm) was definitely slower than sm += X1*X2.
 
@@ -28,8 +28,9 @@ int conv_s (float *Y, const float *X1, const float *X2, const size_t R, const si
 
     const size_t N = R*C*S*H;
     const size_t L1 = (dim==0u) ? R : (dim==1u) ? C : (dim==2u) ? S : H;
-    if (N<1u) { fprintf(stderr,"error in conv_s: N (total length of X1) must be positive\n"); return 1; }
+    if (N<1u) { fprintf(stderr,"error in conv_s: N (total num elements in X1) must be positive\n"); return 1; }
     if (L1<1u) { fprintf(stderr,"error in conv_s: L1 (length of vecs in X1) must be positive\n"); return 1; }
+    if (L2<1u) { fprintf(stderr,"error in conv_s: L2 (length X2) must be positive\n"); return 1; }
 
     const int inc = 1 - (int)L2;       //fixed increment for X1 below
     size_t w=0u, W;                    //current frame and total frames
@@ -185,8 +186,9 @@ int conv_d (double *Y, const double *X1, const double *X2, const size_t R, const
     
     const size_t N = R*C*S*H;
     const size_t L1 = (dim==0u) ? R : (dim==1u) ? C : (dim==2u) ? S : H;
-    if (N<1u) { fprintf(stderr,"error in conv_d: N (total length of X1) must be positive\n"); return 1; }
+    if (N<1u) { fprintf(stderr,"error in conv_d: N (total num elements in X1) must be positive\n"); return 1; }
     if (L1<1u) { fprintf(stderr,"error in conv_d: L1 (length of vecs in X1) must be positive\n"); return 1; }
+    if (L2<1u) { fprintf(stderr,"error in conv_d: L2 (length X2) must be positive\n"); return 1; }
 
     const int inc = 1 - (int)L2;       //fixed increment for X1 below
     size_t w=0u, W;                    //current frame and total frames
@@ -337,8 +339,9 @@ int conv_c (float *Y, const float *X1, const float *X2, const size_t R, const si
 
     const size_t N = R*C*S*H;
     const size_t L1 = (dim==0u) ? R : (dim==1u) ? C : (dim==2u) ? S : H;
-    if (N<1u) { fprintf(stderr,"error in conv_c: N (total length of X1) must be positive\n"); return 1; }
+    if (N<1u) { fprintf(stderr,"error in conv_c: N (total num elements in X1) must be positive\n"); return 1; }
     if (L1<1u) { fprintf(stderr,"error in conv_c: L1 (length of vecs in X1) must be positive\n"); return 1; }
+    if (L2<1u) { fprintf(stderr,"error in conv_c: L2 (length X2) must be positive\n"); return 1; }
 
     const int inc = 2 - 2*(int)L2;     //fixed increment for X1 below
     size_t w=0u, W;                    //current frame and total frames
@@ -524,8 +527,9 @@ int conv_z (double *Y, const double *X1, const double *X2, const size_t R, const
 
     const size_t N = R*C*S*H;
     const size_t L1 = (dim==0u) ? R : (dim==1u) ? C : (dim==2u) ? S : H;
-    if (N<1u) { fprintf(stderr,"error in conv_z: N (total length of X1) must be positive\n"); return 1; }
+    if (N<1u) { fprintf(stderr,"error in conv_z: N (total num elements in X1) must be positive\n"); return 1; }
     if (L1<1u) { fprintf(stderr,"error in conv_z: L1 (length of vecs in X1) must be positive\n"); return 1; }
+    if (L2<1u) { fprintf(stderr,"error in conv_z: L2 (length X2) must be positive\n"); return 1; }
 
     const int inc = 2 - 2*(int)L2;     //fixed increment for X1 below
     size_t w=0u, W;                    //current frame and total frames

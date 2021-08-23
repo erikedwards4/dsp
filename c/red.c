@@ -36,7 +36,7 @@ int red_s (float *Y, const size_t N, const float std, const int zmn)
     if (N==0u) {}
     else if (std<FLT_EPSILON)
     {
-        for (size_t n=0u; n<N; ++n, ++Y) { *Y = 0.0f; }
+        for (size_t n=N; n>0u; --n, ++Y) { *Y = 0.0f; }
     }
     else
     {
@@ -68,7 +68,7 @@ int red_s (float *Y, const size_t N, const float std, const int zmn)
         //Generate white noise
         if (std==1.0f)
         {
-            for (size_t n=0u; n<N-1u; n+=2u)
+            for (size_t n=N-1u; n>0u; n-=2u)
             {
                 state = state*mul + inc;
                 xorshifted = (uint32_t)(((state >> 18u) ^ state) >> 27u);
@@ -102,7 +102,7 @@ int red_s (float *Y, const size_t N, const float std, const int zmn)
         }
         else
         {
-            for (size_t n=0u; n<N-1u; n+=2u)
+            for (size_t n=N-1u; n>0u; n-=2u)
             {
                 state = state*mul + inc;
                 xorshifted = (uint32_t)(((state >> 18u) ^ state) >> 27u);
@@ -159,7 +159,7 @@ int red_s (float *Y, const size_t N, const float std, const int zmn)
 
         //IFFT
         fftwf_execute(iplan);
-        for (size_t n=0u; n<N; ++n, Xi+=2u, ++Y) { *Y = *Xi / (float)(N); }
+        for (size_t n=N; n>0u; --n, Xi+=2u, ++Y) { *Y = *Xi / (float)(N); }
         Xi -= 2u*N;
 
         //Finish
@@ -170,9 +170,9 @@ int red_s (float *Y, const size_t N, const float std, const int zmn)
     if (zmn)
     {
         float sm = 0.0f;
-        for (size_t n=0u; n<N; ++n) { sm += *--Y; }
+        for (size_t n=N; n>0u; --n) { sm += *--Y; }
         sm /= (float)N;
-        for (size_t n=0u; n<N; ++n, ++Y) { *Y -= sm; }
+        for (size_t n=N; n>0u; --n, ++Y) { *Y -= sm; }
     }
     
     return 0;
@@ -186,7 +186,7 @@ int red_d (double *Y, const size_t N, const double std, const int zmn)
     if (N==0u) {}
     else if (std<DBL_EPSILON)
     {
-        for (size_t n=0u; n<N; ++n, ++Y) { *Y = 0.0; }
+        for (size_t n=N; n>0u; --n, ++Y) { *Y = 0.0; }
     }
     else
     {
@@ -218,7 +218,7 @@ int red_d (double *Y, const size_t N, const double std, const int zmn)
         //Generate white noise
         if (std==1.0)
         {
-            for (size_t n=0u; n<N-1u; n+=2u)
+            for (size_t n=N-1u; n>0u; n-=2u)
             {
                 state = state*mul + inc;
                 xorshifted = (uint32_t)(((state >> 18u) ^ state) >> 27u);
@@ -252,7 +252,7 @@ int red_d (double *Y, const size_t N, const double std, const int zmn)
         }
         else
         {
-            for (size_t n=0u; n<N-1u; n+=2u)
+            for (size_t n=N-1u; n>0u; n-=2u)
             {
                 state = state*mul + inc;
                 xorshifted = (uint32_t)(((state >> 18u) ^ state) >> 27u);
@@ -309,7 +309,7 @@ int red_d (double *Y, const size_t N, const double std, const int zmn)
 
         //IFFT
         fftw_execute(iplan);
-        for (size_t n=0u; n<N; ++n, Xi+=2u, ++Y) { *Y = *Xi / (double)(N); }
+        for (size_t n=N; n>0u; --n, Xi+=2u, ++Y) { *Y = *Xi / (double)(N); }
         Xi -= 2u*N;
 
         //Finish
@@ -320,9 +320,9 @@ int red_d (double *Y, const size_t N, const double std, const int zmn)
     if (zmn)
     {
         double sm = 0.0;
-        for (size_t n=0u; n<N; ++n) { sm += *--Y; }
+        for (size_t n=N; n>0u; --n) { sm += *--Y; }
         sm /= (double)N;
-        for (size_t n=0u; n<N; ++n, ++Y) { *Y -= sm; }
+        for (size_t n=N; n>0u; --n, ++Y) { *Y -= sm; }
     }
 
     return 0;
@@ -336,7 +336,7 @@ int red_c (float *Y, const size_t N, const float std, const int zmn)
     if (N==0u) {}
     else if (std<FLT_EPSILON)
     {
-        for (size_t n=0u; n<2u*N; ++n, ++Y) { *Y = 0.0f; }
+        for (size_t n=2u*N; n>0u; --n, ++Y) { *Y = 0.0f; }
     }
     else
     {
@@ -368,7 +368,7 @@ int red_c (float *Y, const size_t N, const float std, const int zmn)
         //Generate white noise
         if (std==1.0f)
         {
-            for (size_t n=0u; n<N; ++n)
+            for (size_t n=N; n>0u; --n)
             {
                 state = state*mul + inc;
                 xorshifted = (uint32_t)(((state >> 18u) ^ state) >> 27u);
@@ -387,7 +387,7 @@ int red_c (float *Y, const size_t N, const float std, const int zmn)
         }
         else
         {
-            for (size_t n=0u; n<N; ++n)
+            for (size_t n=N; n>0u; --n)
             {
                 state = state*mul + inc;
                 xorshifted = (uint32_t)(((state >> 18u) ^ state) >> 27u);
@@ -429,7 +429,7 @@ int red_c (float *Y, const size_t N, const float std, const int zmn)
 
         //IFFT
         fftwf_execute(iplan);
-        for (size_t n=0u; n<2u*N; ++n, ++Xi, ++Y) { *Y = *Xi / (float)(N); }
+        for (size_t n=2u*N; n>0u; --n, ++Xi, ++Y) { *Y = *Xi / (float)(N); }
         Xi -= 2u*N;
 
         //Finish
@@ -440,9 +440,9 @@ int red_c (float *Y, const size_t N, const float std, const int zmn)
     if (zmn)
     {
         float smr=0.0f, smi=0.0f;
-        for (size_t n=0u; n<N; ++n) { smi += *--Y; smr += *--Y; }
+        for (size_t n=N; n>0u; --n) { smi += *--Y; smr += *--Y; }
         smr /= (float)N; smi /= (float)N;
-        for (size_t n=0u; n<N; ++n) { *Y++ -= smr; *Y++ -= smi; }
+        for (size_t n=N; n>0u; --n) { *Y++ -= smr; *Y++ -= smi; }
     }
 
     return 0;
@@ -456,7 +456,7 @@ int red_z (double *Y, const size_t N, const double std, const int zmn)
     if (N==0u) {}
     else if (std<DBL_EPSILON)
     {
-        for (size_t n=0u; n<2u*N; ++n, ++Y) { *Y = 0.0; }
+        for (size_t n=2u*N; n>0u; --n, ++Y) { *Y = 0.0; }
     }
     else
     {
@@ -488,7 +488,7 @@ int red_z (double *Y, const size_t N, const double std, const int zmn)
         //Generate white noise
         if (std==1.0)
         {
-            for (size_t n=0u; n<N; ++n)
+            for (size_t n=N; n>0u; --n)
             {
                 state = state*mul + inc;
                 xorshifted = (uint32_t)(((state >> 18u) ^ state) >> 27u);
@@ -507,7 +507,7 @@ int red_z (double *Y, const size_t N, const double std, const int zmn)
         }
         else
         {
-            for (size_t n=0u; n<N; ++n)
+            for (size_t n=N; n>0u; --n)
             {
                 state = state*mul + inc;
                 xorshifted = (uint32_t)(((state >> 18u) ^ state) >> 27u);
@@ -549,7 +549,7 @@ int red_z (double *Y, const size_t N, const double std, const int zmn)
 
         //IFFT
         fftw_execute(iplan);
-        for (size_t n=0u; n<2u*N; ++n, ++Xi, ++Y) { *Y = *Xi / (double)(N); }
+        for (size_t n=2u*N; n>0u; --n, ++Xi, ++Y) { *Y = *Xi / (double)(N); }
         Xi -= 2u*N;
 
         //Finish
@@ -560,9 +560,9 @@ int red_z (double *Y, const size_t N, const double std, const int zmn)
     if (zmn)
     {
         double smr=0.0, smi = 0.0;
-        for (size_t n=0u; n<N; ++n) { smi += *--Y; smr += *--Y; }
+        for (size_t n=N; n>0u; --n) { smi += *--Y; smr += *--Y; }
         smr /= (double)N; smi /= (double)N;
-        for (size_t n=0u; n<N; ++n) { *Y++ -= smr; *Y++ -= smi; }
+        for (size_t n=N; n>0u; --n) { *Y++ -= smr; *Y++ -= smi; }
     }
 
     return 0;

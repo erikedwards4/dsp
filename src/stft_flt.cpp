@@ -11,7 +11,7 @@
 #include <valarray>
 #include <unordered_map>
 #include <argtable2.h>
-#include "cmli.hpp"
+#include "../util/cmli.hpp"
 #include <cfloat>
 #include "stft_flt.c"
 
@@ -56,8 +56,8 @@ int main(int argc, char *argv[])
     descr += "and nfft is the next-pow-2 of L, \n";
     descr += "and W is the number of frames (a.k.a. windows).\n";
     descr += "\n";
-    descr += "This _float version has different options and conventions;\n";
-    descr += "and allows float (non-integer) values for tep size and start samp.\n";
+    descr += "This _flt version has different options and conventions;\n";
+    descr += "and allows float (non-integer) values for step size and start samp.\n";
     descr += "\n";
     descr += "Use -s (--step) to give the step-size (frame-shift) in samples [default=160].\n";
     descr += "This is a positive floating-point value.\n";
@@ -68,15 +68,17 @@ int main(int argc, char *argv[])
     descr += "Use -w (--nframes) to give W, the number of frames [default=(N-1)/stp].\n";
     descr += "This is a positive int (use less than default to use only part of X).\n";
     descr += "\n";
+    descr += "Note: -c and -w do not usually need to be set (defaults are recommended).\n";
+    descr += "\n";
     descr += "Only after the (floating-point) centers of each frame are set,\n";
     descr += "then the center of each frame is rounded to the nearest integer sample.\n";
     descr += "\n";
     descr += "X is extrapolated with zeros if the first/last frames overlap the edge.\n";
     descr += "\n";
     descr += "The following framing convention is used here:\n";
-    descr += "Samples from one frame are contiguous in memory, for row- and col-major.\n";
-    descr += "So, if Y is row-major, then it has size W x F; \n";
-    descr += "but if Y is col-major, then it has size F x W. \n";
+    descr += "Samples from one frame are always contiguous in memory, so:\n";
+    descr += "If X is row-major, then Y is row-major with size W x F; \n";
+    descr += "If X is col-major, then Y is col-major with size F x W. \n";
     descr += "\n";
     descr += "Include -z (--zero-mean) to subtract the mean from each frame [default=false].\n";
     descr += "This is applied just after windowing.\n";
@@ -120,14 +122,14 @@ int main(int argc, char *argv[])
 
 
     //Check stdin
-    stdi1 = (a_fi->count==0 || strlen(a_fi->filename[0])==0 || strcmp(a_fi->filename[0],"-")==0);
-    stdi2 = (a_fi->count<=1 || strlen(a_fi->filename[1])==0 || strcmp(a_fi->filename[1],"-")==0);
+    stdi1 = (a_fi->count==0 || strlen(a_fi->filename[0])==0u || strcmp(a_fi->filename[0],"-")==0);
+    stdi2 = (a_fi->count<=1 || strlen(a_fi->filename[1])==0u || strcmp(a_fi->filename[1],"-")==0);
     if (stdi1+stdi2>1) { cerr << progstr+": " << __LINE__ << errstr << "can only use stdin for one input" << endl; return 1; }
     if (stdi1+stdi2>0 && isatty(fileno(stdin))) { cerr << progstr+": " << __LINE__ << errstr << "no stdin detected" << endl; return 1; }
 
 
     //Check stdout
-    if (a_fo->count>0) { stdo1 = (strlen(a_fo->filename[0])==0 || strcmp(a_fo->filename[0],"-")==0); }
+    if (a_fo->count>0) { stdo1 = (strlen(a_fo->filename[0])==0u || strcmp(a_fo->filename[0],"-")==0); }
     else { stdo1 = (!isatty(fileno(stdout))); }
     wo1 = (stdo1 || a_fo->count>0);
 
@@ -233,7 +235,7 @@ int main(int argc, char *argv[])
         }
         delete[] X1; delete[] X2; delete[] Y;
     }
-    else if (o1.T==2)
+    else if (o1.T==2u)
     {
         double *X1, *X2, *Y;
         try { X1 = new double[i1.N()]; }
@@ -264,4 +266,3 @@ int main(int argc, char *argv[])
     //Exit
     return ret;
 }
-

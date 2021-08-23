@@ -48,7 +48,7 @@ int frame_univar_flt_s (float *Y, const float *X, const size_t N, const size_t L
 
         while (es<0 && w<W)
         {
-            for (size_t l=0u; l<L; ++l, ++Y) { *Y = 0.0f; }
+            for (size_t l=L; l>0u; --l, ++Y) { *Y = 0.0f; }
             ++w; cc += stp; cs = (int)roundf(cc);
             es = cs + (int)Lpost;
         }
@@ -56,7 +56,7 @@ int frame_univar_flt_s (float *Y, const float *X, const size_t N, const size_t L
         prev_cs = cs;
         while (ss<0 && w<W)
         {
-            for (size_t l=0u; l<(size_t)(-ss); ++l, ++Y) { *Y = 0.0f; }
+            for (size_t l=(size_t)(-ss); l>0u; --l, ++Y) { *Y = 0.0f; }
             for (size_t l=(size_t)(-ss); l<L; ++l, ++X, ++Y) { *Y = *X; }
             ++w; cc += stp; cs = (int)roundf(cc);
             X -= (int)L + ss;
@@ -66,7 +66,7 @@ int frame_univar_flt_s (float *Y, const float *X, const size_t N, const size_t L
         es = cs + (int)Lpost;
         while (es<(int)N && w<W)
         {
-            for (size_t l=0u; l<L; ++l, ++X, ++Y) { *Y = *X; }
+            for (size_t l=L; l>0u; --l, ++X, ++Y) { *Y = *X; }
             ++w; cc += stp; cs = (int)roundf(cc);
             X += cs - prev_cs - (int)L;
             es = cs + (int)Lpost; prev_cs = cs;
@@ -82,7 +82,7 @@ int frame_univar_flt_s (float *Y, const float *X, const size_t N, const size_t L
         }
         while (w<W)
         {
-            for (size_t l=0u; l<L; ++l, ++Y) { *Y = 0.0f; }
+            for (size_t l=L; l>0u; --l, ++Y) { *Y = 0.0f; }
             ++w;
         }
     }
@@ -113,7 +113,7 @@ int frame_univar_flt_d (double *Y, const double *X, const size_t N, const size_t
 
         while (es<0 && w<W)
         {
-            for (size_t l=0u; l<L; ++l, ++Y) { *Y = 0.0; }
+            for (size_t l=L; l>0u; --l, ++Y) { *Y = 0.0; }
             ++w; cc += stp; cs = (int)round(cc);
             es = cs + (int)Lpost;
         }
@@ -121,7 +121,7 @@ int frame_univar_flt_d (double *Y, const double *X, const size_t N, const size_t
         prev_cs = cs;
         while (ss<0 && w<W)
         {
-            for (size_t l=0u; l<(size_t)(-ss); ++l, ++Y) { *Y = 0.0; }
+            for (size_t l=(size_t)(-ss); l>0u; --l, ++Y) { *Y = 0.0; }
             for (size_t l=(size_t)(-ss); l<L; ++l, ++X, ++Y) { *Y = *X; }
             ++w; cc += stp; cs = (int)round(cc);
             X -= (int)L + ss;
@@ -131,7 +131,7 @@ int frame_univar_flt_d (double *Y, const double *X, const size_t N, const size_t
         es = cs + (int)Lpost;
         while (es<(int)N && w<W)
         {
-            for (size_t l=0u; l<L; ++l, ++X, ++Y) { *Y = *X; }
+            for (size_t l=L; l>0u; --l, ++X, ++Y) { *Y = *X; }
             ++w; cc += stp; cs = (int)round(cc);
             X += cs - prev_cs - (int)L;
             es = cs + (int)Lpost; prev_cs = cs;
@@ -147,7 +147,7 @@ int frame_univar_flt_d (double *Y, const double *X, const size_t N, const size_t
         }
         while (w<W)
         {
-            for (size_t l=0u; l<L; ++l, ++Y) { *Y = 0.0; }
+            for (size_t l=L; l>0u; --l, ++Y) { *Y = 0.0; }
             ++w;
         }
     }
@@ -178,7 +178,7 @@ int frame_univar_flt_c (float *Y, const float *X, const size_t N, const size_t L
 
         while (es<0 && w<W)
         {
-            for (size_t l=0u; l<L; ++l, ++Y) { *Y = 0.0f; *++Y = 0.0f; }
+            for (size_t l=L; l>0u; --l, ++Y) { *Y = 0.0f; *++Y = 0.0f; }
             ++w; cc += stp; cs = (int)roundf(cc);
             es = cs + (int)Lpost;
         }
@@ -186,7 +186,7 @@ int frame_univar_flt_c (float *Y, const float *X, const size_t N, const size_t L
         prev_cs = cs;
         while (ss<0 && w<W)
         {
-            for (size_t l=0u; l<(size_t)(-ss); ++l, ++Y) { *Y = 0.0f; *++Y = 0.0f; }
+            for (size_t l=(size_t)(-ss); l>0u; --l, ++Y) { *Y = 0.0f; *++Y = 0.0f; }
             for (size_t l=(size_t)(-ss); l<L; ++l, ++X, ++Y) { *Y = *X; *++Y = *++X; }
             ++w; cc += stp; cs = (int)roundf(cc);
             X -= 2*((int)L+ss);
@@ -196,7 +196,7 @@ int frame_univar_flt_c (float *Y, const float *X, const size_t N, const size_t L
         es = cs + (int)Lpost;
         while (es<(int)N && w<W)
         {
-            for (size_t l=0u; l<L; ++l, ++X, ++Y) { *Y = *X; *++Y = *++X; }
+            for (size_t l=L; l>0u; --l, ++X, ++Y) { *Y = *X; *++Y = *++X; }
             ++w; cc += stp; cs = (int)roundf(cc);
             X += 2*(cs-prev_cs-(int)L);
             es = cs + (int)Lpost; prev_cs = cs;
@@ -212,7 +212,7 @@ int frame_univar_flt_c (float *Y, const float *X, const size_t N, const size_t L
         }
         while (w<W)
         {
-            for (size_t l=0u; l<L; ++l, ++Y) { *Y = 0.0f; *++Y = 0.0f; }
+            for (size_t l=L; l>0u; --l, ++Y) { *Y = 0.0f; *++Y = 0.0f; }
             ++w;
         }
     }
@@ -243,7 +243,7 @@ int frame_univar_flt_z (double *Y, const double *X, const size_t N, const size_t
 
         while (es<0 && w<W)
         {
-            for (size_t l=0u; l<L; ++l, ++Y) { *Y = 0.0; *++Y = 0.0; }
+            for (size_t l=L; l>0u; --l, ++Y) { *Y = 0.0; *++Y = 0.0; }
             ++w; cc += stp; cs = (int)round(cc);
             es = cs + (int)Lpost;
         }
@@ -251,7 +251,7 @@ int frame_univar_flt_z (double *Y, const double *X, const size_t N, const size_t
         prev_cs = cs;
         while (ss<0 && w<W)
         {
-            for (size_t l=0u; l<(size_t)(-ss); ++l, ++Y) { *Y = 0.0; *++Y = 0.0; }
+            for (size_t l=(size_t)(-ss); l>0u; --l, ++Y) { *Y = 0.0; *++Y = 0.0; }
             for (size_t l=(size_t)(-ss); l<L; ++l, ++X, ++Y) { *Y = *X; *++Y = *++X; }
             ++w; cc += stp; cs = (int)round(cc);
             X -= 2*((int)L+ss);
@@ -261,7 +261,7 @@ int frame_univar_flt_z (double *Y, const double *X, const size_t N, const size_t
         es = cs + (int)Lpost;
         while (es<(int)N && w<W)
         {
-            for (size_t l=0u; l<L; ++l, ++X, ++Y) { *Y = *X; *++Y = *++X; }
+            for (size_t l=L; l>0u; --l, ++X, ++Y) { *Y = *X; *++Y = *++X; }
             ++w; cc += stp; cs = (int)round(cc);
             X += 2*(cs-prev_cs-(int)L);
             es = cs + (int)Lpost; prev_cs = cs;
@@ -277,7 +277,7 @@ int frame_univar_flt_z (double *Y, const double *X, const size_t N, const size_t
         }
         while (w<W)
         {
-            for (size_t l=0u; l<L; ++l, ++Y) { *Y = 0.0; *++Y = 0.0; }
+            for (size_t l=L; l>0u; --l, ++Y) { *Y = 0.0; *++Y = 0.0; }
             ++w;
         }
     }

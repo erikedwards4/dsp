@@ -34,7 +34,7 @@ int violet_s (float *Y, const size_t N, const float std, const int zmn)
     if (N==0u) {}
     else if (std<FLT_EPSILON)
     {
-        for (size_t n=0u; n<N; ++n, ++Y) { *Y = 0.0f; }
+        for (size_t n=N; n>0u; --n, ++Y) { *Y = 0.0f; }
     }
     else
     {
@@ -53,7 +53,7 @@ int violet_s (float *Y, const size_t N, const float std, const int zmn)
         //Generate
         if (std==1.0f)
         {
-            for (size_t n=0u; n<N-1u; n+=2u)
+            for (size_t n=N-1u; n>0u; n-=2u)
             {
                 state = state*mul + inc;
                 xorshifted = (uint32_t)(((state >> 18u) ^ state) >> 27u);
@@ -87,7 +87,7 @@ int violet_s (float *Y, const size_t N, const float std, const int zmn)
         }
         else
         {
-            for (size_t n=0u; n<N-1u; n+=2u)
+            for (size_t n=N-1u; n>0u; n-=2u)
             {
                 state = state*mul + inc;
                 xorshifted = (uint32_t)(((state >> 18u) ^ state) >> 27u);
@@ -121,14 +121,14 @@ int violet_s (float *Y, const size_t N, const float std, const int zmn)
         }
 
         --Y;
-        for (size_t n=0u; n<N-1u; ++n, --Y) { *Y -= *(Y-1); }
+        for (size_t n=N-1u; n>0u; --n, --Y) { *Y -= *(Y-1); }
 
         if (zmn)
         {
             float sm = 0.0f;
-            for (size_t n=0u; n<N; ++n, ++Y) { sm += *Y; }
+            for (size_t n=N; n>0u; --n, ++Y) { sm += *Y; }
             sm /= (float)N;
-            for (size_t n=0u; n<N; ++n) { *--Y -= sm; }
+            for (size_t n=N; n>0u; --n) { *--Y -= sm; }
         }
     }
 
@@ -143,7 +143,7 @@ int violet_d (double *Y, const size_t N, const double std, const int zmn)
     if (N==0u) {}
     else if (std<DBL_EPSILON)
     {
-        for (size_t n=0u; n<N; ++n, ++Y) { *Y = 0.0; }
+        for (size_t n=N; n>0u; --n, ++Y) { *Y = 0.0; }
     }
     else
     {
@@ -162,7 +162,7 @@ int violet_d (double *Y, const size_t N, const double std, const int zmn)
         //Generate
         if (std==1.0)
         {
-            for (size_t n=0u; n<N-1u; n+=2u)
+            for (size_t n=N-1u; n>0u; n-=2u)
             {
                 state = state*mul + inc;
                 xorshifted = (uint32_t)(((state >> 18u) ^ state) >> 27u);
@@ -196,7 +196,7 @@ int violet_d (double *Y, const size_t N, const double std, const int zmn)
         }
         else
         {
-            for (size_t n=0u; n<N-1u; n+=2u)
+            for (size_t n=N-1u; n>0u; n-=2u)
             {
                 state = state*mul + inc;
                 xorshifted = (uint32_t)(((state >> 18u) ^ state) >> 27u);
@@ -230,14 +230,14 @@ int violet_d (double *Y, const size_t N, const double std, const int zmn)
         }
 
         --Y;
-        for (size_t n=0u; n<N-1u; ++n, --Y) { *Y -= *(Y-1); }
+        for (size_t n=N-1u; n>0u; --n, --Y) { *Y -= *(Y-1); }
 
         if (zmn)
         {
             double sm = 0.0;
-            for (size_t n=0u; n<N; ++n, ++Y) { sm += *Y; }
+            for (size_t n=N; n>0u; --n, ++Y) { sm += *Y; }
             sm /= (double)N;
-            for (size_t n=0u; n<N; ++n) { *--Y -= sm; }
+            for (size_t n=N; n>0u; --n) { *--Y -= sm; }
         }
     }
 
@@ -252,7 +252,7 @@ int violet_c (float *Y, const size_t N, const float std, const int zmn)
     if (N==0u) {}
     else if (std<FLT_EPSILON)
     {
-        for (size_t n=0u; n<2u*N; ++n, ++Y) { *Y = 0.0f; }
+        for (size_t n=2u*N; n>0u; --n, ++Y) { *Y = 0.0f; }
     }
     else
     {
@@ -271,7 +271,7 @@ int violet_c (float *Y, const size_t N, const float std, const int zmn)
         //Generate
         if (std==1.0f)
         {
-            for (size_t n=0u; n<N; ++n)
+            for (size_t n=N; n>0u; --n)
             {
                 state = state*mul + inc;
                 xorshifted = (uint32_t)(((state >> 18u) ^ state) >> 27u);
@@ -290,7 +290,7 @@ int violet_c (float *Y, const size_t N, const float std, const int zmn)
         }
         else
         {
-            for (size_t n=0u; n<N; ++n)
+            for (size_t n=N; n>0u; --n)
             {
                 state = state*mul + inc;
                 xorshifted = (uint32_t)(((state >> 18u) ^ state) >> 27u);
@@ -309,15 +309,15 @@ int violet_c (float *Y, const size_t N, const float std, const int zmn)
         }
 
         --Y;
-        for (size_t n=0u; n<N-1u; ++n, --Y) { *Y -= *(Y-2); --Y; *Y -= *(Y-2); }
+        for (size_t n=N-1u; n>0u; --n, --Y) { *Y -= *(Y-2); --Y; *Y -= *(Y-2); }
         --Y;
 
         if (zmn)
         {
             float smr = 0.0f, smi = 0.0f;
-            for (size_t n=0u; n<N; ++n) { smr += *Y++; smi += *Y++; }
+            for (size_t n=N; n>0u; --n) { smr += *Y++; smi += *Y++; }
             smr /= (float)N; smi /= (float)N;
-            for (size_t n=0u; n<N; ++n) { *--Y -= smi; *--Y -= smr; }
+            for (size_t n=N; n>0u; --n) { *--Y -= smi; *--Y -= smr; }
         }
     }
 
@@ -332,7 +332,7 @@ int violet_z (double *Y, const size_t N, const double std, const int zmn)
     if (N==0u) {}
     else if (std<DBL_EPSILON)
     {
-        for (size_t n=0u; n<2u*N; ++n, ++Y) { *Y = 0.0; }
+        for (size_t n=2u*N; n>0u; --n, ++Y) { *Y = 0.0; }
     }
     else
     {
@@ -351,7 +351,7 @@ int violet_z (double *Y, const size_t N, const double std, const int zmn)
         //Generate
         if (std==1.0)
         {
-            for (size_t n=0u; n<N; ++n)
+            for (size_t n=N; n>0u; --n)
             {
                 state = state*mul + inc;
                 xorshifted = (uint32_t)(((state >> 18u) ^ state) >> 27u);
@@ -370,7 +370,7 @@ int violet_z (double *Y, const size_t N, const double std, const int zmn)
         }
         else
         {
-            for (size_t n=0u; n<N; ++n)
+            for (size_t n=N; n>0u; --n)
             {
                 state = state*mul + inc;
                 xorshifted = (uint32_t)(((state >> 18u) ^ state) >> 27u);
@@ -389,15 +389,15 @@ int violet_z (double *Y, const size_t N, const double std, const int zmn)
         }
 
         --Y;
-        for (size_t n=0u; n<N-1u; ++n, --Y) { *Y -= *(Y-2); --Y; *Y -= *(Y-2); }
+        for (size_t n=N-1u; n>0u; --n, --Y) { *Y -= *(Y-2); --Y; *Y -= *(Y-2); }
         --Y;
 
         if (zmn)
         {
             double smr = 0.0, smi = 0.0;
-            for (size_t n=0u; n<N; ++n) { smr += *Y++; smi += *Y++; }
+            for (size_t n=N; n>0u; --n) { smr += *Y++; smi += *Y++; }
             smr /= (double)N; smi /= (double)N;
-            for (size_t n=0u; n<N; ++n) { *--Y -= smi; *--Y -= smr; }
+            for (size_t n=N; n>0u; --n) { *--Y -= smi; *--Y -= smr; }
         }
     }
 

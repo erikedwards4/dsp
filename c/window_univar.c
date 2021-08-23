@@ -51,9 +51,9 @@ int window_univar_s (float *Y, const float *X1, const float *X2, const size_t N,
     else if (snip_edges)
     {
         const int xd = (int)L - (int)stp;
-        for (size_t w=0u; w<W; ++w, X1-=xd, X2-=L)
+        for (size_t w=W; w>0u; --w, X1-=xd, X2-=L)
         {
-            for (size_t l=0u; l<L; ++l, ++X1, ++X2, ++Y) { *Y = *X1 * *X2; }
+            for (size_t l=L; l>0u; --l, ++X1, ++X2, ++Y) { *Y = *X1 * *X2; }
         }
     }
     else
@@ -63,7 +63,7 @@ int window_univar_s (float *Y, const float *X1, const float *X2, const size_t N,
         int ss = (int)(stp/2u) - (int)Lpre;         //start-samp of current frame
         int n, prev_n = 0;                          //current/prev samps in X
 
-        for (size_t w=0u; w<W; ++w, ss+=stp, X2-=L)
+        for (size_t w=W; w>0u; --w, ss+=stp, X2-=L)
         {
             if (ss<0 || ss>(int)N-(int)L)
             {
@@ -79,7 +79,7 @@ int window_univar_s (float *Y, const float *X1, const float *X2, const size_t N,
             else
             {
                 X1 += ss - prev_n;
-                for (size_t l=0u; l<L; ++l, ++X1, ++X2, ++Y) { *Y = *X1 * *X2; }
+                for (size_t l=L; l>0u; --l, ++X1, ++X2, ++Y) { *Y = *X1 * *X2; }
                 X1 -= xd; prev_n = ss + (int)stp;
             }
         }
@@ -102,9 +102,9 @@ int window_univar_d (double *Y, const double *X1, const double *X2, const size_t
     else if (snip_edges)
     {
         const int xd = (int)L - (int)stp;
-        for (size_t w=0u; w<W; ++w, X1-=xd, X2-=L)
+        for (size_t w=W; w>0u; --w, X1-=xd, X2-=L)
         {
-            for (size_t l=0u; l<L; ++l, ++X1, ++X2, ++Y) { *Y = *X1 * *X2; }
+            for (size_t l=L; l>0u; --l, ++X1, ++X2, ++Y) { *Y = *X1 * *X2; }
         }
     }
     else
@@ -114,7 +114,7 @@ int window_univar_d (double *Y, const double *X1, const double *X2, const size_t
         int ss = (int)(stp/2u) - (int)Lpre;         //start-samp of current frame
         int n, prev_n = 0;                          //current/prev samps in X
 
-        for (size_t w=0u; w<W; ++w, ss+=stp, X2-=L)
+        for (size_t w=W; w>0u; --w, ss+=stp, X2-=L)
         {
             if (ss<0 || ss>(int)N-(int)L)
             {
@@ -130,7 +130,7 @@ int window_univar_d (double *Y, const double *X1, const double *X2, const size_t
             else
             {
                 X1 += ss - prev_n;
-                for (size_t l=0u; l<L; ++l, ++X1, ++X2, ++Y) { *Y = *X1 * *X2; }
+                for (size_t l=L; l>0u; --l, ++X1, ++X2, ++Y) { *Y = *X1 * *X2; }
                 X1 -= xd; prev_n = ss + (int)stp;
             }
         }
@@ -153,9 +153,9 @@ int window_univar_c (float *Y, const float *X1, const float *X2, const size_t N,
     else if (snip_edges)
     {
         const int xd = (int)L - (int)stp;
-        for (size_t w=0u; w<W; ++w, X1-=xd, X2-=L)
+        for (size_t w=W; w>0u; --w, X1-=xd, X2-=L)
         {
-            for (size_t l=0u; l<L; ++l, ++X1, ++X2, ++Y) { *Y = *X1 * *X2; *++Y = *++X1 * *X2; }
+            for (size_t l=L; l>0u; --l, ++X1, ++X2, ++Y) { *Y = *X1 * *X2; *++Y = *++X1 * *X2; }
         }
     }
     else
@@ -165,7 +165,7 @@ int window_univar_c (float *Y, const float *X1, const float *X2, const size_t N,
         int ss = (int)(stp/2u) - (int)Lpre;         //start-samp of current frame
         int n, prev_n = 0;                          //current/prev samps in X
 
-        for (size_t w=0u; w<W; ++w, ss+=stp, X2-=L)
+        for (size_t w=W; w>0u; --w, ss+=stp, X2-=L)
         {
             if (ss<0 || ss>(int)N-(int)L)
             {
@@ -181,7 +181,7 @@ int window_univar_c (float *Y, const float *X1, const float *X2, const size_t N,
             else
             {
                 X1 += 2*(ss-prev_n);
-                for (size_t l=0u; l<L; ++l, ++X1, ++X2, ++Y) { *Y = *X1 * *X2; *++Y = *++X1 * *X2; }
+                for (size_t l=L; l>0u; --l, ++X1, ++X2, ++Y) { *Y = *X1 * *X2; *++Y = *++X1 * *X2; }
                 X1 -= xd; prev_n = ss + (int)stp;
             }
         }
@@ -204,9 +204,9 @@ int window_univar_z (double *Y, const double *X1, const double *X2, const size_t
     else if (snip_edges)
     {
         const int xd = (int)L - (int)stp;
-        for (size_t w=0u; w<W; ++w, X1-=xd, X2-=L)
+        for (size_t w=W; w>0u; --w, X1-=xd, X2-=L)
         {
-            for (size_t l=0u; l<L; ++l, ++X1, ++X2, ++Y) { *Y = *X1 * *X2; *++Y = *++X1 * *X2; }
+            for (size_t l=L; l>0u; --l, ++X1, ++X2, ++Y) { *Y = *X1 * *X2; *++Y = *++X1 * *X2; }
         }
     }
     else
@@ -216,7 +216,7 @@ int window_univar_z (double *Y, const double *X1, const double *X2, const size_t
         int ss = (int)(stp/2u) - (int)Lpre;         //start-samp of current frame
         int n, prev_n = 0;                          //current/prev samps in X
 
-        for (size_t w=0u; w<W; ++w, ss+=stp, X2-=L)
+        for (size_t w=W; w>0u; --w, ss+=stp, X2-=L)
         {
             if (ss<0 || ss>(int)N-(int)L)
             {
@@ -232,7 +232,7 @@ int window_univar_z (double *Y, const double *X1, const double *X2, const size_t
             else
             {
                 X1 += 2*(ss-prev_n);
-                for (size_t l=0u; l<L; ++l, ++X1, ++X2, ++Y) { *Y = *X1 * *X2; *++Y = *++X1 * *X2; }
+                for (size_t l=L; l>0u; --l, ++X1, ++X2, ++Y) { *Y = *X1 * *X2; *++Y = *++X1 * *X2; }
                 X1 -= xd; prev_n = ss + (int)stp;
             }
         }

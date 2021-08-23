@@ -49,55 +49,55 @@ int zcr_s (float *Y, const float *X, const size_t R, const size_t C, const size_
             if (going==0)
             {
                 sp = (*X++<0.0f); *Z++ = sm = 0;
-                for (size_t l=1u; l<L; ++l, ++X, ++Z) { s = (*X<0.0f); sm += (s!=sp); *Z = sm; sp = s; }
-                for (size_t l=0u; l<L-Lw+1u; ++l) { --Z; *Z -= *(Z-Lw); }
+                for (size_t l=L; l>1u; --l, ++X, ++Z) { s = (*X<0.0f); sm += (s!=sp); *Z = sm; sp = s; }
+                for (size_t l=L-Lw+1u; l>0u; --l) { --Z; *Z -= *(Z-Lw); }
                 y = (float)(*Z) / Lwf;
-                for (size_t l=0u; l<Lw-1u; ++l, ++Y) { *Y = y; }
-                for (size_t l=Lw-1u; l<L; ++l, ++Y, ++Z) { *Y = (float)(*Z) / Lwf; }
+                for (size_t l=Lw-1u; l>0u; --l, ++Y) { *Y = y; }
+                for (size_t l=L-Lw+1u; l>0u; --l, ++Y, ++Z) { *Y = (float)(*Z) / Lwf; }
                 Z -= L;
                 if (!causal)
                 {
                     const size_t L2 = Lw - Lw/2u - 1u;
                     Y -= L;
-                    for (size_t l=0u; l<L-L2; ++l, ++Y) { *Y = *(Y+L2); }
+                    for (size_t l=L-L2; l>0u; --l, ++Y) { *Y = *(Y+L2); }
                     y = *(Y-1);
-                    for (size_t l=0u; l<L2; ++l, ++Y) { *Y = y; }
+                    for (size_t l=L2; l>0u; --l, ++Y) { *Y = y; }
                 }
             }
             else if (going==1)
             {
                 sp = (*X++>=0.0f); *Z++ = sm = 0;
-                for (size_t l=1u; l<L; ++l, ++X, ++Z) { s = (*X>=0.0f); sm += s*(s!=sp); *Z = sm; sp = s; }
-                for (size_t l=0u; l<L-Lw+1u; ++l) { --Z; *Z -= *(Z-Lw); }
+                for (size_t l=L; l>1u; --l, ++X, ++Z) { s = (*X>=0.0f); sm += s*(s!=sp); *Z = sm; sp = s; }
+                for (size_t l=L-Lw+1u; l>0u; --l) { --Z; *Z -= *(Z-Lw); }
                 y = (float)(*Z) / Lwf;
-                for (size_t l=0u; l<Lw-1u; ++l, ++Y) { *Y = y; }
-                for (size_t l=Lw-1u; l<L; ++l, ++Y, ++Z) { *Y = (float)(*Z) / Lwf; }
+                for (size_t l=Lw-1u; l>0u; --l, ++Y) { *Y = y; }
+                for (size_t l=L-Lw+1u; l>0u; --l, ++Y, ++Z) { *Y = (float)(*Z) / Lwf; }
                 Z -= L;
                 if (!causal)
                 {
                     const size_t L2 = Lw - Lw/2u - 1u;
                     Y -= L;
-                    for (size_t l=0u; l<L-L2; ++l, ++Y) { *Y = *(Y+L2); }
+                    for (size_t l=L-L2; l>0u; --l, ++Y) { *Y = *(Y+L2); }
                     y = *(Y-1);
-                    for (size_t l=0u; l<L2; ++l, ++Y) { *Y = y; }
+                    for (size_t l=L2; l>0u; --l, ++Y) { *Y = y; }
                 }
             }
             else if (going==-1)
             {
                 sp = (*X++<0.0f); *Z++ = sm = 0;
-                for (size_t l=1u; l<L; ++l, ++X, ++Z) { s = (*X<0.0f); sm += s*(s!=sp); *Z = sm; sp = s; }
-                for (size_t l=0u; l<L-Lw+1u; ++l) { --Z; *Z -= *(Z-Lw); }
+                for (size_t l=L; l>1u; --l, ++X, ++Z) { s = (*X<0.0f); sm += s*(s!=sp); *Z = sm; sp = s; }
+                for (size_t l=L-Lw+1u; l>0u; --l) { --Z; *Z -= *(Z-Lw); }
                 y = (float)(*Z) / Lwf;
-                for (size_t l=0u; l<Lw-1u; ++l, ++Y) { *Y = y; }
-                for (size_t l=Lw-1u; l<L; ++l, ++Y, ++Z) { *Y = (float)(*Z) / Lwf; }
+                for (size_t l=Lw-1u; l>0u; --l, ++Y) { *Y = y; }
+                for (size_t l=L-Lw+1u; l>0u; --l, ++Y, ++Z) { *Y = (float)(*Z) / Lwf; }
                 Z -= L;
                 if (!causal)
                 {
                     const size_t L2 = Lw - Lw/2u - 1u;
                     Y -= L;
-                    for (size_t l=0u; l<L-L2; ++l, ++Y) { *Y = *(Y+L2); }
+                    for (size_t l=L-L2; l>0u; --l, ++Y) { *Y = *(Y+L2); }
                     y = *(Y-1);
-                    for (size_t l=0u; l<L2; ++l, ++Y) { *Y = y; }
+                    for (size_t l=L2; l>0u; --l, ++Y) { *Y = y; }
                 }
             }
             else { fprintf(stderr,"error in zcr_s: going must be in {-1,0,1}\n"); return 1; }
@@ -115,19 +115,19 @@ int zcr_s (float *Y, const float *X, const size_t R, const size_t C, const size_
                     for (size_t v=V; v>0u; --v)
                     {
                         sp = (*X++<0.0f); *Z++ = sm = 0;
-                        for (size_t l=1u; l<L; ++l, ++X, ++Z) { s = (*X<0.0f); sm += (s!=sp); *Z = sm; sp = s; }
-                        for (size_t l=0u; l<L-Lw+1u; ++l) { --Z; *Z -= *(Z-Lw); }
+                        for (size_t l=L; l>1u; --l, ++X, ++Z) { s = (*X<0.0f); sm += (s!=sp); *Z = sm; sp = s; }
+                        for (size_t l=L-Lw+1u; l>0u; --l) { --Z; *Z -= *(Z-Lw); }
                         y = (float)(*Z) / Lwf;
-                        for (size_t l=0u; l<Lw-1u; ++l, ++Y) { *Y = y; }
-                        for (size_t l=Lw-1u; l<L; ++l, ++Y, ++Z) { *Y = (float)(*Z) / Lwf; }
+                        for (size_t l=Lw-1u; l>0u; --l, ++Y) { *Y = y; }
+                        for (size_t l=L-Lw+1u; l>0u; --l, ++Y, ++Z) { *Y = (float)(*Z) / Lwf; }
                         Z -= L;
                         if (!causal)
                         {
                             const size_t L2 = Lw - Lw/2u - 1u;
                             Y -= L;
-                            for (size_t l=0u; l<L-L2; ++l, ++Y) { *Y = *(Y+L2); }
+                            for (size_t l=L-L2; l>0u; --l, ++Y) { *Y = *(Y+L2); }
                             y = *(Y-1);
-                            for (size_t l=0u; l<L2; ++l, ++Y) { *Y = y; }
+                            for (size_t l=L2; l>0u; --l, ++Y) { *Y = y; }
                         }
                     }
                 }
@@ -136,19 +136,19 @@ int zcr_s (float *Y, const float *X, const size_t R, const size_t C, const size_
                     for (size_t v=V; v>0u; --v)
                     {
                         sp = (*X++>=0.0f); *Z++ = sm = 0;
-                        for (size_t l=1u; l<L; ++l, ++X, ++Z) { s = (*X>=0.0f); sm += s*(s!=sp); *Z = sm; sp = s; }
-                        for (size_t l=0u; l<L-Lw+1u; ++l) { --Z; *Z -= *(Z-Lw); }
+                        for (size_t l=L; l>1u; --l, ++X, ++Z) { s = (*X>=0.0f); sm += s*(s!=sp); *Z = sm; sp = s; }
+                        for (size_t l=L-Lw+1u; l>0u; --l) { --Z; *Z -= *(Z-Lw); }
                         y = (float)(*Z) / Lwf;
-                        for (size_t l=0u; l<Lw-1u; ++l, ++Y) { *Y = y; }
-                        for (size_t l=Lw-1u; l<L; ++l, ++Y, ++Z) { *Y = (float)(*Z) / Lwf; }
+                        for (size_t l=Lw-1u; l>0u; --l, ++Y) { *Y = y; }
+                        for (size_t l=L-Lw+1u; l>0u; --l, ++Y, ++Z) { *Y = (float)(*Z) / Lwf; }
                         Z -= L;
                         if (!causal)
                         {
                             const size_t L2 = Lw - Lw/2u - 1u;
                             Y -= L;
-                            for (size_t l=0u; l<L-L2; ++l, ++Y) { *Y = *(Y+L2); }
+                            for (size_t l=L-L2; l>0u; --l, ++Y) { *Y = *(Y+L2); }
                             y = *(Y-1);
-                            for (size_t l=0u; l<L2; ++l, ++Y) { *Y = y; }
+                            for (size_t l=L2; l>0u; --l, ++Y) { *Y = y; }
                         }
                     }
                 }
@@ -157,19 +157,19 @@ int zcr_s (float *Y, const float *X, const size_t R, const size_t C, const size_
                     for (size_t v=V; v>0u; --v)
                     {
                         sp = (*X++<0.0f); *Z++ = sm = 0;
-                        for (size_t l=1u; l<L; ++l, ++X, ++Z) { s = (*X<0.0f); sm += s*(s!=sp); *Z = sm; sp = s; }
-                        for (size_t l=0u; l<L-Lw+1u; ++l) { --Z; *Z -= *(Z-Lw); }
+                        for (size_t l=L; l>1u; --l, ++X, ++Z) { s = (*X<0.0f); sm += s*(s!=sp); *Z = sm; sp = s; }
+                        for (size_t l=L-Lw+1u; l>0u; --l) { --Z; *Z -= *(Z-Lw); }
                         y = (float)(*Z) / Lwf;
-                        for (size_t l=0u; l<Lw-1u; ++l, ++Y) { *Y = y; }
-                        for (size_t l=Lw-1u; l<L; ++l, ++Y, ++Z) { *Y = (float)(*Z) / Lwf; }
+                        for (size_t l=Lw-1u; l>0u; --l, ++Y) { *Y = y; }
+                        for (size_t l=L-Lw+1u; l>0u; --l, ++Y, ++Z) { *Y = (float)(*Z) / Lwf; }
                         Z -= L;
                         if (!causal)
                         {
                             const size_t L2 = Lw - Lw/2u - 1u;
                             Y -= L;
-                            for (size_t l=0u; l<L-L2; ++l, ++Y) { *Y = *(Y+L2); }
+                            for (size_t l=L-L2; l>0u; --l, ++Y) { *Y = *(Y+L2); }
                             y = *(Y-1);
-                            for (size_t l=0u; l<L2; ++l, ++Y) { *Y = y; }
+                            for (size_t l=L2; l>0u; --l, ++Y) { *Y = y; }
                         }
                     }
                 }
@@ -184,19 +184,19 @@ int zcr_s (float *Y, const float *X, const size_t R, const size_t C, const size_
                         for (size_t b=B; b>0u; --b, X-=K*L-1u, Y-=K*L-1u)
                         {
                             sp = (*X<0.0f); X+=K; *Z++ = sm = 0;
-                            for (size_t l=1u; l<L; ++l, X+=K, ++Z) { s = (*X<0.0f); sm += (s!=sp); *Z = sm; sp = s; }
-                            for (size_t l=0u; l<L-Lw+1u; ++l) { --Z; *Z -= *(Z-Lw); }
+                            for (size_t l=L; l>1u; --l, X+=K, ++Z) { s = (*X<0.0f); sm += (s!=sp); *Z = sm; sp = s; }
+                            for (size_t l=L-Lw+1u; l>0u; --l) { --Z; *Z -= *(Z-Lw); }
                             y = (float)(*Z) / Lwf;
-                            for (size_t l=0u; l<Lw-1u; ++l, Y+=K) { *Y = y; }
-                            for (size_t l=Lw-1u; l<L; ++l, Y+=K, ++Z) { *Y = (float)(*Z) / Lwf; }
+                            for (size_t l=Lw-1u; l>0u; --l, Y+=K) { *Y = y; }
+                            for (size_t l=L-Lw+1u; l>0u; --l, Y+=K, ++Z) { *Y = (float)(*Z) / Lwf; }
                             Z -= L;
                             if (!causal)
                             {
                                 const size_t L2 = Lw - Lw/2u - 1u;
                                 Y -= K*L;
-                                for (size_t l=0u; l<L-L2; ++l, Y+=K) { *Y = *(Y+K*L2); }
+                                for (size_t l=L-L2; l>0u; --l, Y+=K) { *Y = *(Y+K*L2); }
                                 y = *(Y-K);
-                                for (size_t l=0u; l<L2; ++l, Y+=K) { *Y = y; }
+                                for (size_t l=L2; l>0u; --l, Y+=K) { *Y = y; }
                             }
                         }
                     }
@@ -208,19 +208,19 @@ int zcr_s (float *Y, const float *X, const size_t R, const size_t C, const size_
                         for (size_t b=B; b>0u; --b, X-=K*L-1u, Y-=K*L-1u)
                         {
                             sp = (*X>=0.0f); X+=K; *Z++ = sm = 0;
-                            for (size_t l=1u; l<L; ++l, X+=K, ++Z) { s = (*X>=0.0f); sm += s*(s!=sp); *Z = sm; sp = s; }
-                            for (size_t l=0u; l<L-Lw+1u; ++l) { --Z; *Z -= *(Z-Lw); }
+                            for (size_t l=L; l>1u; --l, X+=K, ++Z) { s = (*X>=0.0f); sm += s*(s!=sp); *Z = sm; sp = s; }
+                            for (size_t l=L-Lw+1u; l>0u; --l) { --Z; *Z -= *(Z-Lw); }
                             y = (float)(*Z) / Lwf;
-                            for (size_t l=0u; l<Lw-1u; ++l, Y+=K) { *Y = y; }
-                            for (size_t l=Lw-1u; l<L; ++l, Y+=K, ++Z) { *Y = (float)(*Z) / Lwf; }
+                            for (size_t l=Lw-1u; l>0u; --l, Y+=K) { *Y = y; }
+                            for (size_t l=L-Lw+1u; l>0u; --l, Y+=K, ++Z) { *Y = (float)(*Z) / Lwf; }
                             Z -= L;
                             if (!causal)
                             {
                                 const size_t L2 = Lw - Lw/2u - 1u;
                                 Y -= K*L;
-                                for (size_t l=0u; l<L-L2; ++l, Y+=K) { *Y = *(Y+K*L2); }
+                                for (size_t l=L-L2; l>0u; --l, Y+=K) { *Y = *(Y+K*L2); }
                                 y = *(Y-K);
-                                for (size_t l=0u; l<L2; ++l, Y+=K) { *Y = y; }
+                                for (size_t l=L2; l>0u; --l, Y+=K) { *Y = y; }
                             }
                         }
                     }
@@ -232,19 +232,19 @@ int zcr_s (float *Y, const float *X, const size_t R, const size_t C, const size_
                         for (size_t b=B; b>0u; --b, X-=K*L-1u, Y-=K*L-1u)
                         {
                             sp = (*X<0.0f); X+=K; *Z++ = sm = 0;
-                            for (size_t l=1u; l<L; ++l, X+=K, ++Z) { s = (*X<0.0f); sm += s*(s!=sp); *Z = sm; sp = s; }
-                            for (size_t l=0u; l<L-Lw+1u; ++l) { --Z; *Z -= *(Z-Lw); }
+                            for (size_t l=L; l>1u; --l, X+=K, ++Z) { s = (*X<0.0f); sm += s*(s!=sp); *Z = sm; sp = s; }
+                            for (size_t l=L-Lw+1u; l>0u; --l) { --Z; *Z -= *(Z-Lw); }
                             y = (float)(*Z) / Lwf;
-                            for (size_t l=0u; l<Lw-1u; ++l, Y+=K) { *Y = y; }
-                            for (size_t l=Lw-1u; l<L; ++l, Y+=K, ++Z) { *Y = (float)(*Z) / Lwf; }
+                            for (size_t l=Lw-1u; l>0u; --l, Y+=K) { *Y = y; }
+                            for (size_t l=L-Lw+1u; l>0u; --l, Y+=K, ++Z) { *Y = (float)(*Z) / Lwf; }
                             Z -= L;
                             if (!causal)
                             {
                                 const size_t L2 = Lw - Lw/2u - 1u;
                                 Y -= K*L;
-                                for (size_t l=0u; l<L-L2; ++l, Y+=K) { *Y = *(Y+K*L2); }
+                                for (size_t l=L-L2; l>0u; --l, Y+=K) { *Y = *(Y+K*L2); }
                                 y = *(Y-K);
-                                for (size_t l=0u; l<L2; ++l, Y+=K) { *Y = y; }
+                                for (size_t l=L2; l>0u; --l, Y+=K) { *Y = y; }
                             }
                         }
                     }
@@ -280,55 +280,55 @@ int zcr_d (double *Y, const double *X, const size_t R, const size_t C, const siz
             if (going==0)
             {
                 sp = (*X++<0.0); *Z++ = sm = 0;
-                for (size_t l=1u; l<L; ++l, ++X, ++Z) { s = (*X<0.0); sm += (s!=sp); *Z = sm; sp = s; }
-                for (size_t l=0u; l<L-Lw+1u; ++l) { --Z; *Z -= *(Z-Lw); }
+                for (size_t l=L; l>1u; --l, ++X, ++Z) { s = (*X<0.0); sm += (s!=sp); *Z = sm; sp = s; }
+                for (size_t l=L-Lw+1u; l>0u; --l) { --Z; *Z -= *(Z-Lw); }
                 y = (double)(*Z) / Lwf;
-                for (size_t l=0u; l<Lw-1u; ++l, ++Y) { *Y = y; }
-                for (size_t l=Lw-1u; l<L; ++l, ++Y, ++Z) { *Y = (double)(*Z) / Lwf; }
+                for (size_t l=Lw-1u; l>0u; --l, ++Y) { *Y = y; }
+                for (size_t l=L-Lw+1u; l>0u; --l, ++Y, ++Z) { *Y = (double)(*Z) / Lwf; }
                 Z -= L;
                 if (!causal)
                 {
                     const size_t L2 = Lw - Lw/2u - 1u;
                     Y -= L;
-                    for (size_t l=0u; l<L-L2; ++l, ++Y) { *Y = *(Y+L2); }
+                    for (size_t l=L-L2; l>0u; --l, ++Y) { *Y = *(Y+L2); }
                     y = *(Y-1);
-                    for (size_t l=0u; l<L2; ++l, ++Y) { *Y = y; }
+                    for (size_t l=L2; l>0u; --l, ++Y) { *Y = y; }
                 }
             }
             else if (going==1)
             {
                 sp = (*X++>=0.0); *Z++ = sm = 0;
-                for (size_t l=1u; l<L; ++l, ++X, ++Z) { s = (*X>=0.0); sm += s*(s!=sp); *Z = sm; sp = s; }
-                for (size_t l=0u; l<L-Lw+1u; ++l) { --Z; *Z -= *(Z-Lw); }
+                for (size_t l=L; l>1u; --l, ++X, ++Z) { s = (*X>=0.0); sm += s*(s!=sp); *Z = sm; sp = s; }
+                for (size_t l=L-Lw+1u; l>0u; --l) { --Z; *Z -= *(Z-Lw); }
                 y = (double)(*Z) / Lwf;
-                for (size_t l=0u; l<Lw-1u; ++l, ++Y) { *Y = y; }
-                for (size_t l=Lw-1u; l<L; ++l, ++Y, ++Z) { *Y = (double)(*Z) / Lwf; }
+                for (size_t l=Lw-1u; l>0u; --l, ++Y) { *Y = y; }
+                for (size_t l=L-Lw+1u; l>0u; --l, ++Y, ++Z) { *Y = (double)(*Z) / Lwf; }
                 Z -= L;
                 if (!causal)
                 {
                     const size_t L2 = Lw - Lw/2u - 1u;
                     Y -= L;
-                    for (size_t l=0u; l<L-L2; ++l, ++Y) { *Y = *(Y+L2); }
+                    for (size_t l=L-L2; l>0u; --l, ++Y) { *Y = *(Y+L2); }
                     y = *(Y-1);
-                    for (size_t l=0u; l<L2; ++l, ++Y) { *Y = y; }
+                    for (size_t l=L2; l>0u; --l, ++Y) { *Y = y; }
                 }
             }
             else if (going==-1)
             {
                 sp = (*X++<0.0); *Z++ = sm = 0;
-                for (size_t l=1u; l<L; ++l, ++X, ++Z) { s = (*X<0.0); sm += s*(s!=sp); *Z = sm; sp = s; }
-                for (size_t l=0u; l<L-Lw+1u; ++l) { --Z; *Z -= *(Z-Lw); }
+                for (size_t l=L; l>1u; --l, ++X, ++Z) { s = (*X<0.0); sm += s*(s!=sp); *Z = sm; sp = s; }
+                for (size_t l=L-Lw+1u; l>0u; --l) { --Z; *Z -= *(Z-Lw); }
                 y = (double)(*Z) / Lwf;
-                for (size_t l=0u; l<Lw-1u; ++l, ++Y) { *Y = y; }
-                for (size_t l=Lw-1u; l<L; ++l, ++Y, ++Z) { *Y = (double)(*Z) / Lwf; }
+                for (size_t l=Lw-1u; l>0u; --l, ++Y) { *Y = y; }
+                for (size_t l=L-Lw+1u; l>0u; --l, ++Y, ++Z) { *Y = (double)(*Z) / Lwf; }
                 Z -= L;
                 if (!causal)
                 {
                     const size_t L2 = Lw - Lw/2u - 1u;
                     Y -= L;
-                    for (size_t l=0u; l<L-L2; ++l, ++Y) { *Y = *(Y+L2); }
+                    for (size_t l=L-L2; l>0u; --l, ++Y) { *Y = *(Y+L2); }
                     y = *(Y-1);
-                    for (size_t l=0u; l<L2; ++l, ++Y) { *Y = y; }
+                    for (size_t l=L2; l>0u; --l, ++Y) { *Y = y; }
                 }
             }
             else { fprintf(stderr,"error in zcr_d: going must be in {-1,0,1}\n"); return 1; }
@@ -346,19 +346,19 @@ int zcr_d (double *Y, const double *X, const size_t R, const size_t C, const siz
                     for (size_t v=V; v>0u; --v)
                     {
                         sp = (*X++<0.0); *Z++ = sm = 0;
-                        for (size_t l=1u; l<L; ++l, ++X, ++Z) { s = (*X<0.0); sm += (s!=sp); *Z = sm; sp = s; }
-                        for (size_t l=0u; l<L-Lw+1u; ++l) { --Z; *Z -= *(Z-Lw); }
+                        for (size_t l=L; l>1u; --l, ++X, ++Z) { s = (*X<0.0); sm += (s!=sp); *Z = sm; sp = s; }
+                        for (size_t l=L-Lw+1u; l>0u; --l) { --Z; *Z -= *(Z-Lw); }
                         y = (double)(*Z) / Lwf;
-                        for (size_t l=0u; l<Lw-1u; ++l, ++Y) { *Y = y; }
-                        for (size_t l=Lw-1u; l<L; ++l, ++Y, ++Z) { *Y = (double)(*Z) / Lwf; }
+                        for (size_t l=Lw-1u; l>0u; --l, ++Y) { *Y = y; }
+                        for (size_t l=L-Lw+1u; l>0u; --l, ++Y, ++Z) { *Y = (double)(*Z) / Lwf; }
                         Z -= L;
                         if (!causal)
                         {
                             const size_t L2 = Lw - Lw/2u - 1u;
                             Y -= L;
-                            for (size_t l=0u; l<L-L2; ++l, ++Y) { *Y = *(Y+L2); }
+                            for (size_t l=L-L2; l>0u; --l, ++Y) { *Y = *(Y+L2); }
                             y = *(Y-1);
-                            for (size_t l=0u; l<L2; ++l, ++Y) { *Y = y; }
+                            for (size_t l=L2; l>0u; --l, ++Y) { *Y = y; }
                         }
                     }
                 }
@@ -367,19 +367,19 @@ int zcr_d (double *Y, const double *X, const size_t R, const size_t C, const siz
                     for (size_t v=V; v>0u; --v)
                     {
                         sp = (*X++>=0.0); *Z++ = sm = 0;
-                        for (size_t l=1u; l<L; ++l, ++X, ++Z) { s = (*X>=0.0); sm += s*(s!=sp); *Z = sm; sp = s; }
-                        for (size_t l=0u; l<L-Lw+1u; ++l) { --Z; *Z -= *(Z-Lw); }
+                        for (size_t l=L; l>1u; --l, ++X, ++Z) { s = (*X>=0.0); sm += s*(s!=sp); *Z = sm; sp = s; }
+                        for (size_t l=L-Lw+1u; l>0u; --l) { --Z; *Z -= *(Z-Lw); }
                         y = (double)(*Z) / Lwf;
-                        for (size_t l=0u; l<Lw-1u; ++l, ++Y) { *Y = y; }
-                        for (size_t l=Lw-1u; l<L; ++l, ++Y, ++Z) { *Y = (double)(*Z) / Lwf; }
+                        for (size_t l=Lw-1u; l>0u; --l, ++Y) { *Y = y; }
+                        for (size_t l=L-Lw+1u; l>0u; --l, ++Y, ++Z) { *Y = (double)(*Z) / Lwf; }
                         Z -= L;
                         if (!causal)
                         {
                             const size_t L2 = Lw - Lw/2u - 1u;
                             Y -= L;
-                            for (size_t l=0u; l<L-L2; ++l, ++Y) { *Y = *(Y+L2); }
+                            for (size_t l=L-L2; l>0u; --l, ++Y) { *Y = *(Y+L2); }
                             y = *(Y-1);
-                            for (size_t l=0u; l<L2; ++l, ++Y) { *Y = y; }
+                            for (size_t l=L2; l>0u; --l, ++Y) { *Y = y; }
                         }
                     }
                 }
@@ -388,19 +388,19 @@ int zcr_d (double *Y, const double *X, const size_t R, const size_t C, const siz
                     for (size_t v=V; v>0u; --v)
                     {
                         sp = (*X++<0.0); *Z++ = sm = 0;
-                        for (size_t l=1u; l<L; ++l, ++X, ++Z) { s = (*X<0.0); sm += s*(s!=sp); *Z = sm; sp = s; }
-                        for (size_t l=0u; l<L-Lw+1u; ++l) { --Z; *Z -= *(Z-Lw); }
+                        for (size_t l=L; l>1u; --l, ++X, ++Z) { s = (*X<0.0); sm += s*(s!=sp); *Z = sm; sp = s; }
+                        for (size_t l=L-Lw+1u; l>0u; --l) { --Z; *Z -= *(Z-Lw); }
                         y = (double)(*Z) / Lwf;
-                        for (size_t l=0u; l<Lw-1u; ++l, ++Y) { *Y = y; }
-                        for (size_t l=Lw-1u; l<L; ++l, ++Y, ++Z) { *Y = (double)(*Z) / Lwf; }
+                        for (size_t l=Lw-1u; l>0u; --l, ++Y) { *Y = y; }
+                        for (size_t l=L-Lw+1u; l>0u; --l, ++Y, ++Z) { *Y = (double)(*Z) / Lwf; }
                         Z -= L;
                         if (!causal)
                         {
                             const size_t L2 = Lw - Lw/2u - 1u;
                             Y -= L;
-                            for (size_t l=0u; l<L-L2; ++l, ++Y) { *Y = *(Y+L2); }
+                            for (size_t l=L-L2; l>0u; --l, ++Y) { *Y = *(Y+L2); }
                             y = *(Y-1);
-                            for (size_t l=0u; l<L2; ++l, ++Y) { *Y = y; }
+                            for (size_t l=L2; l>0u; --l, ++Y) { *Y = y; }
                         }
                     }
                 }
@@ -415,19 +415,19 @@ int zcr_d (double *Y, const double *X, const size_t R, const size_t C, const siz
                         for (size_t b=B; b>0u; --b, X-=K*L-1u, Y-=K*L-1u)
                         {
                             sp = (*X<0.0); X+=K; *Z++ = sm = 0;
-                            for (size_t l=1u; l<L; ++l, X+=K, ++Z) { s = (*X<0.0); sm += (s!=sp); *Z = sm; sp = s; }
-                            for (size_t l=0u; l<L-Lw+1u; ++l) { --Z; *Z -= *(Z-Lw); }
+                            for (size_t l=L; l>1u; --l, X+=K, ++Z) { s = (*X<0.0); sm += (s!=sp); *Z = sm; sp = s; }
+                            for (size_t l=L-Lw+1u; l>0u; --l) { --Z; *Z -= *(Z-Lw); }
                             y = (double)(*Z) / Lwf;
-                            for (size_t l=0u; l<Lw-1u; ++l, Y+=K) { *Y = y; }
-                            for (size_t l=Lw-1u; l<L; ++l, Y+=K, ++Z) { *Y = (double)(*Z) / Lwf; }
+                            for (size_t l=Lw-1u; l>0u; --l, Y+=K) { *Y = y; }
+                            for (size_t l=L-Lw+1u; l>0u; --l, Y+=K, ++Z) { *Y = (double)(*Z) / Lwf; }
                             Z -= L;
                             if (!causal)
                             {
                                 const size_t L2 = Lw - Lw/2u - 1u;
                                 Y -= K*L;
-                                for (size_t l=0u; l<L-L2; ++l, Y+=K) { *Y = *(Y+K*L2); }
+                                for (size_t l=L-L2; l>0u; --l, Y+=K) { *Y = *(Y+K*L2); }
                                 y = *(Y-K);
-                                for (size_t l=0u; l<L2; ++l, Y+=K) { *Y = y; }
+                                for (size_t l=L2; l>0u; --l, Y+=K) { *Y = y; }
                             }
                         }
                     }
@@ -439,19 +439,19 @@ int zcr_d (double *Y, const double *X, const size_t R, const size_t C, const siz
                         for (size_t b=B; b>0u; --b, X-=K*L-1u, Y-=K*L-1u)
                         {
                             sp = (*X>=0.0); X+=K; *Z++ = sm = 0;
-                            for (size_t l=1u; l<L; ++l, X+=K, ++Z) { s = (*X>=0.0); sm += s*(s!=sp); *Z = sm; sp = s; }
-                            for (size_t l=0u; l<L-Lw+1u; ++l) { --Z; *Z -= *(Z-Lw); }
+                            for (size_t l=L; l>1u; --l, X+=K, ++Z) { s = (*X>=0.0); sm += s*(s!=sp); *Z = sm; sp = s; }
+                            for (size_t l=L-Lw+1u; l>0u; --l) { --Z; *Z -= *(Z-Lw); }
                             y = (double)(*Z) / Lwf;
-                            for (size_t l=0u; l<Lw-1u; ++l, Y+=K) { *Y = y; }
-                            for (size_t l=Lw-1u; l<L; ++l, Y+=K, ++Z) { *Y = (double)(*Z) / Lwf; }
+                            for (size_t l=Lw-1u; l>0u; --l, Y+=K) { *Y = y; }
+                            for (size_t l=L-Lw+1u; l>0u; --l, Y+=K, ++Z) { *Y = (double)(*Z) / Lwf; }
                             Z -= L;
                             if (!causal)
                             {
                                 const size_t L2 = Lw - Lw/2u - 1u;
                                 Y -= K*L;
-                                for (size_t l=0u; l<L-L2; ++l, Y+=K) { *Y = *(Y+K*L2); }
+                                for (size_t l=L-L2; l>0u; --l, Y+=K) { *Y = *(Y+K*L2); }
                                 y = *(Y-K);
-                                for (size_t l=0u; l<L2; ++l, Y+=K) { *Y = y; }
+                                for (size_t l=L2; l>0u; --l, Y+=K) { *Y = y; }
                             }
                         }
                     }
@@ -463,19 +463,19 @@ int zcr_d (double *Y, const double *X, const size_t R, const size_t C, const siz
                         for (size_t b=B; b>0u; --b, X-=K*L-1u, Y-=K*L-1u)
                         {
                             sp = (*X<0.0); X+=K; *Z++ = sm = 0;
-                            for (size_t l=1u; l<L; ++l, X+=K, ++Z) { s = (*X<0.0); sm += s*(s!=sp); *Z = sm; sp = s; }
-                            for (size_t l=0u; l<L-Lw+1u; ++l) { --Z; *Z -= *(Z-Lw); }
+                            for (size_t l=L; l>1u; --l, X+=K, ++Z) { s = (*X<0.0); sm += s*(s!=sp); *Z = sm; sp = s; }
+                            for (size_t l=L-Lw+1u; l>0u; --l) { --Z; *Z -= *(Z-Lw); }
                             y = (double)(*Z) / Lwf;
-                            for (size_t l=0u; l<Lw-1u; ++l, Y+=K) { *Y = y; }
-                            for (size_t l=Lw-1u; l<L; ++l, Y+=K, ++Z) { *Y = (double)(*Z) / Lwf; }
+                            for (size_t l=Lw-1u; l>0u; --l, Y+=K) { *Y = y; }
+                            for (size_t l=L-Lw+1u; l>0u; --l, Y+=K, ++Z) { *Y = (double)(*Z) / Lwf; }
                             Z -= L;
                             if (!causal)
                             {
                                 const size_t L2 = Lw - Lw/2u - 1u;
                                 Y -= K*L;
-                                for (size_t l=0u; l<L-L2; ++l, Y+=K) { *Y = *(Y+K*L2); }
+                                for (size_t l=L-L2; l>0u; --l, Y+=K) { *Y = *(Y+K*L2); }
                                 y = *(Y-K);
-                                for (size_t l=0u; l<L2; ++l, Y+=K) { *Y = y; }
+                                for (size_t l=L2; l>0u; --l, Y+=K) { *Y = y; }
                             }
                         }
                     }
@@ -514,55 +514,55 @@ int zcr_c (float *Y, const float *X, const size_t R, const size_t C, const size_
             if (going==0)
             {
                 sp = (*X<0.0f); X+=2; *Z++ = sm = 0;
-                for (size_t l=1u; l<L; ++l, X+=2, ++Z) { s = (*X<0.0f); sm += (s!=sp); *Z = sm; sp = s; }
-                for (size_t l=0u; l<L-Lw+1u; ++l) { --Z; *Z -= *(Z-Lw); }
+                for (size_t l=L; l>1u; --l, X+=2, ++Z) { s = (*X<0.0f); sm += (s!=sp); *Z = sm; sp = s; }
+                for (size_t l=L-Lw+1u; l>0u; --l) { --Z; *Z -= *(Z-Lw); }
                 y = (float)(*Z) / Lwf;
-                for (size_t l=0u; l<Lw-1u; ++l, ++Y) { *Y = y; }
-                for (size_t l=Lw-1u; l<L; ++l, ++Y, ++Z) { *Y = (float)(*Z) / Lwf; }
+                for (size_t l=Lw-1u; l>0u; --l, ++Y) { *Y = y; }
+                for (size_t l=L-Lw+1u; l>0u; --l, ++Y, ++Z) { *Y = (float)(*Z) / Lwf; }
                 Z -= L;
                 if (!causal)
                 {
                     const size_t L2 = Lw - Lw/2u - 1u;
                     Y -= L;
-                    for (size_t l=0u; l<L-L2; ++l, ++Y) { *Y = *(Y+L2); }
+                    for (size_t l=L-L2; l>0u; --l, ++Y) { *Y = *(Y+L2); }
                     y = *(Y-1);
-                    for (size_t l=0u; l<L2; ++l, ++Y) { *Y = y; }
+                    for (size_t l=L2; l>0u; --l, ++Y) { *Y = y; }
                 }
             }
             else if (going==1)
             {
                 sp = (*X>=0.0f); X+=2; *Z++ = sm = 0;
-                for (size_t l=1u; l<L; ++l, X+=2, ++Z) { s = (*X>=0.0f); sm += s*(s!=sp); *Z = sm; sp = s; }
-                for (size_t l=0u; l<L-Lw+1u; ++l) { --Z; *Z -= *(Z-Lw); }
+                for (size_t l=L; l>1u; --l, X+=2, ++Z) { s = (*X>=0.0f); sm += s*(s!=sp); *Z = sm; sp = s; }
+                for (size_t l=L-Lw+1u; l>0u; --l) { --Z; *Z -= *(Z-Lw); }
                 y = (float)(*Z) / Lwf;
-                for (size_t l=0u; l<Lw-1u; ++l, ++Y) { *Y = y; }
-                for (size_t l=Lw-1u; l<L; ++l, ++Y, ++Z) { *Y = (float)(*Z) / Lwf; }
+                for (size_t l=Lw-1u; l>0u; --l, ++Y) { *Y = y; }
+                for (size_t l=L-Lw+1u; l>0u; --l, ++Y, ++Z) { *Y = (float)(*Z) / Lwf; }
                 Z -= L;
                 if (!causal)
                 {
                     const size_t L2 = Lw - Lw/2u - 1u;
                     Y -= L;
-                    for (size_t l=0u; l<L-L2; ++l, ++Y) { *Y = *(Y+L2); }
+                    for (size_t l=L-L2; l>0u; --l, ++Y) { *Y = *(Y+L2); }
                     y = *(Y-1);
-                    for (size_t l=0u; l<L2; ++l, ++Y) { *Y = y; }
+                    for (size_t l=L2; l>0u; --l, ++Y) { *Y = y; }
                 }
             }
             else if (going==-1)
             {
                 sp = (*X<0.0f); X+=2; *Z++ = sm = 0;
-                for (size_t l=1u; l<L; ++l, X+=2, ++Z) { s = (*X<0.0f); sm += s*(s!=sp); *Z = sm; sp = s; }
-                for (size_t l=0u; l<L-Lw+1u; ++l) { --Z; *Z -= *(Z-Lw); }
+                for (size_t l=L; l>1u; --l, X+=2, ++Z) { s = (*X<0.0f); sm += s*(s!=sp); *Z = sm; sp = s; }
+                for (size_t l=L-Lw+1u; l>0u; --l) { --Z; *Z -= *(Z-Lw); }
                 y = (float)(*Z) / Lwf;
-                for (size_t l=0u; l<Lw-1u; ++l, ++Y) { *Y = y; }
-                for (size_t l=Lw-1u; l<L; ++l, ++Y, ++Z) { *Y = (float)(*Z) / Lwf; }
+                for (size_t l=Lw-1u; l>0u; --l, ++Y) { *Y = y; }
+                for (size_t l=L-Lw+1u; l>0u; --l, ++Y, ++Z) { *Y = (float)(*Z) / Lwf; }
                 Z -= L;
                 if (!causal)
                 {
                     const size_t L2 = Lw - Lw/2u - 1u;
                     Y -= L;
-                    for (size_t l=0u; l<L-L2; ++l, ++Y) { *Y = *(Y+L2); }
+                    for (size_t l=L-L2; l>0u; --l, ++Y) { *Y = *(Y+L2); }
                     y = *(Y-1);
-                    for (size_t l=0u; l<L2; ++l, ++Y) { *Y = y; }
+                    for (size_t l=L2; l>0u; --l, ++Y) { *Y = y; }
                 }
             }
             else { fprintf(stderr,"error in zcr_c: going must be in {-1,0,1}\n"); return 1; }
@@ -580,19 +580,19 @@ int zcr_c (float *Y, const float *X, const size_t R, const size_t C, const size_
                     for (size_t v=V; v>0u; --v)
                     {
                         sp = (*X<0.0f); X+=2; *Z++ = sm = 0;
-                        for (size_t l=1u; l<L; ++l, X+=2, ++Z) { s = (*X<0.0f); sm += (s!=sp); *Z = sm; sp = s; }
-                        for (size_t l=0u; l<L-Lw+1u; ++l) { --Z; *Z -= *(Z-Lw); }
+                        for (size_t l=L; l>1u; --l, X+=2, ++Z) { s = (*X<0.0f); sm += (s!=sp); *Z = sm; sp = s; }
+                        for (size_t l=L-Lw+1u; l>0u; --l) { --Z; *Z -= *(Z-Lw); }
                         y = (float)(*Z) / Lwf;
-                        for (size_t l=0u; l<Lw-1u; ++l, ++Y) { *Y = y; }
-                        for (size_t l=Lw-1u; l<L; ++l, ++Y, ++Z) { *Y = (float)(*Z) / Lwf; }
+                        for (size_t l=Lw-1u; l>0u; --l, ++Y) { *Y = y; }
+                        for (size_t l=L-Lw+1u; l>0u; --l, ++Y, ++Z) { *Y = (float)(*Z) / Lwf; }
                         Z -= L;
                         if (!causal)
                         {
                             const size_t L2 = Lw - Lw/2u - 1u;
                             Y -= L;
-                            for (size_t l=0u; l<L-L2; ++l, ++Y) { *Y = *(Y+L2); }
+                            for (size_t l=L-L2; l>0u; --l, ++Y) { *Y = *(Y+L2); }
                             y = *(Y-1);
-                            for (size_t l=0u; l<L2; ++l, ++Y) { *Y = y; }
+                            for (size_t l=L2; l>0u; --l, ++Y) { *Y = y; }
                         }
                     }
                 }
@@ -601,19 +601,19 @@ int zcr_c (float *Y, const float *X, const size_t R, const size_t C, const size_
                     for (size_t v=V; v>0u; --v)
                     {
                         sp = (*X>=0.0f); X+=2; *Z++ = sm = 0;
-                        for (size_t l=1u; l<L; ++l, X+=2, ++Z) { s = (*X>=0.0f); sm += s*(s!=sp); *Z = sm; sp = s; }
-                        for (size_t l=0u; l<L-Lw+1u; ++l) { --Z; *Z -= *(Z-Lw); }
+                        for (size_t l=L; l>1u; --l, X+=2, ++Z) { s = (*X>=0.0f); sm += s*(s!=sp); *Z = sm; sp = s; }
+                        for (size_t l=L-Lw+1u; l>0u; --l) { --Z; *Z -= *(Z-Lw); }
                         y = (float)(*Z) / Lwf;
-                        for (size_t l=0u; l<Lw-1u; ++l, ++Y) { *Y = y; }
-                        for (size_t l=Lw-1u; l<L; ++l, ++Y, ++Z) { *Y = (float)(*Z) / Lwf; }
+                        for (size_t l=Lw-1u; l>0u; --l, ++Y) { *Y = y; }
+                        for (size_t l=L-Lw+1u; l>0u; --l, ++Y, ++Z) { *Y = (float)(*Z) / Lwf; }
                         Z -= L;
                         if (!causal)
                         {
                             const size_t L2 = Lw - Lw/2u - 1u;
                             Y -= L;
-                            for (size_t l=0u; l<L-L2; ++l, ++Y) { *Y = *(Y+L2); }
+                            for (size_t l=L-L2; l>0u; --l, ++Y) { *Y = *(Y+L2); }
                             y = *(Y-1);
-                            for (size_t l=0u; l<L2; ++l, ++Y) { *Y = y; }
+                            for (size_t l=L2; l>0u; --l, ++Y) { *Y = y; }
                         }
                     }
                 }
@@ -622,19 +622,19 @@ int zcr_c (float *Y, const float *X, const size_t R, const size_t C, const size_
                     for (size_t v=V; v>0u; --v)
                     {
                         sp = (*X<0.0f); X+=2; *Z++ = sm = 0;
-                        for (size_t l=1u; l<L; ++l, X+=2, ++Z) { s = (*X<0.0f); sm += s*(s!=sp); *Z = sm; sp = s; }
-                        for (size_t l=0u; l<L-Lw+1u; ++l) { --Z; *Z -= *(Z-Lw); }
+                        for (size_t l=L; l>1u; --l, X+=2, ++Z) { s = (*X<0.0f); sm += s*(s!=sp); *Z = sm; sp = s; }
+                        for (size_t l=L-Lw+1u; l>0u; --l) { --Z; *Z -= *(Z-Lw); }
                         y = (float)(*Z) / Lwf;
-                        for (size_t l=0u; l<Lw-1u; ++l, ++Y) { *Y = y; }
-                        for (size_t l=Lw-1u; l<L; ++l, ++Y, ++Z) { *Y = (float)(*Z) / Lwf; }
+                        for (size_t l=Lw-1u; l>0u; --l, ++Y) { *Y = y; }
+                        for (size_t l=L-Lw+1u; l>0u; --l, ++Y, ++Z) { *Y = (float)(*Z) / Lwf; }
                         Z -= L;
                         if (!causal)
                         {
                             const size_t L2 = Lw - Lw/2u - 1u;
                             Y -= L;
-                            for (size_t l=0u; l<L-L2; ++l, ++Y) { *Y = *(Y+L2); }
+                            for (size_t l=L-L2; l>0u; --l, ++Y) { *Y = *(Y+L2); }
                             y = *(Y-1);
-                            for (size_t l=0u; l<L2; ++l, ++Y) { *Y = y; }
+                            for (size_t l=L2; l>0u; --l, ++Y) { *Y = y; }
                         }
                     }
                 }
@@ -649,19 +649,19 @@ int zcr_c (float *Y, const float *X, const size_t R, const size_t C, const size_
                         for (size_t b=B; b>0u; --b, X-=2u*K*L-2u, Y-=K*L-1u)
                         {
                             sp = (*X<0.0f); X+=2u*K; *Z++ = sm = 0;
-                            for (size_t l=1u; l<L; ++l, X+=2u*K, ++Z) { s = (*X<0.0f); sm += (s!=sp); *Z = sm; sp = s; }
-                            for (size_t l=0u; l<L-Lw+1u; ++l) { --Z; *Z -= *(Z-Lw); }
+                            for (size_t l=L; l>1u; --l, X+=2u*K, ++Z) { s = (*X<0.0f); sm += (s!=sp); *Z = sm; sp = s; }
+                            for (size_t l=L-Lw+1u; l>0u; --l) { --Z; *Z -= *(Z-Lw); }
                             y = (float)(*Z) / Lwf;
-                            for (size_t l=0u; l<Lw-1u; ++l, Y+=K) { *Y = y; }
-                            for (size_t l=Lw-1u; l<L; ++l, Y+=K, ++Z) { *Y = (float)(*Z) / Lwf; }
+                            for (size_t l=Lw-1u; l>0u; --l, Y+=K) { *Y = y; }
+                            for (size_t l=L-Lw+1u; l>0u; --l, Y+=K, ++Z) { *Y = (float)(*Z) / Lwf; }
                             Z -= L;
                             if (!causal)
                             {
                                 const size_t L2 = Lw - Lw/2u - 1u;
                                 Y -= K*L;
-                                for (size_t l=0u; l<L-L2; ++l, Y+=K) { *Y = *(Y+K*L2); }
+                                for (size_t l=L-L2; l>0u; --l, Y+=K) { *Y = *(Y+K*L2); }
                                 y = *(Y-K);
-                                for (size_t l=0u; l<L2; ++l, Y+=K) { *Y = y; }
+                                for (size_t l=L2; l>0u; --l, Y+=K) { *Y = y; }
                             }
                         }
                     }
@@ -673,19 +673,19 @@ int zcr_c (float *Y, const float *X, const size_t R, const size_t C, const size_
                         for (size_t b=B; b>0u; --b, X-=2u*K*L-2u, Y-=K*L-1u)
                         {
                             sp = (*X>=0.0f); X+=2u*K; *Z++ = sm = 0;
-                            for (size_t l=1u; l<L; ++l, X+=2u*K, ++Z) { s = (*X>=0.0f); sm += s*(s!=sp); *Z = sm; sp = s; }
-                            for (size_t l=0u; l<L-Lw+1u; ++l) { --Z; *Z -= *(Z-Lw); }
+                            for (size_t l=L; l>1u; --l, X+=2u*K, ++Z) { s = (*X>=0.0f); sm += s*(s!=sp); *Z = sm; sp = s; }
+                            for (size_t l=L-Lw+1u; l>0u; --l) { --Z; *Z -= *(Z-Lw); }
                             y = (float)(*Z) / Lwf;
-                            for (size_t l=0u; l<Lw-1u; ++l, Y+=K) { *Y = y; }
-                            for (size_t l=Lw-1u; l<L; ++l, Y+=K, ++Z) { *Y = (float)(*Z) / Lwf; }
+                            for (size_t l=Lw-1u; l>0u; --l, Y+=K) { *Y = y; }
+                            for (size_t l=L-Lw+1u; l>0u; --l, Y+=K, ++Z) { *Y = (float)(*Z) / Lwf; }
                             Z -= L;
                             if (!causal)
                             {
                                 const size_t L2 = Lw - Lw/2u - 1u;
                                 Y -= K*L;
-                                for (size_t l=0u; l<L-L2; ++l, Y+=K) { *Y = *(Y+K*L2); }
+                                for (size_t l=L-L2; l>0u; --l, Y+=K) { *Y = *(Y+K*L2); }
                                 y = *(Y-K);
-                                for (size_t l=0u; l<L2; ++l, Y+=K) { *Y = y; }
+                                for (size_t l=L2; l>0u; --l, Y+=K) { *Y = y; }
                             }
                         }
                     }
@@ -697,19 +697,19 @@ int zcr_c (float *Y, const float *X, const size_t R, const size_t C, const size_
                         for (size_t b=B; b>0u; --b, X-=2u*K*L-2u, Y-=K*L-1u)
                         {
                             sp = (*X<0.0f); X+=2u*K; *Z++ = sm = 0;
-                            for (size_t l=1u; l<L; ++l, X+=2u*K, ++Z) { s = (*X<0.0f); sm += s*(s!=sp); *Z = sm; sp = s; }
-                            for (size_t l=0u; l<L-Lw+1u; ++l) { --Z; *Z -= *(Z-Lw); }
+                            for (size_t l=L; l>1u; --l, X+=2u*K, ++Z) { s = (*X<0.0f); sm += s*(s!=sp); *Z = sm; sp = s; }
+                            for (size_t l=L-Lw+1u; l>0u; --l) { --Z; *Z -= *(Z-Lw); }
                             y = (float)(*Z) / Lwf;
-                            for (size_t l=0u; l<Lw-1u; ++l, Y+=K) { *Y = y; }
-                            for (size_t l=Lw-1u; l<L; ++l, Y+=K, ++Z) { *Y = (float)(*Z) / Lwf; }
+                            for (size_t l=Lw-1u; l>0u; --l, Y+=K) { *Y = y; }
+                            for (size_t l=L-Lw+1u; l>0u; --l, Y+=K, ++Z) { *Y = (float)(*Z) / Lwf; }
                             Z -= L;
                             if (!causal)
                             {
                                 const size_t L2 = Lw - Lw/2u - 1u;
                                 Y -= K*L;
-                                for (size_t l=0u; l<L-L2; ++l, Y+=K) { *Y = *(Y+K*L2); }
+                                for (size_t l=L-L2; l>0u; --l, Y+=K) { *Y = *(Y+K*L2); }
                                 y = *(Y-K);
-                                for (size_t l=0u; l<L2; ++l, Y+=K) { *Y = y; }
+                                for (size_t l=L2; l>0u; --l, Y+=K) { *Y = y; }
                             }
                         }
                     }
@@ -748,55 +748,55 @@ int zcr_z (double *Y, const double *X, const size_t R, const size_t C, const siz
             if (going==0)
             {
                 sp = (*X<0.0); X+=2; *Z++ = sm = 0;
-                for (size_t l=1u; l<L; ++l, X+=2, ++Z) { s = (*X<0.0); sm += (s!=sp); *Z = sm; sp = s; }
-                for (size_t l=0u; l<L-Lw+1u; ++l) { --Z; *Z -= *(Z-Lw); }
+                for (size_t l=L; l>1u; --l, X+=2, ++Z) { s = (*X<0.0); sm += (s!=sp); *Z = sm; sp = s; }
+                for (size_t l=L-Lw+1u; l>0u; --l) { --Z; *Z -= *(Z-Lw); }
                 y = (double)(*Z) / Lwf;
-                for (size_t l=0u; l<Lw-1u; ++l, ++Y) { *Y = y; }
-                for (size_t l=Lw-1u; l<L; ++l, ++Y, ++Z) { *Y = (double)(*Z) / Lwf; }
+                for (size_t l=Lw-1u; l>0u; --l, ++Y) { *Y = y; }
+                for (size_t l=L-Lw+1u; l>0u; --l, ++Y, ++Z) { *Y = (double)(*Z) / Lwf; }
                 Z -= L;
                 if (!causal)
                 {
                     const size_t L2 = Lw - Lw/2u - 1u;
                     Y -= L;
-                    for (size_t l=0u; l<L-L2; ++l, ++Y) { *Y = *(Y+L2); }
+                    for (size_t l=L-L2; l>0u; --l, ++Y) { *Y = *(Y+L2); }
                     y = *(Y-1);
-                    for (size_t l=0u; l<L2; ++l, ++Y) { *Y = y; }
+                    for (size_t l=L2; l>0u; --l, ++Y) { *Y = y; }
                 }
             }
             else if (going==1)
             {
                 sp = (*X>=0.0); X+=2; *Z++ = sm = 0;
-                for (size_t l=1u; l<L; ++l, X+=2, ++Z) { s = (*X>=0.0); sm += s*(s!=sp); *Z = sm; sp = s; }
-                for (size_t l=0u; l<L-Lw+1u; ++l) { --Z; *Z -= *(Z-Lw); }
+                for (size_t l=L; l>1u; --l, X+=2, ++Z) { s = (*X>=0.0); sm += s*(s!=sp); *Z = sm; sp = s; }
+                for (size_t l=L-Lw+1u; l>0u; --l) { --Z; *Z -= *(Z-Lw); }
                 y = (double)(*Z) / Lwf;
-                for (size_t l=0u; l<Lw-1u; ++l, ++Y) { *Y = y; }
-                for (size_t l=Lw-1u; l<L; ++l, ++Y, ++Z) { *Y = (double)(*Z) / Lwf; }
+                for (size_t l=Lw-1u; l>0u; --l, ++Y) { *Y = y; }
+                for (size_t l=L-Lw+1u; l>0u; --l, ++Y, ++Z) { *Y = (double)(*Z) / Lwf; }
                 Z -= L;
                 if (!causal)
                 {
                     const size_t L2 = Lw - Lw/2u - 1u;
                     Y -= L;
-                    for (size_t l=0u; l<L-L2; ++l, ++Y) { *Y = *(Y+L2); }
+                    for (size_t l=L-L2; l>0u; --l, ++Y) { *Y = *(Y+L2); }
                     y = *(Y-1);
-                    for (size_t l=0u; l<L2; ++l, ++Y) { *Y = y; }
+                    for (size_t l=L2; l>0u; --l, ++Y) { *Y = y; }
                 }
             }
             else if (going==-1)
             {
                 sp = (*X<0.0); X+=2; *Z++ = sm = 0;
-                for (size_t l=1u; l<L; ++l, X+=2, ++Z) { s = (*X<0.0); sm += s*(s!=sp); *Z = sm; sp = s; }
-                for (size_t l=0u; l<L-Lw+1u; ++l) { --Z; *Z -= *(Z-Lw); }
+                for (size_t l=L; l>1u; --l, X+=2, ++Z) { s = (*X<0.0); sm += s*(s!=sp); *Z = sm; sp = s; }
+                for (size_t l=L-Lw+1u; l>0u; --l) { --Z; *Z -= *(Z-Lw); }
                 y = (double)(*Z) / Lwf;
-                for (size_t l=0u; l<Lw-1u; ++l, ++Y) { *Y = y; }
-                for (size_t l=Lw-1u; l<L; ++l, ++Y, ++Z) { *Y = (double)(*Z) / Lwf; }
+                for (size_t l=Lw-1u; l>0u; --l, ++Y) { *Y = y; }
+                for (size_t l=L-Lw+1u; l>0u; --l, ++Y, ++Z) { *Y = (double)(*Z) / Lwf; }
                 Z -= L;
                 if (!causal)
                 {
                     const size_t L2 = Lw - Lw/2u - 1u;
                     Y -= L;
-                    for (size_t l=0u; l<L-L2; ++l, ++Y) { *Y = *(Y+L2); }
+                    for (size_t l=L-L2; l>0u; --l, ++Y) { *Y = *(Y+L2); }
                     y = *(Y-1);
-                    for (size_t l=0u; l<L2; ++l, ++Y) { *Y = y; }
+                    for (size_t l=L2; l>0u; --l, ++Y) { *Y = y; }
                 }
             }
             else { fprintf(stderr,"error in zcr_z: going must be in {-1,0,1}\n"); return 1; }
@@ -814,19 +814,19 @@ int zcr_z (double *Y, const double *X, const size_t R, const size_t C, const siz
                     for (size_t v=V; v>0u; --v)
                     {
                         sp = (*X<0.0); X+=2; *Z++ = sm = 0;
-                        for (size_t l=1u; l<L; ++l, X+=2, ++Z) { s = (*X<0.0); sm += (s!=sp); *Z = sm; sp = s; }
-                        for (size_t l=0u; l<L-Lw+1u; ++l) { --Z; *Z -= *(Z-Lw); }
+                        for (size_t l=L; l>1u; --l, X+=2, ++Z) { s = (*X<0.0); sm += (s!=sp); *Z = sm; sp = s; }
+                        for (size_t l=L-Lw+1u; l>0u; --l) { --Z; *Z -= *(Z-Lw); }
                         y = (double)(*Z) / Lwf;
-                        for (size_t l=0u; l<Lw-1u; ++l, ++Y) { *Y = y; }
-                        for (size_t l=Lw-1u; l<L; ++l, ++Y, ++Z) { *Y = (double)(*Z) / Lwf; }
+                        for (size_t l=Lw-1u; l>0u; --l, ++Y) { *Y = y; }
+                        for (size_t l=L-Lw+1u; l>0u; --l, ++Y, ++Z) { *Y = (double)(*Z) / Lwf; }
                         Z -= L;
                         if (!causal)
                         {
                             const size_t L2 = Lw - Lw/2u - 1u;
                             Y -= L;
-                            for (size_t l=0u; l<L-L2; ++l, ++Y) { *Y = *(Y+L2); }
+                            for (size_t l=L-L2; l>0u; --l, ++Y) { *Y = *(Y+L2); }
                             y = *(Y-1);
-                            for (size_t l=0u; l<L2; ++l, ++Y) { *Y = y; }
+                            for (size_t l=L2; l>0u; --l, ++Y) { *Y = y; }
                         }
                     }
                 }
@@ -835,19 +835,19 @@ int zcr_z (double *Y, const double *X, const size_t R, const size_t C, const siz
                     for (size_t v=V; v>0u; --v)
                     {
                         sp = (*X>=0.0); X+=2; *Z++ = sm = 0;
-                        for (size_t l=1u; l<L; ++l, X+=2, ++Z) { s = (*X>=0.0); sm += s*(s!=sp); *Z = sm; sp = s; }
-                        for (size_t l=0u; l<L-Lw+1u; ++l) { --Z; *Z -= *(Z-Lw); }
+                        for (size_t l=L; l>1u; --l, X+=2, ++Z) { s = (*X>=0.0); sm += s*(s!=sp); *Z = sm; sp = s; }
+                        for (size_t l=L-Lw+1u; l>0u; --l) { --Z; *Z -= *(Z-Lw); }
                         y = (double)(*Z) / Lwf;
-                        for (size_t l=0u; l<Lw-1u; ++l, ++Y) { *Y = y; }
-                        for (size_t l=Lw-1u; l<L; ++l, ++Y, ++Z) { *Y = (double)(*Z) / Lwf; }
+                        for (size_t l=Lw-1u; l>0u; --l, ++Y) { *Y = y; }
+                        for (size_t l=L-Lw+1u; l>0u; --l, ++Y, ++Z) { *Y = (double)(*Z) / Lwf; }
                         Z -= L;
                         if (!causal)
                         {
                             const size_t L2 = Lw - Lw/2u - 1u;
                             Y -= L;
-                            for (size_t l=0u; l<L-L2; ++l, ++Y) { *Y = *(Y+L2); }
+                            for (size_t l=L-L2; l>0u; --l, ++Y) { *Y = *(Y+L2); }
                             y = *(Y-1);
-                            for (size_t l=0u; l<L2; ++l, ++Y) { *Y = y; }
+                            for (size_t l=L2; l>0u; --l, ++Y) { *Y = y; }
                         }
                     }
                 }
@@ -856,19 +856,19 @@ int zcr_z (double *Y, const double *X, const size_t R, const size_t C, const siz
                     for (size_t v=V; v>0u; --v)
                     {
                         sp = (*X<0.0); X+=2; *Z++ = sm = 0;
-                        for (size_t l=1u; l<L; ++l, X+=2, ++Z) { s = (*X<0.0); sm += s*(s!=sp); *Z = sm; sp = s; }
-                        for (size_t l=0u; l<L-Lw+1u; ++l) { --Z; *Z -= *(Z-Lw); }
+                        for (size_t l=L; l>1u; --l, X+=2, ++Z) { s = (*X<0.0); sm += s*(s!=sp); *Z = sm; sp = s; }
+                        for (size_t l=L-Lw+1u; l>0u; --l) { --Z; *Z -= *(Z-Lw); }
                         y = (double)(*Z) / Lwf;
-                        for (size_t l=0u; l<Lw-1u; ++l, ++Y) { *Y = y; }
-                        for (size_t l=Lw-1u; l<L; ++l, ++Y, ++Z) { *Y = (double)(*Z) / Lwf; }
+                        for (size_t l=Lw-1u; l>0u; --l, ++Y) { *Y = y; }
+                        for (size_t l=L-Lw+1u; l>0u; --l, ++Y, ++Z) { *Y = (double)(*Z) / Lwf; }
                         Z -= L;
                         if (!causal)
                         {
                             const size_t L2 = Lw - Lw/2u - 1u;
                             Y -= L;
-                            for (size_t l=0u; l<L-L2; ++l, ++Y) { *Y = *(Y+L2); }
+                            for (size_t l=L-L2; l>0u; --l, ++Y) { *Y = *(Y+L2); }
                             y = *(Y-1);
-                            for (size_t l=0u; l<L2; ++l, ++Y) { *Y = y; }
+                            for (size_t l=L2; l>0u; --l, ++Y) { *Y = y; }
                         }
                     }
                 }
@@ -883,19 +883,19 @@ int zcr_z (double *Y, const double *X, const size_t R, const size_t C, const siz
                         for (size_t b=B; b>0u; --b, X-=2u*K*L-2u, Y-=K*L-1u)
                         {
                             sp = (*X<0.0); X+=2u*K; *Z++ = sm = 0;
-                            for (size_t l=1u; l<L; ++l, X+=2u*K, ++Z) { s = (*X<0.0); sm += (s!=sp); *Z = sm; sp = s; }
-                            for (size_t l=0u; l<L-Lw+1u; ++l) { --Z; *Z -= *(Z-Lw); }
+                            for (size_t l=L; l>1u; --l, X+=2u*K, ++Z) { s = (*X<0.0); sm += (s!=sp); *Z = sm; sp = s; }
+                            for (size_t l=L-Lw+1u; l>0u; --l) { --Z; *Z -= *(Z-Lw); }
                             y = (double)(*Z) / Lwf;
-                            for (size_t l=0u; l<Lw-1u; ++l, Y+=K) { *Y = y; }
-                            for (size_t l=Lw-1u; l<L; ++l, Y+=K, ++Z) { *Y = (double)(*Z) / Lwf; }
+                            for (size_t l=Lw-1u; l>0u; --l, Y+=K) { *Y = y; }
+                            for (size_t l=L-Lw+1u; l>0u; --l, Y+=K, ++Z) { *Y = (double)(*Z) / Lwf; }
                             Z -= L;
                             if (!causal)
                             {
                                 const size_t L2 = Lw - Lw/2u - 1u;
                                 Y -= K*L;
-                                for (size_t l=0u; l<L-L2; ++l, Y+=K) { *Y = *(Y+K*L2); }
+                                for (size_t l=L-L2; l>0u; --l, Y+=K) { *Y = *(Y+K*L2); }
                                 y = *(Y-K);
-                                for (size_t l=0u; l<L2; ++l, Y+=K) { *Y = y; }
+                                for (size_t l=L2; l>0u; --l, Y+=K) { *Y = y; }
                             }
                         }
                     }
@@ -907,19 +907,19 @@ int zcr_z (double *Y, const double *X, const size_t R, const size_t C, const siz
                         for (size_t b=B; b>0u; --b, X-=2u*K*L-2u, Y-=K*L-1u)
                         {
                             sp = (*X>=0.0); X+=2u*K; *Z++ = sm = 0;
-                            for (size_t l=1u; l<L; ++l, X+=2u*K, ++Z) { s = (*X>=0.0); sm += s*(s!=sp); *Z = sm; sp = s; }
-                            for (size_t l=0u; l<L-Lw+1u; ++l) { --Z; *Z -= *(Z-Lw); }
+                            for (size_t l=L; l>1u; --l, X+=2u*K, ++Z) { s = (*X>=0.0); sm += s*(s!=sp); *Z = sm; sp = s; }
+                            for (size_t l=L-Lw+1u; l>0u; --l) { --Z; *Z -= *(Z-Lw); }
                             y = (double)(*Z) / Lwf;
-                            for (size_t l=0u; l<Lw-1u; ++l, Y+=K) { *Y = y; }
-                            for (size_t l=Lw-1u; l<L; ++l, Y+=K, ++Z) { *Y = (double)(*Z) / Lwf; }
+                            for (size_t l=Lw-1u; l>0u; --l, Y+=K) { *Y = y; }
+                            for (size_t l=L-Lw+1u; l>0u; --l, Y+=K, ++Z) { *Y = (double)(*Z) / Lwf; }
                             Z -= L;
                             if (!causal)
                             {
                                 const size_t L2 = Lw - Lw/2u - 1u;
                                 Y -= K*L;
-                                for (size_t l=0u; l<L-L2; ++l, Y+=K) { *Y = *(Y+K*L2); }
+                                for (size_t l=L-L2; l>0u; --l, Y+=K) { *Y = *(Y+K*L2); }
                                 y = *(Y-K);
-                                for (size_t l=0u; l<L2; ++l, Y+=K) { *Y = y; }
+                                for (size_t l=L2; l>0u; --l, Y+=K) { *Y = y; }
                             }
                         }
                     }
@@ -931,19 +931,19 @@ int zcr_z (double *Y, const double *X, const size_t R, const size_t C, const siz
                         for (size_t b=B; b>0u; --b, X-=2u*K*L-2u, Y-=K*L-1u)
                         {
                             sp = (*X<0.0); X+=2u*K; *Z++ = sm = 0;
-                            for (size_t l=1u; l<L; ++l, X+=2u*K, ++Z) { s = (*X<0.0); sm += s*(s!=sp); *Z = sm; sp = s; }
-                            for (size_t l=0u; l<L-Lw+1u; ++l) { --Z; *Z -= *(Z-Lw); }
+                            for (size_t l=L; l>1u; --l, X+=2u*K, ++Z) { s = (*X<0.0); sm += s*(s!=sp); *Z = sm; sp = s; }
+                            for (size_t l=L-Lw+1u; l>0u; --l) { --Z; *Z -= *(Z-Lw); }
                             y = (double)(*Z) / Lwf;
-                            for (size_t l=0u; l<Lw-1u; ++l, Y+=K) { *Y = y; }
-                            for (size_t l=Lw-1u; l<L; ++l, Y+=K, ++Z) { *Y = (double)(*Z) / Lwf; }
+                            for (size_t l=Lw-1u; l>0u; --l, Y+=K) { *Y = y; }
+                            for (size_t l=L-Lw+1u; l>0u; --l, Y+=K, ++Z) { *Y = (double)(*Z) / Lwf; }
                             Z -= L;
                             if (!causal)
                             {
                                 const size_t L2 = Lw - Lw/2u - 1u;
                                 Y -= K*L;
-                                for (size_t l=0u; l<L-L2; ++l, Y+=K) { *Y = *(Y+K*L2); }
+                                for (size_t l=L-L2; l>0u; --l, Y+=K) { *Y = *(Y+K*L2); }
                                 y = *(Y-K);
-                                for (size_t l=0u; l<L2; ++l, Y+=K) { *Y = y; }
+                                for (size_t l=L2; l>0u; --l, Y+=K) { *Y = y; }
                             }
                         }
                     }

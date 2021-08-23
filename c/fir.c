@@ -26,7 +26,7 @@ int fir_s (float *Y, const float *X, const float *B, const size_t R, const size_
 
     //Initialize Y
     float b = *B++;
-    for (size_t n=0u; n<N; ++n, ++X, ++Y) { *Y = b * *X; }
+    for (size_t n=N; n>0u; --n, ++X, ++Y) { *Y = b * *X; }
     X -= N; Y -= N - 1u;
 
     if (N==0u || L==1u || Q==0u) {}
@@ -78,7 +78,7 @@ int fir_s (float *Y, const float *X, const float *B, const size_t R, const size_
             Y += K - 1u;
             for (size_t g=G; g>0u; --g, X+=BS*(L-1u), Y+=BS*(L-1u))
             {
-                for (size_t bs=0u; bs<BS; ++bs, ++X, B-=Q, Y-=K*Q-1u)
+                for (size_t bs=BS; bs>0u; --bs, ++X, B-=Q, Y-=K*Q-1u)
                 {
                     for (size_t q=1u; q<=Q; ++q, ++B, Y+=K) { cblas_saxpy((int)(L-q),*B,X,(int)K,Y,(int)K); }
                 }
@@ -99,7 +99,7 @@ int fir_d (double *Y, const double *X, const double *B, const size_t R, const si
 
     //Initialize Y
     double b = *B++;
-    for (size_t n=0u; n<N; ++n, ++X, ++Y) { *Y = b * *X; }
+    for (size_t n=N; n>0u; --n, ++X, ++Y) { *Y = b * *X; }
     X -= N; Y -= N - 1u;
 
     if (N==0u || L==1u || Q==0u) {}
@@ -151,7 +151,7 @@ int fir_d (double *Y, const double *X, const double *B, const size_t R, const si
             Y += K - 1u;
             for (size_t g=G; g>0u; --g, X+=BS*(L-1u), Y+=BS*(L-1u))
             {
-                for (size_t bs=0u; bs<BS; ++bs, ++X, B-=Q, Y-=K*Q-1u)
+                for (size_t bs=BS; bs>0u; --bs, ++X, B-=Q, Y-=K*Q-1u)
                 {
                     for (size_t q=1u; q<=Q; ++q, ++B, Y+=K) { cblas_daxpy((int)(L-q),*B,X,(int)K,Y,(int)K); }
                 }
@@ -173,7 +173,7 @@ int fir_c (float *Y, const float *X, const float *B, const size_t R, const size_
 
     //Initialize Y
     br = *B++; bi = *B++;
-    for (size_t n=0u; n<N; ++n)
+    for (size_t n=N; n>0u; --n)
     {
         xr = *X++; xi = *X++;
         *Y++ = br*xr - bi*xi;
@@ -240,7 +240,7 @@ int fir_c (float *Y, const float *X, const float *B, const size_t R, const size_
             Y += 2u*K - 2u;
             for (size_t g=G; g>0u; --g, X+=2u*BS*(L-1u), Y+=2u*BS*(L-1u))
             {
-                for (size_t bs=0u; bs<BS; ++bs, X+=2u, B-=2u*Q, Y-=2u*K*Q-2u)
+                for (size_t bs=BS; bs>0u; --bs, X+=2u, B-=2u*Q, Y-=2u*K*Q-2u)
                 {
                     for (size_t q=1u; q<=Q; ++q, B+=2u, Y+=2u*K) { cblas_caxpy((int)(L-q),B,X,(int)K,Y,(int)K); }
                 }
@@ -262,7 +262,7 @@ int fir_z (double *Y, const double *X, const double *B, const size_t R, const si
 
     //Initialize Y
     br = *B++; bi = *B++;
-    for (size_t n=0u; n<N; ++n)
+    for (size_t n=N; n>0u; --n)
     {
         xr = *X++; xi = *X++;
         *Y++ = br*xr - bi*xi;
@@ -329,7 +329,7 @@ int fir_z (double *Y, const double *X, const double *B, const size_t R, const si
             Y += 2u*K - 2u;
             for (size_t g=G; g>0u; --g, X+=2u*BS*(L-1u), Y+=2u*BS*(L-1u))
             {
-                for (size_t bs=0u; bs<BS; ++bs, X+=2u, B-=2u*Q, Y-=2u*K*Q-2u)
+                for (size_t bs=BS; bs>0u; --bs, X+=2u, B-=2u*Q, Y-=2u*K*Q-2u)
                 {
                     for (size_t q=1u; q<=Q; ++q, B+=2u, Y+=2u*K) { cblas_zaxpy((int)(L-q),B,X,(int)K,Y,(int)K); }
                 }

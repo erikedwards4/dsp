@@ -27,23 +27,23 @@ int pow_compress_s (float *Y, const float *X, const size_t N, const float p, con
 
     if (p==1.0f)
     {
-        for (size_t n=0u; n<N; ++n, ++X, ++Y) { *Y = *X + preg; }
+        for (size_t n=N; n>0u; --n, ++X, ++Y) { *Y = *X + preg; }
     }
     else if (p==0.0f)
     {
-        for (size_t n=0u; n<N; ++n, ++X, ++Y) { *Y = logf(*X+preg); }
+        for (size_t n=N; n>0u; --n, ++X, ++Y) { *Y = logf(*X+preg); }
     }
     else if (p==0.5f)
     {
-        for (size_t n=0u; n<N; ++n, ++X, ++Y) { *Y = sqrtf(*X+preg); }
+        for (size_t n=N; n>0u; --n, ++X, ++Y) { *Y = sqrtf(*X+preg); }
     }
     else if (fabsf(p-1.0f/3.0f)<=FLT_EPSILON)
     {
-        for (size_t n=0u; n<N; ++n, ++X, ++Y) { *Y = cbrtf(*X+preg); }
+        for (size_t n=N; n>0u; --n, ++X, ++Y) { *Y = cbrtf(*X+preg); }
     }
     else
     {
-        for (size_t n=0u; n<N; ++n, ++X, ++Y) { *Y = powf(*X+preg,p); }
+        for (size_t n=N; n>0u; --n, ++X, ++Y) { *Y = powf(*X+preg,p); }
     }
     
     return 0;
@@ -57,23 +57,23 @@ int pow_compress_d (double *Y, const double *X, const size_t N, const double p, 
 
     if (p==1.0)
     {
-        for (size_t n=0u; n<N; ++n, ++X, ++Y) { *Y = *X + preg; }
+        for (size_t n=N; n>0u; --n, ++X, ++Y) { *Y = *X + preg; }
     }
     else if (p==0.0)
     {
-        for (size_t n=0u; n<N; ++n, ++X, ++Y) { *Y = log(*X+preg); }
+        for (size_t n=N; n>0u; --n, ++X, ++Y) { *Y = log(*X+preg); }
     }
     else if (p==0.5)
     {
-        for (size_t n=0u; n<N; ++n, ++X, ++Y) { *Y = sqrt(*X+preg); }
+        for (size_t n=N; n>0u; --n, ++X, ++Y) { *Y = sqrt(*X+preg); }
     }
     else if (fabs(p-1.0/3.0)<=(double)FLT_EPSILON)
     {
-        for (size_t n=0u; n<N; ++n, ++X, ++Y) { *Y = cbrt(*X+preg); }
+        for (size_t n=N; n>0u; --n, ++X, ++Y) { *Y = cbrt(*X+preg); }
     }
     else
     {
-        for (size_t n=0u; n<N; ++n, ++X, ++Y) { *Y = pow(*X+preg,p); }
+        for (size_t n=N; n>0u; --n, ++X, ++Y) { *Y = pow(*X+preg,p); }
     }
     
     return 0;
@@ -87,23 +87,23 @@ int pow_compress_inplace_s (float *X, const size_t N, const float p, const float
 
     if (p==1.0f)
     {
-        for (size_t n=0u; n<N; ++n, ++X) { *X += preg; }
+        for (size_t n=N; n>0u; --n, ++X) { *X += preg; }
     }
     else if (p==0.0f)
     {
-        for (size_t n=0u; n<N; ++n, ++X) { *X = logf(*X+preg); }
+        for (size_t n=N; n>0u; --n, ++X) { *X = logf(*X+preg); }
     }
     else if (p==0.5f)
     {
-        for (size_t n=0u; n<N; ++n, ++X) { *X = sqrtf(*X+preg); }
+        for (size_t n=N; n>0u; --n, ++X) { *X = sqrtf(*X+preg); }
     }
     else if (fabsf(p-1.0f/3.0f)<=FLT_EPSILON)
     {
-        for (size_t n=0u; n<N; ++n, ++X) { *X = cbrtf(*X+preg); }
+        for (size_t n=N; n>0u; --n, ++X) { *X = cbrtf(*X+preg); }
     }
     else
     {
-        for (size_t n=0u; n<N; ++n, ++X) { *X = powf(*X+preg,p); }
+        for (size_t n=N; n>0u; --n, ++X) { *X = powf(*X+preg,p); }
     }
     
     return 0;
@@ -117,23 +117,23 @@ int pow_compress_inplace_d (double*X, const size_t N, const double p, const doub
 
     if (p==1.0)
     {
-        for (size_t n=0u; n<N; ++n, ++X) { *X += preg; }
+        for (size_t n=N; n>0u; --n, ++X) { *X += preg; }
     }
     else if (p==0.0)
     {
-        for (size_t n=0u; n<N; ++n, ++X) { *X = log(*X+preg); }
+        for (size_t n=N; n>0u; --n, ++X) { *X = log(*X+preg); }
     }
     else if (p==0.5)
     {
-        for (size_t n=0u; n<N; ++n, ++X) { *X = sqrt(*X+preg); }
+        for (size_t n=N; n>0u; --n, ++X) { *X = sqrt(*X+preg); }
     }
     else if (fabs(p-1.0/3.0)<=(double)FLT_EPSILON)
     {
-        for (size_t n=0u; n<N; ++n, ++X) { *X = cbrt(*X+preg); }
+        for (size_t n=N; n>0u; --n, ++X) { *X = cbrt(*X+preg); }
     }
     else
     {
-        for (size_t n=0u; n<N; ++n, ++X) { *X = pow(*X+preg,p); }
+        for (size_t n=N; n>0u; --n, ++X) { *X = pow(*X+preg,p); }
     }
     
     return 0;

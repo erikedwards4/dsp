@@ -4,8 +4,8 @@
 //X2 should sum to 1 if the output Y is interpreted as a moving average.
 
 //I profiled a few ways to do the dot product between bool *Z and float *X2.
-//1. for (size_t l=0u; l<Lw; ++l, ++Z, ++X2) { sm += (float)*Z * *X2; }
-//2. for (size_t l=0u; l<Lw; ++l, ++Z, ++X2) { if (*Z) { sm += *X2; } }
+//1. for (size_t l=Lw; l>0u; --l, ++Z, ++X2) { sm += (float)*Z * *X2; }
+//2. for (size_t l=Lw; l>0u; --l, ++Z, ++X2) { if (*Z) { sm += *X2; } }
 //3. a while loop method.
 //1. was ~10% faster than 2., which was ~10% faster than 3.
 
@@ -71,17 +71,17 @@ int zcr_windowed_s (float *Y, const float *X1, const float *X2, const size_t R, 
                 if (going==0)
                 {
                     sp = (*X1++<0.0f); *Z++ = 0;
-                    for (size_t l=1u; l<Lx; ++l, ++X1, ++Z) { s = (*X1<0.0f); *Z = (s!=sp); sp = s; }
+                    for (size_t l=Lx; l>1u; --l, ++X1, ++Z) { s = (*X1<0.0f); *Z = (s!=sp); sp = s; }
                 }
                 else if (going==1)
                 {
                     sp = (*X1++>=0.0f); *Z++ = 0;
-                    for (size_t l=1u; l<Lx; ++l, ++X1, ++Z) { s = (*X1>=0.0f); *Z = s*(s!=sp); sp = s; }
+                    for (size_t l=Lx; l>1u; --l, ++X1, ++Z) { s = (*X1>=0.0f); *Z = s*(s!=sp); sp = s; }
                 }
                 else if (going==-1)
                 {
                     sp = (*X1++<0.0f); *Z++ = 0;
-                    for (size_t l=1u; l<Lx; ++l, ++X1, ++Z) { s = (*X1<0.0f); *Z = s*(s!=sp); sp = s; }
+                    for (size_t l=Lx; l>1u; --l, ++X1, ++Z) { s = (*X1<0.0f); *Z = s*(s!=sp); sp = s; }
                 }
                 Z -= Lx;
 
@@ -102,7 +102,7 @@ int zcr_windowed_s (float *Y, const float *X1, const float *X2, const size_t R, 
                 while (ss<0 && w<W)
                 {
                     sm = 0.0f; X2 -= ss;
-                    for (size_t l=(size_t)(-ss); l<Lw; ++l, ++X2, ++Z) { sm += (float)(*Z) * *X2; }
+                    for (size_t l=Lw-(size_t)(-ss); l>0u; --l, ++X2, ++Z) { sm += (float)(*Z) * *X2; }
                     *Y++ = sm;
                     ++w; cc += stp; cs = (int)roundf(cc);
                     Z -= (int)Lw + ss; X2 -= Lw;
@@ -115,8 +115,8 @@ int zcr_windowed_s (float *Y, const float *X1, const float *X2, const size_t R, 
                 while (es<(int)Lx && w<W)
                 {
                     sm = 0.0f;
-                    //for (size_t l=0u; l<Lw; ++l, ++Z, ++X2) { sm = fmaf((float)*Z,*X2,sm); }
-                    for (size_t l=0u; l<Lw; ++l, ++Z, ++X2) { sm += (float)*Z * *X2; }
+                    //for (size_t l=Lw; l>0u; --l, ++Z, ++X2) { sm = fmaf((float)*Z,*X2,sm); }
+                    for (size_t l=Lw; l>0u; --l, ++Z, ++X2) { sm += (float)*Z * *X2; }
                     *Y++ = sm;
                     ++w; cc += stp; cs = (int)roundf(cc);
                     Z += cs - prev_cs - (int)Lw; X2 -= Lw;
@@ -128,7 +128,7 @@ int zcr_windowed_s (float *Y, const float *X1, const float *X2, const size_t R, 
                 while (ss<(int)Lx && w<W)
                 {
                     sm = 0.0f;
-                    for (size_t l=0u; l<Lx-(size_t)ss; ++l, ++Z, ++X2) { sm += (float)(*Z) * *X2; }
+                    for (size_t l=Lx-(size_t)ss; l>0u; --l, ++Z, ++X2) { sm += (float)(*Z) * *X2; }
                     *Y++ = sm;
                     X2 += ss - (int)Lx;
                     ++w; cc += stp; cs = (int)roundf(cc);
@@ -151,17 +151,17 @@ int zcr_windowed_s (float *Y, const float *X1, const float *X2, const size_t R, 
                     if (going==0)
                     {
                         sp = (*X1<0.0f); X1+=K; *Z++ = 0;
-                        for (size_t l=1u; l<Lx; ++l, X1+=K, ++Z) { s = (*X1<0.0f); *Z = (s!=sp); sp = s; }
+                        for (size_t l=Lx; l>1u; --l, X1+=K, ++Z) { s = (*X1<0.0f); *Z = (s!=sp); sp = s; }
                     }
                     else if (going==1)
                     {
                         sp = (*X1>=0.0f); X1+=K; *Z++ = 0;
-                        for (size_t l=1u; l<Lx; ++l, X1+=K, ++Z) { s = (*X1>=0.0f); *Z = s*(s!=sp); sp = s; }
+                        for (size_t l=Lx; l>1u; --l, X1+=K, ++Z) { s = (*X1>=0.0f); *Z = s*(s!=sp); sp = s; }
                     }
                     else if (going==-1)
                     {
                         sp = (*X1<0.0f); X1+=K; *Z++ = 0;
-                        for (size_t l=1u; l<Lx; ++l, X1+=K, ++Z) { s = (*X1<0.0f); *Z = s*(s!=sp); sp = s; }
+                        for (size_t l=Lx; l>1u; --l, X1+=K, ++Z) { s = (*X1<0.0f); *Z = s*(s!=sp); sp = s; }
                     }
                     Z -= Lx;
 
@@ -182,7 +182,7 @@ int zcr_windowed_s (float *Y, const float *X1, const float *X2, const size_t R, 
                     while (ss<0 && w<W)
                     {
                         sm = 0.0f; X2 -= ss;
-                        for (size_t l=(size_t)(-ss); l<Lw; ++l, ++X2, ++Z) { sm += (float)(*Z) * *X2; }
+                        for (size_t l=Lw-(size_t)(-ss); l>0u; --l, ++X2, ++Z) { sm += (float)(*Z) * *X2; }
                         *Y = sm; Y += K;
                         ++w; cc += stp; cs = (int)roundf(cc);
                         Z -= (int)Lw + ss; X2 -= Lw;
@@ -195,7 +195,7 @@ int zcr_windowed_s (float *Y, const float *X1, const float *X2, const size_t R, 
                     while (es<(int)Lx && w<W)
                     {
                         sm = 0.0f;
-                        for (size_t l=0u; l<Lw; ++l, ++Z, ++X2) { sm += (float)*Z * *X2; }
+                        for (size_t l=Lw; l>0u; --l, ++Z, ++X2) { sm += (float)*Z * *X2; }
                         *Y = sm; Y += K;
                         ++w; cc += stp; cs = (int)roundf(cc);
                         Z += cs - prev_cs - (int)Lw; X2 -= Lw;
@@ -207,7 +207,7 @@ int zcr_windowed_s (float *Y, const float *X1, const float *X2, const size_t R, 
                     while (ss<(int)Lx && w<W)
                     {
                         sm = 0.0f;
-                        for (size_t l=0u; l<Lx-(size_t)ss; ++l, ++Z, ++X2) { sm += (float)(*Z) * *X2; }
+                        for (size_t l=Lx-(size_t)ss; l>0u; --l, ++Z, ++X2) { sm += (float)(*Z) * *X2; }
                         *Y = sm; Y += K;
                         X2 += ss - (int)Lx;
                         ++w; cc += stp; cs = (int)roundf(cc);
@@ -275,17 +275,17 @@ int zcr_windowed_d (double *Y, const double *X1, const double *X2, const size_t 
                 if (going==0)
                 {
                     sp = (*X1++<0.0); *Z++ = 0;
-                    for (size_t l=1u; l<Lx; ++l, ++X1, ++Z) { s = (*X1<0.0); *Z = (s!=sp); sp = s; }
+                    for (size_t l=Lx; l>1u; --l, ++X1, ++Z) { s = (*X1<0.0); *Z = (s!=sp); sp = s; }
                 }
                 else if (going==1)
                 {
                     sp = (*X1++>=0.0); *Z++ = 0;
-                    for (size_t l=1u; l<Lx; ++l, ++X1, ++Z) { s = (*X1>=0.0); *Z = s*(s!=sp); sp = s; }
+                    for (size_t l=Lx; l>1u; --l, ++X1, ++Z) { s = (*X1>=0.0); *Z = s*(s!=sp); sp = s; }
                 }
                 else if (going==-1)
                 {
                     sp = (*X1++<0.0); *Z++ = 0;
-                    for (size_t l=1u; l<Lx; ++l, ++X1, ++Z) { s = (*X1<0.0); *Z = s*(s!=sp); sp = s; }
+                    for (size_t l=Lx; l>1u; --l, ++X1, ++Z) { s = (*X1<0.0); *Z = s*(s!=sp); sp = s; }
                 }
                 Z -= Lx;
 
@@ -306,7 +306,7 @@ int zcr_windowed_d (double *Y, const double *X1, const double *X2, const size_t 
                 while (ss<0 && w<W)
                 {
                     sm = 0.0; X2 -= ss;
-                    for (size_t l=(size_t)(-ss); l<Lw; ++l, ++X2, ++Z) { sm += (double)(*Z) * *X2; }
+                    for (size_t l=Lw-(size_t)(-ss); l>0u; --l, ++X2, ++Z) { sm += (double)(*Z) * *X2; }
                     *Y++ = sm;
                     ++w; cc += stp; cs = (int)round(cc);
                     Z -= (int)Lw + ss; X2 -= Lw;
@@ -319,7 +319,7 @@ int zcr_windowed_d (double *Y, const double *X1, const double *X2, const size_t 
                 while (es<(int)Lx && w<W)
                 {
                     sm = 0.0;
-                    for (size_t l=0u; l<Lw; ++l, ++Z, ++X2) { sm += (double)*Z * *X2; }
+                    for (size_t l=Lw; l>0u; --l, ++Z, ++X2) { sm += (double)*Z * *X2; }
                     *Y++ = sm;
                     ++w; cc += stp; cs = (int)round(cc);
                     Z += cs - prev_cs - (int)Lw; X2 -= Lw;
@@ -331,7 +331,7 @@ int zcr_windowed_d (double *Y, const double *X1, const double *X2, const size_t 
                 while (ss<(int)Lx && w<W)
                 {
                     sm = 0.0;
-                    for (size_t l=0u; l<Lx-(size_t)ss; ++l, ++Z, ++X2) { sm += (double)(*Z) * *X2; }
+                    for (size_t l=Lx-(size_t)ss; l>0u; --l, ++Z, ++X2) { sm += (double)(*Z) * *X2; }
                     *Y++ = sm;
                     X2 += ss - (int)Lx;
                     ++w; cc += stp; cs = (int)round(cc);
@@ -354,17 +354,17 @@ int zcr_windowed_d (double *Y, const double *X1, const double *X2, const size_t 
                     if (going==0)
                     {
                         sp = (*X1<0.0); X1+=K; *Z++ = 0;
-                        for (size_t l=1u; l<Lx; ++l, X1+=K, ++Z) { s = (*X1<0.0); *Z = (s!=sp); sp = s; }
+                        for (size_t l=Lx; l>1u; --l, X1+=K, ++Z) { s = (*X1<0.0); *Z = (s!=sp); sp = s; }
                     }
                     else if (going==1)
                     {
                         sp = (*X1>=0.0); X1+=K; *Z++ = 0;
-                        for (size_t l=1u; l<Lx; ++l, X1+=K, ++Z) { s = (*X1>=0.0); *Z = s*(s!=sp); sp = s; }
+                        for (size_t l=Lx; l>1u; --l, X1+=K, ++Z) { s = (*X1>=0.0); *Z = s*(s!=sp); sp = s; }
                     }
                     else if (going==-1)
                     {
                         sp = (*X1<0.0); X1+=K; *Z++ = 0;
-                        for (size_t l=1u; l<Lx; ++l, X1+=K, ++Z) { s = (*X1<0.0); *Z = s*(s!=sp); sp = s; }
+                        for (size_t l=Lx; l>1u; --l, X1+=K, ++Z) { s = (*X1<0.0); *Z = s*(s!=sp); sp = s; }
                     }
                     Z -= Lx;
 
@@ -385,7 +385,7 @@ int zcr_windowed_d (double *Y, const double *X1, const double *X2, const size_t 
                     while (ss<0 && w<W)
                     {
                         sm = 0.0; X2 -= ss;
-                        for (size_t l=(size_t)(-ss); l<Lw; ++l, ++X2, ++Z) { sm += (double)(*Z) * *X2; }
+                        for (size_t l=Lw-(size_t)(-ss); l>0u; --l, ++X2, ++Z) { sm += (double)(*Z) * *X2; }
                         *Y = sm; Y += K;
                         ++w; cc += stp; cs = (int)round(cc);
                         Z -= (int)Lw + ss; X2 -= Lw;
@@ -398,7 +398,7 @@ int zcr_windowed_d (double *Y, const double *X1, const double *X2, const size_t 
                     while (es<(int)Lx && w<W)
                     {
                         sm = 0.0;
-                        for (size_t l=0u; l<Lw; ++l, ++Z, ++X2) { sm += (double)*Z * *X2; }
+                        for (size_t l=Lw; l>0u; --l, ++Z, ++X2) { sm += (double)*Z * *X2; }
                         *Y = sm; Y += K;
                         ++w; cc += stp; cs = (int)round(cc);
                         Z += cs - prev_cs - (int)Lw; X2 -= Lw;
@@ -410,7 +410,7 @@ int zcr_windowed_d (double *Y, const double *X1, const double *X2, const size_t 
                     while (ss<(int)Lx && w<W)
                     {
                         sm = 0.0;
-                        for (size_t l=0u; l<Lx-(size_t)ss; ++l, ++Z, ++X2) { sm += (double)(*Z) * *X2; }
+                        for (size_t l=Lx-(size_t)ss; l>0u; --l, ++Z, ++X2) { sm += (double)(*Z) * *X2; }
                         *Y = sm; Y += K;
                         X2 += ss - (int)Lx;
                         ++w; cc += stp; cs = (int)round(cc);
@@ -480,17 +480,17 @@ int zcr_windowed_c (float *Y, const float *X1, const float *X2, const size_t R, 
                 if (going==0)
                 {
                     sp = (*X1<0.0f); X1+=2u*K; *Z++ = 0;
-                    for (size_t l=1u; l<Lx; ++l, X1+=2u*K, ++Z) { s = (*X1<0.0f); *Z = (s!=sp); sp = s; }
+                    for (size_t l=Lx; l>1u; --l, X1+=2u*K, ++Z) { s = (*X1<0.0f); *Z = (s!=sp); sp = s; }
                 }
                 else if (going==1)
                 {
                     sp = (*X1>=0.0f); X1+=2u*K; *Z++ = 0;
-                    for (size_t l=1u; l<Lx; ++l, X1+=2u*K, ++Z) { s = (*X1>=0.0f); *Z = s*(s!=sp); sp = s; }
+                    for (size_t l=Lx; l>1u; --l, X1+=2u*K, ++Z) { s = (*X1>=0.0f); *Z = s*(s!=sp); sp = s; }
                 }
                 else if (going==-1)
                 {
                     sp = (*X1<0.0f); X1+=2u*K; *Z++ = 0;
-                    for (size_t l=1u; l<Lx; ++l, X1+=2u*K, ++Z) { s = (*X1<0.0f); *Z = s*(s!=sp); sp = s; }
+                    for (size_t l=Lx; l>1u; --l, X1+=2u*K, ++Z) { s = (*X1<0.0f); *Z = s*(s!=sp); sp = s; }
                 }
                 Z -= Lx;
 
@@ -511,7 +511,7 @@ int zcr_windowed_c (float *Y, const float *X1, const float *X2, const size_t R, 
                 while (ss<0 && w<W)
                 {
                     sm = 0.0f; X2 -= ss;
-                    for (size_t l=(size_t)(-ss); l<Lw; ++l, ++X2, ++Z) { sm += (float)(*Z) * *X2; }
+                    for (size_t l=Lw-(size_t)(-ss); l>0u; --l, ++X2, ++Z) { sm += (float)(*Z) * *X2; }
                     *Y = sm; Y += K;
                     ++w; cc += stp; cs = (int)roundf(cc);
                     Z -= (int)Lw + ss; X2 -= Lw;
@@ -524,7 +524,7 @@ int zcr_windowed_c (float *Y, const float *X1, const float *X2, const size_t R, 
                 while (es<(int)Lx && w<W)
                 {
                     sm = 0.0f;
-                    for (size_t l=0u; l<Lw; ++l, ++Z, ++X2) { sm += (float)*Z * *X2; }
+                    for (size_t l=Lw; l>0u; --l, ++Z, ++X2) { sm += (float)*Z * *X2; }
                     *Y = sm; Y += K;
                     ++w; cc += stp; cs = (int)roundf(cc);
                     Z += cs - prev_cs - (int)Lw; X2 -= Lw;
@@ -536,7 +536,7 @@ int zcr_windowed_c (float *Y, const float *X1, const float *X2, const size_t R, 
                 while (ss<(int)Lx && w<W)
                 {
                     sm = 0.0f;
-                    for (size_t l=0u; l<Lx-(size_t)ss; ++l, ++Z, ++X2) { sm += (float)(*Z) * *X2; }
+                    for (size_t l=Lx-(size_t)ss; l>0u; --l, ++Z, ++X2) { sm += (float)(*Z) * *X2; }
                     *Y = sm; Y += K;
                     X2 += ss - (int)Lx;
                     ++w; cc += stp; cs = (int)roundf(cc);
@@ -605,17 +605,17 @@ int zcr_windowed_z (double *Y, const double *X1, const double *X2, const size_t 
                 if (going==0)
                 {
                     sp = (*X1<0.0); X1+=2u*K; *Z++ = 0;
-                    for (size_t l=1u; l<Lx; ++l, X1+=2u*K, ++Z) { s = (*X1<0.0); *Z = (s!=sp); sp = s; }
+                    for (size_t l=Lx; l>1u; --l, X1+=2u*K, ++Z) { s = (*X1<0.0); *Z = (s!=sp); sp = s; }
                 }
                 else if (going==1)
                 {
                     sp = (*X1>=0.0); X1+=2u*K; *Z++ = 0;
-                    for (size_t l=1u; l<Lx; ++l, X1+=2u*K, ++Z) { s = (*X1>=0.0); *Z = s*(s!=sp); sp = s; }
+                    for (size_t l=Lx; l>1u; --l, X1+=2u*K, ++Z) { s = (*X1>=0.0); *Z = s*(s!=sp); sp = s; }
                 }
                 else if (going==-1)
                 {
                     sp = (*X1<0.0); X1+=2u*K; *Z++ = 0;
-                    for (size_t l=1u; l<Lx; ++l, X1+=2u*K, ++Z) { s = (*X1<0.0); *Z = s*(s!=sp); sp = s; }
+                    for (size_t l=Lx; l>1u; --l, X1+=2u*K, ++Z) { s = (*X1<0.0); *Z = s*(s!=sp); sp = s; }
                 }
                 Z -= Lx;
 
@@ -636,7 +636,7 @@ int zcr_windowed_z (double *Y, const double *X1, const double *X2, const size_t 
                 while (ss<0 && w<W)
                 {
                     sm = 0.0; X2 -= ss;
-                    for (size_t l=(size_t)(-ss); l<Lw; ++l, ++X2, ++Z) { sm += (double)(*Z) * *X2; }
+                    for (size_t l=Lw-(size_t)(-ss); l>0u; --l, ++X2, ++Z) { sm += (double)(*Z) * *X2; }
                     *Y = sm; Y += K;
                     ++w; cc += stp; cs = (int)round(cc);
                     Z -= (int)Lw + ss; X2 -= Lw;
@@ -649,7 +649,7 @@ int zcr_windowed_z (double *Y, const double *X1, const double *X2, const size_t 
                 while (es<(int)Lx && w<W)
                 {
                     sm = 0.0;
-                    for (size_t l=0u; l<Lw; ++l, ++Z, ++X2) { sm += (double)*Z * *X2; }
+                    for (size_t l=Lw; l>0u; --l, ++Z, ++X2) { sm += (double)*Z * *X2; }
                     *Y = sm; Y += K;
                     ++w; cc += stp; cs = (int)round(cc);
                     Z += cs - prev_cs - (int)Lw; X2 -= Lw;
@@ -661,7 +661,7 @@ int zcr_windowed_z (double *Y, const double *X1, const double *X2, const size_t 
                 while (ss<(int)Lx && w<W)
                 {
                     sm = 0.0;
-                    for (size_t l=0u; l<Lx-(size_t)ss; ++l, ++Z, ++X2) { sm += (double)(*Z) * *X2; }
+                    for (size_t l=Lx-(size_t)ss; l>0u; --l, ++Z, ++X2) { sm += (double)(*Z) * *X2; }
                     *Y = sm; Y += K;
                     X2 += ss - (int)Lx;
                     ++w; cc += stp; cs = (int)round(cc);

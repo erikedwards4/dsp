@@ -78,7 +78,7 @@ planck: planck.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 
 
 #Transform: common 1-D signal transforms
-Transform: fft.fftw fft.fftw.r2hc fft.rad2 ifft.fftw ifft.rad2 dct idct dst idst hilbert
+Transform: fft.fftw fft.fftw.r2hc fft.rad2 ifft.fftw ifft.rad2 dct idct dst idst
 fft.fftw: fft.fftw.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 fft.fftw.r2hc: fft.fftw.r2hc.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 fft.rad2: fft.rad2.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
@@ -90,6 +90,7 @@ dst: dst.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 idst: idst.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 
 
+#Hilbert: Hilbert transform and related
 Hilbert: hilbert analytic_sig analytic_amp analytic_pow inst_phase inst_freq
 hilbert: hilbert.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 analytic_sig: analytic_sig.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
@@ -109,7 +110,7 @@ filtfilt: filtfilt.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 
 
 #Conv: convolution
-Conv: conv conv1d conv_fft conv1d_fft xcorr xcorr1d xcorr_fft xcorr1d_fft
+Conv: conv conv1d xcorr xcorr1d #conv_fft conv1d_fft xcorr_fft xcorr1d_fft
 conv: conv.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 conv1d: conv1d.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 conv_fft: conv_fft.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)

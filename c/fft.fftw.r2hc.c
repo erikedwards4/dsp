@@ -34,7 +34,7 @@ int fft_fftw_r2hc_s (float *Y, const float *X, const size_t R, const size_t C, c
     if (nfft==0u || N==0u) {}
     else if (nfft==1u)
     {
-        for (size_t n=0u; n<N; ++n, ++X) { *Y++ = *X; *Y++ = 0.0f; }
+        for (size_t n=N; n>0u; --n, ++X) { *Y++ = *X; *Y++ = 0.0f; }
         Y -= 2u*N;
     }
     else
@@ -45,17 +45,17 @@ int fft_fftw_r2hc_s (float *Y, const float *X, const size_t R, const size_t C, c
         Y1 = (float *)fftwf_malloc(nfft*sizeof(float));
         fftwf_plan plan = fftwf_plan_r2r_1d((int)nfft,X1,Y1,FFTW_R2HC,FFTW_ESTIMATE);
         if (!plan) { fprintf(stderr,"error in fft_fftw_r2hc_s: problem creating fftw plan"); return 1; }
-        for (size_t l=0u; l<nfft; ++l, ++X1) { *X1 = 0.0f; }
+        for (size_t n=nfft; n>0u; --n, ++X1) { *X1 = 0.0f; }
         X1 -= nfft;
 
         if (Lx==N)
         {
-            for (size_t l=0u; l<Lx; ++l, ++X, ++X1) { *X1 = *X; }
+            for (size_t l=Lx; l>0u; --l, ++X, ++X1) { *X1 = *X; }
             X1 -= Lx;
             fftwf_execute(plan);
-            for (size_t l=0u; l<Ly; ++l, ++Y1, Y+=2) { *Y = *Y1; }
+            for (size_t l=Ly; l>0u; --l, ++Y1, Y+=2) { *Y = *Y1; }
             *--Y = 0.0f; Y -= 2u;
-            for (size_t l=0u; l<Ly-1u; ++l, ++Y1, Y-=2) { *Y = *Y1; }
+            for (size_t l=Ly-1u; l>0u; --l, ++Y1, Y-=2) { *Y = *Y1; }
             Y1 -= 2u*Ly-1u;
         }
         else
@@ -68,12 +68,12 @@ int fft_fftw_r2hc_s (float *Y, const float *X, const size_t R, const size_t C, c
             {
                 for (size_t v=V; v>0u; --v, Y1-=2u*Ly-2u, Y+=2u*Ly-1u)
                 {
-                    for (size_t l=0u; l<Lx; ++l, ++X, ++X1) { *X1 = *X; }
+                    for (size_t l=Lx; l>0u; --l, ++X, ++X1) { *X1 = *X; }
                     X1 -= Lx;
                     fftwf_execute(plan);
-                    for (size_t l=0u; l<Ly; ++l, ++Y1, Y+=2u) { *Y = *Y1; }
+                    for (size_t l=Ly; l>0u; --l, ++Y1, Y+=2u) { *Y = *Y1; }
                     *--Y = 0.0f; Y -= 2u;
-                    for (size_t l=0u; l<Ly-2u; ++l, ++Y1, Y-=2u) { *Y = *Y1; }
+                    for (size_t l=Ly-2u; l>0u; --l, ++Y1, Y-=2u) { *Y = *Y1; }
                     *Y = 0.0f;
                 }
             }
@@ -83,12 +83,12 @@ int fft_fftw_r2hc_s (float *Y, const float *X, const size_t R, const size_t C, c
                 {
                     for (size_t b=B; b>0u; --b, X-=K*Lx-1u, Y1-=2u*Ly-2u, ++Y)
                     {
-                        for (size_t l=0u; l<Lx; ++l, X+=K, ++X1) { *X1 = *X; }
+                        for (size_t l=Lx; l>0u; --l, X+=K, ++X1) { *X1 = *X; }
                         X1 -= Lx;
                         fftwf_execute(plan);
-                        for (size_t l=0u; l<Ly-1u; ++l, ++Y1, Y+=2u*K) { *Y = *Y1; }
+                        for (size_t l=Ly-1u; l>0u; --l, ++Y1, Y+=2u*K) { *Y = *Y1; }
                         *Y = *Y1; *++Y = 0.0f; ++Y1; Y -= 2u*K;
-                        for (size_t l=1u; l<Ly-1u; ++l, ++Y1, Y-=2u*K) { *Y = *Y1; }
+                        for (size_t l=Ly-2u; l>0u; --l, ++Y1, Y-=2u*K) { *Y = *Y1; }
                         *Y = 0.0f;
                     }
                 }
@@ -101,7 +101,7 @@ int fft_fftw_r2hc_s (float *Y, const float *X, const size_t R, const size_t C, c
     if (sc)
     {
         const float s = (float)(1.0/sqrt((double)(2u*nfft)));
-        for (size_t l=0u; l<2u*Ly*N/Lx; ++l, ++Y) { *Y *= s; }
+        for (size_t l=2u*Ly*N/Lx; l>0u; --l, ++Y) { *Y *= s; }
     }
 
     //clock_gettime(CLOCK_REALTIME,&toc); fprintf(stderr,"elapsed time = %.6f ms\n",(toc.tv_sec-tic.tv_sec)*1e3+(toc.tv_nsec-tic.tv_nsec)/1e6);
@@ -121,7 +121,7 @@ int fft_fftw_r2hc_d (double *Y, const double *X, const size_t R, const size_t C,
     if (nfft==0u || N==0u) {}
     else if (nfft==1u)
     {
-        for (size_t n=0u; n<N; ++n, ++X) { *Y++ = *X; *Y++ = 0.0; }
+        for (size_t n=N; n>0u; --n, ++X) { *Y++ = *X; *Y++ = 0.0; }
         Y -= 2u*N;
     }
     else
@@ -132,17 +132,17 @@ int fft_fftw_r2hc_d (double *Y, const double *X, const size_t R, const size_t C,
         Y1 = (double *)fftw_malloc(nfft*sizeof(double));
         fftw_plan plan = fftw_plan_r2r_1d((int)nfft,X1,Y1,FFTW_R2HC,FFTW_ESTIMATE);
         if (!plan) { fprintf(stderr,"error in fft_fftw_r2hc_d: problem creating fftw plan"); return 1; }
-        for (size_t l=0u; l<nfft; ++l, ++X1) { *X1 = 0.0; }
+        for (size_t n=nfft; n>0u; --n, ++X1) { *X1 = 0.0; }
         X1 -= nfft;
 
         if (Lx==N)
         {
-            for (size_t l=0u; l<Lx; ++l, ++X, ++X1) { *X1 = *X; }
+            for (size_t l=Lx; l>0u; --l, ++X, ++X1) { *X1 = *X; }
             X1 -= Lx;
             fftw_execute(plan);
-            for (size_t l=0u; l<Ly; ++l, ++Y1, Y+=2u) { *Y = *Y1; }
+            for (size_t l=Ly; l>0u; --l, ++Y1, Y+=2u) { *Y = *Y1; }
             *--Y = 0.0; Y -= 2u;
-            for (size_t l=0u; l<Ly-1u; ++l, ++Y1, Y-=2u) { *Y = *Y1; }
+            for (size_t l=Ly-1u; l>0u; --l, ++Y1, Y-=2u) { *Y = *Y1; }
             Y1 -= 2u*Ly-1u;
         }
         else
@@ -155,12 +155,12 @@ int fft_fftw_r2hc_d (double *Y, const double *X, const size_t R, const size_t C,
             {
                 for (size_t v=V; v>0u; --v, Y1-=2u*Ly-2u, Y+=2u*Ly-1u)
                 {
-                    for (size_t l=0u; l<Lx; ++l, ++X, ++X1) { *X1 = *X; }
+                    for (size_t l=Lx; l>0u; --l, ++X, ++X1) { *X1 = *X; }
                     X1 -= Lx;
                     fftw_execute(plan);
-                    for (size_t l=0u; l<Ly; ++l, ++Y1, Y+=2u) { *Y = *Y1; }
+                    for (size_t l=Ly; l>0u; --l, ++Y1, Y+=2u) { *Y = *Y1; }
                     *--Y = 0.0; Y -= 2u;
-                    for (size_t l=0u; l<Ly-2u; ++l, ++Y1, Y-=2u) { *Y = *Y1; }
+                    for (size_t l=Ly-2u; l>0u; --l, ++Y1, Y-=2u) { *Y = *Y1; }
                     *Y = 0.0;
                 }
                 //X -= V*Lx; Y -= 2u*V*Ly;
@@ -171,12 +171,12 @@ int fft_fftw_r2hc_d (double *Y, const double *X, const size_t R, const size_t C,
                 {
                     for (size_t b=B; b>0u; --b, X-=K*Lx-1u, Y1-=2u*Ly-2u, ++Y)
                     {
-                        for (size_t l=0u; l<Lx; ++l, X+=K, ++X1) { *X1 = *X; }
+                        for (size_t l=Lx; l>0u; --l, X+=K, ++X1) { *X1 = *X; }
                         X1 -= Lx;
                         fftw_execute(plan);
-                        for (size_t l=0u; l<Ly-1u; ++l, ++Y1, Y+=2u*K) { *Y = *Y1; }
+                        for (size_t l=Ly-1u; l>0u; --l, ++Y1, Y+=2u*K) { *Y = *Y1; }
                         *Y = *Y1; *++Y = 0.0; ++Y1; Y -= 2u*K;
-                        for (size_t l=1u; l<Ly-1u; ++l, ++Y1, Y-=2u*K) { *Y = *Y1; }
+                        for (size_t l=Ly-2u; l>0u; --l, ++Y1, Y-=2u*K) { *Y = *Y1; }
                         *Y = 0.0;
                     }
                 }
@@ -190,7 +190,7 @@ int fft_fftw_r2hc_d (double *Y, const double *X, const size_t R, const size_t C,
     if (sc)
     {
         const double s = 1.0/sqrt((double)(2u*nfft));
-        for (size_t l=0u; l<2u*Ly*N/Lx; ++l, ++Y) { *Y *= s; }
+        for (size_t l=2u*Ly*N/Lx; l>0u; --l, ++Y) { *Y *= s; }
     }
 
     //clock_gettime(CLOCK_REALTIME,&toc); fprintf(stderr,"elapsed time = %.6f ms\n",(toc.tv_sec-tic.tv_sec)*1e3+(toc.tv_nsec-tic.tv_nsec)/1e6);

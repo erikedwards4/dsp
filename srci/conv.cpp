@@ -34,7 +34,7 @@ descr += "$ cat X2 | conv -d1 -s'valid' X1 - > Y \n";
 //Argtable
 struct arg_file  *a_fi = arg_filen(nullptr,nullptr,"<file>",I-1,I,"input files (X1,X2)");
 struct arg_str   *a_sh = arg_strn("s","shape","<str>",0,1,"shape [default='full']");
-struct arg_int    *a_d = arg_intn("d","dim","<uint>",0,1,"dimension along which to filter [default=0]");
+struct arg_int    *a_d = arg_intn("d","dim","<uint>",0,1,"dimension along which to convolve [default=0]");
 struct arg_file  *a_fo = arg_filen("o","ofile","<file>",0,O,"output file (Y)");
 
 //Get options

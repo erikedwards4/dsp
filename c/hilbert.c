@@ -26,7 +26,7 @@ int hilbert_s (float *Y, const float *X, const size_t R, const size_t C, const s
     if (nfft==0u || N==0u) {}
     else if (nfft==1u)
     {
-        for (size_t n=0u; n<N; ++n, ++X, ++Y) { *Y = 0.0f; }
+        for (size_t n=N; n>0u; --n, ++X, ++Y) { *Y = 0.0f; }
     }
     else
     {
@@ -47,17 +47,17 @@ int hilbert_s (float *Y, const float *X, const size_t R, const size_t C, const s
     
         if (L==N)
         {
-            for (size_t l=0u; l<L; ++l, ++X, ++X1) { *X1 = *X; }
+            for (size_t l=L; l>0u; --l, ++X, ++X1) { *X1 = *X; }
             //for (size_t l=L; l<nfft; ++l, ++X1) { *X1 = 0.0f; }
             X1 -= L; //X1 -= nfft;
             fftwf_execute(fplan);
             *Y1++ /= (float)nfft; ++Y1;
-            for (size_t n=2u; n<nfft+isodd; ++n, ++Y1) { *Y1 *= sc; }
+            for (size_t n=nfft+isodd-2u; n>0u; --n, ++Y1) { *Y1 *= sc; }
             if (!isodd) { *Y1++ /= (float)nfft; }
             //for (size_t l=nfft+1u; l<2u*nfft; ++l, ++Y1) { *Y1 = 0.0f; }
             Y1 -= nfft + 1u; //Y1 -= 2u*nfft;
             fftwf_execute(iplan);
-            for (size_t l=0u; l<L; ++l, ++Z1, ++Y) { *Y = *++Z1; }
+            for (size_t l=L; l>0u; --l, ++Z1, ++Y) { *Y = *++Z1; }
             Z1 -= 2u*L;
         }
         else
@@ -70,15 +70,15 @@ int hilbert_s (float *Y, const float *X, const size_t R, const size_t C, const s
             {
                 for (size_t v=V; v>0u; --v, Z1-=2u*L)
                 {
-                    for (size_t l=0u; l<L; ++l, ++X, ++X1) { *X1 = *X; }
+                    for (size_t l=L; l>0u; --l, ++X, ++X1) { *X1 = *X; }
                     X1 -= L;
                     fftwf_execute(fplan);
                     *Y1++ /= (float)nfft; ++Y1;
-                    for (size_t n=2u; n<nfft+isodd; ++n, ++Y1) { *Y1 *= sc; }
+                    for (size_t n=nfft+isodd-2u; n>0u; --n, ++Y1) { *Y1 *= sc; }
                     if (!isodd) { *Y1++ /= (float)nfft; }
                     Y1 -= nfft + 1u;
                     fftwf_execute(iplan);
-                    for (size_t l=0u; l<L; ++l, ++Z1, ++Y) { *Y = *++Z1; }
+                    for (size_t l=L; l>0u; --l, ++Z1, ++Y) { *Y = *++Z1; }
                 }
             }
             else
@@ -87,15 +87,15 @@ int hilbert_s (float *Y, const float *X, const size_t R, const size_t C, const s
                 {
                     for (size_t b=B; b>0u; --b, X-=K*L-1u, Z1-=2u*L, Y-=K*L-1u)
                     {
-                        for (size_t l=0u; l<L; ++l, X+=K, ++X1) { *X1 = *X; }
+                        for (size_t l=L; l>0u; --l, X+=K, ++X1) { *X1 = *X; }
                         X1 -= L;
                         fftwf_execute(fplan);
                         *Y1++ /= (float)nfft; ++Y1;
-                        for (size_t n=2u; n<nfft+isodd; ++n, ++Y1) { *Y1 *= sc; }
+                        for (size_t n=nfft+isodd-2u; n>0u; --n, ++Y1) { *Y1 *= sc; }
                         if (!isodd) { *Y1++ /= (float)nfft; }
                         Y1 -= nfft + 1u;
                         fftwf_execute(iplan);
-                        for (size_t l=0u; l<L; ++l, ++Z1, Y+=K) { *Y = *++Z1; }
+                        for (size_t l=L; l>0u; --l, ++Z1, Y+=K) { *Y = *++Z1; }
                     }
                 }
             }
@@ -118,7 +118,7 @@ int hilbert_d (double *Y, const double *X, const size_t R, const size_t C, const
     if (nfft==0u || N==0u) {}
     else if (nfft==1u)
     {
-        for (size_t n=0u; n<N; ++n, ++X, ++Y) { *Y = *X; *++Y = 0.0; }
+        for (size_t n=N; n>0u; --n, ++X, ++Y) { *Y = *X; *++Y = 0.0; }
     }
     else
     {
@@ -139,15 +139,15 @@ int hilbert_d (double *Y, const double *X, const size_t R, const size_t C, const
     
         if (L==N)
         {
-            for (size_t l=0u; l<L; ++l, ++X, ++X1) { *X1 = *X; }
+            for (size_t l=L; l>0u; --l, ++X, ++X1) { *X1 = *X; }
             X1 -= L;
             fftw_execute(fplan);
             *Y1++ /= (double)nfft; ++Y1;
-            for (size_t n=2u; n<nfft+isodd; ++n, ++Y1) { *Y1 *= sc; }
+            for (size_t n=nfft+isodd-2u; n>0u; --n, ++Y1) { *Y1 *= sc; }
             if (!isodd) { *Y1++ /= (double)nfft; }
             Y1 -= nfft + 1u;
             fftw_execute(iplan);
-            for (size_t l=0u; l<L; ++l, ++Z1, ++Y) { *Y = *++Z1; }
+            for (size_t l=L; l>0u; --l, ++Z1, ++Y) { *Y = *++Z1; }
             Z1 -= 2u*L;
         }
         else
@@ -160,15 +160,15 @@ int hilbert_d (double *Y, const double *X, const size_t R, const size_t C, const
             {
                 for (size_t v=V; v>0u; --v, Z1-=2u*L)
                 {
-                    for (size_t l=0u; l<L; ++l, ++X, ++X1) { *X1 = *X; }
+                    for (size_t l=L; l>0u; --l, ++X, ++X1) { *X1 = *X; }
                     X1 -= L;
                     fftw_execute(fplan);
                     *Y1++ /= (double)nfft; ++Y1;
-                    for (size_t n=2u; n<nfft+isodd; ++n, ++Y1) { *Y1 *= sc; }
+                    for (size_t n=nfft+isodd-2u; n>0u; --n, ++Y1) { *Y1 *= sc; }
                     if (!isodd) { *Y1++ /= (double)nfft; }
                     Y1 -= nfft + 1u;
                     fftw_execute(iplan);
-                    for (size_t l=0u; l<L; ++l, ++Z1, ++Y) { *Y = *++Z1; }
+                    for (size_t l=L; l>0u; --l, ++Z1, ++Y) { *Y = *++Z1; }
                 }
             }
             else
@@ -177,15 +177,15 @@ int hilbert_d (double *Y, const double *X, const size_t R, const size_t C, const
                 {
                     for (size_t b=B; b>0u; --b, X-=K*L-1u, Z1-=2u*L, Y-=K*L-1u)
                     {
-                        for (size_t l=0u; l<L; ++l, X+=K, ++X1) { *X1 = *X; }
+                        for (size_t l=L; l>0u; --l, X+=K, ++X1) { *X1 = *X; }
                         X1 -= L;
                         fftw_execute(fplan);
                         *Y1++ /= (double)nfft; ++Y1;
-                        for (size_t n=2u; n<nfft+isodd; ++n, ++Y1) { *Y1 *= sc; }
+                        for (size_t n=nfft+isodd-2u; n>0u; --n, ++Y1) { *Y1 *= sc; }
                         if (!isodd) { *Y1++ /= (double)nfft; }
                         Y1 -= nfft + 1u;
                         fftw_execute(iplan);
-                        for (size_t l=0u; l<L; ++l, ++Z1, Y+=K) { *Y = *++Z1; }
+                        for (size_t l=L; l>0u; --l, ++Z1, Y+=K) { *Y = *++Z1; }
                     }
                 }
             }

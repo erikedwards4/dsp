@@ -34,7 +34,7 @@ int cosinewave_s (float *Y, const size_t N, const float amp, const float frq, co
     if (N==0u) {}
     else if (amp<FLT_EPSILON)
     {
-        for (size_t n=0u; n<N; ++n, ++Y) { *Y = 0.0f; }
+        for (size_t n=N; n>0u; --n, ++Y) { *Y = 0.0f; }
     }
     else if (amp==1.0f)
     {
@@ -65,7 +65,7 @@ int cosinewave_d (double *Y, const size_t N, const double amp, const double frq,
     if (N==0u) {}
     else if (amp<DBL_EPSILON)
     {
-        for (size_t n=0u; n<N; ++n, ++Y) { *Y = 0.0; }
+        for (size_t n=N; n>0u; --n, ++Y) { *Y = 0.0; }
     }
     else if (amp==1.0)
     {
@@ -96,7 +96,7 @@ int cosinewave_c (float *Y, const size_t N, const float amp, const float frq, co
     if (N==0u) {}
     else if (amp<FLT_EPSILON)
     {
-        for (size_t n=0u; n<2u*N; ++n, ++Y) { *Y = 0.0f; }
+        for (size_t n=2u*N; n>0u; --n, ++Y) { *Y = 0.0f; }
     }
     else if (amp==1.0f)
     {
@@ -129,7 +129,7 @@ int cosinewave_z (double *Y, const size_t N, const double amp, const double frq,
     if (N==0u) {}
     else if (amp<DBL_EPSILON)
     {
-        for (size_t n=0u; n<2u*N; ++n, ++Y) { *Y = 0.0; }
+        for (size_t n=2u*N; n>0u; --n, ++Y) { *Y = 0.0; }
     }
     else if (amp==1.0)
     {

@@ -52,24 +52,24 @@ int stft_s (float *Y, const float *X1, const float *X2, const size_t N, const si
         Yw = (float *)fftwf_malloc(nfft*sizeof(float));
         fftwf_plan plan = fftwf_plan_r2r_1d((int)nfft,Xw,Yw,FFTW_R2HC,FFTW_ESTIMATE);
         if (!plan) { fprintf(stderr,"error in stft_s: problem creating fftw plan"); return 1; }
-        for (size_t l=0u; l<nfft; ++l, ++Xw) { *Xw = 0.0f; }
+        for (size_t n=nfft; n>0u; --n, ++Xw) { *Xw = 0.0f; }
         Xw -= nfft;
 
         if (snip_edges)
         {
-            for (size_t w=0u; w<W; ++w)
+            for (size_t w=W; w>0u; --w)
             {
                 //Window
-                for (size_t l=0u; l<L; ++l, ++X1, ++X2, ++Xw) { *Xw = *X1 * *X2; }
+                for (size_t l=L; l>0u; --l, ++X1, ++X2, ++Xw) { *Xw = *X1 * *X2; }
                 X1 -= xd; X2 -= L;
                 
                 //Zero mean
                 if (mn0)
                 {
                     mn = 0.0f;
-                    for (size_t l=0u; l<L; ++l) { mn += *--Xw; }
+                    for (size_t l=L; l>0u; --l) { mn += *--Xw; }
                     mn /= (float)L;
-                    for (size_t l=0u; l<L; ++l, ++Xw) { *Xw -= mn; }
+                    for (size_t l=L; l>0u; --l, ++Xw) { *Xw -= mn; }
                 }
                 
                 //FFT
@@ -77,20 +77,20 @@ int stft_s (float *Y, const float *X1, const float *X2, const size_t N, const si
                 fftwf_execute(plan);
                 
                 //Power
-                for (size_t f=0u; f<F; ++f, ++Yw, ++Y) { *Y = *Yw * *Yw; }
+                for (size_t f=F; f>0u; --f, ++Yw, ++Y) { *Y = *Yw * *Yw; }
                 Y -= 2u;
-                for (size_t f=1u; f<F-1u; ++f, ++Yw, --Y) { *Y += *Yw * *Yw; }
+                for (size_t f=F-2u; f>0u; --f, ++Yw, --Y) { *Y += *Yw * *Yw; }
                 Yw -= nfft;
 
                 //Amplitude and/or log
                 if (amp)
                 {
-                    if (lg) { for (size_t f=0u; f<F; ++f, ++Y) { *Y = logf(sqrtf(*Y)); } }
-                    else { for (size_t f=0u; f<F; ++f, ++Y) { *Y = sqrtf(*Y); } }
+                    if (lg) { for (size_t f=F; f>0u; --f, ++Y) { *Y = logf(sqrtf(*Y)); } }
+                    else { for (size_t f=F; f>0u; --f, ++Y) { *Y = sqrtf(*Y); } }
                 }
                 else if (lg)
                 {
-                    for (size_t f=0u; f<F; ++f, ++Y) { *Y = logf(*Y); }
+                    for (size_t f=F; f>0u; --f, ++Y) { *Y = logf(*Y); }
                 }
                 else { Y += F; }
             }
@@ -101,7 +101,7 @@ int stft_s (float *Y, const float *X1, const float *X2, const size_t N, const si
             int ss = (int)(stp/2u) - (int)Lpre;         //start-samp of current frame
             int n, prev_n = 0;                          //current/prev samps in X
 
-            for (size_t w=0u; w<W; ++w)
+            for (size_t w=W; w>0u; --w)
             {
                 //Window
                 if (ss<0 || ss>(int)N-(int)L)
@@ -118,7 +118,7 @@ int stft_s (float *Y, const float *X1, const float *X2, const size_t N, const si
                 else
                 {
                     X1 += ss - prev_n;
-                    for (size_t l=0u; l<L; ++l, ++X1, ++X2, ++Xw) { *Xw = *X1 * *X2; }
+                    for (size_t l=L; l>0u; --l, ++X1, ++X2, ++Xw) { *Xw = *X1 * *X2; }
                     X1 -= xd; prev_n = ss + (int)stp;
                 }
                 ss += stp; X2 -= L;
@@ -127,9 +127,9 @@ int stft_s (float *Y, const float *X1, const float *X2, const size_t N, const si
                 if (mn0)
                 {
                     mn = 0.0f;
-                    for (size_t l=0u; l<L; ++l) { mn += *--Xw; }
+                    for (size_t l=L; l>0u; --l) { mn += *--Xw; }
                     mn /= (float)L;
-                    for (size_t l=0u; l<L; ++l, ++Xw) { *Xw -= mn; }
+                    for (size_t l=L; l>0u; --l, ++Xw) { *Xw -= mn; }
                 }
 
                 //FFT
@@ -137,20 +137,20 @@ int stft_s (float *Y, const float *X1, const float *X2, const size_t N, const si
                 fftwf_execute(plan);
                 
                 //Power
-                for (size_t f=0u; f<F; ++f, ++Yw, ++Y) { *Y = *Yw * *Yw; }
+                for (size_t f=F; f>0u; --f, ++Yw, ++Y) { *Y = *Yw * *Yw; }
                 Y -= 2u;
-                for (size_t f=1u; f<F-1u; ++f, ++Yw, --Y) { *Y += *Yw * *Yw; }
+                for (size_t f=F-2u; f>0u; --f, ++Yw, --Y) { *Y += *Yw * *Yw; }
                 Yw -= nfft;
                 
                 //Amplitude and/or log
                 if (amp)
                 {
-                    if (lg) { for (size_t f=0u; f<F; ++f, ++Y) { *Y = logf(sqrtf(*Y)); } }
-                    else { for (size_t f=0u; f<F; ++f, ++Y) { *Y = sqrtf(*Y); } }
+                    if (lg) { for (size_t f=F; f>0u; --f, ++Y) { *Y = logf(sqrtf(*Y)); } }
+                    else { for (size_t f=F; f>0u; --f, ++Y) { *Y = sqrtf(*Y); } }
                 }
                 else if (lg)
                 {
-                    for (size_t f=0u; f<F; ++f, ++Y) { *Y = logf(*Y); }
+                    for (size_t f=F; f>0u; --f, ++Y) { *Y = logf(*Y); }
                 }
                 else { Y += F; }
             }
@@ -184,25 +184,25 @@ int stft_d (double *Y, const double *X1, const double *X2, const size_t N, const
         Yw = (double *)fftw_malloc(nfft*sizeof(double));
         fftw_plan plan = fftw_plan_r2r_1d((int)nfft,Xw,Yw,FFTW_R2HC,FFTW_ESTIMATE);
         if (!plan) { fprintf(stderr,"error in stft_d: problem creating fftw plan"); return 1; }
-        for (size_t l=0u; l<nfft; ++l, ++Xw) { *Xw = 0.0; }
+        for (size_t n=nfft; n>0u; --n, ++Xw) { *Xw = 0.0; }
         Xw -= nfft;
 
         if (snip_edges)
         {
             //struct timespec tic, toc; clock_gettime(CLOCK_REALTIME,&tic);
-            for (size_t w=0u; w<W; ++w)
+            for (size_t w=W; w>0u; --w)
             {
                 //Window
-                for (size_t l=0u; l<L; ++l, ++X1, ++X2, ++Xw) { *Xw = *X1 * *X2; }
+                for (size_t l=L; l>0u; --l, ++X1, ++X2, ++Xw) { *Xw = *X1 * *X2; }
                 X1 -= xd; X2 -= L;
                 
                 //Zero mean
                 if (mn0)
                 {
                     mn = 0.0;
-                    for (size_t l=0u; l<L; ++l) { mn += *--Xw; }
+                    for (size_t l=L; l>0u; --l) { mn += *--Xw; }
                     mn /= (double)L;
-                    for (size_t l=0u; l<L; ++l, ++Xw) { *Xw -= mn; }
+                    for (size_t l=L; l>0u; --l, ++Xw) { *Xw -= mn; }
                 }
                 
                 //FFT
@@ -210,25 +210,25 @@ int stft_d (double *Y, const double *X1, const double *X2, const size_t N, const
                 fftw_execute(plan);
                 
                 //Power
-                for (size_t f=0u; f<F; ++f, ++Yw, ++Y) { *Y = *Yw * *Yw; }
+                for (size_t f=F; f>0u; --f, ++Yw, ++Y) { *Y = *Yw * *Yw; }
                 Y -= 2u;
-                for (size_t f=1u; f<F-1u; ++f, ++Yw, --Y) { *Y += *Yw * *Yw; }
+                for (size_t f=F-2u; f>0u; --f, ++Yw, --Y) { *Y += *Yw * *Yw; }
                 Yw -= nfft;
-                // for (size_t n=0u; n<nfft; ++n, ++Yw) { *Yw *= *Yw; }
-                // for (size_t f=0u; f<F-1u; ++f) { *++Y = *--Yw; }
+                // for (size_t n=nfft; n>0u; --n, ++Yw) { *Yw *= *Yw; }
+                // for (size_t f=F-1u; f>0u; --f) { *++Y = *--Yw; }
                 // *Y-- = *Yw--;
-                // for (size_t f=1u; f<F-1u; ++f, --Yw, --Y) { *Y += *Yw; }
+                // for (size_t f=F-2u; f>0u; --f, --Yw, --Y) { *Y += *Yw; }
                 // *Y = *Yw;
 
                 //Amplitude and/or log
                 if (amp)
                 {
-                    if (lg) { for (size_t f=0u; f<F; ++f, ++Y) { *Y = log(sqrt(*Y)); } }
-                    else { for (size_t f=0u; f<F; ++f, ++Y) { *Y = sqrt(*Y); } }
+                    if (lg) { for (size_t f=F; f>0u; --f, ++Y) { *Y = log(sqrt(*Y)); } }
+                    else { for (size_t f=F; f>0u; --f, ++Y) { *Y = sqrt(*Y); } }
                 }
                 else if (lg)
                 {
-                    for (size_t f=0u; f<F; ++f, ++Y) { *Y = log(*Y); }
+                    for (size_t f=F; f>0u; --f, ++Y) { *Y = log(*Y); }
                 }
                 else { Y += F; }
             }
@@ -240,7 +240,7 @@ int stft_d (double *Y, const double *X1, const double *X2, const size_t N, const
             int ss = (int)(stp/2u) - (int)Lpre;         //start-samp of current frame
             int n, prev_n = 0;                          //current/prev samps in X
 
-            for (size_t w=0u; w<W; ++w)
+            for (size_t w=W; w>0u; --w)
             {
                 //Window
                 if (ss<0 || ss>(int)N-(int)L)
@@ -257,7 +257,7 @@ int stft_d (double *Y, const double *X1, const double *X2, const size_t N, const
                 else
                 {
                     X1 += ss - prev_n;
-                    for (size_t l=0u; l<L; ++l, ++X1, ++X2, ++Xw) { *Xw = *X1 * *X2; }
+                    for (size_t l=L; l>0u; --l, ++X1, ++X2, ++Xw) { *Xw = *X1 * *X2; }
                     X1 -= xd; prev_n = ss + (int)stp;
                 }
                 ss += stp; X2 -= L;
@@ -266,9 +266,9 @@ int stft_d (double *Y, const double *X1, const double *X2, const size_t N, const
                 if (mn0)
                 {
                     mn = 0.0;
-                    for (size_t l=0u; l<L; ++l) { mn += *--Xw; }
+                    for (size_t l=L; l>0u; --l) { mn += *--Xw; }
                     mn /= (double)L;
-                    for (size_t l=0u; l<L; ++l, ++Xw) { *Xw -= mn; }
+                    for (size_t l=L; l>0u; --l, ++Xw) { *Xw -= mn; }
                 }
 
                 //FFT
@@ -276,20 +276,20 @@ int stft_d (double *Y, const double *X1, const double *X2, const size_t N, const
                 fftw_execute(plan);
                 
                 //Power
-                for (size_t f=0u; f<F; ++f, ++Yw, ++Y) { *Y = *Yw * *Yw; }
+                for (size_t f=F; f>0u; --f, ++Yw, ++Y) { *Y = *Yw * *Yw; }
                 Y -= 2u;
-                for (size_t f=1u; f<F-1u; ++f, ++Yw, --Y) { *Y += *Yw * *Yw; }
+                for (size_t f=F-2u; f>0u; --f, ++Yw, --Y) { *Y += *Yw * *Yw; }
                 Yw -= nfft;
 
                 //Amplitude and/or log
                 if (amp)
                 {
-                    if (lg) { for (size_t f=0u; f<F; ++f, ++Y) { *Y = log(sqrt(*Y)); } }
-                    else { for (size_t f=0u; f<F; ++f, ++Y) { *Y = sqrt(*Y); } }
+                    if (lg) { for (size_t f=F; f>0u; --f, ++Y) { *Y = log(sqrt(*Y)); } }
+                    else { for (size_t f=F; f>0u; --f, ++Y) { *Y = sqrt(*Y); } }
                 }
                 else if (lg)
                 {
-                    for (size_t f=0u; f<F; ++f, ++Y) { *Y = log(*Y); }
+                    for (size_t f=F; f>0u; --f, ++Y) { *Y = log(*Y); }
                 }
                 else { Y += F; }
             }

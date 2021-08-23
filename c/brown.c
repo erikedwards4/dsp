@@ -41,7 +41,7 @@ int brown_s (float *Y, const size_t N, const float std, const int zmn)
     if (N==0u) {}
     else if (std<FLT_EPSILON)
     {
-        for (size_t n=0u; n<N; ++n, ++Y) { *Y = 0.0f; }
+        for (size_t n=N; n>0u; --n, ++Y) { *Y = 0.0f; }
     }
     else
     {
@@ -60,7 +60,7 @@ int brown_s (float *Y, const size_t N, const float std, const int zmn)
         //Generate
         if (std==1.0f)
         {
-            for (size_t n=0u; n<N-1u; n+=2u)
+            for (size_t n=N-1u; n>0u; n-=2u)
             {
                 state = state*mul + inc;
                 xorshifted = (uint32_t)(((state >> 18u) ^ state) >> 27u);
@@ -105,7 +105,7 @@ int brown_s (float *Y, const size_t N, const float std, const int zmn)
         }
         else
         {
-            for (size_t n=0u; n<N-1u; n+=2u)
+            for (size_t n=N-1u; n>0u; n-=2u)
             {
                 state = state*mul + inc;
                 xorshifted = (uint32_t)(((state >> 18u) ^ state) >> 27u);
@@ -152,9 +152,9 @@ int brown_s (float *Y, const size_t N, const float std, const int zmn)
         if (zmn)
         {
             sm = 0.0f;
-            for (size_t n=0u; n<N; ++n) { sm += *--Y; }
+            for (size_t n=N; n>0u; --n) { sm += *--Y; }
             sm /= (float)N;
-            for (size_t n=0u; n<N; ++n, ++Y) { *Y -= sm; }
+            for (size_t n=N; n>0u; --n, ++Y) { *Y -= sm; }
         }
     }
 
@@ -169,7 +169,7 @@ int brown_d (double *Y, const size_t N, const double std, const int zmn)
     if (N==0u) {}
     else if (std<DBL_EPSILON)
     {
-        for (size_t n=0u; n<N; ++n, ++Y) { *Y = 0.0; }
+        for (size_t n=N; n>0u; --n, ++Y) { *Y = 0.0; }
     }
     else
     {
@@ -188,7 +188,7 @@ int brown_d (double *Y, const size_t N, const double std, const int zmn)
         //Generate
         if (std==1.0)
         {
-            for (size_t n=0u; n<N-1u; n+=2u)
+            for (size_t n=N-1u; n>0u; n-=2u)
             {
                 state = state*mul + inc;
                 xorshifted = (uint32_t)(((state >> 18u) ^ state) >> 27u);
@@ -233,7 +233,7 @@ int brown_d (double *Y, const size_t N, const double std, const int zmn)
         }
         else
         {
-            for (size_t n=0u; n<N-1u; n+=2u)
+            for (size_t n=N-1u; n>0u; n-=2u)
             {
                 state = state*mul + inc;
                 xorshifted = (uint32_t)(((state >> 18u) ^ state) >> 27u);
@@ -280,9 +280,9 @@ int brown_d (double *Y, const size_t N, const double std, const int zmn)
         if (zmn)
         {
             sm = 0.0;
-            for (size_t n=0u; n<N; ++n) { sm += *--Y; }
+            for (size_t n=N; n>0u; --n) { sm += *--Y; }
             sm /= (double)N;
-            for (size_t n=0u; n<N; ++n, ++Y) { *Y -= sm; }
+            for (size_t n=N; n>0u; --n, ++Y) { *Y -= sm; }
         }
     }
 
@@ -297,7 +297,7 @@ int brown_c (float *Y, const size_t N, const float std, const int zmn)
     if (N==0u) {}
     else if (std<FLT_EPSILON)
     {
-        for (size_t n=0u; n<2u*N; ++n, ++Y) { *Y = 0.0f; }
+        for (size_t n=2u*N; n>0u; --n, ++Y) { *Y = 0.0f; }
     }
     else
     {
@@ -316,7 +316,7 @@ int brown_c (float *Y, const size_t N, const float std, const int zmn)
         //Generate
         if (std==1.0f)
         {
-            for (size_t n=0u; n<N; ++n)
+            for (size_t n=N; n>0u; --n)
             {
                 state = state*mul + inc;
                 xorshifted = (uint32_t)(((state >> 18u) ^ state) >> 27u);
@@ -342,7 +342,7 @@ int brown_c (float *Y, const size_t N, const float std, const int zmn)
         }
         else
         {
-            for (size_t n=0u; n<N; ++n)
+            for (size_t n=N; n>0u; --n)
             {
                 state = state*mul + inc;
                 xorshifted = (uint32_t)(((state >> 18u) ^ state) >> 27u);
@@ -370,9 +370,9 @@ int brown_c (float *Y, const size_t N, const float std, const int zmn)
         if (zmn)
         {
             smr = smi = 0.0f;
-            for (size_t n=0u; n<N; ++n) { smi += *--Y; smr += *--Y; }
+            for (size_t n=N; n>0u; --n) { smi += *--Y; smr += *--Y; }
             smr /= (float)N; smi /= (float)N;
-            for (size_t n=0u; n<N; ++n) { *Y++ -= smr; *Y++ -= smi; }
+            for (size_t n=N; n>0u; --n) { *Y++ -= smr; *Y++ -= smi; }
         }
     }
 
@@ -387,7 +387,7 @@ int brown_z (double *Y, const size_t N, const double std, const int zmn)
     if (N==0u) {}
     else if (std<DBL_EPSILON)
     {
-        for (size_t n=0u; n<2u*N; ++n, ++Y) { *Y = 0.0; }
+        for (size_t n=2u*N; n>0u; --n, ++Y) { *Y = 0.0; }
     }
     else
     {
@@ -406,7 +406,7 @@ int brown_z (double *Y, const size_t N, const double std, const int zmn)
         //Generate
         if (std==1.0)
         {
-            for (size_t n=0u; n<N; ++n)
+            for (size_t n=N; n>0u; --n)
             {
                 state = state*mul + inc;
                 xorshifted = (uint32_t)(((state >> 18u) ^ state) >> 27u);
@@ -432,7 +432,7 @@ int brown_z (double *Y, const size_t N, const double std, const int zmn)
         }
         else
         {
-            for (size_t n=0u; n<N; ++n)
+            for (size_t n=N; n>0u; --n)
             {
                 state = state*mul + inc;
                 xorshifted = (uint32_t)(((state >> 18u) ^ state) >> 27u);
@@ -460,9 +460,9 @@ int brown_z (double *Y, const size_t N, const double std, const int zmn)
         if (zmn)
         {
             smr = smi = 0.0;
-            for (size_t n=0u; n<N; ++n) { smi += *--Y; smr += *--Y; }
+            for (size_t n=N; n>0u; --n) { smi += *--Y; smr += *--Y; }
             smr /= (double)N; smi /= (double)N;
-            for (size_t n=0u; n<N; ++n) { *Y++ -= smr; *Y++ -= smi; }
+            for (size_t n=N; n>0u; --n) { *Y++ -= smr; *Y++ -= smi; }
         }
     }
 

@@ -44,10 +44,10 @@ int blackman_s (float *Y, const size_t L, const int exact, const size_t norm)
     if (norm)
     {
         float nrm = 0.0f;
-        if (norm==1u) { for (size_t l=0u; l<L; ++l) { --Y; nrm += *Y; } }
-        else if (norm==2u) { for (size_t l=0u; l<L; ++l) { --Y; nrm += *Y**Y; } nrm = sqrtf(nrm); }
+        if (norm==1u) { for (size_t l=L; l>0u; --l) { --Y; nrm += *Y; } }
+        else if (norm==2u) { for (size_t l=L; l>0u; --l) { --Y; nrm += *Y**Y; } nrm = sqrtf(nrm); }
         else if (norm==3u) { Y -= L-L/2u; nrm = *Y; Y -= L/2u; }
-        for (size_t l=0u; l<L; ++l, ++Y) { *Y /= nrm; }
+        for (size_t l=L; l>0u; --l, ++Y) { *Y /= nrm; }
     }
 
     return 0;
@@ -75,10 +75,10 @@ int blackman_d (double *Y, const size_t L, const int exact, const size_t norm)
     if (norm)
     {
         double nrm = 0.0;
-        if (norm==1u) { for (size_t l=0u; l<L; ++l) { --Y; nrm += *Y; } }
-        else if (norm==2u) { for (size_t l=0u; l<L; ++l) { --Y; nrm += *Y**Y; } nrm = sqrt(nrm); }
+        if (norm==1u) { for (size_t l=L; l>0u; --l) { --Y; nrm += *Y; } }
+        else if (norm==2u) { for (size_t l=L; l>0u; --l) { --Y; nrm += *Y**Y; } nrm = sqrt(nrm); }
         else if (norm==3u) { Y -= L-L/2u; nrm = *Y; Y -= L/2u; }
-        for (size_t l=0u; l<L; ++l, ++Y) { *Y /= nrm; }
+        for (size_t l=L; l>0u; --l, ++Y) { *Y /= nrm; }
     }
 
     return 0;
@@ -106,10 +106,10 @@ int blackman_c (float *Y, const size_t L, const int exact, const size_t norm)
     if (norm)
     {
         float nrm = 0.0f;
-        if (norm==1u) { for (size_t l=0u; l<L; ++l) { Y-=2u; nrm += *Y; } }
-        else if (norm==2u) { for (size_t l=0u; l<L; ++l) { Y-=2u; nrm += *Y**Y; } nrm = sqrtf(nrm); }
+        if (norm==1u) { for (size_t l=L; l>0u; --l) { Y-=2u; nrm += *Y; } }
+        else if (norm==2u) { for (size_t l=L; l>0u; --l) { Y-=2u; nrm += *Y**Y; } nrm = sqrtf(nrm); }
         else if (norm==3u) { Y -= 2u*(L-L/2u); nrm = *Y; Y -= 2u*(L/2u); }
-        for (size_t l=0u; l<L; ++l, Y+=2u) { *Y /= nrm; }
+        for (size_t l=L; l>0u; --l, Y+=2u) { *Y /= nrm; }
     }
 
     return 0;
@@ -137,10 +137,10 @@ int blackman_z (double *Y, const size_t L, const int exact, const size_t norm)
     if (norm)
     {
         double nrm = 0.0;
-        if (norm==1u) { for (size_t l=0u; l<L; ++l) { Y-=2u; nrm += *Y; } }
-        else if (norm==2u) { for (size_t l=0u; l<L; ++l) { Y-=2u; nrm += *Y**Y; } nrm = sqrt(nrm); }
+        if (norm==1u) { for (size_t l=L; l>0u; --l) { Y-=2u; nrm += *Y; } }
+        else if (norm==2u) { for (size_t l=L; l>0u; --l) { Y-=2u; nrm += *Y**Y; } nrm = sqrt(nrm); }
         else if (norm==3u) { Y -= 2u*(L-L/2u); nrm = *Y; Y -= 2u*(L/2u); }
-        for (size_t l=0u; l<L; ++l, Y+=2u) { *Y /= nrm; }
+        for (size_t l=L; l>0u; --l, Y+=2u) { *Y /= nrm; }
     }
     
     return 0;

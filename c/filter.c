@@ -34,15 +34,15 @@ int filter_s (float *Y, const float *X, float *A, float *B, const size_t R, cons
     float a = *A++, b = *B++;
     if (a==1.0f)
     {
-        for (size_t p=1u; p<=P; ++p, ++A) { *A = -*A; }
-        for (size_t n=0u; n<N; ++n, ++X, ++Y) { *Y = b * *X; }
+        for (size_t p=P; p>0u; --p, ++A) { *A = -*A; }
+        for (size_t n=N; n>0u; --n, ++X, ++Y) { *Y = b * *X; }
     }
     else
     {
         const float b_a = b / a;
-        for (size_t p=1u; p<=P; ++p, ++A) { *A = -*A / a; }
-        for (size_t q=1u; q<=Q; ++q, ++B) { *B /= a; }
-        for (size_t n=0u; n<N; ++n, ++X, ++Y) { *Y = b_a * *X; }
+        for (size_t p=P; p>0u; --p, ++A) { *A = -*A / a; }
+        for (size_t q=Q; q>0u; --q, ++B) { *B /= a; }
+        for (size_t n=N; n>0u; --n, ++X, ++Y) { *Y = b_a * *X; }
         B -= Q;
     }
     A -= P; X -= N; Y -= N;
@@ -118,7 +118,7 @@ int filter_s (float *Y, const float *X, float *A, float *B, const size_t R, cons
         {
             for (size_t g=G; g>0u; --g, X+=BS*(L-1u), Y+=BS*(L-1u))
             {
-                for (size_t bs=0u; bs<BS; ++bs, ++X, Y-=K*L-1u)
+                for (size_t bs=BS; bs>0u; --bs, ++X, Y-=K*L-1u)
                 {
                     //FIR
                     for (size_t q=1u; q<=Q; ++q, ++B) { Y+=K; cblas_saxpy((int)(L-q),*B,X,(int)K,Y,(int)K); }
@@ -153,15 +153,15 @@ int filter_d (double *Y, const double *X, double *A, double *B, const size_t R, 
     double a = *A++, b = *B++;
     if (a==1.0)
     {
-        for (size_t p=1u; p<=P; ++p, ++A) { *A = -*A; }
-        for (size_t n=0u; n<N; ++n, ++X, ++Y) { *Y = b * *X; }
+        for (size_t p=P; p>0u; --p, ++A) { *A = -*A; }
+        for (size_t n=N; n>0u; --n, ++X, ++Y) { *Y = b * *X; }
     }
     else
     {
         const double b_a = b / a;
-        for (size_t p=1u; p<=P; ++p, ++A) { *A = -*A / a; }
-        for (size_t q=1u; q<=Q; ++q, ++B) { *B /= a; }
-        for (size_t n=0u; n<N; ++n, ++X, ++Y) { *Y = b_a * *X; }
+        for (size_t p=P; p>0u; --p, ++A) { *A = -*A / a; }
+        for (size_t q=Q; q>0u; --q, ++B) { *B /= a; }
+        for (size_t n=N; n>0u; --n, ++X, ++Y) { *Y = b_a * *X; }
         B -= Q;
     }
     A -= P; X -= N; Y -= N;
@@ -237,7 +237,7 @@ int filter_d (double *Y, const double *X, double *A, double *B, const size_t R, 
         {
             for (size_t g=G; g>0u; --g, X+=BS*(L-1u), Y+=BS*(L-1u))
             {
-                for (size_t bs=0u; bs<BS; ++bs, ++X, Y-=K*L-1u)
+                for (size_t bs=BS; bs>0u; --bs, ++X, Y-=K*L-1u)
                 {
                     //FIR
                     for (size_t q=1u; q<=Q; ++q, ++B) { Y+=K; cblas_daxpy((int)(L-q),*B,X,(int)K,Y,(int)K); }
@@ -275,19 +275,19 @@ int filter_c (float *Y, const float *X, float *A, float *B, const size_t R, cons
     const float a0r = *A++, a0i = *A++, a02 = a0r*a0r + a0i*a0i;
     const float b_ar = (b0r*a0r + b0i*a0i) / a02;
     const float b_ai = (b0i*a0r - b0r*a0i) / a02;
-    for (size_t p=1u; p<=P; ++p)
+    for (size_t p=P; p>0u; --p)
     {
         ar = -*A; ai = -*(A+1u);
         *A++ = (ar*a0r + ai*a0i) / a02;
         *A++ = (ai*a0r - ar*a0i) / a02;
     }
-    for (size_t q=1u; q<=Q; ++q)
+    for (size_t q=Q; q>0u; --q)
     {
         br = *B++; bi = *B--;
         *B++ = (br*a0r + bi*a0i) / a02;
         *B++ = (bi*a0r - br*a0i) / a02;
     }
-    for (size_t n=0u; n<N; ++n)
+    for (size_t n=N; n>0u; --n)
     {
         xr = *X++; xi = *X++;
         *Y++ = b_ar*xr - b_ai*xi;
@@ -387,7 +387,7 @@ int filter_c (float *Y, const float *X, float *A, float *B, const size_t R, cons
         {
             for (size_t g=G; g>0u; --g, X+=2u*BS*(L-1u), Y+=2u*BS*(L-1u))
             {
-                for (size_t bs=0u; bs<BS; ++bs, X-=2u*K*L-2u, Y-=2u*K*L-2u)
+                for (size_t bs=BS; bs>0u; --bs, X-=2u*K*L-2u, Y-=2u*K*L-2u)
                 {
                     //FIR
                     //for (size_t q=1u; q<=Q; X-=2u*K*(L-q), ++q)
@@ -450,19 +450,19 @@ int filter_z (double *Y, const double *X, double *A, double *B, const size_t R, 
     const double a0r = *A++, a0i = *A++, a02 = a0r*a0r + a0i*a0i;
     const double b_ar = (b0r*a0r + b0i*a0i) / a02;
     const double b_ai = (b0i*a0r - b0r*a0i) / a02;
-    for (size_t p=1u; p<=P; ++p)
+    for (size_t p=P; p>0u; --p)
     {
         ar = -*A; ai = -*(A+1u);
         *A++ = (ar*a0r + ai*a0i) / a02;
         *A++ = (ai*a0r - ar*a0i) / a02;
     }
-    for (size_t q=1u; q<=Q; ++q)
+    for (size_t q=Q; q>0u; --q)
     {
         br = *B++; bi = *B--;
         *B++ = (br*a0r + bi*a0i) / a02;
         *B++ = (bi*a0r - br*a0i) / a02;
     }
-    for (size_t n=0u; n<N; ++n)
+    for (size_t n=N; n>0u; --n)
     {
         xr = *X++; xi = *X++;
         *Y++ = b_ar*xr - b_ai*xi;
@@ -562,7 +562,7 @@ int filter_z (double *Y, const double *X, double *A, double *B, const size_t R, 
         {
             for (size_t g=G; g>0u; --g, X+=2u*BS*(L-1u), Y+=2u*BS*(L-1u))
             {
-                for (size_t bs=0u; bs<BS; ++bs, X-=2u*K*L-2u, Y-=2u*K*L-2u)
+                for (size_t bs=BS; bs>0u; --bs, X-=2u*K*L-2u, Y-=2u*K*L-2u)
                 {
                     //FIR
                     for (size_t q=1u; q<=Q; ++q)

@@ -26,23 +26,23 @@ int mcs_s (int *Y, const float *X, const size_t R, const size_t C, const size_t 
     {
         //Mean
         mn = 0.0f;
-        for (size_t l=0u; l<L; ++l, ++X) { mn += *X; }
+        for (size_t l=L; l>0u; --l, ++X) { mn += *X; }
         mn /= (float)L; X -= L;
 
         if (going==0)
         {
             sp = (*X++<mn); *Y++ = 0;
-            for (size_t l=1u; l<L; ++l, ++X, ++Y) { s = (*X<mn); *Y = (s!=sp); sp = s; }
+            for (size_t l=L; l>1u; --l, ++X, ++Y) { s = (*X<mn); *Y = (s!=sp); sp = s; }
         }
         else if (going==1)
         {
             sp = (*X++>=mn); *Y++ = 0;
-            for (size_t l=1u; l<L; ++l, ++X, ++Y) { s = (*X>=mn); *Y = s*(s!=sp); sp = s; }
+            for (size_t l=L; l>1u; --l, ++X, ++Y) { s = (*X>=mn); *Y = s*(s!=sp); sp = s; }
         }
         else if (going==-1)
         {
             sp = (*X++<mn); *Y++ = 0;
-            for (size_t l=1u; l<L; ++l, ++X, ++Y) { s = (*X<mn); *Y = s*(s!=sp); sp = s; }
+            for (size_t l=L; l>1u; --l, ++X, ++Y) { s = (*X<mn); *Y = s*(s!=sp); sp = s; }
         }
         else { fprintf(stderr,"error in mcs_s: going must be in {-1,0,1}\n"); return 1; }
     }
@@ -59,10 +59,10 @@ int mcs_s (int *Y, const float *X, const size_t R, const size_t C, const size_t 
                 for (size_t v=V; v>0u; --v)
                 {
                     mn = 0.0f;
-                    for (size_t l=0u; l<L; ++l, ++X) { mn += *X; }
+                    for (size_t l=L; l>0u; --l, ++X) { mn += *X; }
                     mn /= (float)L; X -= L;
                     sp = (*X++<mn); *Y++ = 0;
-                    for (size_t l=1u; l<L; ++l, ++X, ++Y) { s = (*X<mn); *Y = (s!=sp); sp = s; }
+                    for (size_t l=L; l>1u; --l, ++X, ++Y) { s = (*X<mn); *Y = (s!=sp); sp = s; }
                 }
             }
             else if (going==1)
@@ -70,10 +70,10 @@ int mcs_s (int *Y, const float *X, const size_t R, const size_t C, const size_t 
                 for (size_t v=V; v>0u; --v)
                 {
                     mn = 0.0f;
-                    for (size_t l=0u; l<L; ++l, ++X) { mn += *X; }
+                    for (size_t l=L; l>0u; --l, ++X) { mn += *X; }
                     mn /= (float)L; X -= L;
                     sp = (*X++>=mn); *Y++ = 0;
-                    for (size_t l=1u; l<L; ++l, ++X, ++Y) { s = (*X>=mn); *Y = s*(s!=sp); sp = s; }
+                    for (size_t l=L; l>1u; --l, ++X, ++Y) { s = (*X>=mn); *Y = s*(s!=sp); sp = s; }
                 }
             }
             else if (going==-1)
@@ -81,10 +81,10 @@ int mcs_s (int *Y, const float *X, const size_t R, const size_t C, const size_t 
                 for (size_t v=V; v>0u; --v)
                 {
                     mn = 0.0f;
-                    for (size_t l=0u; l<L; ++l, ++X) { mn += *X; }
+                    for (size_t l=L; l>0u; --l, ++X) { mn += *X; }
                     mn /= (float)L; X -= L;
                     sp = (*X++<mn); *Y++ = 0;
-                    for (size_t l=1u; l<L; ++l, ++X, ++Y) { s = (*X<mn); *Y = s*(s!=sp); sp = s; }
+                    for (size_t l=L; l>1u; --l, ++X, ++Y) { s = (*X<mn); *Y = s*(s!=sp); sp = s; }
                 }
             }
             else { fprintf(stderr,"error in mcs_s: going must be in {-1,0,1}\n"); return 1; }
@@ -98,10 +98,10 @@ int mcs_s (int *Y, const float *X, const size_t R, const size_t C, const size_t 
                     for (size_t b=B; b>0u; --b, X-=K*L-1u, Y-=K*L-1u)
                     {
                         mn = 0.0f;
-                        for (size_t l=0u; l<L; ++l, X+=K) { mn += *X; }
+                        for (size_t l=L; l>0u; --l, X+=K) { mn += *X; }
                         mn /= (float)L; X -= L*K;
                         sp = (*X<mn); *Y = 0; X+=K; Y+=K;
-                        for (size_t l=1u; l<L; ++l, X+=K, Y+=K) { s = (*X<mn); *Y = (s!=sp); sp = s; }
+                        for (size_t l=L; l>1u; --l, X+=K, Y+=K) { s = (*X<mn); *Y = (s!=sp); sp = s; }
                     }
                 }
             }
@@ -112,10 +112,10 @@ int mcs_s (int *Y, const float *X, const size_t R, const size_t C, const size_t 
                     for (size_t b=B; b>0u; --b, X-=K*L-1u, Y-=K*L-1u)
                     {
                         mn = 0.0f;
-                        for (size_t l=0u; l<L; ++l, X+=K) { mn += *X; }
+                        for (size_t l=L; l>0u; --l, X+=K) { mn += *X; }
                         mn /= (float)L; X -= L*K;
                         sp = (*X>=mn); *Y = 0; X+=K; Y+=K;
-                        for (size_t l=1u; l<L; ++l, X+=K, Y+=K) { s = (*X>=mn); *Y = s*(s!=sp); sp = s; }
+                        for (size_t l=L; l>1u; --l, X+=K, Y+=K) { s = (*X>=mn); *Y = s*(s!=sp); sp = s; }
                     }
                 }
             }
@@ -126,10 +126,10 @@ int mcs_s (int *Y, const float *X, const size_t R, const size_t C, const size_t 
                     for (size_t b=B; b>0u; --b, X-=K*L-1u, Y-=K*L-1u)
                     {
                         mn = 0.0f;
-                        for (size_t l=0u; l<L; ++l, X+=K) { mn += *X; }
+                        for (size_t l=L; l>0u; --l, X+=K) { mn += *X; }
                         mn /= (float)L; X -= L*K;
                         sp = (*X<mn); *Y = 0; X+=K; Y+=K;
-                        for (size_t l=1u; l<L; ++l, X+=K, Y+=K) { s = (*X<mn); *Y = s*(s!=sp); sp = s; }
+                        for (size_t l=L; l>1u; --l, X+=K, Y+=K) { s = (*X<mn); *Y = s*(s!=sp); sp = s; }
                     }
                 }
             }
@@ -155,23 +155,23 @@ int mcs_d (int *Y, const double *X, const size_t R, const size_t C, const size_t
     {
         //Mean
         mn = 0.0;
-        for (size_t l=0u; l<L; ++l, ++X) { mn += *X; }
+        for (size_t l=L; l>0u; --l, ++X) { mn += *X; }
         mn /= (double)L; X -= L;
 
         if (going==0)
         {
             sp = (*X++<mn); *Y++ = 0;
-            for (size_t l=1u; l<L; ++l, ++X, ++Y) { s = (*X<mn); *Y = (s!=sp); sp = s; }
+            for (size_t l=L; l>1u; --l, ++X, ++Y) { s = (*X<mn); *Y = (s!=sp); sp = s; }
         }
         else if (going==1)
         {
             sp = (*X++>=mn); *Y++ = 0;
-            for (size_t l=1u; l<L; ++l, ++X, ++Y) { s = (*X>=mn); *Y = s*(s!=sp); sp = s; }
+            for (size_t l=L; l>1u; --l, ++X, ++Y) { s = (*X>=mn); *Y = s*(s!=sp); sp = s; }
         }
         else if (going==-1)
         {
             sp = (*X++<mn); *Y++ = 0;
-            for (size_t l=1u; l<L; ++l, ++X, ++Y) { s = (*X<mn); *Y = s*(s!=sp); sp = s; }
+            for (size_t l=L; l>1u; --l, ++X, ++Y) { s = (*X<mn); *Y = s*(s!=sp); sp = s; }
         }
         else { fprintf(stderr,"error in mcs_d: going must be in {-1,0,1}\n"); return 1; }
     }
@@ -188,10 +188,10 @@ int mcs_d (int *Y, const double *X, const size_t R, const size_t C, const size_t
                 for (size_t v=V; v>0u; --v)
                 {
                     mn = 0.0;
-                    for (size_t l=0u; l<L; ++l, ++X) { mn += *X; }
+                    for (size_t l=L; l>0u; --l, ++X) { mn += *X; }
                     mn /= (double)L; X -= L;
                     sp = (*X++<mn); *Y++ = 0;
-                    for (size_t l=1u; l<L; ++l, ++X, ++Y) { s = (*X<mn); *Y = (s!=sp); sp = s; }
+                    for (size_t l=L; l>1u; --l, ++X, ++Y) { s = (*X<mn); *Y = (s!=sp); sp = s; }
                 }
             }
             else if (going==1)
@@ -199,10 +199,10 @@ int mcs_d (int *Y, const double *X, const size_t R, const size_t C, const size_t
                 for (size_t v=V; v>0u; --v)
                 {
                     mn = 0.0;
-                    for (size_t l=0u; l<L; ++l, ++X) { mn += *X; }
+                    for (size_t l=L; l>0u; --l, ++X) { mn += *X; }
                     mn /= (double)L; X -= L;
                     sp = (*X++>=mn); *Y++ = 0;
-                    for (size_t l=1u; l<L; ++l, ++X, ++Y) { s = (*X>=mn); *Y = s*(s!=sp); sp = s; }
+                    for (size_t l=L; l>1u; --l, ++X, ++Y) { s = (*X>=mn); *Y = s*(s!=sp); sp = s; }
                 }
             }
             else if (going==-1)
@@ -210,10 +210,10 @@ int mcs_d (int *Y, const double *X, const size_t R, const size_t C, const size_t
                 for (size_t v=V; v>0u; --v)
                 {
                     mn = 0.0;
-                    for (size_t l=0u; l<L; ++l, ++X) { mn += *X; }
+                    for (size_t l=L; l>0u; --l, ++X) { mn += *X; }
                     mn /= (double)L; X -= L;
                     sp = (*X++<mn); *Y++ = 0;
-                    for (size_t l=1u; l<L; ++l, ++X, ++Y) { s = (*X<mn); *Y = s*(s!=sp); sp = s; }
+                    for (size_t l=L; l>1u; --l, ++X, ++Y) { s = (*X<mn); *Y = s*(s!=sp); sp = s; }
                 }
             }
             else { fprintf(stderr,"error in mcs_d: going must be in {-1,0,1}\n"); return 1; }
@@ -227,10 +227,10 @@ int mcs_d (int *Y, const double *X, const size_t R, const size_t C, const size_t
                     for (size_t b=B; b>0u; --b, X-=K*L-1u, Y-=K*L-1u)
                     {
                         mn = 0.0;
-                        for (size_t l=0u; l<L; ++l, X+=K) { mn += *X; }
+                        for (size_t l=L; l>0u; --l, X+=K) { mn += *X; }
                         mn /= (double)L; X -= L*K;
                         sp = (*X<mn); *Y = 0; X+=K; Y+=K;
-                        for (size_t l=1u; l<L; ++l, X+=K, Y+=K) { s = (*X<mn); *Y = (s!=sp); sp = s; }
+                        for (size_t l=L; l>1u; --l, X+=K, Y+=K) { s = (*X<mn); *Y = (s!=sp); sp = s; }
                     }
                 }
             }
@@ -241,10 +241,10 @@ int mcs_d (int *Y, const double *X, const size_t R, const size_t C, const size_t
                     for (size_t b=B; b>0u; --b, X-=K*L-1u, Y-=K*L-1u)
                     {
                         mn = 0.0;
-                        for (size_t l=0u; l<L; ++l, X+=K) { mn += *X; }
+                        for (size_t l=L; l>0u; --l, X+=K) { mn += *X; }
                         mn /= (double)L; X -= L*K;
                         sp = (*X>=mn); *Y = 0; X+=K; Y+=K;
-                        for (size_t l=1u; l<L; ++l, X+=K, Y+=K) { s = (*X>=mn); *Y = s*(s!=sp); sp = s; }
+                        for (size_t l=L; l>1u; --l, X+=K, Y+=K) { s = (*X>=mn); *Y = s*(s!=sp); sp = s; }
                     }
                 }
             }
@@ -255,10 +255,10 @@ int mcs_d (int *Y, const double *X, const size_t R, const size_t C, const size_t
                     for (size_t b=B; b>0u; --b, X-=K*L-1u, Y-=K*L-1u)
                     {
                         mn = 0.0;
-                        for (size_t l=0u; l<L; ++l, X+=K) { mn += *X; }
+                        for (size_t l=L; l>0u; --l, X+=K) { mn += *X; }
                         mn /= (double)L; X -= L*K;
                         sp = (*X<mn); *Y = 0; X+=K; Y+=K;
-                        for (size_t l=1u; l<L; ++l, X+=K, Y+=K) { s = (*X<mn); *Y = s*(s!=sp); sp = s; }
+                        for (size_t l=L; l>1u; --l, X+=K, Y+=K) { s = (*X<mn); *Y = s*(s!=sp); sp = s; }
                     }
                 }
             }

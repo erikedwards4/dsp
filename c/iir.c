@@ -38,13 +38,13 @@ int iir_s (float *Y, const float *X, float *A, const size_t R, const size_t C, c
     const float a0 = *A++;
     if (a0==1.0f)
     {
-        for (size_t p=1u; p<=P; ++p, ++A) { *A = -*A; }
-        for (size_t n=0u; n<N; ++n, ++X, ++Y) { *Y = *X; }
+        for (size_t p=P; p>0u; --p, ++A) { *A = -*A; }
+        for (size_t n=N; n>0u; --n, ++X, ++Y) { *Y = *X; }
     }
     else
     {
-        for (size_t p=1u; p<=P; ++p, ++A) { *A = -*A / a0; }
-        for (size_t n=0u; n<N; ++n, ++X, ++Y) { *Y = *X / a0; }
+        for (size_t p=P; p>0u; --p, ++A) { *A = -*A / a0; }
+        for (size_t n=N; n>0u; --n, ++X, ++Y) { *Y = *X / a0; }
     }
     A -= P; Y -= N;
 
@@ -86,7 +86,7 @@ int iir_s (float *Y, const float *X, float *A, const size_t R, const size_t C, c
         {
             for (size_t g=G; g>0u; --g, Y+=BS*(L-1u))
             {
-                for (size_t b=0u; b<BS; ++b, Y-=K*L-1u)
+                for (size_t b=BS; b>0u; --b, Y-=K*L-1u)
                 {
                     for (size_t l=0u; l<P; A-=l, ++l, Y+=K)
                     {
@@ -117,13 +117,13 @@ int iir_d (double *Y, const double *X, double *A, const size_t R, const size_t C
     const double a0 = *A++;
     if (a0==1.0)
     {
-        for (size_t p=1u; p<=P; ++p, ++A) { *A = -*A; }
-        for (size_t n=0u; n<N; ++n, ++X, ++Y) { *Y = *X; }
+        for (size_t p=P; p>0u; --p, ++A) { *A = -*A; }
+        for (size_t n=N; n>0u; --n, ++X, ++Y) { *Y = *X; }
     }
     else
     {
-        for (size_t p=1u; p<=P; ++p, ++A) { *A = -*A / a0; }
-        for (size_t n=0u; n<N; ++n, ++X, ++Y) { *Y = *X / a0; }
+        for (size_t p=P; p>0u; --p, ++A) { *A = -*A / a0; }
+        for (size_t n=N; n>0u; --n, ++X, ++Y) { *Y = *X / a0; }
     }
     A -= P; Y -= N;
 
@@ -163,7 +163,7 @@ int iir_d (double *Y, const double *X, double *A, const size_t R, const size_t C
         {
             for (size_t g=G; g>0u; --g, Y+=BS*(L-1u))
             {
-                for (size_t b=0u; b<BS; ++b, Y-=K*L-1u)
+                for (size_t b=BS; b>0u; --b, Y-=K*L-1u)
                 {
                     for (size_t l=0u; l<P; A-=l, ++l, Y+=K)
                     {
@@ -197,17 +197,17 @@ int iir_c (float *Y, const float *X, float *A, const size_t R, const size_t C, c
     if (a0r==1.0f && a0i==0.0f)
     {
         for (size_t p=1u; p<2u*P; ++p, ++A) { *A = -*A; }
-        for (size_t n=0u; n<2u*N; ++n, ++X, ++Y) { *Y = *X; }
+        for (size_t n=2u*N; n>0u; --n, ++X, ++Y) { *Y = *X; }
     }
     else
     {
-        for (size_t p=1u; p<=P; ++p, ++A)
+        for (size_t p=P; p>0u; --p, ++A)
         {
             ar = -*A; ai = -*(A+1u);
             *A = (ar*a0r + ai*a0i) / a02;
             *++A = (ai*a0r - ar*a0i) / a02;
         }
-        for (size_t n=0u; n<N; ++n, ++X, ++Y)
+        for (size_t n=N; n>0u; --n, ++X, ++Y)
         {
             xr = *X; xi = *++X;
             *Y = (xr*a0r + xi*a0i) / a02;
@@ -276,7 +276,7 @@ int iir_c (float *Y, const float *X, float *A, const size_t R, const size_t C, c
         {
             for (size_t g=G; g>0u; --g, Y+=2u*BS*(L-1u))
             {
-                for (size_t b=0u; b<BS; ++b, Y-=2u*K*L-2u)
+                for (size_t b=BS; b>0u; --b, Y-=2u*K*L-2u)
                 {
                     for (size_t l=0u; l<P; ++l, A-=2u*l-2u, Y+=2u*K)
                     {
@@ -320,19 +320,19 @@ int iir_z (double *Y, const double *X, double *A, const size_t R, const size_t C
     const double a0r = *A++, a0i = *A++;
     if (a0r==1.0 && a0i==0.0)
     {
-        for (size_t p=0u; p<2u*P; ++p, ++A) { *A = -*A; }
-        for (size_t n=0u; n<2u*N; ++n, ++X, ++Y) { *Y = *X; }
+        for (size_t p=2u*P; p>0u; --p, ++A) { *A = -*A; }
+        for (size_t n=2u*N; n>0u; --n, ++X, ++Y) { *Y = *X; }
     }
     else
     {
         const double a02 = a0r*a0r + a0i*a0i; 
-        for (size_t p=1u; p<=P; ++p, ++A)
+        for (size_t p=P; p>0u; --p, ++A)
         {
             ar = -*A; ai = -*(A+1u);
             *A = (ar*a0r + ai*a0i) / a02;
             *++A = (ai*a0r - ar*a0i) / a02;
         }
-        for (size_t n=0u; n<N; ++n, ++X, ++Y)
+        for (size_t n=N; n>0u; --n, ++X, ++Y)
         {
             xr = *X; xi = *++X;
             *Y = (xr*a0r + xi*a0i) / a02;
@@ -401,7 +401,7 @@ int iir_z (double *Y, const double *X, double *A, const size_t R, const size_t C
         {
             for (size_t g=G; g>0u; --g, Y+=2u*BS*(L-1u))
             {
-                for (size_t b=0u; b<BS; ++b, Y-=2u*K*L-2u)
+                for (size_t b=BS; b>0u; --b, Y-=2u*K*L-2u)
                 {
                     for (size_t l=0u; l<P; ++l, A-=2u*l-2u, Y+=2u*K)
                     {
@@ -443,12 +443,12 @@ int iir_inplace_s (float *X, float *A, const size_t R, const size_t C, const siz
     const float a0 = *A++;
     if (a0==1.0f)
     {
-        for (size_t p=1u; p<=P; ++p, ++A) { *A = -*A; }
+        for (size_t p=P; p>0u; --p, ++A) { *A = -*A; }
     }
     else
     {
-        for (size_t p=1u; p<=P; ++p, ++A) { *A = -*A / a0; }
-        for (size_t n=0u; n<N; ++n, ++X) { *X /= a0; }
+        for (size_t p=P; p>0u; --p, ++A) { *A = -*A / a0; }
+        for (size_t n=N; n>0u; --n, ++X) { *X /= a0; }
         X -= N;
     }
     A -= P;
@@ -489,7 +489,7 @@ int iir_inplace_s (float *X, float *A, const size_t R, const size_t C, const siz
         {
             for (size_t g=G; g>0u; --g, X+=BS*(L-1u))
             {
-                for (size_t b=0u; b<BS; ++b, X-=K*L-1u)
+                for (size_t b=BS; b>0u; --b, X-=K*L-1u)
                 {
                     for (size_t l=0u; l<P; A-=l, ++l, X+=K)
                     {
@@ -519,12 +519,12 @@ int iir_inplace_d (double *X, double *A, const size_t R, const size_t C, const s
     const double a0 = *A++;
     if (a0==1.0)
     {
-        for (size_t p=1u; p<=P; ++p, ++A) { *A = -*A; }
+        for (size_t p=P; p>0u; --p, ++A) { *A = -*A; }
     }
     else
     {
-        for (size_t p=1u; p<=P; ++p, ++A) { *A = -*A / a0; }
-        for (size_t n=0u; n<N; ++n, ++X) { *X /= a0; }
+        for (size_t p=P; p>0u; --p, ++A) { *A = -*A / a0; }
+        for (size_t n=N; n>0u; --n, ++X) { *X /= a0; }
         X -= N;
     }
     A -= P;
@@ -565,7 +565,7 @@ int iir_inplace_d (double *X, double *A, const size_t R, const size_t C, const s
         {
             for (size_t g=G; g>0u; --g, X+=BS*(L-1u))
             {
-                for (size_t b=0u; b<BS; ++b, X-=K*L-1u)
+                for (size_t b=BS; b>0u; --b, X-=K*L-1u)
                 {
                     for (size_t l=0u; l<P; A-=l, ++l, X+=K)
                     {
@@ -595,17 +595,17 @@ int iir_inplace_c (float *X, float *A, const size_t R, const size_t C, const siz
     const float a02 = a0r*a0r + a0i*a0i;
     if (a0r==1.0f && a0i==0.0f)
     {
-        for (size_t p=0u; p<2u*P; ++p, ++A) { *A = -*A; }
+        for (size_t p=2u*P; p>0u; --p, ++A) { *A = -*A; }
     }
     else
     {
-        for (size_t p=1u; p<=P; ++p, ++A)
+        for (size_t p=P; p>0u; --p, ++A)
         {
             ar = -*A; ai = -*(A+1u);
             *A = (ar*a0r + ai*a0i) / a02;
             *++A = (ai*a0r - ar*a0i) / a02;
         }
-        for (size_t n=0u; n<N; ++n, ++X)
+        for (size_t n=N; n>0u; --n, ++X)
         {
             xr = *X; xi = *(X+1u);
             *X = (xr*a0r + xi*a0i) / a02;
@@ -675,7 +675,7 @@ int iir_inplace_c (float *X, float *A, const size_t R, const size_t C, const siz
         {
             for (size_t g=G; g>0u; --g, X+=2u*BS*(L-1u))
             {
-                for (size_t b=0u; b<BS; ++b, X-=2u*K*L-2u)
+                for (size_t b=BS; b>0u; --b, X-=2u*K*L-2u)
                 {
                     for (size_t l=0u; l<P; ++l, A-=2u*l-2u, X+=2u*K)
                     {
@@ -717,17 +717,17 @@ int iir_inplace_z (double *X, double *A, const size_t R, const size_t C, const s
     const double a02 = a0r*a0r + a0i*a0i;
     if (a0r==1.0 && a0i==0.0)
     {
-        for (size_t p=0u; p<2u*P; ++p, ++A) { *A = -*A; }
+        for (size_t p=2u*P; p>0u; --p, ++A) { *A = -*A; }
     }
     else
     {
-        for (size_t p=1u; p<=P; ++p, ++A)
+        for (size_t p=P; p>0u; --p, ++A)
         {
             ar = -*A; ai = -*(A+1u);
             *A = (ar*a0r + ai*a0i) / a02;
             *++A = (ai*a0r - ar*a0i) / a02;
         }
-        for (size_t n=0u; n<N; ++n, ++X)
+        for (size_t n=N; n>0u; --n, ++X)
         {
             xr = *X; xi = *(X+1u);
             *X = (xr*a0r + xi*a0i) / a02;
@@ -797,7 +797,7 @@ int iir_inplace_z (double *X, double *A, const size_t R, const size_t C, const s
         {
             for (size_t g=G; g>0u; --g, X+=2u*BS*(L-1u))
             {
-                for (size_t b=0u; b<BS; ++b, X-=2u*K*L-2u)
+                for (size_t b=BS; b>0u; --b, X-=2u*K*L-2u)
                 {
                     for (size_t l=0u; l<P; ++l, A-=2u*l-2u, X+=2u*K)
                     {
