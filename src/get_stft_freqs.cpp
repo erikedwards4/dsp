@@ -11,7 +11,7 @@
 #include <valarray>
 #include <unordered_map>
 #include <argtable2.h>
-#include "../util/cmli.hpp"
+#include "cmli.hpp"
 #include <float.h>
 #include "get_stft_freqs.c"
 
@@ -89,7 +89,7 @@ int main(int argc, char *argv[])
 
 
     //Check stdout
-    if (a_fo->count>0) { stdo1 = (strlen(a_fo->filename[0])==0u || strcmp(a_fo->filename[0],"-")==0); }
+    if (a_fo->count>0) { stdo1 = (strlen(a_fo->filename[0])==0 || strcmp(a_fo->filename[0],"-")==0); }
     else { stdo1 = (!isatty(fileno(stdout))); }
     wo1 = (stdo1 || a_fo->count>0);
 
@@ -175,7 +175,7 @@ int main(int argc, char *argv[])
         }
         delete[] Y;
     }
-    else if (o1.T==2u)
+    else if (o1.T==2)
     {
         double *Y;
         try { Y = new double[o1.N()]; }
@@ -198,3 +198,4 @@ int main(int argc, char *argv[])
     //Exit
     return ret;
 }
+

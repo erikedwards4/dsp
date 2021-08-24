@@ -59,7 +59,7 @@ L1 = (dim==0u) ? i1.R : (dim==1u) ? i1.C : (dim==2u) ? i1.S : i1.H;
 
 //Get padding
 if (a_pad->count==0) { pad = 0u; }
-else if (a_pad->ival[0]<1) { cerr << progstr+": " << __LINE__ << errstr << "pad must be nonnegative" << endl; return 1; }
+else if (a_pad->ival[0]<0) { cerr << progstr+": " << __LINE__ << errstr << "pad must be nonnegative" << endl; return 1; }
 else { pad = size_t(a_pad->ival[0]); }
 
 //Get stride

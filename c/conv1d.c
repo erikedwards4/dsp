@@ -74,7 +74,7 @@ int conv1d_s (float *Y, const float *X1, const float *X2, const size_t R, const 
 
         if (N2>(int)L1) //X1 fully within X2
         {
-            while (ss<=0 && w<W)
+            while (ss<0 && w<W)
             {
                 sm = 0.0f;
                 for (int n=(int)dil*(-ss/(int)dil); n<(int)L1-ss; n+=dil)
@@ -241,7 +241,7 @@ int conv1d_d (double *Y, const double *X1, const double *X2, const size_t R, con
 
         if (N2>(int)L1) //X1 fully within X2
         {
-            while (ss<=0 && w<W)
+            while (ss<0 && w<W)
             {
                 sm = 0.0;
                 for (int n=(int)dil*(-ss/(int)dil); n<(int)L1-ss; n+=dil)
@@ -412,7 +412,7 @@ int conv1d_c (float *Y, const float *X1, const float *X2, const size_t R, const 
 
         if (N2>(int)L1) //X1 fully within X2
         {
-            while (ss<=0 && w<W)
+            while (ss<0 && w<W)
             {
                 smr = smi = 0.0f;
                 for (int n=(int)dil*(-ss/(int)dil); n<(int)L1-ss; n+=dil)
@@ -605,7 +605,7 @@ int conv1d_z (double *Y, const double *X1, const double *X2, const size_t R, con
 
         if (N2>(int)L1) //X1 fully within X2
         {
-            while (ss<=0 && w<W)
+            while (ss<0 && w<W)
             {
                 smr = smi = 0.0;
                 for (int n=(int)dil*(-ss/(int)dil); n<(int)L1-ss; n+=dil)

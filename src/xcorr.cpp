@@ -44,13 +44,13 @@ int main(int argc, char *argv[])
     descr += "This is not identical to the xcorr function of Octave.\n";
     descr += "Rather, it is identical to conv, but without flipping X2.\n";
     descr += "\n";
-    descr += "X2 is NOT in flipped order (as is correct for cross-correlation).\n";
+    descr += "X2 is a vector that is NOT in flipped order.\n";
     descr += "Note that some \"convolution\" functions actually do cross-corr.\n";
     descr += "To use X2 in flipped order (convolution), use conv.\n";
     descr += "\n";
-    descr += "Use -d (--dim) to give the dimension (axis) along which to filter.\n";
+    descr += "Use -d (--dim) to give the dimension (axis) along which to operate.\n";
     descr += "Use -d0 to operate along cols, -d1 to operate along rows, etc.\n";
-    descr += "The default is 0 (along cols), unless X is a row vector.\n";
+    descr += "The default is 0 (along cols), unless X1 is a row vector.\n";
     descr += "\n";
     descr += "Use -s (--shape) to give the shape as 'full', 'same' or 'valid' [default='full'].\n";
     descr += "For 'same', Y has length L1 along dim (same as X1).\n";

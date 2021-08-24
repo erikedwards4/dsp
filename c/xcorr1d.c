@@ -52,6 +52,8 @@ int xcorr1d_s (float *Y, const float *X1, const float *X2, const size_t R, const
     if (W==0u) {}
     else if (L1==N)
     {
+        //struct timespec tic, toc; clock_gettime(CLOCK_REALTIME,&tic);
+
         //Init ss, es
         ss = -(int)pad; es = ss + N2 - 1;
 
@@ -73,7 +75,7 @@ int xcorr1d_s (float *Y, const float *X1, const float *X2, const size_t R, const
 
         if (N2>(int)L1) //X1 fully within X2
         {
-            while (ss<=0 && w<W)
+            while (ss<0 && w<W)
             {
                 sm = 0.0f;
                 //for (int n=0; n<N2; n+=dil) { if (n>=-ss && n<(int)L1-ss && n%(int)dil==0) { sm += X1[n+ss] * X2[n/(int)dil]; } }
@@ -113,6 +115,9 @@ int xcorr1d_s (float *Y, const float *X1, const float *X2, const size_t R, const
 
         //X2 past end samp of X1
         while (w<W) { *Y++ = 0.0f; ++w; }
+
+        //clock_gettime(CLOCK_REALTIME,&toc);
+        //fprintf(stderr,"elapsed time = %.6f ms\n",(double)(toc.tv_sec-tic.tv_sec)*1e3+(double)(toc.tv_nsec-tic.tv_nsec)/1e6);
     }
     else
     {
@@ -245,7 +250,7 @@ int xcorr1d_d (double *Y, const double *X1, const double *X2, const size_t R, co
 
         if (N2>(int)L1) //X1 fully within X2
         {
-            while (ss<=0 && w<W)
+            while (ss<0 && w<W)
             {
                 sm = 0.0;
                 for (int n=(int)dil*(-ss/(int)dil); n<(int)L1-ss; n+=dil)
@@ -419,7 +424,7 @@ int xcorr1d_c (float *Y, const float *X1, const float *X2, const size_t R, const
 
         if (N2>(int)L1) //X1 fully within X2
         {
-            while (ss<=0 && w<W)
+            while (ss<0 && w<W)
             {
                 smr = smi = 0.0f;
                 for (int n=(int)dil*(-ss/(int)dil); n<(int)L1-ss; n+=dil)
@@ -615,7 +620,7 @@ int xcorr1d_z (double *Y, const double *X1, const double *X2, const size_t R, co
 
         if (N2>(int)L1) //X1 fully within X2
         {
-            while (ss<=0 && w<W)
+            while (ss<0 && w<W)
             {
                 smr = smi = 0.0;
                 for (int n=(int)dil*(-ss/(int)dil); n<(int)L1-ss; n+=dil)

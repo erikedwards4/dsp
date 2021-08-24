@@ -77,7 +77,7 @@ int main(int argc, char *argv[])
     struct arg_int  *a_str = arg_intn("s","step","<uint>",0,1,"step size in samps [default=1]");
     struct arg_int  *a_dil = arg_intn("i","dilation","<uint>",0,1,"dilation factor [default=1]");
     struct arg_int  *a_pad = arg_intn("p","padding","<uint>",0,1,"padding [default=0]");
-    struct arg_int    *a_d = arg_intn("d","dim","<uint>",0,1,"dimension along which to filter [default=0]");
+    struct arg_int    *a_d = arg_intn("d","dim","<uint>",0,1,"dimension along which to convolve [default=0]");
     struct arg_file  *a_fo = arg_filen("o","ofile","<file>",0,O,"output file (Y)");
     struct arg_lit *a_help = arg_litn("h","help",0,1,"display this help and exit");
     struct arg_end  *a_end = arg_end(5);
@@ -135,7 +135,7 @@ int main(int argc, char *argv[])
 
     //Get padding
     if (a_pad->count==0) { pad = 0u; }
-    else if (a_pad->ival[0]<1) { cerr << progstr+": " << __LINE__ << errstr << "pad must be nonnegative" << endl; return 1; }
+    else if (a_pad->ival[0]<0) { cerr << progstr+": " << __LINE__ << errstr << "pad must be nonnegative" << endl; return 1; }
     else { pad = size_t(a_pad->ival[0]); }
 
     //Get stride

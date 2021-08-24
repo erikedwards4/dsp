@@ -58,9 +58,13 @@ int main(int argc, char *argv[])
     descr += "Use -p (--padding) to give the padding in samples [default=0]\n";
     descr += "\n";
     descr += "Y has the same size as X1, but the vecs along dim have length\n";
-    descr += "W = L_out = floor[1 + (L1 + 2*pad - dil*(L2-1) - 1)/stride].\n";
-    descr += "where L1=L_in is the length of vecs along dim in X1.\n";
-    descr += "and L2 is the length of X2.\n";
+    descr += "W = L_out = floor[1 + (N1-N2)/stride].\n";
+    descr += "          = floor[1 + (L1 + 2*pad - dil*(L2-1) - 1)/stride].\n";
+    descr += "where\n";
+    descr += "L1 = L_in is the length of vecs along dim in X1.\n";
+    descr += "L2 is the length of X2.\n";
+    descr += "N1 is the full length of vecs in X1 including padding.\n";
+    descr += "N2 is the full length of X2 including dilation.\n";
     descr += "\n";
     descr += "Examples:\n";
     descr += "$ xcorr1d X1 X2 -o Y \n";
@@ -132,7 +136,7 @@ int main(int argc, char *argv[])
 
     //Get padding
     if (a_pad->count==0) { pad = 0u; }
-    else if (a_pad->ival[0]<1) { cerr << progstr+": " << __LINE__ << errstr << "pad must be nonnegative" << endl; return 1; }
+    else if (a_pad->ival[0]<0) { cerr << progstr+": " << __LINE__ << errstr << "pad must be nonnegative" << endl; return 1; }
     else { pad = size_t(a_pad->ival[0]); }
 
     //Get stride

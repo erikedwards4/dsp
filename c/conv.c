@@ -77,7 +77,7 @@ int conv_s (float *Y, const float *X1, const float *X2, const size_t R, const si
 
         if (L2>L1)  //X1 fully within X2
         {
-            while (ss<=0 && w<W)
+            while (ss<0 && w<W)
             {
                 sm = 0.0f;
                 for (size_t l=L1; l>0u; --l, ++X1, --X2) { sm += *X1 * *X2; }
@@ -86,7 +86,6 @@ int conv_s (float *Y, const float *X1, const float *X2, const size_t R, const si
                 ++ss; ++w;
             }
             es = ss + (int)L2 - 1;
-            ++X1; --X2;
         }
         else        //X2 fully within X1
         {        
@@ -111,7 +110,8 @@ int conv_s (float *Y, const float *X1, const float *X2, const size_t R, const si
             ++ss; ++es; ++w;
         }
 
-        //clock_gettime(CLOCK_REALTIME,&toc); fprintf(stderr,"elapsed time = %.6f ms\n",(toc.tv_sec-tic.tv_sec)*1e3+(toc.tv_nsec-tic.tv_nsec)/1e6);
+        //clock_gettime(CLOCK_REALTIME,&toc);
+        //fprintf(stderr,"elapsed time = %.6f ms\n",(double)(toc.tv_sec-tic.tv_sec)*1e3+(double)(toc.tv_nsec-tic.tv_nsec)/1e6);
     }
     else
     {
@@ -136,7 +136,7 @@ int conv_s (float *Y, const float *X1, const float *X2, const size_t R, const si
 
                 if (L2>L1)  //X1 fully within X2
                 {
-                    while (ss<=0 && w<W)
+                    while (ss<0 && w<W)
                     {
                         sm = 0.0f;
                         for (size_t l=L1; l>0u; --l, X1+=K, --X2) { sm += *X1 * *X2; }
@@ -145,7 +145,6 @@ int conv_s (float *Y, const float *X1, const float *X2, const size_t R, const si
                         ++ss; ++w;
                     }
                     es = ss + (int)L2 - 1;
-                    X1 += K; --X2;
                 }
                 else        //X2 fully within X1
                 {        
@@ -232,7 +231,7 @@ int conv_d (double *Y, const double *X1, const double *X2, const size_t R, const
 
         if (L2>L1)  //X1 fully within X2
         {
-            while (ss<=0 && w<W)
+            while (ss<0 && w<W)
             {
                 sm = 0.0;
                 for (size_t l=L1; l>0u; --l, ++X1, --X2) { sm += *X1 * *X2; }
@@ -241,7 +240,6 @@ int conv_d (double *Y, const double *X1, const double *X2, const size_t R, const
                 ++ss; ++w;
             }
             es = ss + (int)L2 - 1;
-            ++X1; --X2;
         }
         else        //X2 fully within X1
         {        
@@ -289,7 +287,7 @@ int conv_d (double *Y, const double *X1, const double *X2, const size_t R, const
 
                 if (L2>L1)  //X1 fully within X2
                 {
-                    while (ss<=0 && w<W)
+                    while (ss<0 && w<W)
                     {
                         sm = 0.0;
                         for (size_t l=L1; l>0u; --l, X1+=K, --X2) { sm += *X1 * *X2; }
@@ -298,7 +296,6 @@ int conv_d (double *Y, const double *X1, const double *X2, const size_t R, const
                         ++ss; ++w;
                     }
                     es = ss + (int)L2 - 1;
-                    X1 += K; --X2;
                 }
                 else        //X2 fully within X1
                 {        
@@ -390,7 +387,7 @@ int conv_c (float *Y, const float *X1, const float *X2, const size_t R, const si
 
         if (L2>L1)  //X1 fully within X2
         {
-            while (ss<=0 && w<W)
+            while (ss<0 && w<W)
             {
                 smr = smi = 0.0f;
                 for (size_t l=L1; l>0u; --l, X1+=2, X2-=2)
@@ -403,7 +400,6 @@ int conv_c (float *Y, const float *X1, const float *X2, const size_t R, const si
                 ++ss; ++w;
             }
             es = ss + (int)L2 - 1;
-            X1+=2; X2-=2;
         }
         else        //X2 fully within X1
         {        
@@ -465,7 +461,7 @@ int conv_c (float *Y, const float *X1, const float *X2, const size_t R, const si
 
                 if (L2>L1)  //X1 fully within X2
                 {
-                    while (ss<=0 && w<W)
+                    while (ss<0 && w<W)
                     {
                         smr = smi = 0.0f;
                         for (size_t l=L1; l>0u; --l, X1+=2u*K, X2-=2)
@@ -478,7 +474,6 @@ int conv_c (float *Y, const float *X1, const float *X2, const size_t R, const si
                         ++ss; ++w;
                     }
                     es = ss + (int)L2 - 1;
-                    X1 += 2u*K; X2-=2;
                 }
                 else        //X2 fully within X1
                 {        
@@ -578,7 +573,7 @@ int conv_z (double *Y, const double *X1, const double *X2, const size_t R, const
 
         if (L2>L1)  //X1 fully within X2
         {
-            while (ss<=0 && w<W)
+            while (ss<0 && w<W)
             {
                 smr = smi = 0.0;
                 for (size_t l=L1; l>0u; --l, X1+=2, X2-=2)
@@ -591,7 +586,6 @@ int conv_z (double *Y, const double *X1, const double *X2, const size_t R, const
                 ++ss; ++w;
             }
             es = ss + (int)L2 - 1;
-            X1+=2; X2-=2;
         }
         else        //X2 fully within X1
         {        
@@ -653,7 +647,7 @@ int conv_z (double *Y, const double *X1, const double *X2, const size_t R, const
 
                 if (L2>L1)  //X1 fully within X2
                 {
-                    while (ss<=0 && w<W)
+                    while (ss<0 && w<W)
                     {
                         smr = smi = 0.0;
                         for (size_t l=L1; l>0u; --l, X1+=2u*K, X2-=2)
@@ -666,7 +660,6 @@ int conv_z (double *Y, const double *X1, const double *X2, const size_t R, const
                         ++ss; ++w;
                     }
                     es = ss + (int)L2 - 1;
-                    X1 += 2u*K; X2-=2;
                 }
                 else        //X2 fully within X1
                 {        

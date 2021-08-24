@@ -1,5 +1,5 @@
 //Includes
-#include "conv1d.c"
+#include "xcorr1d_fft.c"
 
 //Declarations
 const valarray<size_t> oktypes = {1u,2u,101u,102u};
@@ -8,12 +8,9 @@ size_t dim, L1, W, str, dil, pad;
 
 //Description
 string descr;
-descr += "1D convolution of each vector in X1 by X2.\n";
-descr += "This version gives control over stride, dilation, etc.\n";
-descr += "For a simpler interface with less flexibility, see conv.\n";
-descr += "\n";
-descr += "X2 is a vector in reverse chronological order (usual convention).\n";
-descr += "This performs non-causal convolution; use fir for causal.\n";
+descr += "1D cross-correlation of each vector in X1 with X2.\n";
+descr += "This gives same result as xcorr1d, but uses FFT internally.\n";
+descr += "This has not been found to be faster than xcorr1d.\n";
 descr += "\n";
 descr += "Use -d (--dim) to give the dimension (axis) along which to filter.\n";
 descr += "Use -d0 to operate along cols, -d1 to operate along rows, etc.\n";
@@ -35,16 +32,16 @@ descr += "N1 is the full length of vecs in X1 including padding.\n";
 descr += "N2 is the full length of X2 including dilation.\n";
 descr += "\n";
 descr += "Examples:\n";
-descr += "$ conv1d X1 X2 -o Y \n";
-descr += "$ conv1d -d1 -p2 X1 X2 > Y \n";
-descr += "$ cat X2 | conv1d -d1 -p5 -s3 -i2 X2 > Y \n";
+descr += "$ xcorr1d_fft X1 X2 -o Y \n";
+descr += "$ xcorr1d_fft -d1 -p2 X1 X2 > Y \n";
+descr += "$ cat X2 | xcorr1d_fft -d1 -p5 -s3 -i2 X2 > Y \n";
 
 //Argtable
 struct arg_file  *a_fi = arg_filen(nullptr,nullptr,"<file>",I-1,I,"input files (X1,X2)");
 struct arg_int  *a_str = arg_intn("s","step","<uint>",0,1,"step size in samps [default=1]");
 struct arg_int  *a_dil = arg_intn("i","dilation","<uint>",0,1,"dilation factor [default=1]");
 struct arg_int  *a_pad = arg_intn("p","padding","<uint>",0,1,"padding [default=0]");
-struct arg_int    *a_d = arg_intn("d","dim","<uint>",0,1,"dimension along which to convolve [default=0]");
+struct arg_int    *a_d = arg_intn("d","dim","<uint>",0,1,"dimension along which to filter [default=0]");
 struct arg_file  *a_fo = arg_filen("o","ofile","<file>",0,O,"output file (Y)");
 
 //Get options
@@ -102,7 +99,7 @@ if (i1.T==1u)
     catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 1 (X1)" << endl; return 1; }
     try { ifs2.read(reinterpret_cast<char*>(X2),i2.nbytes()); }
     catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 2 (X2)" << endl; return 1; }
-    if (codee::conv1d_s(Y,X1,X2,i1.R,i1.C,i1.S,i1.H,i1.iscolmajor(),i2.N(),pad,str,dil,dim))
+    if (codee::xcorr1d_fft_s(Y,X1,X2,i1.R,i1.C,i1.S,i1.H,i1.iscolmajor(),i2.N(),pad,str,dil,dim))
     { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; } 
     if (wo1)
     {
@@ -124,7 +121,7 @@ else if (i1.T==101u)
     catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 1 (X1)" << endl; return 1; }
     try { ifs2.read(reinterpret_cast<char*>(X2),i2.nbytes()); }
     catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 2 (X2)" << endl; return 1; }
-    if (codee::conv1d_c(Y,X1,X2,i1.R,i1.C,i1.S,i1.H,i1.iscolmajor(),i2.N(),pad,str,dil,dim))
+    if (codee::xcorr1d_fft_c(Y,X1,X2,i1.R,i1.C,i1.S,i1.H,i1.iscolmajor(),i2.N(),pad,str,dil,dim))
     { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; } 
     if (wo1)
     {

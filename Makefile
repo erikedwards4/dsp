@@ -161,23 +161,23 @@ filtfilt: srci/filtfilt.cpp c/filtfilt.c
 
 
 #Conv: 1-D convolution and cross-correlation
-Conv: conv conv_fft conv1d conv1d_fft xcorr xcorr_fft xcorr1d xcorr1d_fft
+Conv: conv xcorr conv1d  xcorr1d conv_fft xcorr_fft #conv1d_fft xcorr1d_fft
 conv: srci/conv.cpp c/conv.c
 	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2
-conv_fft: srci/conv_fft.cpp c/conv_fft.c
-	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lm
-conv1d: srci/conv1d.cpp c/conv1d.c
-	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2
-conv1d_fft: srci/conv1d_fft.cpp c/conv1d_fft.c
-	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lm
 xcorr: srci/xcorr.cpp c/xcorr.c
 	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2
-xcorr_fft: srci/xcorr_fft.cpp c/xcorr_fft.c
-	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lm
+conv1d: srci/conv1d.cpp c/conv1d.c
+	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2
 xcorr1d: srci/xcorr1d.cpp c/xcorr1d.c
 	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2
+conv_fft: srci/conv_fft.cpp c/conv_fft.c
+	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lfftw3f -lfftw3 -lm
+xcorr_fft: srci/xcorr_fft.cpp c/xcorr_fft.c
+	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lfftw3f -lfftw3 -lm
+conv1d_fft: srci/conv1d_fft.cpp c/conv1d_fft.c
+	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lfftw3f -lfftw3 -lm
 xcorr1d_fft: srci/xcorr1d_fft.cpp c/xcorr1d_fft.c
-	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lm
+	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lfftw3f -lfftw3 -lm
 
 
 #Interp: 1-D interpolation
@@ -213,7 +213,7 @@ mcr_windowed: srci/mcr_windowed.cpp c/mcr_windowed.c
 #AR_Poly: conversion between AR (autoregressive), poly (polynomial),
 #RC (reflection coeff), and PSD (power spectral density) representations
 #poly2roots uses LAPACKE, so for complex case requires -Wno-c99-extensions.
-AR_Poly: poly2roots roots2poly poly2ar ar2poly ar2psd poly2psd #ar2rc rc2ar poly2rc rc2poly
+AR_Poly: #poly2roots roots2poly poly2ar ar2poly ar2psd poly2psd #ar2rc rc2ar poly2rc rc2poly
 poly2roots: srci/poly2roots.cpp c/poly2roots.c
 	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS) -Wno-c99-extensions; $(CC) obj/$@.o -obin/$@ -largtable2 -llapacke -lm
 roots2poly: srci/roots2poly.cpp c/roots2poly.c
@@ -238,7 +238,7 @@ poly2psd: srci/poly2psd.cpp c/poly2psd.c
 
 #AC_LP: conversions between sig (signal), AC (autocorrelation), LP (linear prediction), and related.
 #For example, ac2rc converts from AC to RCs (reflection coeffs).
-AC_LP: sig2ac sig2ac_fft ac2rc ac2ar ac2poly sig2rc sig2ar sig2poly #sig2ar_burg sig2poly_burg ac2cc ac2mvdr
+AC_LP: #sig2ac sig2ac_fft ac2rc ac2ar ac2poly sig2rc sig2ar sig2poly #sig2ar_burg sig2poly_burg ac2cc ac2mvdr
 ac2rc: srci/ac2rc.cpp c/ac2rc.c
 	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lm
 ac2ar: srci/ac2ar.cpp c/ac2ar.c

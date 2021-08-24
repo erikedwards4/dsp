@@ -3,7 +3,6 @@
 //@license BSD 3-clause
 
 
-#include <ctime>
 #include <iostream>
 #include <fstream>
 #include <unistd.h>
@@ -23,7 +22,6 @@
 int main(int argc, char *argv[])
 {
     using namespace std;
-    timespec tic, toc;
 
 
     //Declarations
@@ -157,11 +155,8 @@ int main(int argc, char *argv[])
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for output file (Y)" << endl; return 1; }
         try { ifs1.read(reinterpret_cast<char*>(X),i1.nbytes()); }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file (X)" << endl; return 1; }
-        clock_gettime(CLOCK_REALTIME,&tic); //TIC
         if (codee::zcs_s(Y,X,i1.R,i1.C,i1.S,i1.H,i1.iscolmajor(),dim,g))
         { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
-        clock_gettime(CLOCK_REALTIME,&toc); //TOC
-        cerr << "elapsed time = " << (toc.tv_sec-tic.tv_sec)*1e3 + (toc.tv_nsec-tic.tv_nsec)/1e6 << " ms" << endl;
         if (wo1)
         {
             try { ofs1.write(reinterpret_cast<char*>(Y),o1.nbytes()); }
@@ -178,11 +173,8 @@ int main(int argc, char *argv[])
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for output file (Y)" << endl; return 1; }
         try { ifs1.read(reinterpret_cast<char*>(X),i1.nbytes()); }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file (X)" << endl; return 1; }
-        clock_gettime(CLOCK_REALTIME,&tic); //TIC
         if (codee::zcs_d(Y,X,i1.R,i1.C,i1.S,i1.H,i1.iscolmajor(),dim,g))
         { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
-        clock_gettime(CLOCK_REALTIME,&toc); //TOC
-        cerr << "elapsed time = " << (toc.tv_sec-tic.tv_sec)*1e3 + (toc.tv_nsec-tic.tv_nsec)/1e6 << " ms" << endl;
         if (wo1)
         {
             try { ofs1.write(reinterpret_cast<char*>(Y),o1.nbytes()); }

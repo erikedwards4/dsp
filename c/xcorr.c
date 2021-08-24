@@ -69,7 +69,7 @@ int xcorr_s (float *Y, const float *X1, const float *X2, const size_t R, const s
 
         if (L2>L1)  //X1 fully within X2
         {
-            while (ss<=0 && w<W)
+            while (ss<0 && w<W)
             {
                 sm = 0.0f;
                 for (size_t l=L1; l>0u; --l, ++X1, ++X2) { sm += *X1 * *X2; }
@@ -78,7 +78,6 @@ int xcorr_s (float *Y, const float *X1, const float *X2, const size_t R, const s
                 ++ss; ++w;
             }
             es = ss + (int)L2 - 1;
-            ++X1; ++X2;
         }
         else        //X2 fully within X1
         {        
@@ -126,7 +125,7 @@ int xcorr_s (float *Y, const float *X1, const float *X2, const size_t R, const s
 
                 if (L2>L1)  //X1 fully within X2
                 {
-                    while (ss<=0 && w<W)
+                    while (ss<0 && w<W)
                     {
                         sm = 0.0f;
                         for (size_t l=L1; l>0u; --l, X1+=K, ++X2) { sm += *X1 * *X2; }
@@ -135,7 +134,6 @@ int xcorr_s (float *Y, const float *X1, const float *X2, const size_t R, const s
                         ++ss; ++w;
                     }
                     es = ss + (int)L2 - 1;
-                    X1 += K; ++X2;
                 }
                 else        //X2 fully within X1
                 {        
@@ -161,6 +159,8 @@ int xcorr_s (float *Y, const float *X1, const float *X2, const size_t R, const s
                     ++ss; ++w;
                 }
                 X1 -= (int)K*ss; X2 += L2 - 1u;
+
+                //Update ss, es, w
                 ss -= (int)W; es = ss + (int)L2 - 1; w = 0u;
             }
         }
@@ -224,7 +224,7 @@ int xcorr_d (double *Y, const double *X1, const double *X2, const size_t R, cons
 
         if (L2>L1)  //X1 fully within X2
         {
-            while (ss<=0 && w<W)
+            while (ss<0 && w<W)
             {
                 sm = 0.0;
                 for (size_t l=L1; l>0u; --l, ++X1, ++X2) { sm += *X1 * *X2; }
@@ -233,7 +233,6 @@ int xcorr_d (double *Y, const double *X1, const double *X2, const size_t R, cons
                 ++ss; ++w;
             }
             es = ss + (int)L2 - 1;
-            ++X1; ++X2;
         }
         else        //X2 fully within X1
         {        
@@ -281,7 +280,7 @@ int xcorr_d (double *Y, const double *X1, const double *X2, const size_t R, cons
 
                 if (L2>L1)  //X1 fully within X2
                 {
-                    while (ss<=0 && w<W)
+                    while (ss<0 && w<W)
                     {
                         sm = 0.0;
                         for (size_t l=L1; l>0u; --l, X1+=K, ++X2) { sm += *X1 * *X2; }
@@ -290,7 +289,6 @@ int xcorr_d (double *Y, const double *X1, const double *X2, const size_t R, cons
                         ++ss; ++w;
                     }
                     es = ss + (int)L2 - 1;
-                    X1 += K; ++X2;
                 }
                 else        //X2 fully within X1
                 {        
@@ -384,7 +382,7 @@ int xcorr_c (float *Y, const float *X1, const float *X2, const size_t R, const s
 
         if (L2>L1)  //X1 fully within X2
         {
-            while (ss<=0 && w<W)
+            while (ss<0 && w<W)
             {
                 smr = smi = 0.0f;
                 for (size_t l=L1; l>0u; --l, X1+=2, X2+=2)
@@ -397,7 +395,6 @@ int xcorr_c (float *Y, const float *X1, const float *X2, const size_t R, const s
                 ++ss; ++w;
             }
             es = ss + (int)L2 - 1;
-            X1+=2; X2+=2;
         }
         else        //X2 fully within X1
         {        
@@ -459,7 +456,7 @@ int xcorr_c (float *Y, const float *X1, const float *X2, const size_t R, const s
 
                 if (L2>L1)  //X1 fully within X2
                 {
-                    while (ss<=0 && w<W)
+                    while (ss<0 && w<W)
                     {
                         smr = smi = 0.0f;
                         for (size_t l=L1; l>0u; --l, X1+=2u*K, X2+=2)
@@ -472,7 +469,6 @@ int xcorr_c (float *Y, const float *X1, const float *X2, const size_t R, const s
                         ++ss; ++w;
                     }
                     es = ss + (int)L2 - 1;
-                    X1 += 2u*K; X2+=2;
                 }
                 else        //X2 fully within X1
                 {        
@@ -574,7 +570,7 @@ int xcorr_z (double *Y, const double *X1, const double *X2, const size_t R, cons
 
         if (L2>L1)  //X1 fully within X2
         {
-            while (ss<=0 && w<W)
+            while (ss<0 && w<W)
             {
                 smr = smi = 0.0;
                 for (size_t l=L1; l>0u; --l, X1+=2, X2+=2)
@@ -587,7 +583,6 @@ int xcorr_z (double *Y, const double *X1, const double *X2, const size_t R, cons
                 ++ss; ++w;
             }
             es = ss + (int)L2 - 1;
-            X1+=2; X2+=2;
         }
         else        //X2 fully within X1
         {        
@@ -649,7 +644,7 @@ int xcorr_z (double *Y, const double *X1, const double *X2, const size_t R, cons
 
                 if (L2>L1)  //X1 fully within X2
                 {
-                    while (ss<=0 && w<W)
+                    while (ss<0 && w<W)
                     {
                         smr = smi = 0.0;
                         for (size_t l=L1; l>0u; --l, X1+=2u*K, X2+=2)
@@ -662,7 +657,6 @@ int xcorr_z (double *Y, const double *X1, const double *X2, const size_t R, cons
                         ++ss; ++w;
                     }
                     es = ss + (int)L2 - 1;
-                    X1 += 2u*K; X2+=2;
                 }
                 else        //X2 fully within X1
                 {        

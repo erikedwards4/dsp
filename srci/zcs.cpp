@@ -67,10 +67,8 @@ if (i1.T==1u)
     catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for output file (Y)" << endl; return 1; }
     try { ifs1.read(reinterpret_cast<char*>(X),i1.nbytes()); }
     catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file (X)" << endl; return 1; }
-    //TIC
     if (codee::zcs_s(Y,X,i1.R,i1.C,i1.S,i1.H,i1.iscolmajor(),dim,g))
     { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
-    //TOC
     if (wo1)
     {
         try { ofs1.write(reinterpret_cast<char*>(Y),o1.nbytes()); }

@@ -276,7 +276,7 @@ int fir_fft_d (double *Y, const double *X, const double *B, const size_t R, cons
 
 int fir_fft_c (float *Y, const float *X, const float *B, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t Q, const size_t dim)
 {
-    if (dim>3u) { fprintf(stderr,"error in fir_fft_s: dim must be in [0 3]\n"); return 1; }
+    if (dim>3u) { fprintf(stderr,"error in fir_fft_c: dim must be in [0 3]\n"); return 1; }
 
     const size_t N = R*C*S*H;
     const size_t L = (dim==0u) ? R : (dim==1u) ? C : (dim==2u) ? S : H;
@@ -302,7 +302,6 @@ int fir_fft_c (float *Y, const float *X, const float *B, const size_t R, const s
         fftwf_plan iplan = fftwf_plan_dft_1d((int)nfft,(fftwf_complex *)Y1,(fftwf_complex *)Z1,FFTW_BACKWARD,FFTW_ESTIMATE);
         if (!iplan) { fprintf(stderr,"error in fir_fft_c: problem creating fftw plan"); return 1; }
         for (size_t n=2u*L; n<2u*nfft; ++n) { X1[n] = 0.0f; }
-        for (size_t n=nfft; n<2u*nfft; ++n) { Y1[n] = 0.0f; }
 
         //Get D1 (FFT of B1, then scale)
         for (size_t n=0u; n<=Q; ++n, ++B, ++B1) { *B1 = *B; *++B1 = *++B; }
@@ -415,7 +414,6 @@ int fir_fft_z (double *Y, const double *X, const double *B, const size_t R, cons
         fftw_plan iplan = fftw_plan_dft_1d((int)nfft,(fftw_complex *)Y1,(fftw_complex *)Z1,FFTW_BACKWARD,FFTW_ESTIMATE);
         if (!iplan) { fprintf(stderr,"error in fir_fft_z: problem creating fftw plan"); return 1; }
         for (size_t n=2u*L; n<2u*nfft; ++n) { X1[n] = 0.0; }
-        for (size_t n=nfft; n<2u*nfft; ++n) { Y1[n] = 0.0; }
 
         //Get D1 (FFT of B1, then scale)
         for (size_t n=0u; n<=Q; ++n, ++B, ++B1) { *B1 = *B; *++B1 = *++B; }

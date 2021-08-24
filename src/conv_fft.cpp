@@ -3,6 +3,7 @@
 //@license BSD 3-clause
 
 
+#include <ctime>
 #include <iostream>
 #include <fstream>
 #include <unistd.h>
@@ -22,6 +23,7 @@
 int main(int argc, char *argv[])
 {
     using namespace std;
+    timespec tic, toc;
 
 
     //Declarations
@@ -46,8 +48,7 @@ int main(int argc, char *argv[])
     descr += "For more options (stride, dilation), see conv1d_fft.\n";
     descr += "\n";
     descr += "X2 is a vector in reverse chronological order (usual convention).\n";
-    descr += "This performs non-causal convolution.\n";
-    descr += "Use fir_fft for causal (where X2 is B).\n";
+    descr += "This performs non-causal convolution; use fir_fft for causal.\n";
     descr += "\n";
     descr += "Use -d (--dim) to give the dimension (axis) along which to operate.\n";
     descr += "Use -d0 to operate along cols, -d1 to operate along rows, etc.\n";
@@ -169,6 +170,7 @@ int main(int argc, char *argv[])
 
 
     //Process
+    clock_gettime(CLOCK_REALTIME,&tic);
     if (i1.T==1u)
     {
         float *X1, *X2, *Y;
@@ -261,6 +263,8 @@ int main(int argc, char *argv[])
     {
         cerr << progstr+": " << __LINE__ << errstr << "data type not supported" << endl; return 1;
     }
+    clock_gettime(CLOCK_REALTIME,&toc);
+    cerr << "elapsed time = " << double(toc.tv_sec-tic.tv_sec)*1e3 + double(toc.tv_nsec-tic.tv_nsec)/1e6 << " ms" << endl;
     
 
     //Exit
