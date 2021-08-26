@@ -12,6 +12,8 @@ string descr;
 descr += "1D DST (discrete sine transform) of each vector (1D signal) in X.\n";
 descr += "This is the type-I DST (\"the DST\"), which is the most-often used.\n";
 descr += "\n";
+descr += "This version uses direct matrix multiplication by the DST-I matrix.\n";
+descr += "\n";
 descr += "Use -d (--dim) to give the dimension along which to transform.\n";
 descr += "Use -d0 to operate along cols, -d1 to operate along rows, etc.\n";
 descr += "The default is 0 (along cols), unless X is a row vector.\n";
@@ -73,7 +75,7 @@ if (i1.T==1u)
     float *X, *Y;
     try { X = new float[i1.N()]; }
     catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for input file (X)" << endl; return 1; }
-    try { Y = new float[2u*o1.N()]; }
+    try { Y = new float[o1.N()]; }
     catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for output file (Y)" << endl; return 1; }
     try { ifs1.read(reinterpret_cast<char*>(X),i1.nbytes()); }
     catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file (X)" << endl; return 1; }

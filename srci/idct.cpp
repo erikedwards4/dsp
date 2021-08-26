@@ -11,6 +11,9 @@ int sc;
 string descr;
 descr += "1D IDCT (inverse DCT) of each vector (1D signal) in X.\n";
 descr += "This is the type-II IDCT (\"the IDCT\"), which is the most-often used.\n";
+descr += "This is also the type-III DCT.\n";
+descr += "\n";
+descr += "This version uses direct matrix multiplication by the type-III DCT matrix.\n";
 descr += "\n";
 descr += "Use -d (--dim) to give the dimension along which to transform.\n";
 descr += "Use -d0 to operate along cols, -d1 to operate along rows, etc.\n";
@@ -22,13 +25,13 @@ descr += "The default (L) is the length of X along dim.\n";
 descr += "\n";
 descr += "The output (Y) is real-valued with length ndct along dim. \n";
 descr += "\n";
-descr += "For complex X, Y is complex and consists of the DCT of the \n";
+descr += "For complex X, Y is complex and consists of the IDCT of the \n";
 descr += "real and imag parts separately (like Octave convention).\n";
 descr += "\n";
 descr += "Examples:\n";
-descr += "$ dct -n256 X -o Y \n";
-descr += "$ dct -n256 -d1 X > Y \n";
-descr += "$ cat X | dct -n256 > Y \n";
+descr += "$ idct -n256 X -o Y \n";
+descr += "$ idct -n256 -d1 X > Y \n";
+descr += "$ cat X | idct -n256 > Y \n";
 
 //Argtable
 struct arg_file  *a_fi = arg_filen(nullptr,nullptr,"<file>",I-1,I,"input file (X)");

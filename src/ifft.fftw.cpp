@@ -11,7 +11,7 @@
 #include <valarray>
 #include <unordered_map>
 #include <argtable2.h>
-#include "cmli.hpp"
+#include "../util/cmli.hpp"
 #include "ifft.fftw.c"
 
 #ifdef I
@@ -40,8 +40,8 @@ int main(int argc, char *argv[])
 
     //Description
     string descr;
-    descr += "1D IFFT (inverse fast Fourier transform) of each vector (1D signal) in X,\n";
-    descr += "using the FFTW library.\n";
+    descr += "1D IFFT (inverse fast Fourier transform) of each vector (1D signal) in X.\n";
+    descr += "This uses the FFTW (Fastest FFT in the West) library.\n";
     descr += "\n";
     descr += "This is meant for inverting fft (the 1D FFT in this namespace).\n";
     descr += "Thus, X must be complex-valued and have appropriate length.\n";
@@ -95,12 +95,12 @@ int main(int argc, char *argv[])
 
 
     //Check stdin
-    stdi1 = (a_fi->count==0 || strlen(a_fi->filename[0])==0 || strcmp(a_fi->filename[0],"-")==0);
+    stdi1 = (a_fi->count==0 || strlen(a_fi->filename[0])==0u || strcmp(a_fi->filename[0],"-")==0);
     if (stdi1>0 && isatty(fileno(stdin))) { cerr << progstr+": " << __LINE__ << errstr << "no stdin detected" << endl; return 1; }
 
 
     //Check stdout
-    if (a_fo->count>0) { stdo1 = (strlen(a_fo->filename[0])==0 || strcmp(a_fo->filename[0],"-")==0); }
+    if (a_fo->count>0) { stdo1 = (strlen(a_fo->filename[0])==0u || strcmp(a_fo->filename[0],"-")==0); }
     else { stdo1 = (!isatty(fileno(stdout))); }
     wo1 = (stdo1 || a_fo->count>0);
 
@@ -194,7 +194,7 @@ int main(int argc, char *argv[])
         }
         delete[] X; delete[] Y;
     }
-    else if (o1.T==2)
+    else if (o1.T==2u)
     {
         double *X, *Y;
         try { X = new double[2u*i1.N()]; }
@@ -255,4 +255,3 @@ int main(int argc, char *argv[])
     //Exit
     return ret;
 }
-

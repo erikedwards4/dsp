@@ -24,11 +24,11 @@ else
 	WFLAG=-Wall -Wextra
 endif
 
-CFLAGS=$(WFLAG) $(STD) -O3 -march=native -fPIC
+CFLAGS=$(WFLAG) $(STD) -O3 -ffast-math -march=native -mfpmath=sse -fPIC
 
 
 All: all
-all: Dirs Generate Transform Hilbert Filter Conv Interp ZCs_LCs AR_Poly AC_LP Frame STFT Wavelets Clean
+all: Dirs Generate Transform Filter Conv Interp ZCs_LCs AR_Poly AC_LP Frame STFT Wavelets Clean
 
 Dirs:
 	mkdir -pm 777 obj
@@ -78,17 +78,39 @@ planck: planck.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 
 
 #Transform: common 1-D signal transforms
-Transform: fft.fftw fft.fftw.r2hc fft.rad2 ifft.fftw ifft.rad2 dct idct dst idst
-fft.fftw: fft.fftw.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
-fft.fftw.r2hc: fft.fftw.r2hc.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+Transform: FFT DCT DST Hilbert
+
+#FFT: fast Fourier transforms
+FFT: fft.rad2 ifft.rad2 fft.fftw ifft.fftw fft.fftw.r2hc fft.ffts ifft.ffts fft.kiss ifft.kiss
 fft.rad2: fft.rad2.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
-ifft.fftw: ifft.fftw.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 ifft.rad2: ifft.rad2.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+fft.fftw: fft.fftw.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+ifft.fftw: ifft.fftw.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+fft.fftw.r2hc: fft.fftw.r2hc.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+fft.ffts: fft.ffts.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+ifft.ffts: ifft.ffts.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+fft.kiss: fft.kiss.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+ifft.kiss: ifft.kiss.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+
+#DCT: discrete cosine transforms
+DCT: dct idct dct.cblas idct.cblas dct.fftw idct.fftw dct.ffts #idct.ffts
 dct: dct.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 idct: idct.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+dct.cblas: dct.cblas.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+idct.cblas: idct.cblas.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+dct.fftw: dct.fftw.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+idct.fftw: idct.fftw.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+dct.ffts: dct.ffts.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+#idct.ffts: idct.ffts.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+
+#DST: discrete sine transforms
+DST: dst idst dst.cblas idst.cblas dst.fftw idst.fftw
 dst: dst.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 idst: idst.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
-
+dst.cblas: dst.cblas.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+idst.cblas: idst.cblas.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+dst.fftw: dst.fftw.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+idst.fftw: idst.fftw.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 
 #Hilbert: Hilbert transform and related
 Hilbert: hilbert analytic_sig analytic_amp analytic_pow inst_phase inst_freq

@@ -10,6 +10,7 @@ int sc;
 //Description
 string descr;
 descr += "1D FFT (fast Fourier transform) of each vector (1D signal) in X.\n";
+descr += "This uses the FFTW (Fastest FFT in the West) library.\n";
 descr += "\n";
 descr += "Use -d (--dim) to give the dimension along which to transform.\n";
 descr += "Use -d0 to operate along cols, -d1 to operate along rows, etc.\n";
@@ -24,7 +25,6 @@ descr += "for complex X, and length nfrqs along dim for real X, \n";
 descr += "where nfrqs = floor(nfft/2)+1 = num nonnegative FFT frequencies.\n";
 descr += "\n";
 descr += "Note: to get same result + negative freqs, just convert X to complex.\n";
-descr += "Alternately, use fft.rad2, which outputs all nfft freqs.\n";
 descr += "\n";
 descr += "Include -s (--scale) to scale by sqrt(0.5/L), for formal definition.\n";
 descr += "\n";
@@ -65,14 +65,12 @@ if (i1.isempty()) { cerr << progstr+": " << __LINE__ << errstr << "input (X) fou
 o1.F = i1.F;
 o1.T = i1.isreal() ? i1.T+100u : i1.T;
 Ly = i1.isreal() ? nfft/2u+1u : nfft;
-//Ly = i1.isreal() ? nfft : nfft;
 o1.R = (dim==0u) ? Ly : i1.R;
 o1.C = (dim==1u) ? Ly : i1.C;
 o1.S = (dim==2u) ? Ly : i1.S;
 o1.H = (dim==3u) ? Ly : i1.H;
 
 //Other prep
-//struct timespec tic, toc; clock_gettime(CLOCK_REALTIME,&tic);
 
 //Process
 if (i1.T==1u)
@@ -113,4 +111,3 @@ else if (i1.T==101u)
 }
 
 //Finish
-//clock_gettime(CLOCK_REALTIME,&toc); fprintf(stderr,"elapsed time = %.6f ms\n",(toc.tv_sec-tic.tv_sec)*1e3+(toc.tv_nsec-tic.tv_nsec)/1e6);

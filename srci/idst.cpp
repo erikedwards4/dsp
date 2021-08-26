@@ -12,6 +12,8 @@ string descr;
 descr += "1D IDST (inverse DST) of each vector (1D signal) in X.\n";
 descr += "This is the type-I IDST (\"the IDST\"), which is the most-often used.\n";
 descr += "\n";
+descr += "This version uses direct matrix multplication by the DST-I matrix.\n";
+descr += "\n";
 descr += "Use -d (--dim) to give the dimension along which to transform.\n";
 descr += "Use -d0 to operate along cols, -d1 to operate along rows, etc.\n";
 descr += "The default is 0 (along cols), unless X is a row vector.\n";
@@ -26,9 +28,9 @@ descr += "For complex X, Y is complex and consists of the DST of the \n";
 descr += "real and imag parts separately (like Octave convention).\n";
 descr += "\n";
 descr += "Examples:\n";
-descr += "$ dst -n256 X -o Y \n";
-descr += "$ dst -n256 -d1 X > Y \n";
-descr += "$ cat X | dst -n256 > Y \n";
+descr += "$ idst -n256 X -o Y \n";
+descr += "$ idst -n256 -d1 X > Y \n";
+descr += "$ cat X | idst -n256 > Y \n";
 
 //Argtable
 struct arg_file  *a_fi = arg_filen(nullptr,nullptr,"<file>",I-1,I,"input file (X)");

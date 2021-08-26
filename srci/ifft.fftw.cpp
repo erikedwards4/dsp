@@ -9,8 +9,8 @@ int sc, rl;
 
 //Description
 string descr;
-descr += "1D IFFT (inverse fast Fourier transform) of each vector (1D signal) in X,\n";
-descr += "using the FFTW library.\n";
+descr += "1D IFFT (inverse fast Fourier transform) of each vector (1D signal) in X.\n";
+descr += "This uses the FFTW (Fastest FFT in the West) library.\n";
 descr += "\n";
 descr += "This is meant for inverting fft (the 1D FFT in this namespace).\n";
 descr += "Thus, X must be complex-valued and have appropriate length.\n";

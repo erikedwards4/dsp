@@ -12,6 +12,8 @@ string descr;
 descr += "1D DCT (discrete cosine transform) of each vector (1D signal) in X.\n";
 descr += "This is the type-II DCT (\"the DCT\"), which is the most-often used.\n";
 descr += "\n";
+descr += "This version uses direct matrix multiplication by the DCT-II matrix.\n";
+descr += "\n";
 descr += "Use -d (--dim) to give the dimension along which to transform.\n";
 descr += "Use -d0 to operate along cols, -d1 to operate along rows, etc.\n";
 descr += "The default is 0 (along cols), unless X is a row vector.\n";

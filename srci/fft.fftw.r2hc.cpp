@@ -69,7 +69,6 @@ o1.S = (dim==2u) ? Ly : i1.S;
 o1.H = (dim==3u) ? Ly : i1.H;
 
 //Other prep
-//struct timespec tic, toc; clock_gettime(CLOCK_REALTIME,&tic);
 
 //Process
 if (i1.T==1u)
@@ -92,4 +91,3 @@ if (i1.T==1u)
 }
 
 //Finish
-//clock_gettime(CLOCK_REALTIME,&toc); fprintf(stderr,"elapsed time = %.6f ms\n",(toc.tv_sec-tic.tv_sec)*1e3+(toc.tv_nsec-tic.tv_nsec)/1e6);

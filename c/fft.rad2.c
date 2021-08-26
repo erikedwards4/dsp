@@ -14,7 +14,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
-//#include <time.h>
+#include <time.h>
 
 #ifndef M_PI
     #define M_PI 3.14159265358979323846
@@ -53,7 +53,7 @@ static void get_bittbl (size_t* bittbl, const size_t nfft)
     // while (P2<nfft) { P2 *= 2u; ++K; }
     // bittbl[0u] = 0u;
     // size_t L = 1u;
-    // for (size_t k=0u; k<K; ++k, L*=2u)
+    // for (size_t k=K; k>0u; --k, L*=2u)
     // {
     //     for (size_t l=1u; l<L; ++l) { bittbl[l] *= 2u; }
     //     for (size_t l=0u; l<L; ++l) { bittbl[l+L] = bittbl[l] + 1u; }
@@ -63,7 +63,7 @@ static void get_bittbl (size_t* bittbl, const size_t nfft)
     const size_t nfft2 = nfft/2u;
     size_t j=0u, k;
     *bittbl++ = 0u;
-    for (size_t i=1u; i<nfft; --i, ++bittbl)
+    for (size_t i=nfft; i>1u; --i, ++bittbl)
     {
         k = nfft2;
         while (k<=j) { j -= k; k /= 2u; }
@@ -357,14 +357,13 @@ static void fft_1d_z (double *Y, const size_t nfft, const size_t *bittbl, const 
 
 int fft_rad2_s (float *Y, const float *X, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t dim, const size_t nfft, const int sc)
 {
-    //struct timespec tic, toc; clock_gettime(CLOCK_REALTIME,&tic);
     if (dim>3u) { fprintf(stderr,"error in fft_rad2_s: dim must be in [0 3]\n"); return 1; }
     if (nfft>0u && (nfft & (nfft-1u))) { fprintf(stderr,"error in fft_rad2_s: nfft must be a power of 2\n"); return 1; }
     
     const size_t N = R*C*S*H;
     const size_t Lx = (dim==0u) ? R : (dim==1u) ? C : (dim==2u) ? S : H;
     const size_t Ly = nfft/2u + 1u;
-    if (nfft<Lx) { fprintf(stderr,"error in fft_rad2_s: nfft must be >= L (vec length)\n"); return 1; }
+    if (nfft<Lx) { fprintf(stderr,"error in fft_rad2_s: nfft must be >= Lx (vec length of vecs in X)\n"); return 1; }
 
     if (nfft==0u || N==0u) {}
     else if (nfft==1u)
@@ -374,10 +373,15 @@ int fft_rad2_s (float *Y, const float *X, const size_t R, const size_t C, const 
     }
     else
     {
+        struct timespec tic, toc; clock_gettime(CLOCK_REALTIME,&tic);
+
         //Initialize FFT
         size_t *bittbl; float *cstbl, *Y1;
+        //if (!(bittbl=(size_t *)aligned_alloc(sizeof(float),Ly*sizeof(size_t)))) { fprintf(stderr,"error in fft_rad2_s: problem with aligned_alloc. "); perror("aligned_alloc"); return 1; }
         if (!(bittbl=(size_t *)malloc(Ly*sizeof(size_t)))) { fprintf(stderr,"error in fft_rad2_s: problem with malloc. "); perror("malloc"); return 1; }
+        //if (!(cstbl=(float *)aligned_alloc(sizeof(float),(nfft+nfft/4u)*sizeof(float)))) { fprintf(stderr,"error in fft_rad2_s: problem with aligned_alloc. "); perror("aligned_alloc"); return 1; }
         if (!(cstbl=(float *)malloc((nfft+nfft/4u)*sizeof(float)))) { fprintf(stderr,"error in fft_rad2_s: problem with malloc. "); perror("malloc"); return 1; }
+        //if (!(Y1=(float *)aligned_alloc(sizeof(float),2u*nfft*sizeof(float)))) { fprintf(stderr,"error in fft_rad2_s: problem with aligned_alloc. "); perror("aligned_alloc"); return 1; }
         if (!(Y1=(float *)malloc(2u*nfft*sizeof(float)))) { fprintf(stderr,"error in fft_rad2_s: problem with malloc. "); perror("malloc"); return 1; }
         get_bittbl_nyq(bittbl,nfft);
         get_cstbl_s(cstbl,nfft);
@@ -425,17 +429,21 @@ int fft_rad2_s (float *Y, const float *X, const size_t R, const size_t C, const 
                 Y -= 2u*G*B*Ly;
             }
         }
+
+        //Free
         free(bittbl); free(cstbl); free(Y1);
+
+        clock_gettime(CLOCK_REALTIME,&toc);
+        fprintf(stderr,"elapsed time = %.6f ms\n",(double)(toc.tv_sec-tic.tv_sec)*1e3+(double)(toc.tv_nsec-tic.tv_nsec)/1e6);
     }
 
     //Scale
     if (sc)
     {
-        const float s = 1.0f/sqrt((float)(2u*nfft));
+        const float s = 1.0f/sqrtf((float)(2u*nfft));
         for (size_t l=2u*Ly*N/Lx; l>0u; --l, ++Y) { *Y *= s; }
     }
     
-    //clock_gettime(CLOCK_REALTIME,&toc); fprintf(stderr,"elapsed time = %.6f ms\n",(toc.tv_sec-tic.tv_sec)*1e3+(toc.tv_nsec-tic.tv_nsec)/1e6);
     return 0;
 }
 
@@ -448,7 +456,7 @@ int fft_rad2_d (double *Y, const double *X, const size_t R, const size_t C, cons
     const size_t N = R*C*S*H;
     const size_t Lx = (dim==0u) ? R : (dim==1u) ? C : (dim==2u) ? S : H;
     const size_t Ly = nfft;
-    if (nfft<Lx) { fprintf(stderr,"error in fft_rad2_d: nfft must be >= L (vec length)\n"); return 1; }
+    if (nfft<Lx) { fprintf(stderr,"error in fft_rad2_d: nfft must be >= Lx (vec length of vecs in X)\n"); return 1; }
 
     if (nfft==0u || N==0u) {}
     else if (nfft==1u)
@@ -531,7 +539,7 @@ int fft_rad2_c (float *Y, const float *X, const size_t R, const size_t C, const 
     const size_t N = R*C*S*H;
     const size_t Lx = (dim==0u) ? R : (dim==1u) ? C : (dim==2u) ? S : H;
     const size_t Ly = nfft;
-    if (nfft<Lx) { fprintf(stderr,"error in fft_rad2_c: nfft must be >= L (vec length)\n"); return 1; }
+    if (nfft<Lx) { fprintf(stderr,"error in fft_rad2_c: nfft must be >= Lx (vec length of vecs in X)\n"); return 1; }
 
     if (nfft==0u || N==0u) {}
     else if (nfft==1u)
@@ -595,7 +603,7 @@ int fft_rad2_c (float *Y, const float *X, const size_t R, const size_t C, const 
     //Scale
     if (sc)
     {
-        const float s = 1.0f/sqrt((float)(2u*nfft));
+        const float s = 1.0f/sqrtf((float)(2u*nfft));
         for (size_t l=2u*Ly*N/Lx; l>0u; --l, ++Y) { *Y *= s; }
     }
     
@@ -611,7 +619,7 @@ int fft_rad2_z (double *Y, const double *X, const size_t R, const size_t C, cons
     const size_t N = R*C*S*H;
     const size_t Lx = (dim==0u) ? R : (dim==1u) ? C : (dim==2u) ? S : H;
     const size_t Ly = nfft;
-    if (nfft<Lx) { fprintf(stderr,"error in fft_rad2_z: nfft must be >= L (vec length)\n"); return 1; }
+    if (nfft<Lx) { fprintf(stderr,"error in fft_rad2_z: nfft must be >= Lx (vec length of vecs in X)\n"); return 1; }
 
     if (nfft==0u || N==0u) {}
     else if (nfft==1u)

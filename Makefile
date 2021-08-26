@@ -12,7 +12,7 @@
 
 SHELL=/bin/bash
 ss=../util/bin/srci2src
-CC=clang++
+CC=g++
 
 ifeq ($(CC),clang++)
 	STD=-std=c++11
@@ -23,11 +23,11 @@ else
 endif
 
 INCLS=-Ic -I../util
-CFLAGS=$(WFLAG) $(STD) -O2 -ffast-math -march=native $(INCLS)
+CFLAGS=$(WFLAG) $(STD) -O3 -ffast-math -march=native -mfpmath=sse $(INCLS)
 
 
 All: all
-all: Dirs Generate Transform Hilbert Filter Conv Interp ZCs_LCs AR_Poly AC_LP Frame STFT Clean
+all: Dirs Generate Transform Filter Conv Interp ZCs_LCs AR_Poly AC_LP Frame STFT Clean
 	rm -f 7 obj/*.o
 
 Dirs:
@@ -105,28 +105,63 @@ planck: srci/planck.cpp c/planck.c
 
 
 #Transform: common 1-D signal transforms
-Transform: fft fft.fftw fft.fftw.r2hc fft.rad2 ifft ifft.fftw ifft.rad2 dct idct dst idst
+Transform: FFT DCT DST Hilbert
+
+#FFT: fast Fourier transforms
+FFT: fft ifft fft.rad2 ifft.rad2 fft.fftw ifft.fftw fft.fftw.r2hc fft.ffts ifft.ffts fft.kiss ifft.kiss
 fft: srci/fft.cpp c/fft.fftw.c c/fft.rad2.c
 	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lfftw3f -lfftw3 -lm
-fft.fftw: srci/fft.fftw.cpp c/fft.fftw.c
-	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lfftw3f -lfftw3 -lm
-fft.fftw.r2hc: srci/fft.fftw.r2hc.cpp c/fft.fftw.r2hc.c
+ifft: srci/ifft.cpp c/ifft.fftw.c c/ifft.rad2.c
 	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lfftw3f -lfftw3 -lm
 fft.rad2: srci/fft.rad2.cpp c/fft.rad2.c
 	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lm
-ifft: srci/ifft.cpp c/ifft.fftw.c c/ifft.rad2.c
+ifft.rad2: srci/ifft.rad2.cpp c/ifft.rad2.c
+	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lm
+fft.fftw: srci/fft.fftw.cpp c/fft.fftw.c
 	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lfftw3f -lfftw3 -lm
 ifft.fftw: srci/ifft.fftw.cpp c/ifft.fftw.c
 	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lfftw3f -lfftw3 -lm
-ifft.rad2: srci/ifft.rad2.cpp c/ifft.rad2.c
+fft.fftw.r2hc: srci/fft.fftw.r2hc.cpp c/fft.fftw.r2hc.c
+	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lfftw3f -lfftw3 -lm
+fft.ffts: srci/fft.ffts.cpp c/fft.ffts.c
+	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lffts -lm
+ifft.ffts: srci/ifft.ffts.cpp c/ifft.ffts.c
+	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lffts -lm
+fft.kiss: srci/fft.kiss.cpp c/fft.kiss.c
 	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lm
+ifft.kiss: srci/ifft.kiss.cpp c/ifft.kiss.c
+	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lm
+
+#DCT: discrete cosine transforms
+DCT: dct idct dct.cblas idct.cblas dct.fftw idct.fftw dct.ffts
 dct: srci/dct.cpp c/dct.c
-	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lfftw3f -lfftw3 -lm
+	$(ss) -tvd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lm
 idct: srci/idct.cpp c/idct.c
+	$(ss) -tvd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lm
+dct.cblas: srci/dct.cblas.cpp c/dct.cblas.c
+	$(ss) -tvd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lopenblas -lm
+idct.cblas: srci/idct.cblas.cpp c/idct.cblas.c
+	$(ss) -tvd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lopenblas -lm
+dct.fftw: srci/dct.fftw.cpp c/dct.fftw.c
+	$(ss) -tvd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lfftw3f -lfftw3 -lm
+idct.fftw: srci/idct.fftw.cpp c/idct.fftw.c
 	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lfftw3f -lfftw3 -lm
+dct.ffts: srci/dct.ffts.cpp c/dct.ffts.c
+	$(ss) -tvd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lffts -lm
+
+#DST: discrete sine transforms
+DST: dst idst dst.cblas idst.cblas dst.fftw idst.fftw dst.ffts
 dst: srci/dst.cpp c/dst.c
-	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lfftw3f -lfftw3 -lm
+	$(ss) -tvd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lm
 idst: srci/idst.cpp c/idst.c
+	$(ss) -tvd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lm
+dst.cblas: srci/dst.cblas.cpp c/dst.cblas.c
+	$(ss) -tvd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lopenblas -lm
+idst.cblas: srci/idst.cblas.cpp c/idst.cblas.c
+	$(ss) -tvd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lopenblas -lm
+dst.fftw: srci/dst.fftw.cpp c/dst.fftw.c
+	$(ss) -tvd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lfftw3f -lfftw3 -lm
+idst.fftw: srci/idst.fftw.cpp c/idst.fftw.c
 	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lfftw3f -lfftw3 -lm
 
 

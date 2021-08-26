@@ -3,6 +3,7 @@
 //@license BSD 3-clause
 
 
+#include <ctime>
 #include <iostream>
 #include <fstream>
 #include <unistd.h>
@@ -11,7 +12,7 @@
 #include <valarray>
 #include <unordered_map>
 #include <argtable2.h>
-#include "cmli.hpp"
+#include "../util/cmli.hpp"
 #include "idct.c"
 
 #ifdef I
@@ -22,6 +23,7 @@
 int main(int argc, char *argv[])
 {
     using namespace std;
+    timespec tic, toc;
 
 
     //Declarations
@@ -42,6 +44,9 @@ int main(int argc, char *argv[])
     string descr;
     descr += "1D IDCT (inverse DCT) of each vector (1D signal) in X.\n";
     descr += "This is the type-II IDCT (\"the IDCT\"), which is the most-often used.\n";
+    descr += "This is also the type-III DCT.\n";
+    descr += "\n";
+    descr += "This version uses matrix multiplication by the type-III DCT matrix.\n";
     descr += "\n";
     descr += "Use -d (--dim) to give the dimension along which to transform.\n";
     descr += "Use -d0 to operate along cols, -d1 to operate along rows, etc.\n";
@@ -53,13 +58,13 @@ int main(int argc, char *argv[])
     descr += "\n";
     descr += "The output (Y) is real-valued with length ndct along dim. \n";
     descr += "\n";
-    descr += "For complex X, Y is complex and consists of the DCT of the \n";
+    descr += "For complex X, Y is complex and consists of the IDCT of the \n";
     descr += "real and imag parts separately (like Octave convention).\n";
     descr += "\n";
     descr += "Examples:\n";
-    descr += "$ dct -n256 X -o Y \n";
-    descr += "$ dct -n256 -d1 X > Y \n";
-    descr += "$ cat X | dct -n256 > Y \n";
+    descr += "$ idct -n256 X -o Y \n";
+    descr += "$ idct -n256 -d1 X > Y \n";
+    descr += "$ cat X | idct -n256 > Y \n";
 
 
     //Argtable
@@ -84,12 +89,12 @@ int main(int argc, char *argv[])
 
 
     //Check stdin
-    stdi1 = (a_fi->count==0 || strlen(a_fi->filename[0])==0 || strcmp(a_fi->filename[0],"-")==0);
+    stdi1 = (a_fi->count==0 || strlen(a_fi->filename[0])==0u || strcmp(a_fi->filename[0],"-")==0);
     if (stdi1>0 && isatty(fileno(stdin))) { cerr << progstr+": " << __LINE__ << errstr << "no stdin detected" << endl; return 1; }
 
 
     //Check stdout
-    if (a_fo->count>0) { stdo1 = (strlen(a_fo->filename[0])==0 || strcmp(a_fo->filename[0],"-")==0); }
+    if (a_fo->count>0) { stdo1 = (strlen(a_fo->filename[0])==0u || strcmp(a_fo->filename[0],"-")==0); }
     else { stdo1 = (!isatty(fileno(stdout))); }
     wo1 = (stdo1 || a_fo->count>0);
 
@@ -156,6 +161,7 @@ int main(int argc, char *argv[])
 
 
     //Process
+    clock_gettime(CLOCK_REALTIME,&tic);
     if (i1.T==1u)
     {
         float *X, *Y;
@@ -174,7 +180,7 @@ int main(int argc, char *argv[])
         }
         delete[] X; delete[] Y;
     }
-    else if (i1.T==2)
+    else if (i1.T==2u)
     {
         double *X, *Y;
         try { X = new double[i1.N()]; }
@@ -232,9 +238,10 @@ int main(int argc, char *argv[])
     {
         cerr << progstr+": " << __LINE__ << errstr << "data type not supported" << endl; return 1;
     }
+    clock_gettime(CLOCK_REALTIME,&toc);
+    cerr << "elapsed time = " << double(toc.tv_sec-tic.tv_sec)*1e3 + double(toc.tv_nsec-tic.tv_nsec)/1e6 << " ms" << endl;
     
 
     //Exit
     return ret;
 }
-
