@@ -8,7 +8,7 @@ size_t dim;
 
 //Description
 string descr;
-descr += "Converts roots back to polynomials along rows or cols of X.\n";
+descr += "Converts roots to polynomials for each vector in X.\n";
 descr += "This is like the poly function of Octave.\n";
 descr += "\n";
 descr += "Use -d (--dim) to give the dimension along which to operate.\n";

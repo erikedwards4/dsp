@@ -10,10 +10,11 @@
 
 //Also for compatibility to Kaldi and Librosa,
 //frames that overlap the edge of X are filled in by flipping the edge of X,
-//e.g., Y <- X[3] X[2] X[1] X[0] X[1] X[2] X[3] X[4] X[5] ... X[N-1]
-//Use frame_univar_float to use zeros outside of [0 N-1].
+//e.g., Y <- X[3] X[2] X[1] X[0] X[1] X[2] X[3] X[4] X[5] ...
+//Use frame_univar_flt to use zeros outside of [0 N-1].
 
-//Also for compatibility to Kaldi, the center-samp of the first frame is at stp/2.
+//Also for compatibility to Kaldi, for snip_edges=false,
+//the start-samp of the first frame is at stp/2 - L/2.
 
 //The following framing convention is forced here:
 //Samples from one frame are always contiguous in memory, regardless of row- vs. col-major.
@@ -22,7 +23,7 @@
 //This avoids confusion, maximizes speed, minimizes code length,
 //and remains compatible with the only viable way to stream data online.
 
-//For more flexibility, see also frame_univar_float.c.
+//For more flexibility, see also frame_univar_flt.c.
 
 #include <stdio.h>
 
@@ -49,7 +50,7 @@ int frame_univar_s (float *Y, const float *X, const size_t N, const size_t L, co
     if (W==0u) {}
     else if (snip_edges)
     {
-        const int xd = (int)L - (int)stp;
+        const int xd = (int)L - (int)stp;           //X inc after each frame
         for (size_t w=W; w>0u; --w, X-=xd)
         {
             for (size_t l=L; l>0u; --l, ++X, ++Y) { *Y = *X; }
@@ -68,8 +69,12 @@ int frame_univar_s (float *Y, const float *X, const size_t N, const size_t L, co
             {
                 for (int s=ss; s<ss+(int)L; ++s, ++Y)
                 {
-                    n = s; //This ensures extrapolation by signal reversal to any length
-                    while (n<0 || n>=(int)N) { n = (n<0) ? -n-1 : (n<(int)N) ? n : 2*(int)N-1-n; }
+                    //This ensures extrapolation by signal reversal to any length
+                    n = s;
+                    while (n<0 || n>=(int)N)
+                    {
+                        n = (n<0) ? -n-1 : (n<(int)N) ? n : 2*(int)N-1-n;
+                    }
                     X += n - prev_n;
                     *Y = *X;
                     prev_n = n;
@@ -79,7 +84,8 @@ int frame_univar_s (float *Y, const float *X, const size_t N, const size_t L, co
             {
                 X += ss - prev_n;
                 for (size_t l=L; l>0u; --l, ++X, ++Y) { *Y = *X; }
-                X -= xd; prev_n = ss + (int)stp;
+                X -= xd;
+                prev_n = ss + (int)stp;
             }
         }
     }
@@ -100,7 +106,8 @@ int frame_univar_d (double *Y, const double *X, const size_t N, const size_t L, 
     if (W==0u) {}
     else if (snip_edges)
     {
-        const int xd = (int)L - (int)stp;
+        const int xd = (int)L - (int)stp;           //X inc after each frame
+
         for (size_t w=W; w>0u; --w, X-=xd)
         {
             for (size_t l=L; l>0u; --l, ++X, ++Y) { *Y = *X; }
@@ -119,8 +126,12 @@ int frame_univar_d (double *Y, const double *X, const size_t N, const size_t L, 
             {
                 for (int s=ss; s<ss+(int)L; ++s, ++Y)
                 {
-                    n = s; //This ensures extrapolation by signal reversal to any length
-                    while (n<0 || n>=(int)N) { n = (n<0) ? -n-1 : (n<(int)N) ? n : 2*(int)N-1-n; }
+                    //This ensures extrapolation by signal reversal to any length
+                    n = s;
+                    while (n<0 || n>=(int)N)
+                    {
+                        n = (n<0) ? -n-1 : (n<(int)N) ? n : 2*(int)N-1-n;
+                    }
                     X += n - prev_n;
                     *Y = *X;
                     prev_n = n;
@@ -130,7 +141,8 @@ int frame_univar_d (double *Y, const double *X, const size_t N, const size_t L, 
             {
                 X += ss - prev_n;
                 for (size_t l=L; l>0u; --l, ++X, ++Y) { *Y = *X; }
-                X -= xd; prev_n = ss + (int)stp;
+                X -= xd;
+                prev_n = ss + (int)stp;
             }
         }
     }
@@ -151,7 +163,8 @@ int frame_univar_c (float *Y, const float *X, const size_t N, const size_t L, co
     if (W==0u) {}
     else if (snip_edges)
     {
-        const int xd = 2*((int)L-(int)stp);
+        const int xd = 2*((int)L-(int)stp);         //X inc after each frame
+
         for (size_t w=W; w>0u; --w, X-=xd)
         {
             for (size_t l=L; l>0u; --l, ++X, ++Y) { *Y = *X; *++Y = *++X; }
@@ -170,8 +183,12 @@ int frame_univar_c (float *Y, const float *X, const size_t N, const size_t L, co
             {
                 for (int s=ss; s<ss+(int)L; ++s, ++Y)
                 {
-                    n = s; //This ensures extrapolation by signal reversal to any length
-                    while (n<0 || n>=(int)N) { n = (n<0) ? -n-1 : (n<(int)N) ? n : 2*(int)N-1-n; }
+                    //This ensures extrapolation by signal reversal to any length
+                    n = s;
+                    while (n<0 || n>=(int)N)
+                    {
+                        n = (n<0) ? -n-1 : (n<(int)N) ? n : 2*(int)N-1-n;
+                    }
                     X += 2*(n-prev_n);
                     *Y = *X; *++Y = *(X+1);
                     prev_n = n;
@@ -181,7 +198,8 @@ int frame_univar_c (float *Y, const float *X, const size_t N, const size_t L, co
             {
                 X += 2*(ss-prev_n);
                 for (size_t l=L; l>0u; --l, ++X, ++Y) { *Y = *X; *++Y = *++X; }
-                X -= xd; prev_n = ss + (int)stp;
+                X -= xd;
+                prev_n = ss + (int)stp;
             }
         }
     }
@@ -202,7 +220,8 @@ int frame_univar_z (double *Y, const double *X, const size_t N, const size_t L, 
     if (W==0u) {}
     else if (snip_edges)
     {
-        const int xd = 2*((int)L-(int)stp);
+        const int xd = 2*((int)L-(int)stp);         //X inc after each frame
+
         for (size_t w=W; w>0u; --w, X-=xd)
         {
             for (size_t l=L; l>0u; --l, ++X, ++Y) { *Y = *X; *++Y = *++X; }
@@ -221,8 +240,12 @@ int frame_univar_z (double *Y, const double *X, const size_t N, const size_t L, 
             {
                 for (int s=ss; s<ss+(int)L; ++s, ++Y)
                 {
-                    n = s; //This ensures extrapolation by signal reversal to any length
-                    while (n<0 || n>=(int)N) { n = (n<0) ? -n-1 : (n<(int)N) ? n : 2*(int)N-1-n; }
+                    //This ensures extrapolation by signal reversal to any length
+                    n = s;
+                    while (n<0 || n>=(int)N)
+                    {
+                        n = (n<0) ? -n-1 : (n<(int)N) ? n : 2*(int)N-1-n;
+                    }
                     X += 2*(n-prev_n);
                     *Y = *X; *++Y = *(X+1);
                     prev_n = n;
@@ -232,7 +255,8 @@ int frame_univar_z (double *Y, const double *X, const size_t N, const size_t L, 
             {
                 X += 2*(ss-prev_n);
                 for (size_t l=L; l>0u; --l, ++X, ++Y) { *Y = *X; *++Y = *++X; }
-                X -= xd; prev_n = ss + (int)stp;
+                X -= xd;
+                prev_n = ss + (int)stp;
             }
         }
     }

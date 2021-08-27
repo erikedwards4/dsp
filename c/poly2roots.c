@@ -67,14 +67,14 @@ int poly2roots_s (float *Y, const float *X, const size_t R, const size_t C, cons
         if (Lx==N)
         {
             ++compan;
-            for (size_t l=0u; l<Ly; ++l, compan+=Lx) { *compan = 1.0f; }
+            for (size_t l=Ly; l>0u; --l, compan+=Lx) { *compan = 1.0f; }
             compan -= Lx*Ly + 1u;
             x0 = -*X++;
-            for (size_t l=0u; l<Ly; ++l, ++X, compan+=Ly) { *compan = *X / x0; }
+            for (size_t l=Ly; l>0u; --l, ++X, compan+=Ly) { *compan = *X / x0; }
             compan -= Ly*Ly;
             info = LAPACKE_shseqr(LAPACK_COL_MAJOR,job,compz,n,ilo,ihi,compan,ldh,wr,wi,zz,ldz);  //eig
             if (info) { fprintf(stderr,"error in poly2roots_s: lapacke decomposition failed\n"); return 1; }
-            for (size_t l=0u; l<Ly; ++l) { *Y++ = *wr++; *Y++ = *wi++; }
+            for (size_t l=Ly; l>0u; --l) { *Y++ = *wr++; *Y++ = *wi++; }
             wr -= Ly; wi -= Ly;
         }
         else
@@ -87,16 +87,16 @@ int poly2roots_s (float *Y, const float *X, const size_t R, const size_t C, cons
             {
                 for (size_t v=V; v>0u; --v)
                 {
-                    for (size_t l=0u; l<Ly*Ly; ++l, ++compan) { *compan = 0.0f; }
+                    for (size_t l=Ly*Ly; l>0u; --l, ++compan) { *compan = 0.0f; }
                     compan -= Lx;
-                    for (size_t l=2u; l<Ly; ++l, compan-=Lx) { *compan = 1.0f; }
+                    for (size_t l=Ly; l>2u; --l, compan-=Lx) { *compan = 1.0f; }
                     *compan-- = 1.0f;
                     x0 = -*X++;
-                    for (size_t l=0u; l<Ly; ++l, ++X, compan+=Ly) { *compan = *X / x0; }
+                    for (size_t l=Ly; l>0u; --l, ++X, compan+=Ly) { *compan = *X / x0; }
                     compan -= Ly*Ly;
                     info = LAPACKE_shseqr(LAPACK_COL_MAJOR,job,compz,n,ilo,ihi,compan,ldh,wr,wi,zz,ldz);  //eig
                     if (info) { fprintf(stderr,"error in poly2roots_s: lapacke decomposition failed\n"); return 1; }
-                    for (size_t l=0u; l<Ly; ++l) { *Y++ = *wr++; *Y++ = *wi++; }
+                    for (size_t l=Ly; l>0u; --l) { *Y++ = *wr++; *Y++ = *wi++; }
                     wr -= Ly; wi -= Ly;
                 }
             }
@@ -106,16 +106,16 @@ int poly2roots_s (float *Y, const float *X, const size_t R, const size_t C, cons
                 {
                     for (size_t b=B; b>0u; --b, X-=K*Lx-1u, Y-=2u*K*Ly-2u)
                     {
-                        for (size_t l=0u; l<Ly*Ly; ++l, ++compan) { *compan = 0.0f; }
+                        for (size_t l=Ly*Ly; l>0u; --l, ++compan) { *compan = 0.0f; }
                         compan -= Lx;
-                        for (size_t l=2u; l<Ly; ++l, compan-=Lx) { *compan = 1.0f; }
+                        for (size_t l=Ly; l>2u; --l, compan-=Lx) { *compan = 1.0f; }
                         *compan-- = 1.0f;
                         x0 = -*X; X += K;
-                        for (size_t l=0u; l<Ly; ++l, X+=K, compan+=Ly) { *compan = *X / x0; }
+                        for (size_t l=Ly; l>0u; --l, X+=K, compan+=Ly) { *compan = *X / x0; }
                         compan -= Ly*Ly;
                         info = LAPACKE_shseqr(LAPACK_COL_MAJOR,job,compz,n,ilo,ihi,compan,ldh,wr,wi,zz,ldz);  //eig
                         if (info) { fprintf(stderr,"error in poly2roots_s: lapacke decomposition failed\n"); return 1; }
-                        for (size_t l=0u; l<Ly; ++l, Y+=2u*K-1u) { *Y = *wr++; *++Y = *wi++; }
+                        for (size_t l=Ly; l>0u; --l, Y+=2u*K-1u) { *Y = *wr++; *++Y = *wi++; }
                         wr -= Ly; wi -= Ly;
                     }
                 }
@@ -176,14 +176,14 @@ int poly2roots_d (double *Y, const double *X, const size_t R, const size_t C, co
         if (Lx==N)
         {
             ++compan;
-            for (size_t l=0u; l<Ly; ++l, compan+=Lx) { *compan = 1.0; }
+            for (size_t l=Ly; l>0u; --l, compan+=Lx) { *compan = 1.0; }
             compan -= Lx*Ly + 1u;
             x0 = -*X++;
-            for (size_t l=0u; l<Ly; ++l, ++X, compan+=Ly) { *compan = *X / x0; }
+            for (size_t l=Ly; l>0u; --l, ++X, compan+=Ly) { *compan = *X / x0; }
             compan -= Ly*Ly;
             info = LAPACKE_dhseqr(LAPACK_COL_MAJOR,job,compz,n,ilo,ihi,compan,ldh,wr,wi,zz,ldz);  //eig
             if (info) { fprintf(stderr,"error in poly2roots_d: lapacke decomposition failed\n"); return 1; }
-            for (size_t l=0u; l<Ly; ++l) { *Y++ = *wr++; *Y++ = *wi++; }
+            for (size_t l=Ly; l>0u; --l) { *Y++ = *wr++; *Y++ = *wi++; }
             wr -= Ly; wi -= Ly;
         }
         else
@@ -196,16 +196,16 @@ int poly2roots_d (double *Y, const double *X, const size_t R, const size_t C, co
             {
                 for (size_t v=V; v>0u; --v)
                 {
-                    for (size_t l=0u; l<Ly*Ly; ++l, ++compan) { *compan = 0.0; }
+                    for (size_t l=Ly*Ly; l>0u; --l, ++compan) { *compan = 0.0; }
                     compan -= Lx;
-                    for (size_t l=2u; l<Ly; ++l, compan-=Lx) { *compan = 1.0; }
+                    for (size_t l=Ly; l>2u; --l, compan-=Lx) { *compan = 1.0; }
                     *compan-- = 1.0;
                     x0 = -*X++;
-                    for (size_t l=0u; l<Ly; ++l, ++X, compan+=Ly) { *compan = *X / x0; }
+                    for (size_t l=Ly; l>0u; --l, ++X, compan+=Ly) { *compan = *X / x0; }
                     compan -= Ly*Ly;
                     info = LAPACKE_dhseqr(LAPACK_COL_MAJOR,job,compz,n,ilo,ihi,compan,ldh,wr,wi,zz,ldz);  //eig
                     if (info) { fprintf(stderr,"error in poly2roots_d: lapacke decomposition failed\n"); return 1; }
-                    for (size_t l=0u; l<Ly; ++l) { *Y++ = *wr++; *Y++ = *wi++; }
+                    for (size_t l=Ly; l>0u; --l) { *Y++ = *wr++; *Y++ = *wi++; }
                     wr -= Ly; wi -= Ly;
                 }
             }
@@ -215,16 +215,16 @@ int poly2roots_d (double *Y, const double *X, const size_t R, const size_t C, co
                 {
                     for (size_t b=B; b>0u; --b, X-=K*Lx-1u, Y-=2u*K*Ly-2u)
                     {
-                        for (size_t l=0u; l<Ly*Ly; ++l, ++compan) { *compan = 0.0; }
+                        for (size_t l=Ly*Ly; l>0u; --l, ++compan) { *compan = 0.0; }
                         compan -= Lx;
-                        for (size_t l=2u; l<Ly; ++l, compan-=Lx) { *compan = 1.0; }
+                        for (size_t l=Ly; l>2u; --l, compan-=Lx) { *compan = 1.0; }
                         *compan-- = 1.0;
                         x0 = -*X; X += K;
-                        for (size_t l=0u; l<Ly; ++l, X+=K, compan+=Ly) { *compan = *X / x0; }
+                        for (size_t l=Ly; l>0u; --l, X+=K, compan+=Ly) { *compan = *X / x0; }
                         compan -= Ly*Ly;
                         info = LAPACKE_dhseqr(LAPACK_COL_MAJOR,job,compz,n,ilo,ihi,compan,ldh,wr,wi,zz,ldz);  //eig
                         if (info) { fprintf(stderr,"error in poly2roots_d: lapacke decomposition failed\n"); return 1; }
-                        for (size_t l=0u; l<Ly; ++l, Y+=2u*K-1u) { *Y = *wr++; *++Y = *wi++; }
+                        for (size_t l=Ly; l>0u; --l, Y+=2u*K-1u) { *Y = *wr++; *++Y = *wi++; }
                         wr -= Ly; wi -= Ly;
                     }
                 }
@@ -259,14 +259,14 @@ int poly2roots_c (float *Y, const float *X, const size_t R, const size_t C, cons
         if (Lx==N)
         {
             compan += 2;
-            for (size_t l=0u; l<Ly; ++l, compan+=2u*Lx) { *compan = 1.0f; }
+            for (size_t l=Ly; l>0u; --l, compan+=2u*Lx) { *compan = 1.0f; }
             compan -= 2u*Lx*Ly + 2u;
             scr = 1.0f/(*X**X+*(X+1)**(X+1)); sci = *(X+1)*scr; scr *= -*X;
             X += 2;
-            for (size_t l=0u; l<Ly; ++l, X+=2, compan+=2u*Ly-1u)
+            for (size_t l=Ly; l>0u; --l, X+=2, compan+=2u*Ly-1u)
             {
-                *compan++ = *X*scr - *(X+1)*sci;
-                *compan = *X*sci + *(X+1)*scr;
+                *compan = *X*scr - *(X+1)*sci;
+                *++compan = *X*sci + *(X+1)*scr;
             }
             compan -= 2u*Ly*Ly;
             info = LAPACKE_chseqr(LAPACK_COL_MAJOR,job,compz,n,ilo,ihi,(lapack_complex_float *)compan,ldh,(lapack_complex_float *)Y,(lapack_complex_float *)zz,ldz);
@@ -286,15 +286,15 @@ int poly2roots_c (float *Y, const float *X, const size_t R, const size_t C, cons
                     {
                         for (size_t l=0u; l<2u*Ly*Ly; ++l, ++compan) { *compan = 0.0f; }
                         compan -= 2u*Lx;
-                        for (size_t l=2u; l<Ly; ++l, compan-=2u*Lx) { *compan = 1.0f; }
+                        for (size_t l=Ly; l>2u; --l, compan-=2u*Lx) { *compan = 1.0f; }
                         *compan = 1.0f; compan -= 2;
                     }
                     scr = 1.0f/(*X**X+*(X+1)**(X+1)); sci = *(X+1)*scr; scr *= -*X;
                     X += 2;
-                    for (size_t l=0u; l<Ly; ++l, X+=2, compan+=2u*Ly-1u)
+                    for (size_t l=Ly; l>0u; --l, X+=2, compan+=2u*Ly-1u)
                     {
-                        *compan++ = *X*scr - *(X+1)*sci;
-                        *compan = *X*sci + *(X+1)*scr;
+                        *compan = *X*scr - *(X+1)*sci;
+                        *++compan = *X*sci + *(X+1)*scr;
                     }
                     compan -= 2u*Ly*Ly;
                     info = LAPACKE_chseqr(LAPACK_COL_MAJOR,job,compz,n,ilo,ihi,(lapack_complex_float *)compan,ldh,(lapack_complex_float *)Y,(lapack_complex_float *)zz,ldz);
@@ -314,20 +314,20 @@ int poly2roots_c (float *Y, const float *X, const size_t R, const size_t C, cons
                         {
                             for (size_t l=0u; l<2u*Ly*Ly; ++l, ++compan) { *compan = 0.0f; }
                             compan -= 2u*Lx;
-                            for (size_t l=2u; l<Ly; ++l, compan-=2u*Lx) { *compan = 1.0f; }
+                            for (size_t l=Ly; l>2u; --l, compan-=2u*Lx) { *compan = 1.0f; }
                             *compan = 1.0f; compan -= 2;
                         }
                         scr = 1.0f/(*X**X+*(X+1)**(X+1)); sci = *(X+1)*scr; scr *= -*X;
                         X += 2u*K;
-                        for (size_t l=0u; l<Ly; ++l, X+=2u*K, compan+=2u*Ly-1u)
+                        for (size_t l=Ly; l>0u; --l, X+=2u*K, compan+=2u*Ly-1u)
                         {
-                            *compan++ = *X*scr - *(X+1)*sci;
-                            *compan = *X*sci + *(X+1)*scr;
+                            *compan = *X*scr - *(X+1)*sci;
+                            *++compan = *X*sci + *(X+1)*scr;
                         }
                         compan -= 2u*Ly*Ly;
                         info = LAPACKE_chseqr(LAPACK_COL_MAJOR,job,compz,n,ilo,ihi,(lapack_complex_float *)compan,ldh,(lapack_complex_float *)roots,(lapack_complex_float *)zz,ldz);
                         if (info) { fprintf(stderr,"error in poly2roots_c: lapacke decomposition failed\n"); return 1; }
-                        for (size_t l=0u; l<Ly; ++l, ++roots, Y+=2u*K-1u) { *Y++ = *roots++; *Y = *roots; }
+                        for (size_t l=Ly; l>0u; --l, ++roots, Y+=2u*K-1u) { *Y++ = *roots++; *Y = *roots; }
                         roots -= 2u*Ly;
                     }
                 }
@@ -362,14 +362,14 @@ int poly2roots_z (double *Y, const double *X, const size_t R, const size_t C, co
         if (Lx==N)
         {
             compan += 2;
-            for (size_t l=0u; l<Ly; ++l, compan+=2u*Lx) { *compan = 1.0; }
+            for (size_t l=Ly; l>0u; --l, compan+=2u*Lx) { *compan = 1.0; }
             compan -= 2u*Lx*Ly + 2u;
             scr = 1.0/(*X**X+*(X+1)**(X+1)); sci = *(X+1)*scr; scr *= -*X;
             X += 2;
-            for (size_t l=0u; l<Ly; ++l, X+=2, compan+=2u*Ly-1u)
+            for (size_t l=Ly; l>0u; --l, X+=2, compan+=2u*Ly-1u)
             {
-                *compan++ = *X*scr - *(X+1)*sci;
-                *compan = *X*sci + *(X+1)*scr;
+                *compan = *X*scr - *(X+1)*sci;
+                *++compan = *X*sci + *(X+1)*scr;
             }
             compan -= 2u*Ly*Ly;
             info = LAPACKE_zhseqr(LAPACK_COL_MAJOR,job,compz,n,ilo,ihi,(lapack_complex_double *)compan,ldh,(lapack_complex_double *)Y,(lapack_complex_double *)zz,ldz);
@@ -389,15 +389,15 @@ int poly2roots_z (double *Y, const double *X, const size_t R, const size_t C, co
                     {
                         for (size_t l=0u; l<2u*Ly*Ly; ++l, ++compan) { *compan = 0.0; }
                         compan -= 2u*Lx;
-                        for (size_t l=2u; l<Ly; ++l, compan-=2u*Lx) { *compan = 1.0; }
+                        for (size_t l=Ly; l>2u; --l, compan-=2u*Lx) { *compan = 1.0; }
                         *compan = 1.0; compan -= 2;
                     }
                     scr = 1.0/(*X**X+*(X+1)**(X+1)); sci = *(X+1)*scr; scr *= -*X;
                     X += 2;
-                    for (size_t l=0u; l<Ly; ++l, X+=2, compan+=2u*Ly-1u)
+                    for (size_t l=Ly; l>0u; --l, X+=2, compan+=2u*Ly-1u)
                     {
-                        *compan++ = *X*scr - *(X+1)*sci;
-                        *compan = *X*sci + *(X+1)*scr;
+                        *compan = *X*scr - *(X+1)*sci;
+                        *++compan = *X*sci + *(X+1)*scr;
                     }
                     compan -= 2u*Ly*Ly;
                     info = LAPACKE_zhseqr(LAPACK_COL_MAJOR,job,compz,n,ilo,ihi,(lapack_complex_double *)compan,ldh,(lapack_complex_double *)Y,(lapack_complex_double *)zz,ldz);
@@ -417,20 +417,20 @@ int poly2roots_z (double *Y, const double *X, const size_t R, const size_t C, co
                         {
                             for (size_t l=0u; l<2u*Ly*Ly; ++l, ++compan) { *compan = 0.0; }
                             compan -= 2u*Lx;
-                            for (size_t l=2u; l<Ly; ++l, compan-=2u*Lx) { *compan = 1.0; }
+                            for (size_t l=Ly; l>2u; --l, compan-=2u*Lx) { *compan = 1.0; }
                             *compan = 1.0; compan -= 2;
                         }
                         scr = 1.0/(*X**X+*(X+1)**(X+1)); sci = *(X+1)*scr; scr *= -*X;
                         X += 2u*K;
-                        for (size_t l=0u; l<Ly; ++l, X+=2u*K, compan+=2u*Ly-1u)
+                        for (size_t l=Ly; l>0u; --l, X+=2u*K, compan+=2u*Ly-1u)
                         {
-                            *compan++ = *X*scr - *(X+1)*sci;
-                            *compan = *X*sci + *(X+1)*scr;
+                            *compan = *X*scr - *(X+1)*sci;
+                            *++compan = *X*sci + *(X+1)*scr;
                         }
                         compan -= 2u*Ly*Ly;
                         info = LAPACKE_zhseqr(LAPACK_COL_MAJOR,job,compz,n,ilo,ihi,(lapack_complex_double *)compan,ldh,(lapack_complex_double *)roots,(lapack_complex_double *)zz,ldz);
                         if (info) { fprintf(stderr,"error in poly2roots_z: lapacke decomposition failed\n"); return 1; }
-                        for (size_t l=0u; l<Ly; ++l, ++roots, Y+=2u*K-1u) { *Y++ = *roots++; *Y = *roots; }
+                        for (size_t l=Ly; l>0u; --l, ++roots, Y+=2u*K-1u) { *Y++ = *roots++; *Y = *roots; }
                         roots -= 2u*Ly;
                     }
                 }

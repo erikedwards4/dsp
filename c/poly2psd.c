@@ -42,7 +42,7 @@ int poly2psd_s (float *Y, const float *X, const float *E, const float *W, const 
         if (!(Ei=(float *)malloc(FP*sizeof(float)))) { fprintf(stderr,"error in poly2psd_s: problem with malloc. "); perror("malloc"); return 1; }
 
         //Make complex-valued E matrix
-        for (size_t f=0u; f<F; ++f, ++W)
+        for (size_t f=F; f>0u; --f, ++W)
         {
             for (size_t p=0u; p<P; ++p, ++Er, ++Ei)
             {
@@ -57,10 +57,10 @@ int poly2psd_s (float *Y, const float *X, const float *E, const float *W, const 
         {
             const float v2 = 2.0f**E;
             ++X;
-            for (size_t f=0u; f<F; ++f, X-=P, ++Y)
+            for (size_t f=F; f>0u; --f, X-=P, ++Y)
             {
                 yr = 1.0f; yi = 0.0f;
-                for (size_t p=0u; p<P; ++p, ++X, ++Er, ++Ei)
+                for (size_t p=P; p>0u; --p, ++X, ++Er, ++Ei)
                 {
                     yr += *Er * *X;
                     yi += *Ei * *X;
@@ -81,10 +81,10 @@ int poly2psd_s (float *Y, const float *X, const float *E, const float *W, const 
                 for (size_t v=V; v>0u; --v, X+=P)
                 {
                     v2 = 2.0f**E++; ++X;
-                    for (size_t f=0u; f<F; ++f, X-=P, ++Y)
+                    for (size_t f=F; f>0u; --f, X-=P, ++Y)
                     {
                         yr = 1.0f; yi = 0.0f;
-                        for (size_t p=0u; p<P; ++p, ++X, ++Er, ++Ei)
+                        for (size_t p=P; p>0u; --p, ++X, ++Er, ++Ei)
                         {
                             yr += *X * *Er;
                             yi += *X * *Ei;
@@ -101,10 +101,10 @@ int poly2psd_s (float *Y, const float *X, const float *E, const float *W, const 
                     for (size_t b=B; b>0u; --b, X-=K-1u, Y-=K*F-1u)
                     {
                         v2 = 2.0f**E++; X += K;
-                        for (size_t f=0u; f<F; ++f, X-=K*P, Y+=K)
+                        for (size_t f=F; f>0u; --f, X-=K*P, Y+=K)
                         {
                             yr = 1.0f; yi = 0.0f;
-                            for (size_t p=0u; p<P; ++p, X+=K, ++Er, ++Ei)
+                            for (size_t p=P; p>0u; --p, X+=K, ++Er, ++Ei)
                             {
                                 yr += *X * *Er;
                                 yi += *X * *Ei;
@@ -140,7 +140,7 @@ int poly2psd_d (double *Y, const double *X, const double *E, const double *W, co
         if (!(Ei=(double *)malloc(FP*sizeof(double)))) { fprintf(stderr,"error in poly2psd_d: problem with malloc. "); perror("malloc"); return 1; }
 
         //Make complex-valued E matrix
-        for (size_t f=0u; f<F; ++f, ++W)
+        for (size_t f=F; f>0u; --f, ++W)
         {
             for (size_t p=0u; p<P; ++p, ++Er, ++Ei)
             {
@@ -155,10 +155,10 @@ int poly2psd_d (double *Y, const double *X, const double *E, const double *W, co
         {
             const double v2 = 2.0**E;
             ++X;
-            for (size_t f=0u; f<F; ++f, X-=P, ++Y)
+            for (size_t f=F; f>0u; --f, X-=P, ++Y)
             {
                 yr = 1.0; yi = 0.0;
-                for (size_t p=0u; p<P; ++p, ++X, ++Er, ++Ei)
+                for (size_t p=P; p>0u; --p, ++X, ++Er, ++Ei)
                 {
                     yr += *Er * *X;
                     yi += *Ei * *X;
@@ -179,10 +179,10 @@ int poly2psd_d (double *Y, const double *X, const double *E, const double *W, co
                 for (size_t v=V; v>0u; --v, X+=P)
                 {
                     v2 = 2.0**E++; ++X;
-                    for (size_t f=0u; f<F; ++f, X-=P, ++Y)
+                    for (size_t f=F; f>0u; --f, X-=P, ++Y)
                     {
                         yr = 1.0; yi = 0.0;
-                        for (size_t p=0u; p<P; ++p, ++X, ++Er, ++Ei)
+                        for (size_t p=P; p>0u; --p, ++X, ++Er, ++Ei)
                         {
                             yr += *X * *Er;
                             yi += *X * *Ei;
@@ -199,10 +199,10 @@ int poly2psd_d (double *Y, const double *X, const double *E, const double *W, co
                     for (size_t b=B; b>0u; --b, X-=K-1u, Y-=K*F-1u)
                     {
                         v2 = 2.0**E++; X += K;
-                        for (size_t f=0u; f<F; ++f, X-=K*P, Y+=K)
+                        for (size_t f=F; f>0u; --f, X-=K*P, Y+=K)
                         {
                             yr = 1.0; yi = 0.0;
-                            for (size_t p=0u; p<P; ++p, X+=K, ++Er, ++Ei)
+                            for (size_t p=P; p>0u; --p, X+=K, ++Er, ++Ei)
                             {
                                 yr += *X * *Er;
                                 yi += *X * *Ei;
@@ -238,7 +238,7 @@ int poly2psd_c (float *Y, const float *X, const float *E, const float *W, const 
         if (!(Ei=(float *)malloc(FP*sizeof(float)))) { fprintf(stderr,"error in poly2psd_c: problem with malloc. "); perror("malloc"); return 1; }
 
         //Make complex-valued E matrix
-        for (size_t f=0u; f<F; ++f, ++W)
+        for (size_t f=F; f>0u; --f, ++W)
         {
             for (size_t p=0u; p<P; ++p, ++Er, ++Ei)
             {
@@ -253,10 +253,10 @@ int poly2psd_c (float *Y, const float *X, const float *E, const float *W, const 
         {
             const float v2 = *E;
             X += 2;
-            for (size_t f=0u; f<F; ++f, X-=2u*P, ++Y)
+            for (size_t f=F; f>0u; --f, X-=2u*P, ++Y)
             {
                 yr = 1.0f; yi = 0.0f;
-                for (size_t p=0u; p<P; ++p, X+=2, ++Er, ++Ei)
+                for (size_t p=P; p>0u; --p, X+=2, ++Er, ++Ei)
                 {
                     yr += *Er**X - *Ei**(X+1);
                     yi += *Ei**X + *Er**(X+1);
@@ -277,10 +277,10 @@ int poly2psd_c (float *Y, const float *X, const float *E, const float *W, const 
                 for (size_t v=V; v>0u; --v, X+=2u*P)
                 {
                     v2 = *E++; X += 2;
-                    for (size_t f=0u; f<F; ++f, X-=2u*P, ++Y)
+                    for (size_t f=F; f>0u; --f, X-=2u*P, ++Y)
                     {
                         yr = 1.0f; yi = 0.0f;
-                        for (size_t p=0u; p<P; ++p, X+=2, ++Er, ++Ei)
+                        for (size_t p=P; p>0u; --p, X+=2, ++Er, ++Ei)
                         {
                             yr += *Er**X - *Ei**(X+1);
                             yi += *Ei**X + *Er**(X+1);
@@ -297,10 +297,10 @@ int poly2psd_c (float *Y, const float *X, const float *E, const float *W, const 
                     for (size_t b=B; b>0u; --b, X-=2u*K-2u, Y-=K*F-1u)
                     {
                         v2 = *E++; X += 2u*K;
-                        for (size_t f=0u; f<F; ++f, X-=2u*K*P, Y+=K)
+                        for (size_t f=F; f>0u; --f, X-=2u*K*P, Y+=K)
                         {
                             yr = 1.0f; yi = 0.0f;
-                            for (size_t p=0u; p<P; ++p, X+=2u*K, ++Er, ++Ei)
+                            for (size_t p=P; p>0u; --p, X+=2u*K, ++Er, ++Ei)
                             {
                                 yr += *Er**X - *Ei**(X+1);
                                 yi += *Ei**X + *Er**(X+1);
@@ -336,7 +336,7 @@ int poly2psd_z (double *Y, const double *X, const double *E, const double *W, co
         if (!(Ei=(double *)malloc(FP*sizeof(double)))) { fprintf(stderr,"error in poly2psd_z: problem with malloc. "); perror("malloc"); return 1; }
 
         //Make complex-valued E matrix
-        for (size_t f=0u; f<F; ++f, ++W)
+        for (size_t f=F; f>0u; --f, ++W)
         {
             for (size_t p=0u; p<P; ++p, ++Er, ++Ei)
             {
@@ -351,10 +351,10 @@ int poly2psd_z (double *Y, const double *X, const double *E, const double *W, co
         {
             const double v2 = *E;
             X += 2;
-            for (size_t f=0u; f<F; ++f, X-=2u*P, ++Y)
+            for (size_t f=F; f>0u; --f, X-=2u*P, ++Y)
             {
                 yr = 1.0; yi = 0.0;
-                for (size_t p=0u; p<P; ++p, X+=2, ++Er, ++Ei)
+                for (size_t p=P; p>0u; --p, X+=2, ++Er, ++Ei)
                 {
                     yr += *Er**X - *Ei**(X+1);
                     yi += *Ei**X + *Er**(X+1);
@@ -375,10 +375,10 @@ int poly2psd_z (double *Y, const double *X, const double *E, const double *W, co
                 for (size_t v=V; v>0u; --v, X+=2u*P)
                 {
                     v2 = *E++; X += 2;
-                    for (size_t f=0u; f<F; ++f, X-=2u*P, ++Y)
+                    for (size_t f=F; f>0u; --f, X-=2u*P, ++Y)
                     {
                         yr = 1.0; yi = 0.0;
-                        for (size_t p=0u; p<P; ++p, X+=2, ++Er, ++Ei)
+                        for (size_t p=P; p>0u; --p, X+=2, ++Er, ++Ei)
                         {
                             yr += *Er**X - *Ei**(X+1);
                             yi += *Ei**X + *Er**(X+1);
@@ -395,10 +395,10 @@ int poly2psd_z (double *Y, const double *X, const double *E, const double *W, co
                     for (size_t b=B; b>0u; --b, X-=2u*K-2u, Y-=K*F-1u)
                     {
                         v2 = *E++; X += 2u*K;
-                        for (size_t f=0u; f<F; ++f, X-=2u*K*P, Y+=K)
+                        for (size_t f=F; f>0u; --f, X-=2u*K*P, Y+=K)
                         {
                             yr = 1.0; yi = 0.0;
-                            for (size_t p=0u; p<P; ++p, X+=2u*K, ++Er, ++Ei)
+                            for (size_t p=P; p>0u; --p, X+=2u*K, ++Er, ++Ei)
                             {
                                 yr += *Er**X - *Ei**(X+1);
                                 yi += *Ei**X + *Er**(X+1);

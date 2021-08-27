@@ -182,21 +182,21 @@ inst_freq: srci/inst_freq.cpp c/inst_freq.c
 
 
 #Filter: FIR and IIR filters
-Filter: fir iir filter fir_fft #fir_ola fftfilt medfilt spencer
+Filter: fir fir_fft iir filter filtfilt #fir_ola medfilt spencer
 fir: srci/fir.cpp c/fir.c
 	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lopenblas -lm
+fir_fft: srci/fir_fft.cpp c/fir_fft.c
+	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lfftw3f -lfftw3 -lm
 iir: srci/iir.cpp c/iir.c
 	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lm
 filter: srci/filter.cpp c/filter.c
 	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lopenblas -lm
-fir_fft: srci/fir_fft.cpp c/fir_fft.c
-	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lfftw3f -lfftw3 -lm
 filtfilt: srci/filtfilt.cpp c/filtfilt.c
 	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lopenblas -lm
 
 
 #Conv: 1-D convolution and cross-correlation
-Conv: conv xcorr conv1d  xcorr1d conv_fft xcorr_fft #conv1d_fft xcorr1d_fft
+Conv: conv xcorr conv1d xcorr1d conv_fft xcorr_fft conv1d_fft xcorr1d_fft
 conv: srci/conv.cpp c/conv.c
 	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2
 xcorr: srci/xcorr.cpp c/xcorr.c
@@ -216,10 +216,10 @@ xcorr1d_fft: srci/xcorr1d_fft.cpp c/xcorr1d_fft.c
 
 
 #Interp: 1-D interpolation
-Interp: interp1q #interp1t
+Interp: interp1q #interp1ft
 interp1q: srci/interp1q.cpp c/interp1q.c
 	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2
-interp1t: srci/interp1t.cpp c/interp1t.c
+interp1ft: srci/interp1ft.cpp c/interp1ft.c
 	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2
 
 

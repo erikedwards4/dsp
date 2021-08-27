@@ -65,40 +65,18 @@ int ac2rc_s (float *Y, const float *X, const size_t R, const size_t C, const siz
             for (size_t p=1u; p<P-1u; ++p, X+=p)
             {
                 a = *X;
-                for (size_t q=0u; q<p; ++q, ++A1) { --X; a += *X * *A1; }
+                for (size_t q=p; q>0u; --q, ++A1) { --X; a += *X * *A1; }
                 a /= -e;
                 *A1 = a; *Y++ = a;
-                for (size_t q=0u; q<p; ++q, ++A2) { --A1; *A2 = *A1; }
+                for (size_t q=p; q>0u; --q, ++A2) { --A1; *A2 = *A1; }
                 A1 += p;
-                for (size_t q=0u; q<p; ++q) { --A2; --A1; *A1 += a * *A2; }
+                for (size_t q=p; q>0u; --q) { --A2; --A1; *A1 += a * *A2; }
                 e *= 1.0f - a*a;
             }
             a = *X;
-            for (size_t q=0u; q<P; ++q, ++A1) { --X; a += *X * *A1; }
+            for (size_t q=P; q>0u; --q, ++A1) { --X; a += *X * *A1; }
             A1 -= P;
             *Y++ = a/-e;
-
-            //Older solution
-            // a = -*(X+1) / *X;
-            // *A1++ = 1.0f; *A1++ = *A2++ = a;
-            // *Y++ = -a;
-            // e = *X++; e += a * *X++;
-            // for (size_t p=2u; p<P; ++p, ++X, ++Y)
-            // {
-            //     a = *X;
-            //     X -= p - 1u;
-            //     for (size_t q=1u; q<p; ++q, ++X) { --A1; a += *X * *A1; }
-            //     a /= -e; *Y = -a; *(A1+p-1u) = a;
-            //     for (size_t q=1u; q<p; ++q, ++A1) { --A2; *A1 += a * *A2; }
-            //     A1 -= p - 1u;
-            //     for (size_t q=0u; q<p; ++q, ++A1, ++A2) { *A2 = *A1; }
-            //     e *= 1.0f - a*a;
-            // }
-            // a = *X;
-            // X -= P - 1u;
-            // for (size_t q=1u; q<P; ++q, ++X) { --A1; a += *X * *A1; }
-            // A2 -= P - 1u; --A1;
-            // *Y = a/e;
 
             //This has approx. same speed (unmeasurable diff), but assembly code definitely longer
             // A1[0] = 1.0f;
@@ -112,7 +90,7 @@ int ac2rc_s (float *Y, const float *X, const size_t R, const size_t C, const siz
             //     A1[p] = a = -a/e;
             //     Y[p-1u] = -a;
             //     for (size_t q=1u; q<p; ++q) { A1[q] = fmaf(a,A2[p-q-1u],A1[q]); }
-            //     for (size_t q=0u; q<p; ++q) { A2[q] = A1[q+1u]; }
+            //     for (size_t q=p; q>0u; --q) { A2[q] = A1[q+1u]; }
             //     e *= fmaf(a,-a,1.0f);
             // }
             // a = X[P];
@@ -135,16 +113,16 @@ int ac2rc_s (float *Y, const float *X, const size_t R, const size_t C, const siz
                     for (size_t p=1u; p<P-1u; ++p, X+=p)
                     {
                         a = *X;
-                        for (size_t q=0u; q<p; ++q, ++A1) { --X; a += *X * *A1; }
+                        for (size_t q=p; q>0u; --q, ++A1) { --X; a += *X * *A1; }
                         a /= -e;
                         *A1 = a; *Y++ = a;
-                        for (size_t q=0u; q<p; ++q, ++A2) { --A1; *A2 = *A1; }
+                        for (size_t q=p; q>0u; --q, ++A2) { --A1; *A2 = *A1; }
                         A1 += p;
-                        for (size_t q=0u; q<p; ++q) { --A2; --A1; *A1 += a * *A2; }
+                        for (size_t q=p; q>0u; --q) { --A2; --A1; *A1 += a * *A2; }
                         e *= 1.0f - a*a;
                     }
                     a = *X;
-                    for (size_t q=0u; q<P; ++q, ++A1) { --X; a += *X * *A1; }
+                    for (size_t q=P; q>0u; --q, ++A1) { --X; a += *X * *A1; }
                     A1 -= P;
                     *Y = a/-e;
                 }
@@ -162,16 +140,16 @@ int ac2rc_s (float *Y, const float *X, const size_t R, const size_t C, const siz
                         for (size_t p=1u; p<P-1u; ++p, X+=p*K)
                         {
                             a = *X;
-                            for (size_t q=0u; q<p; ++q, ++A1) { X-=K; a += *X * *A1; }
+                            for (size_t q=p; q>0u; --q, ++A1) { X-=K; a += *X * *A1; }
                             a /= -e;
                             *A1 = a; *Y = a; Y += K;
-                            for (size_t q=0u; q<p; ++q, ++A2) { --A1; *A2 = *A1; }
+                            for (size_t q=p; q>0u; --q, ++A2) { --A1; *A2 = *A1; }
                             A1 += p;
-                            for (size_t q=0u; q<p; ++q) { --A2; --A1; *A1 += a * *A2; }
+                            for (size_t q=p; q>0u; --q) { --A2; --A1; *A1 += a * *A2; }
                             e *= 1.0f - a*a;
                         }
                         a = *X;
-                        for (size_t q=0u; q<P; ++q, ++A1) { X-=K; a += *X * *A1; }
+                        for (size_t q=P; q>0u; --q, ++A1) { X-=K; a += *X * *A1; }
                         A1 -= P;
                         *Y = a/-e;
                     }
@@ -183,6 +161,7 @@ int ac2rc_s (float *Y, const float *X, const size_t R, const size_t C, const siz
 	
 	return 0;
 }
+
 
 int ac2rc_d (double *Y, const double *X, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t dim)
 {
@@ -229,16 +208,16 @@ int ac2rc_d (double *Y, const double *X, const size_t R, const size_t C, const s
             for (size_t p=1u; p<P-1u; ++p, X+=p)
             {
                 a = *X;
-                for (size_t q=0u; q<p; ++q, ++A1) { --X; a += *X * *A1; }
+                for (size_t q=p; q>0u; --q, ++A1) { --X; a += *X * *A1; }
                 a /= -e;
                 *A1 = a; *Y++ = a;
-                for (size_t q=0u; q<p; ++q, ++A2) { --A1; *A2 = *A1; }
+                for (size_t q=p; q>0u; --q, ++A2) { --A1; *A2 = *A1; }
                 A1 += p;
-                for (size_t q=0u; q<p; ++q) { --A2; --A1; *A1 += a * *A2; }
+                for (size_t q=p; q>0u; --q) { --A2; --A1; *A1 += a * *A2; }
                 e *= 1.0 - a*a;
             }
             a = *X;
-            for (size_t q=0u; q<P; ++q, ++A1) { --X; a += *X * *A1; }
+            for (size_t q=P; q>0u; --q, ++A1) { --X; a += *X * *A1; }
             A1 -= P;
             *Y++ = a/-e;
         }
@@ -258,16 +237,16 @@ int ac2rc_d (double *Y, const double *X, const size_t R, const size_t C, const s
                     for (size_t p=1u; p<P-1u; ++p, X+=p)
                     {
                         a = *X;
-                        for (size_t q=0u; q<p; ++q, ++A1) { --X; a += *X * *A1; }
+                        for (size_t q=p; q>0u; --q, ++A1) { --X; a += *X * *A1; }
                         a /= -e;
                         *A1 = a; *Y++ = a;
-                        for (size_t q=0u; q<p; ++q, ++A2) { --A1; *A2 = *A1; }
+                        for (size_t q=p; q>0u; --q, ++A2) { --A1; *A2 = *A1; }
                         A1 += p;
-                        for (size_t q=0u; q<p; ++q) { --A2; --A1; *A1 += a * *A2; }
+                        for (size_t q=p; q>0u; --q) { --A2; --A1; *A1 += a * *A2; }
                         e *= 1.0 - a*a;
                     }
                     a = *X;
-                    for (size_t q=0u; q<P; ++q, ++A1) { --X; a += *X * *A1; }
+                    for (size_t q=P; q>0u; --q, ++A1) { --X; a += *X * *A1; }
                     A1 -= P;
                     *Y = a/-e;
                 }
@@ -285,16 +264,16 @@ int ac2rc_d (double *Y, const double *X, const size_t R, const size_t C, const s
                         for (size_t p=1u; p<P-1u; ++p, X+=p*K)
                         {
                             a = *X;
-                            for (size_t q=0u; q<p; ++q, ++A1) { X-=K; a += *X * *A1; }
+                            for (size_t q=p; q>0u; --q, ++A1) { X-=K; a += *X * *A1; }
                             a /= -e;
                             *A1 = a; *Y = a; Y += K;
-                            for (size_t q=0u; q<p; ++q, ++A2) { --A1; *A2 = *A1; }
+                            for (size_t q=p; q>0u; --q, ++A2) { --A1; *A2 = *A1; }
                             A1 += p;
-                            for (size_t q=0u; q<p; ++q) { --A2; --A1; *A1 += a * *A2; }
+                            for (size_t q=p; q>0u; --q) { --A2; --A1; *A1 += a * *A2; }
                             e *= 1.0 - a*a;
                         }
                         a = *X;
-                        for (size_t q=0u; q<P; ++q, ++A1) { X-=K; a += *X * *A1; }
+                        for (size_t q=P; q>0u; --q, ++A1) { X-=K; a += *X * *A1; }
                         A1 -= P;
                         *Y = a/-e;
                     }
@@ -373,7 +352,7 @@ int ac2rc_c (float *Y, const float *X, const size_t R, const size_t C, const siz
             for (size_t p=1u; p<P-1u; ++p, X+=2u*p, Y+=2)
             {
                 ar = *X; ai = *(X+1);
-                for (size_t q=0u; q<p; ++q, A1+=2)
+                for (size_t q=p; q>0u; --q, A1+=2)
                 {
                     X -= 2;
                     ar += *X**A1 - *(X+1)**(A1+1);
@@ -382,9 +361,9 @@ int ac2rc_c (float *Y, const float *X, const size_t R, const size_t C, const siz
                 ar /= -e; ai /= -e;
                 *A1 = ar; *(A1+1) = ai;
                 *Y = ar; *(Y+1) = ai;
-                for (size_t q=0u; q<p; ++q, A2+=2) { A1-=2; *A2 = *A1; *(A2+1) = -*(A1+1); }
+                for (size_t q=p; q>0u; --q, A2+=2) { A1-=2; *A2 = *A1; *(A2+1) = -*(A1+1); }
                 A1 += 2u*p;
-                for (size_t q=0u; q<p; ++q)
+                for (size_t q=p; q>0u; --q)
                 {
                     A2 -= 2; A1 -= 2;
                     *A1 += ar**A2 - ai**(A2+1);
@@ -393,7 +372,7 @@ int ac2rc_c (float *Y, const float *X, const size_t R, const size_t C, const siz
                 e *= 1.0f - (ar*ar + ai*ai);
             }
             ar = *X; ai = *(X+1);
-            for (size_t q=0u; q<P; ++q, A1+=2)
+            for (size_t q=P; q>0u; --q, A1+=2)
             {
                 X -= 2;
                 ar += *X**A1 - *(X+1)**(A1+1);
@@ -422,7 +401,7 @@ int ac2rc_c (float *Y, const float *X, const size_t R, const size_t C, const siz
                     for (size_t p=1u; p<P-1u; ++p, X+=2u*p, Y+=2)
                     {
                         ar = *X; ai = *(X+1);
-                        for (size_t q=0u; q<p; ++q, A1+=2)
+                        for (size_t q=p; q>0u; --q, A1+=2)
                         {
                             X -= 2;
                             ar += *X**A1 - *(X+1)**(A1+1);
@@ -431,9 +410,9 @@ int ac2rc_c (float *Y, const float *X, const size_t R, const size_t C, const siz
                         ar /= -e; ai /= -e;
                         *A1 = ar; *(A1+1) = ai;
                         *Y = ar; *(Y+1) = ai;
-                        for (size_t q=0u; q<p; ++q, A2+=2) { A1-=2; *A2 = *A1; *(A2+1) = -*(A1+1); }
+                        for (size_t q=p; q>0u; --q, A2+=2) { A1-=2; *A2 = *A1; *(A2+1) = -*(A1+1); }
                         A1 += 2u*p;
-                        for (size_t q=0u; q<p; ++q)
+                        for (size_t q=p; q>0u; --q)
                         {
                             A2 -= 2; A1 -= 2;
                             *A1 += ar**A2 - ai**(A2+1);
@@ -442,7 +421,7 @@ int ac2rc_c (float *Y, const float *X, const size_t R, const size_t C, const siz
                         e *= 1.0f - (ar*ar + ai*ai);
                     }
                     ar = *X; ai = *(X+1);
-                    for (size_t q=0u; q<P; ++q, A1+=2)
+                    for (size_t q=P; q>0u; --q, A1+=2)
                     {
                         X -= 2;
                         ar += *X**A1 - *(X+1)**(A1+1);
@@ -468,7 +447,7 @@ int ac2rc_c (float *Y, const float *X, const size_t R, const size_t C, const siz
                         for (size_t p=1u; p<P-1u; ++p, X+=2u*p*K, Y+=2u*K)
                         {
                             ar = *X; ai = *(X+1);
-                            for (size_t q=0u; q<p; ++q, A1+=2)
+                            for (size_t q=p; q>0u; --q, A1+=2)
                             {
                                 X -= 2u*K;
                                 ar += *X**A1 - *(X+1)**(A1+1);
@@ -477,9 +456,9 @@ int ac2rc_c (float *Y, const float *X, const size_t R, const size_t C, const siz
                             ar /= -e; ai /= -e;
                             *A1 = ar; *(A1+1) = ai;
                             *Y = ar; *(Y+1) = ai;
-                            for (size_t q=0u; q<p; ++q, A2+=2) { A1-=2; *A2 = *A1; *(A2+1) = -*(A1+1); }
+                            for (size_t q=p; q>0u; --q, A2+=2) { A1-=2; *A2 = *A1; *(A2+1) = -*(A1+1); }
                             A1 += 2u*p;
-                            for (size_t q=0u; q<p; ++q)
+                            for (size_t q=p; q>0u; --q)
                             {
                                 A2 -= 2; A1 -= 2;
                                 *A1 += ar**A2 - ai**(A2+1);
@@ -488,7 +467,7 @@ int ac2rc_c (float *Y, const float *X, const size_t R, const size_t C, const siz
                             e *= 1.0f - (ar*ar + ai*ai);
                         }
                         ar = *X; ai = *(X+1);
-                        for (size_t q=0u; q<P; ++q, A1+=2)
+                        for (size_t q=P; q>0u; --q, A1+=2)
                         {
                             X -= 2u*K;
                             ar += *X**A1 - *(X+1)**(A1+1);
@@ -572,7 +551,7 @@ int ac2rc_z (double *Y, const double *X, const size_t R, const size_t C, const s
             for (size_t p=1u; p<P-1u; ++p, X+=2u*p, Y+=2)
             {
                 ar = *X; ai = *(X+1);
-                for (size_t q=0u; q<p; ++q, A1+=2)
+                for (size_t q=p; q>0u; --q, A1+=2)
                 {
                     X -= 2;
                     ar += *X**A1 - *(X+1)**(A1+1);
@@ -581,9 +560,9 @@ int ac2rc_z (double *Y, const double *X, const size_t R, const size_t C, const s
                 ar /= -e; ai /= -e;
                 *A1 = ar; *(A1+1) = ai;
                 *Y = ar; *(Y+1) = ai;
-                for (size_t q=0u; q<p; ++q, A2+=2) { A1-=2; *A2 = *A1; *(A2+1) = -*(A1+1); }
+                for (size_t q=p; q>0u; --q, A2+=2) { A1-=2; *A2 = *A1; *(A2+1) = -*(A1+1); }
                 A1 += 2u*p;
-                for (size_t q=0u; q<p; ++q)
+                for (size_t q=p; q>0u; --q)
                 {
                     A2 -= 2; A1 -= 2;
                     *A1 += ar**A2 - ai**(A2+1);
@@ -592,7 +571,7 @@ int ac2rc_z (double *Y, const double *X, const size_t R, const size_t C, const s
                 e *= 1.0 - (ar*ar + ai*ai);
             }
             ar = *X; ai = *(X+1);
-            for (size_t q=0u; q<P; ++q, A1+=2)
+            for (size_t q=P; q>0u; --q, A1+=2)
             {
                 X -= 2;
                 ar += *X**A1 - *(X+1)**(A1+1);
@@ -621,7 +600,7 @@ int ac2rc_z (double *Y, const double *X, const size_t R, const size_t C, const s
                     for (size_t p=1u; p<P-1u; ++p, X+=2u*p, Y+=2)
                     {
                         ar = *X; ai = *(X+1);
-                        for (size_t q=0u; q<p; ++q, A1+=2)
+                        for (size_t q=p; q>0u; --q, A1+=2)
                         {
                             X -= 2;
                             ar += *X**A1 - *(X+1)**(A1+1);
@@ -630,9 +609,9 @@ int ac2rc_z (double *Y, const double *X, const size_t R, const size_t C, const s
                         ar /= -e; ai /= -e;
                         *A1 = ar; *(A1+1) = ai;
                         *Y = ar; *(Y+1) = ai;
-                        for (size_t q=0u; q<p; ++q, A2+=2) { A1-=2; *A2 = *A1; *(A2+1) = -*(A1+1); }
+                        for (size_t q=p; q>0u; --q, A2+=2) { A1-=2; *A2 = *A1; *(A2+1) = -*(A1+1); }
                         A1 += 2u*p;
-                        for (size_t q=0u; q<p; ++q)
+                        for (size_t q=p; q>0u; --q)
                         {
                             A2 -= 2; A1 -= 2;
                             *A1 += ar**A2 - ai**(A2+1);
@@ -641,7 +620,7 @@ int ac2rc_z (double *Y, const double *X, const size_t R, const size_t C, const s
                         e *= 1.0 - (ar*ar + ai*ai);
                     }
                     ar = *X; ai = *(X+1);
-                    for (size_t q=0u; q<P; ++q, A1+=2)
+                    for (size_t q=P; q>0u; --q, A1+=2)
                     {
                         X -= 2;
                         ar += *X**A1 - *(X+1)**(A1+1);
@@ -667,7 +646,7 @@ int ac2rc_z (double *Y, const double *X, const size_t R, const size_t C, const s
                         for (size_t p=1u; p<P-1u; ++p, X+=2u*p*K, Y+=2u*K)
                         {
                             ar = *X; ai = *(X+1);
-                            for (size_t q=0u; q<p; ++q, A1+=2)
+                            for (size_t q=p; q>0u; --q, A1+=2)
                             {
                                 X -= 2u*K;
                                 ar += *X**A1 - *(X+1)**(A1+1);
@@ -676,9 +655,9 @@ int ac2rc_z (double *Y, const double *X, const size_t R, const size_t C, const s
                             ar /= -e; ai /= -e;
                             *A1 = ar; *(A1+1) = ai;
                             *Y = ar; *(Y+1) = ai;
-                            for (size_t q=0u; q<p; ++q, A2+=2) { A1-=2; *A2 = *A1; *(A2+1) = -*(A1+1); }
+                            for (size_t q=p; q>0u; --q, A2+=2) { A1-=2; *A2 = *A1; *(A2+1) = -*(A1+1); }
                             A1 += 2u*p;
-                            for (size_t q=0u; q<p; ++q)
+                            for (size_t q=p; q>0u; --q)
                             {
                                 A2 -= 2; A1 -= 2;
                                 *A1 += ar**A2 - ai**(A2+1);
@@ -687,7 +666,7 @@ int ac2rc_z (double *Y, const double *X, const size_t R, const size_t C, const s
                             e *= 1.0 - (ar*ar + ai*ai);
                         }
                         ar = *X; ai = *(X+1);
-                        for (size_t q=0u; q<P; ++q, A1+=2)
+                        for (size_t q=P; q>0u; --q, A1+=2)
                         {
                             X -= 2u*K;
                             ar += *X**A1 - *(X+1)**(A1+1);

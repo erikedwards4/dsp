@@ -29,7 +29,7 @@ int roots2poly_s (float *Y, const float *X, const size_t R, const size_t C, cons
         for (size_t l=1u; l<Lx; ++l, ++X, Y+=l)
         {
             *Y = -*X * *(Y-1);
-            for (size_t p=0u; p<l; ++p) { --Y; *Y = fmaf(-*X,*(Y-1),*Y); }
+            for (size_t p=l; p>0u; --p) { --Y; *Y = fmaf(-*X,*(Y-1),*Y); }
         }
     }
     else
@@ -46,7 +46,7 @@ int roots2poly_s (float *Y, const float *X, const size_t R, const size_t C, cons
                 for (size_t l=1u; l<Lx; ++l, ++X, Y+=l)
                 {
                     *Y = -*X * *(Y-1);
-                    for (size_t p=0u; p<l; ++p) { --Y; *Y = fmaf(-*X,*(Y-1),*Y); }
+                    for (size_t p=l; p>0u; --p) { --Y; *Y = fmaf(-*X,*(Y-1),*Y); }
                 }
             }
         }
@@ -61,7 +61,7 @@ int roots2poly_s (float *Y, const float *X, const size_t R, const size_t C, cons
                     for (size_t l=1u; l<Lx; ++l, X+=K, Y+=l*K)
                     {
                         *Y = -*X * *(Y-K);
-                        for (size_t p=0u; p<l; ++p) { Y-=K; *Y = fmaf(-*X,*(Y-K),*Y); }
+                        for (size_t p=l; p>0u; --p) { Y-=K; *Y = fmaf(-*X,*(Y-K),*Y); }
                     }
                 }
             }
@@ -86,7 +86,7 @@ int roots2poly_d (double *Y, const double *X, const size_t R, const size_t C, co
         for (size_t l=1u; l<Lx; ++l, ++X, Y+=l)
         {
             *Y = -*X * *(Y-1);
-            for (size_t p=0u; p<l; ++p) { --Y; *Y = fma(-*X,*(Y-1),*Y); }
+            for (size_t p=l; p>0u; --p) { --Y; *Y = fma(-*X,*(Y-1),*Y); }
         }
     }
     else
@@ -103,7 +103,7 @@ int roots2poly_d (double *Y, const double *X, const size_t R, const size_t C, co
                 for (size_t l=1u; l<Lx; ++l, ++X, Y+=l)
                 {
                     *Y = -*X * *(Y-1);
-                    for (size_t p=0u; p<l; ++p) { --Y; *Y = fma(-*X,*(Y-1),*Y); }
+                    for (size_t p=l; p>0u; --p) { --Y; *Y = fma(-*X,*(Y-1),*Y); }
                 }
             }
         }
@@ -118,7 +118,7 @@ int roots2poly_d (double *Y, const double *X, const size_t R, const size_t C, co
                     for (size_t l=1u; l<Lx; ++l, X+=K, Y+=l*K)
                     {
                         *Y = -*X * *(Y-K);
-                        for (size_t p=0u; p<l; ++p) { Y-=K; *Y = fma(-*X,*(Y-K),*Y); }
+                        for (size_t p=l; p>0u; --p) { Y-=K; *Y = fma(-*X,*(Y-K),*Y); }
                     }
                 }
             }
@@ -145,7 +145,7 @@ int roots2poly_c (float *Y, const float *X, const size_t R, const size_t C, cons
         {
             *Y = -*X**(Y-2) + *(X+1)**(Y-1);
             *(Y+1) = -*X**(Y-1) - *(X+1)**(Y-2);
-            for (size_t p=0u; p<l; ++p)
+            for (size_t p=l; p>0u; --p)
             {
                 Y -= 2;
                 *Y = fmaf(-*X,*(Y-2),fmaf(*(X+1),*(Y-1),*Y));
@@ -169,7 +169,7 @@ int roots2poly_c (float *Y, const float *X, const size_t R, const size_t C, cons
                 {
                     *Y = -*X**(Y-2) + *(X+1)**(Y-1);
                     *(Y+1) = -*X**(Y-1) - *(X+1)**(Y-2);
-                    for (size_t p=0u; p<l; ++p)
+                    for (size_t p=l; p>0u; --p)
                     {
                         Y -= 2;
                         *Y = fmaf(-*X,*(Y-2),fmaf(*(X+1),*(Y-1),*Y));
@@ -190,7 +190,7 @@ int roots2poly_c (float *Y, const float *X, const size_t R, const size_t C, cons
                     {
                         *Y = -*X**(Y-2u*K) + *(X+1)**(Y-2u*K+1u);
                         *(Y+1) = -*X**(Y-2u*K+1u) - *(X+1)**(Y-2u*K);
-                        for (size_t p=0u; p<l; ++p)
+                        for (size_t p=l; p>0u; --p)
                         {
                             Y -= 2u*K;
                             *Y = fmaf(-*X,*(Y-2u*K),fmaf(*(X+1),*(Y-2u*K+1u),*Y));
@@ -222,7 +222,7 @@ int roots2poly_z (double *Y, const double *X, const size_t R, const size_t C, co
         {
             *Y = -*X**(Y-2) + *(X+1)**(Y-1);
             *(Y+1) = -*X**(Y-1) - *(X+1)**(Y-2);
-            for (size_t p=0u; p<l; ++p)
+            for (size_t p=l; p>0u; --p)
             {
                 Y -= 2;
                 *Y = fma(-*X,*(Y-2),fma(*(X+1),*(Y-1),*Y));
@@ -246,7 +246,7 @@ int roots2poly_z (double *Y, const double *X, const size_t R, const size_t C, co
                 {
                     *Y = -*X**(Y-2) + *(X+1)**(Y-1);
                     *(Y+1) = -*X**(Y-1) - *(X+1)**(Y-2);
-                    for (size_t p=0u; p<l; ++p)
+                    for (size_t p=l; p>0u; --p)
                     {
                         Y -= 2;
                         *Y = fma(-*X,*(Y-2),fma(*(X+1),*(Y-1),*Y));
@@ -267,7 +267,7 @@ int roots2poly_z (double *Y, const double *X, const size_t R, const size_t C, co
                     {
                         *Y = -*X**(Y-2u*K) + *(X+1)**(Y-2u*K+1u);
                         *(Y+1) = -*X**(Y-2u*K+1u) - *(X+1)**(Y-2u*K);
-                        for (size_t p=0u; p<l; ++p)
+                        for (size_t p=l; p>0u; --p)
                         {
                             Y -= 2u*K;
                             *Y = fma(-*X,*(Y-2u*K),fma(*(X+1),*(Y-2u*K+1u),*Y));

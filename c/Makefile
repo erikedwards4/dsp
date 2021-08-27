@@ -144,9 +144,9 @@ xcorr1d_fft: xcorr1d_fft.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 
 
 #Interp: interpolation
-Interp: interp1q #interp1t
+Interp: interp1q #interp1ft
 interp1q: interp1q.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
-interp1t: interp1t.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+interp1ft: interp1ft.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 
 
 #ZC_LCs: zero-crossings, level-crossings and mean-crossings
@@ -187,10 +187,10 @@ ar2psd: ar2psd.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 
 #AC_LP: conversions related to AC (autocovariance) and LP (linear prediction).
 #These work from the signal (sig) or autocovariance (ac) to get
-#ac, rc (reflection coeff), poly (polynomial params), ar (autoregressive),
+#ac, rc (reflection coeff), poly (polynomial), ar (autoregressive),
 #or mvdr (minimum-variance distortionless-response) representations.
-#These use time-domain computations, unless _fft is specified.
-#These use Levinson-Durbin computations, unles _burg is specified.
+#These use time-domain computations, except the _fft versions.
+#These use Levinson-Durbin computations, except the _burg versions.
 AC_LP: sig2ac sig2ac_fft ac2rc ac2ar ac2poly sig2rc sig2ar sig2poly #sig2ar_burg sig2poly_burg ac2cc ac2mvdr
 sig2ac: sig2ac.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 sig2ac_fft: sig2ac_fft.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
