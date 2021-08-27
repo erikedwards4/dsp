@@ -64,7 +64,7 @@ For example:
 
 ## List of functions
 All: Generate Interp Transform Filter Conv Interp ZCs_LCs AR_Poly AC_LP Frame STFT Spectrogram Wavelets  
-Generate: Noise Waves Wins  
+Generate: Noise Pulses Waves Wins  
     Noise: white pink red brown blue violet  
     Pulses: unit_impulse delta_impulse rect_pulse  
     Waves: sinewave cosinewave squarewave triwave sawwave pulsewave  
