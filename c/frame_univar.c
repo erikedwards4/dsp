@@ -51,6 +51,7 @@ int frame_univar_s (float *Y, const float *X, const size_t N, const size_t L, co
     else if (snip_edges)
     {
         const int xd = (int)L - (int)stp;           //X inc after each frame
+        
         for (size_t w=W; w>0u; --w, X-=xd)
         {
             for (size_t l=L; l>0u; --l, ++X, ++Y) { *Y = *X; }
