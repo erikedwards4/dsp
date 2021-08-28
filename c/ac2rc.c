@@ -1,9 +1,9 @@
 //Gets reflection coefficients (RCs) from the autocorrelation (AC) function for each vector in X.
 //Uses a Levinson-Durbin recursion from the AC values.
 
-//This adopts levinson.m from Octave's signal package as the correct answer,
-//including the sign convention.
-//The function from the tsa package seems definitely wrong for complex case!
+//This adopts levinson.m from Octave's signal package as the correct answer, including the sign convention.
+//This even matches Octave for some pathological cases giving Inf and/or NaN.
+//The function from the tsa package may be wrong for the complex case!
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -14,42 +14,21 @@ namespace codee {
 extern "C" {
 #endif
 
-int ac2rc_s (float *Y, const float *X, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t dim);
-int ac2rc_d (double *Y, const double *X, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t dim);
-int ac2rc_c (float *Y, const float *X, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t dim);
-int ac2rc_z (double *Y, const double *X, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t dim);
+int ac2rc_s (float *Y, float *E, const float *X, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t dim);
+int ac2rc_d (double *Y, double *E, const double *X, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t dim);
+int ac2rc_c (float *Y, float *E, const float *X, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t dim);
+int ac2rc_z (double *Y, double *E, const double *X, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t dim);
 
 
-int ac2rc_s (float *Y, const float *X, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t dim)
+int ac2rc_s (float *Y, float *E, const float *X, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t dim)
 {
     if (dim>3u) { fprintf(stderr,"error in ac2rc_s: dim must be in [0 3]\n"); return 1; }
 
     const size_t N = R*C*S*H;
     const size_t Lx = (dim==0u) ? R : (dim==1u) ? C : (dim==2u) ? S : H;
+    if (Lx<2u) { fprintf(stderr,"error in ac2rc_s: ACF must have length > 1\n"); return 1; }
 
-    if (N==0u || Lx<2u) {}
-    else if (Lx==2u)
-    {
-        if (Lx==N) { *Y++ = -*(X+1) / *X; }
-        else
-        {
-            const size_t K = (iscolmajor) ? ((dim==0u) ? 1u : (dim==1u) ? R : (dim==2u) ? R*C : R*C*S) : ((dim==0u) ? C*S*H : (dim==1u) ? S*H : (dim==2u) ? H : 1u);
-            const size_t B = (iscolmajor && dim==0u) ? C*S*H : K;
-            const size_t V = N/Lx, G = V/B;
-
-            if (K==1u && (G==1u || B==1u))
-            {
-                for (size_t v=V; v>0u; --v, X+=2) { *Y++ = -*(X+1) / *X; }
-            }
-            else
-            {
-                for (size_t g=G; g>0u; --g, X+=B)
-                {
-                    for (size_t b=B; b>0u; --b, ++X, ++Y) { *Y = -*(X+K) / *X; }
-                }
-            }
-        }
-    }
+    if (N==0u) {}
     else
     {
         const size_t P = Lx - 1u;
@@ -76,9 +55,10 @@ int ac2rc_s (float *Y, const float *X, const size_t R, const size_t C, const siz
             a = *X;
             for (size_t q=P; q>0u; --q, ++A1) { --X; a += *X * *A1; }
             A1 -= P;
-            *Y++ = a/-e;
+            a /= -e; *Y = a;
+            *E = e * (1.0f-a*a);
 
-            //This has approx. same speed (unmeasurable diff), but assembly code definitely longer
+            //This has approx. same speed, but assembly code definitely longer
             // A1[0] = 1.0f;
             // A1[1] = A2[0] = a = -X[1]/X[0];
             // Y[0] = -a;
@@ -95,7 +75,7 @@ int ac2rc_s (float *Y, const float *X, const size_t R, const size_t C, const siz
             // }
             // a = X[P];
             // for (size_t q=1u; q<P; ++q) { a = fmaf(X[q],A1[P-q],a); }
-            // Y[P-1u] = a/e;
+            // Y[P-1u] = a/e; E[0] = e*fmaf(a,-a,1.0f);
         }
         else
         {
@@ -105,7 +85,7 @@ int ac2rc_s (float *Y, const float *X, const size_t R, const size_t C, const siz
 
             if (K==1u && (G==1u || B==1u))
             {
-                for (size_t v=V; v>0u; --v, X+=Lx, ++Y)
+                for (size_t v=V; v>0u; --v, X+=Lx, ++Y, ++E)
                 {
                     a = -*(X+1) / *X;
                     *A1 = a; *Y++ = a;
@@ -124,14 +104,15 @@ int ac2rc_s (float *Y, const float *X, const size_t R, const size_t C, const siz
                     a = *X;
                     for (size_t q=P; q>0u; --q, ++A1) { --X; a += *X * *A1; }
                     A1 -= P;
-                    *Y = a/-e;
+                    a /= -e; *Y = a;
+                    *E = e * (1.0f-a*a);
                 }
             }
             else
             {
                 for (size_t g=G; g>0u; --g, X+=B*(Lx-1u), Y+=B*(P-1u))
                 {
-                    for (size_t b=B; b>0u; --b, ++X, Y-=K*P-K-1u)
+                    for (size_t b=B; b>0u; --b, ++X, Y-=K*P-K-1u, ++E)
                     {
                         a = -*(X+K) / *X;
                         *A1 = a; *Y = a; Y += K;
@@ -151,7 +132,8 @@ int ac2rc_s (float *Y, const float *X, const size_t R, const size_t C, const siz
                         a = *X;
                         for (size_t q=P; q>0u; --q, ++A1) { X-=K; a += *X * *A1; }
                         A1 -= P;
-                        *Y = a/-e;
+                        a /= -e; *Y = a;
+                        *E = e * (1.0f-a*a);
                     }
                 }
             }
@@ -163,36 +145,15 @@ int ac2rc_s (float *Y, const float *X, const size_t R, const size_t C, const siz
 }
 
 
-int ac2rc_d (double *Y, const double *X, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t dim)
+int ac2rc_d (double *Y, double *E, const double *X, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t dim)
 {
 	if (dim>3u) { fprintf(stderr,"error in ac2rc_d: dim must be in [0 3]\n"); return 1; }
 
     const size_t N = R*C*S*H;
     const size_t Lx = (dim==0u) ? R : (dim==1u) ? C : (dim==2u) ? S : H;
+    if (Lx<2u) { fprintf(stderr,"error in ac2rc_d: ACF must have length > 1\n"); return 1; }
 
-    if (N==0u || Lx<2u) {}
-    else if (Lx==2u)
-    {
-        if (Lx==N) { *Y++ = -*(X+1) / *X; }
-        else
-        {
-            const size_t K = (iscolmajor) ? ((dim==0u) ? 1u : (dim==1u) ? R : (dim==2u) ? R*C : R*C*S) : ((dim==0u) ? C*S*H : (dim==1u) ? S*H : (dim==2u) ? H : 1u);
-            const size_t B = (iscolmajor && dim==0u) ? C*S*H : K;
-            const size_t V = N/Lx, G = V/B;
-
-            if (K==1u && (G==1u || B==1u))
-            {
-                for (size_t v=V; v>0u; --v, X+=2) { *Y++ = -*(X+1) / *X; }
-            }
-            else
-            {
-                for (size_t g=G; g>0u; --g, X+=B)
-                {
-                    for (size_t b=B; b>0u; --b, ++X, ++Y) { *Y = -*(X+K) / *X; }
-                }
-            }
-        }
-    }
+    if (N==0u) {}
     else
     {
         const size_t P = Lx - 1u;
@@ -219,7 +180,8 @@ int ac2rc_d (double *Y, const double *X, const size_t R, const size_t C, const s
             a = *X;
             for (size_t q=P; q>0u; --q, ++A1) { --X; a += *X * *A1; }
             A1 -= P;
-            *Y++ = a/-e;
+            a /= -e; *Y = a;
+            *E = e * (1.0-a*a);
         }
         else
         {
@@ -229,7 +191,7 @@ int ac2rc_d (double *Y, const double *X, const size_t R, const size_t C, const s
 
             if (K==1u && (G==1u || B==1u))
             {
-                for (size_t v=V; v>0u; --v, X+=Lx, ++Y)
+                for (size_t v=V; v>0u; --v, X+=Lx, ++Y, ++E)
                 {
                     a = -*(X+1) / *X;
                     *A1 = a; *Y++ = a;
@@ -248,16 +210,17 @@ int ac2rc_d (double *Y, const double *X, const size_t R, const size_t C, const s
                     a = *X;
                     for (size_t q=P; q>0u; --q, ++A1) { --X; a += *X * *A1; }
                     A1 -= P;
-                    *Y = a/-e;
+                    a /= -e; *Y = a;
+                    *E = e * (1.0-a*a);
                 }
             }
             else
             {
                 for (size_t g=G; g>0u; --g, X+=B*(Lx-1u), Y+=B*(P-1u))
                 {
-                    for (size_t b=B; b>0u; --b, X-=K*Lx-K-1u, Y-=K*P-K-1u)
+                    for (size_t b=B; b>0u; --b, ++X, Y-=K*P-K-1u, ++E)
                     {
-                        a = -*(X+1) / *X;
+                        a = -*(X+K) / *X;
                         *A1 = a; *Y = a; Y += K;
                         e = *X; X += K;
                         e += a * *X; X += K;
@@ -275,7 +238,8 @@ int ac2rc_d (double *Y, const double *X, const size_t R, const size_t C, const s
                         a = *X;
                         for (size_t q=P; q>0u; --q, ++A1) { X-=K; a += *X * *A1; }
                         A1 -= P;
-                        *Y = a/-e;
+                        a /= -e; *Y = a;
+                        *E = e * (1.0-a*a);
                     }
                 }
             }
@@ -287,52 +251,15 @@ int ac2rc_d (double *Y, const double *X, const size_t R, const size_t C, const s
 }
 
 
-int ac2rc_c (float *Y, const float *X, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t dim)
+int ac2rc_c (float *Y, float *E, const float *X, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t dim)
 {
     if (dim>3u) { fprintf(stderr,"error in ac2rc_c: dim must be in [0 3]\n"); return 1; }
 
     const size_t N = R*C*S*H;
     const size_t Lx = (dim==0u) ? R : (dim==1u) ? C : (dim==2u) ? S : H;
+    if (Lx<2u) { fprintf(stderr,"error in ac2rc_c: ACF must have length > 1\n"); return 1; }
 
-    if (N==0u || Lx<2u) {}
-    else if (Lx==2u)
-    {
-        if (Lx==N)
-        {
-            const float den = *X**X + *(X+1)**(X+1);
-            *Y++ = -(*X**(X+2) + *(X+1)**(X+3)) / den;
-            *Y++ = (*(X+1)**(X+2) - *X**(X+3)) / den;
-        }
-        else
-        {
-            const size_t K = (iscolmajor) ? ((dim==0u) ? 1u : (dim==1u) ? R : (dim==2u) ? R*C : R*C*S) : ((dim==0u) ? C*S*H : (dim==1u) ? S*H : (dim==2u) ? H : 1u);
-            const size_t B = (iscolmajor && dim==0u) ? C*S*H : K;
-            const size_t V = N/Lx, G = V/B;
-            float den;
-
-            if (K==1u && (G==1u || B==1u))
-            {
-                for (size_t v=V; v>0u; --v, X+=4)
-                {
-                    den = *X**X + *(X+1)**(X+1);
-                    *Y++ = -(*X**(X+2) + *(X+1)**(X+3)) / den;
-                    *Y++ = (*(X+1)**(X+2) - *X**(X+3)) / den;
-                }
-            }
-            else
-            {
-                for (size_t g=G; g>0u; --g, X+=2u*B)
-                {
-                    for (size_t b=B; b>0u; --b, X+=2u, Y+=2u)
-                    {
-                        den = *X**X + *(X+1)**(X+1);
-                        *Y = -(*X**(X+2u*K) + *(X+1)**(X+2u*K+1u)) / den;
-                        *(Y+1) = (*(X+1)**(X+2u*K) - *X**(X+2u*K+1u)) / den;
-                    }
-                }
-            }
-        }
-    }
+    if (N==0u) {}
     else
     {
         const size_t P = Lx - 1u;
@@ -379,7 +306,9 @@ int ac2rc_c (float *Y, const float *X, const size_t R, const size_t C, const siz
                 ai += *(X+1)**A1 + *X**(A1+1);
             }
             A1 -= 2u*P;
-            *Y++ = ar/-e; *Y = ai/-e;
+            ar /= -e; ai /= -e;
+            *Y++ = ar; *Y = ai;
+            *E = e * (1.0f-ar*ar-ai*ai);
         }
         else
         {
@@ -389,7 +318,7 @@ int ac2rc_c (float *Y, const float *X, const size_t R, const size_t C, const siz
 
             if (K==1u && (G==1u || B==1u))
             {
-                for (size_t v=V; v>0u; --v, X+=2u*Lx)
+                for (size_t v=V; v>0u; --v, X+=2u*Lx, ++E)
                 {
                     den = *X**X + *(X+1)**(X+1);
                     ar = -(*(X+2)**X + *(X+3)**(X+1)) / den;
@@ -428,14 +357,16 @@ int ac2rc_c (float *Y, const float *X, const size_t R, const size_t C, const siz
                         ai += *(X+1)**A1 + *X**(A1+1);
                     }
                     A1 -= 2u*P;
-                    *Y++ = ar/-e; *Y++ = ai/-e;
+                    ar /= -e; ai /= -e;
+                    *Y++ = ar; *Y++ = ai;
+                    *E = e * (1.0f-ar*ar-ai*ai);
                 }
             }
             else
             {
                 for (size_t g=G; g>0u; --g, X+=2u*B*(Lx-1u), Y+=2u*B*(P-1u))
                 {
-                    for (size_t b=B; b>0u; --b, X+=2, Y-=2u*(K*P-K-1u))
+                    for (size_t b=B; b>0u; --b, X+=2, Y-=2u*(K*P-K-1u), ++E)
                     {
                         den = *X**X + *(X+1)**(X+1);
                         ar = -(*(X+2u*K)**X + *(X+2u*K+1u)**(X+1)) / den;
@@ -474,7 +405,9 @@ int ac2rc_c (float *Y, const float *X, const size_t R, const size_t C, const siz
                             ai += *(X+1)**A1 + *X**(A1+1);
                         }
                         A1 -= 2u*P;
-                        *Y = ar/-e; *(Y+1) = ai/-e;
+                        ar /= -e; ai /= -e;
+                        *Y++ = ar; *(Y+1) = ai;
+                        *E = e * (1.0f-ar*ar-ai*ai);
                     }
                 }
             }
@@ -486,52 +419,15 @@ int ac2rc_c (float *Y, const float *X, const size_t R, const size_t C, const siz
 }
 
 
-int ac2rc_z (double *Y, const double *X, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t dim)
+int ac2rc_z (double *Y, double *E, const double *X, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t dim)
 {
     if (dim>3u) { fprintf(stderr,"error in ac2rc_z: dim must be in [0 3]\n"); return 1; }
 
     const size_t N = R*C*S*H;
     const size_t Lx = (dim==0u) ? R : (dim==1u) ? C : (dim==2u) ? S : H;
+    if (Lx<2u) { fprintf(stderr,"error in ac2rc_z: ACF must have length > 1\n"); return 1; }
 
-    if (N==0u || Lx<2u) {}
-    else if (Lx==2u)
-    {
-        if (Lx==N)
-        {
-            const double den = *X**X + *(X+1)**(X+1);
-            *Y++ = -(*X**(X+2) + *(X+1)**(X+3)) / den;
-            *Y++ = (*(X+1)**(X+2) - *X**(X+3)) / den;
-        }
-        else
-        {
-            const size_t K = (iscolmajor) ? ((dim==0u) ? 1u : (dim==1u) ? R : (dim==2u) ? R*C : R*C*S) : ((dim==0u) ? C*S*H : (dim==1u) ? S*H : (dim==2u) ? H : 1u);
-            const size_t B = (iscolmajor && dim==0u) ? C*S*H : K;
-            const size_t V = N/Lx, G = V/B;
-            double den;
-
-            if (K==1u && (G==1u || B==1u))
-            {
-                for (size_t v=V; v>0u; --v, X+=4)
-                {
-                    den = *X**X + *(X+1)**(X+1);
-                    *Y++ = -(*X**(X+2) + *(X+1)**(X+3)) / den;
-                    *Y++ = (*(X+1)**(X+2) - *X**(X+3)) / den;
-                }
-            }
-            else
-            {
-                for (size_t g=G; g>0u; --g, X+=2u*B)
-                {
-                    for (size_t b=B; b>0u; --b, X+=2u, Y+=2u)
-                    {
-                        den = *X**X + *(X+1)**(X+1);
-                        *Y = -(*X**(X+2u*K) + *(X+1)**(X+2u*K+1u)) / den;
-                        *(Y+1) = (*(X+1)**(X+2u*K) - *X**(X+2u*K+1u)) / den;
-                    }
-                }
-            }
-        }
-    }
+    if (N==0u) {}
     else
     {
         const size_t P = Lx - 1u;
@@ -578,7 +474,9 @@ int ac2rc_z (double *Y, const double *X, const size_t R, const size_t C, const s
                 ai += *(X+1)**A1 + *X**(A1+1);
             }
             A1 -= 2u*P;
-            *Y++ = ar/-e; *Y = ai/-e;
+            ar /= -e; ai /= -e;
+            *Y++ = ar; *Y = ai;
+            *E = e * (1.0-ar*ar-ai*ai);
         }
         else
         {
@@ -588,7 +486,7 @@ int ac2rc_z (double *Y, const double *X, const size_t R, const size_t C, const s
 
             if (K==1u && (G==1u || B==1u))
             {
-                for (size_t v=V; v>0u; --v, X+=2u*Lx)
+                for (size_t v=V; v>0u; --v, X+=2u*Lx, ++E)
                 {
                     den = *X**X + *(X+1)**(X+1);
                     ar = -(*(X+2)**X + *(X+3)**(X+1)) / den;
@@ -627,14 +525,16 @@ int ac2rc_z (double *Y, const double *X, const size_t R, const size_t C, const s
                         ai += *(X+1)**A1 + *X**(A1+1);
                     }
                     A1 -= 2u*P;
-                    *Y++ = ar/-e; *Y++ = ai/-e;
+                    ar /= -e; ai /= -e;
+                    *Y++ = ar; *Y++ = ai;
+                    *E = e * (1.0-ar*ar-ai*ai);
                 }
             }
             else
             {
                 for (size_t g=G; g>0u; --g, X+=2u*B*(Lx-1u), Y+=2u*B*(P-1u))
                 {
-                    for (size_t b=B; b>0u; --b, X+=2, Y-=2u*(K*P-K-1u))
+                    for (size_t b=B; b>0u; --b, X+=2, Y-=2u*(K*P-K-1u), ++E)
                     {
                         den = *X**X + *(X+1)**(X+1);
                         ar = -(*(X+2u*K)**X + *(X+2u*K+1u)**(X+1)) / den;
@@ -673,7 +573,9 @@ int ac2rc_z (double *Y, const double *X, const size_t R, const size_t C, const s
                             ai += *(X+1)**A1 + *X**(A1+1);
                         }
                         A1 -= 2u*P;
-                        *Y = ar/-e; *(Y+1) = ai/-e;
+                        ar /= -e; ai /= -e;
+                        *Y++ = ar; *(Y+1) = ai;
+                        *E = e * (1.0-ar*ar-ai*ai);
                     }
                 }
             }

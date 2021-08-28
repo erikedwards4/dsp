@@ -12,7 +12,7 @@
 #include <unordered_map>
 #include <argtable2.h>
 #include "../util/cmli.hpp"
-#include "ac2rc.c"
+#include "sig2rc.c"
 
 #ifdef I
 #undef I
@@ -34,40 +34,54 @@ int main(int argc, char *argv[])
     ifstream ifs1; ofstream ofs1, ofs2;
     int8_t stdi1, stdo1, stdo2, wo1, wo2;
     ioinfo i1, o1, o2;
-    size_t dim;
+    size_t dim, P, Lx;
+    int mnz, u;
 
 
     //Description
     string descr;
-    descr += "Gets reflection coefficients (RCs) starting from the autocovariance (AC).\n";
-    descr += "Does Levinson-Durbin recursion of each vector in X,\n";
-    descr += "where X has the autocovariance (AC) functions in each vector.\n";
+    descr += "Gets autoregressive (AR) coeffs starting from the signal (sig).\n";
+    descr += "This does linear prediction (LP) for each vector in X.\n";
     descr += "\n";
-    descr += "The 2nd output, V, holds the noise variances for each vector in X.\n";
-    descr += "If X is a single vector, then V is a scalar.\n";
+    descr += "This works by Levinson-Durbin recursion of the autocovariance (AC),\n";
+    descr += "and output Y holds the autoregressive (AR) coefficients.\n";
+    descr += "The 2nd output, V, holds the noise variances for each row or col.\n";
+    descr += "\n";
+    descr += "Use -p (--P) to specify the number of AR coefficients [default=1],\n";
+    descr += "also called the order of the linear prediction.\n";
+    descr += "This is the length of each vector in the output Y.\n";
+    descr += "Internally, lags 0 to P are computed for the AC function.\n";
     descr += "\n";
     descr += "Use -d (--dim) to give the dimension along which to operate.\n";
     descr += "Default is 0 (along cols), unless X is a row vector.\n";
     descr += "\n";
-    descr += "If dim==0, then Y has size (R-1) x C x S x H\n";
-    descr += "If dim==1, then Y has size R x (C-1) x S x H.\n";
-    descr += "If dim==2, then Y has size R x C x (S-1) x H.\n";
-    descr += "If dim==3, then Y has size R x C x S x (H-1).\n";
+    descr += "If dim==0, then Y has size P x C x S x H.\n";
+    descr += "If dim==1, then Y has size R x P x S x H.\n";
+    descr += "If dim==2, then Y has size R x C x P x H.\n";
+    descr += "If dim==3, then Y has size R x C x S x P.\n";
+    descr += "\n";
+    descr += "Include -z (--zero_mean) to subtract the means from each vec in X [default=false].\n";
+    descr += "\n";
+    descr += "Include -u (--unbiased) to use unbiased calculation of AC [default is biased].\n";
+    descr += "This uses N-l instead of N in the denominator (it is actually just less biased).\n";
     descr += "\n";
     descr += "Examples:\n";
-    descr += "$ ac2rc X -o Y -o V \n";
-    descr += "$ ac2rc -d1 X -o Y -o V \n";
-    descr += "$ cat X | ac2rc > Y \n";
+    descr += "$ sig2rc -p3 X -o Y -o V \n";
+    descr += "$ sig2rc -d1 -p5 X -o Y -o V \n";
+    descr += "$ cat X | sig2rc -z -p7 > Y \n";
 
 
     //Argtable
     int nerrs;
     struct arg_file  *a_fi = arg_filen(nullptr,nullptr,"<file>",I-1,I,"input file (X)");
+    struct arg_int    *a_p = arg_intn("p","P","<uint>",0,1,"number of reflection coeffs [default=1]");
     struct arg_int    *a_d = arg_intn("d","dim","<uint>",0,1,"dimension along which to operate [default=0]");
+    struct arg_lit  *a_mnz = arg_litn("z","zero_mean",0,1,"subtract mean from each vec in X [default=false]");
+    struct arg_lit    *a_u = arg_litn("u","unbiased",0,1,"use unbiased (N-l) denominator [default=biased]");
     struct arg_file  *a_fo = arg_filen("o","ofile","<file>",0,O,"output files (Y,V)");
     struct arg_lit *a_help = arg_litn("h","help",0,1,"display this help and exit");
     struct arg_end  *a_end = arg_end(5);
-    void *argtable[] = {a_fi, a_d, a_fo, a_help, a_end};
+    void *argtable[] = {a_fi, a_p, a_d, a_mnz, a_u, a_fo, a_help, a_end};
     if (arg_nullcheck(argtable)!=0) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating argtable" << endl; return 1; }
     nerrs = arg_parse(argc, argv, argtable);
     if (a_help->count>0)
@@ -116,19 +130,32 @@ int main(int argc, char *argv[])
     else { dim = size_t(a_d->ival[0]); }
     if (dim>3u) { cerr << progstr+": " << __LINE__ << errstr << "dim must be in {0,1,2,3}" << endl; return 1; }
 
+    //Get P
+    if (a_p->count==0) { P = 1u; }
+    else if (a_p->ival[0]<1) { cerr << progstr+": " << __LINE__ << errstr << "P must be positive" << endl; return 1; }
+    else { P = size_t(a_p->ival[0]); }
+
+    //Get mnz
+    mnz = (a_mnz->count>0);
+
+    //Get u
+    u = (a_u->count>0);
+
 
     //Checks
     if (i1.isempty()) { cerr << progstr+": " << __LINE__ << errstr << "input (X) found to be empty" << endl; return 1; }
+    Lx = (dim==0u) ? i1.R : (dim==1u) ? i1.C : (dim==2u) ? i1.S : i1.H;
+    if (P>=Lx) { cerr << progstr+": " << __LINE__ << errstr << "P (polynomial order) must be < Lx (length of vecs in X)" << endl; return 1; }
 
 
     //Set output header infos
     o1.F = o2.F = i1.F;
     o1.T = i1.T;
     o2.T = i1.isreal() ? i1.T : i1.T-100u;
-    o1.R = (dim==0u) ? i1.R-1u : i1.R;
-    o1.C = (dim==1u) ? i1.C-1u : i1.C;
-    o1.S = (dim==2u) ? i1.S-1u : i1.S;
-    o1.H = (dim==3u) ? i1.H-1u : i1.H;
+    o1.R = (dim==0u) ? P : i1.R;
+    o1.C = (dim==1u) ? P : i1.C;
+    o1.S = (dim==2u) ? P : i1.S;
+    o1.H = (dim==3u) ? P : i1.H;
     o2.R = (dim==0u) ? 1u : i1.R;
     o2.C = (dim==1u) ? 1u : i1.C;
     o2.S = (dim==2u) ? 1u : i1.S;
@@ -168,7 +195,7 @@ int main(int argc, char *argv[])
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for output file 2 (V)" << endl; return 1; }
         try { ifs1.read(reinterpret_cast<char*>(X),i1.nbytes()); }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file (X)" << endl; return 1; }
-        if (codee::ac2rc_s(Y,V,X,i1.R,i1.C,i1.S,i1.H,i1.iscolmajor(),dim)) { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
+        if (codee::sig2rc_s(Y,V,X,i1.R,i1.C,i1.S,i1.H,i1.iscolmajor(),dim,P,mnz,u)) { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
         if (wo1)
         {
             try { ofs1.write(reinterpret_cast<char*>(Y),o1.nbytes()); }
@@ -192,7 +219,7 @@ int main(int argc, char *argv[])
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for output file 2 (V)" << endl; return 1; }
         try { ifs1.read(reinterpret_cast<char*>(X),i1.nbytes()); }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file (X)" << endl; return 1; }
-        if (codee::ac2rc_d(Y,V,X,i1.R,i1.C,i1.S,i1.H,i1.iscolmajor(),dim)) { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
+        if (codee::sig2rc_d(Y,V,X,i1.R,i1.C,i1.S,i1.H,i1.iscolmajor(),dim,P,mnz,u)) { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
         if (wo1)
         {
             try { ofs1.write(reinterpret_cast<char*>(Y),o1.nbytes()); }
@@ -216,7 +243,7 @@ int main(int argc, char *argv[])
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for output file 2 (V)" << endl; return 1; }
         try { ifs1.read(reinterpret_cast<char*>(X),i1.nbytes()); }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file (X)" << endl; return 1; }
-        if (codee::ac2rc_c(Y,V,X,i1.R,i1.C,i1.S,i1.H,i1.iscolmajor(),dim)) { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
+        if (codee::sig2rc_c(Y,V,X,i1.R,i1.C,i1.S,i1.H,i1.iscolmajor(),dim,P,mnz,u)) { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
         if (wo1)
         {
             try { ofs1.write(reinterpret_cast<char*>(Y),o1.nbytes()); }
@@ -240,7 +267,7 @@ int main(int argc, char *argv[])
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for output file 2 (V)" << endl; return 1; }
         try { ifs1.read(reinterpret_cast<char*>(X),i1.nbytes()); }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file (X)" << endl; return 1; }
-        if (codee::ac2rc_z(Y,V,X,i1.R,i1.C,i1.S,i1.H,i1.iscolmajor(),dim)) { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
+        if (codee::sig2rc_z(Y,V,X,i1.R,i1.C,i1.S,i1.H,i1.iscolmajor(),dim,P,mnz,u)) { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
         if (wo1)
         {
             try { ofs1.write(reinterpret_cast<char*>(Y),o1.nbytes()); }

@@ -14,6 +14,9 @@
 //After getting the AC, Levinson-Durbin (levdurb) recursion is used to get the polynomial params (Y)
 //and the error variance (E).
 
+//This matches Octave in tests. For complex case, the sign of the imaginary part depends
+//on whether the positive or negative lags of the ACF are taken.
+
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -50,15 +53,15 @@ int sig2poly_s (float *Y, float *E, float *X, const size_t R, const size_t C, co
             if (mnz)
             {
                 float mn = 0.0f;
-                for (size_t l=0u; l<Lx; ++l, ++X) { mn += *X; }
+                for (size_t l=Lx; l>0u; --l, ++X) { mn += *X; }
                 mn /= (float)Lx;
-                for (size_t l=0u; l<Lx; ++l) { *--X -= mn; }
+                for (size_t l=Lx; l>0u; --l) { *--X -= mn; }
             }
 
             for (size_t l=0u; l<L; ++l, X-=Lx-l+1u, ++AC)
             {
                 sm = 0.0f;
-                for (size_t n=0u; n<Lx-l; ++n, ++X) { sm += *X * *(X+l); }
+                for (size_t n=Lx-l; n>0u; --n, ++X) { sm += *X * *(X+l); }
                 *AC = sm;
             }
             AC -= L;
@@ -76,12 +79,12 @@ int sig2poly_s (float *Y, float *E, float *X, const size_t R, const size_t C, co
             for (size_t p=1u; p<P; ++p, AC+=p)
             {
                 a = *AC;
-                for (size_t q=0u; q<p; ++q, ++Y) { --AC; a += *AC * *Y; }
+                for (size_t q=p; q>0u; --q, ++Y) { --AC; a += *AC * *Y; }
                 a /= -e;
                 *Y = a;
-                for (size_t q=0u; q<p; ++q, ++A2) { --Y; *A2 = *Y; }
+                for (size_t q=p; q>0u; --q, ++A2) { --Y; *A2 = *Y; }
                 Y += p;
-                for (size_t q=0u; q<p; ++q) { --A2; --Y; *Y += a * *A2; }
+                for (size_t q=p; q>0u; --q) { --A2; --Y; *Y += a * *A2; }
                 e *= 1.0f - a*a;
             }
             AC -= L;
@@ -100,19 +103,19 @@ int sig2poly_s (float *Y, float *E, float *X, const size_t R, const size_t C, co
                     if (mnz)
                     {
                         float mn = 0.0f;
-                        for (size_t l=0u; l<Lx; ++l, ++X) { mn += *X; }
+                        for (size_t l=Lx; l>0u; --l, ++X) { mn += *X; }
                         mn /= (float)Lx;
-                        for (size_t l=0u; l<Lx; ++l) { *--X -= mn; }
+                        for (size_t l=Lx; l>0u; --l) { *--X -= mn; }
                     }
 
                     for (size_t l=0u; l<P; ++l, X-=Lx-l+1u, ++AC)
                     {
                         sm = 0.0f;
-                        for (size_t n=0u; n<Lx-l; ++n, ++X) { sm += *X * *(X+l); }
+                        for (size_t n=Lx-l; n>0u; --n, ++X) { sm += *X * *(X+l); }
                         *AC = sm;
                     }
                     sm = 0.0f;
-                    for (size_t n=0u; n<Lx-P; ++n, ++X) { sm += *X * *(X+P); }
+                    for (size_t n=Lx-P; n>0u; --n, ++X) { sm += *X * *(X+P); }
                     *AC = sm; AC -= P;
 
                     if (unbiased)
@@ -128,12 +131,12 @@ int sig2poly_s (float *Y, float *E, float *X, const size_t R, const size_t C, co
                     for (size_t p=1u; p<P; ++p, AC+=p)
                     {
                         a = *AC;
-                        for (size_t q=0u; q<p; ++q, ++Y) { --AC; a += *AC * *Y; }
+                        for (size_t q=p; q>0u; --q, ++Y) { --AC; a += *AC * *Y; }
                         a /= -e;
                         *Y = a;
-                        for (size_t q=0u; q<p; ++q, ++A2) { --Y; *A2 = *Y; }
+                        for (size_t q=p; q>0u; --q, ++A2) { --Y; *A2 = *Y; }
                         Y += p;
-                        for (size_t q=0u; q<p; ++q) { --A2; --Y; *Y += a * *A2; }
+                        for (size_t q=p; q>0u; --q) { --A2; --Y; *Y += a * *A2; }
                         e *= 1.0f - a*a;
                     }
                     AC -= L;
@@ -149,15 +152,15 @@ int sig2poly_s (float *Y, float *E, float *X, const size_t R, const size_t C, co
                         if (mnz)
                         {
                             float mn = 0.0f;
-                            for (size_t l=0u; l<Lx; ++l, X+=K) { mn += *X; }
+                            for (size_t l=Lx; l>0u; --l, X+=K) { mn += *X; }
                             mn /= (float)Lx;
-                            for (size_t l=0u; l<Lx; ++l) { X-=K; *X -= mn; }
+                            for (size_t l=Lx; l>0u; --l) { X-=K; *X -= mn; }
                         }
 
                         for (size_t l=0u; l<L; ++l, X-=K*(Lx-l+1u), ++AC)
                         {
                             sm = 0.0f;
-                            for (size_t n=0u; n<Lx-l; ++n, X+=K) { sm += *X * *(X+l*K); }
+                            for (size_t n=Lx-l; n>0u; --n, X+=K) { sm += *X * *(X+l*K); }
                             *AC = sm;
                         }
                         AC -= L;
@@ -176,12 +179,12 @@ int sig2poly_s (float *Y, float *E, float *X, const size_t R, const size_t C, co
                         for (size_t p=1u; p<P; ++p, AC+=p)
                         {
                             a = *AC;
-                            for (size_t q=0u; q<p; ++q, Y+=K) { --AC; a += *AC * *Y; }
+                            for (size_t q=p; q>0u; --q, Y+=K) { --AC; a += *AC * *Y; }
                             a /= -e;
                             *Y = a;
-                            for (size_t q=0u; q<p; ++q, ++A2) { Y-=K; *A2 = *Y; }
+                            for (size_t q=p; q>0u; --q, ++A2) { Y-=K; *A2 = *Y; }
                             Y += p*K;
-                            for (size_t q=0u; q<p; ++q) { --A2; Y-=K; *Y += a * *A2; }
+                            for (size_t q=p; q>0u; --q) { --A2; Y-=K; *Y += a * *A2; }
                             e *= 1.0f - a*a;
                         }
                         AC -= L;
@@ -219,15 +222,15 @@ int sig2poly_d (double *Y, double *E, double *X, const size_t R, const size_t C,
             if (mnz)
             {
                 double mn = 0.0;
-                for (size_t l=0u; l<Lx; ++l, ++X) { mn += *X; }
+                for (size_t l=Lx; l>0u; --l, ++X) { mn += *X; }
                 mn /= (double)Lx;
-                for (size_t l=0u; l<Lx; ++l) { *--X -= mn; }
+                for (size_t l=Lx; l>0u; --l) { *--X -= mn; }
             }
 
             for (size_t l=0u; l<L; ++l, X-=Lx-l+1u, ++AC)
             {
                 sm = 0.0;
-                for (size_t n=0u; n<Lx-l; ++n, ++X) { sm += *X * *(X+l); }
+                for (size_t n=Lx-l; n>0u; --n, ++X) { sm += *X * *(X+l); }
                 *AC = sm;
             }
             AC -= L;
@@ -245,12 +248,12 @@ int sig2poly_d (double *Y, double *E, double *X, const size_t R, const size_t C,
             for (size_t p=1u; p<P; ++p, AC+=p)
             {
                 a = *AC;
-                for (size_t q=0u; q<p; ++q, ++Y) { --AC; a += *AC * *Y; }
+                for (size_t q=p; q>0u; --q, ++Y) { --AC; a += *AC * *Y; }
                 a /= -e;
                 *Y = a;
-                for (size_t q=0u; q<p; ++q, ++A2) { --Y; *A2 = *Y; }
+                for (size_t q=p; q>0u; --q, ++A2) { --Y; *A2 = *Y; }
                 Y += p;
-                for (size_t q=0u; q<p; ++q) { --A2; --Y; *Y += a * *A2; }
+                for (size_t q=p; q>0u; --q) { --A2; --Y; *Y += a * *A2; }
                 e *= 1.0 - a*a;
             }
             AC -= L;
@@ -269,19 +272,19 @@ int sig2poly_d (double *Y, double *E, double *X, const size_t R, const size_t C,
                     if (mnz)
                     {
                         double mn = 0.0;
-                        for (size_t l=0u; l<Lx; ++l, ++X) { mn += *X; }
+                        for (size_t l=Lx; l>0u; --l, ++X) { mn += *X; }
                         mn /= (double)Lx;
-                        for (size_t l=0u; l<Lx; ++l) { *--X -= mn; }
+                        for (size_t l=Lx; l>0u; --l) { *--X -= mn; }
                     }
 
                     for (size_t l=0u; l<P; ++l, X-=Lx-l+1u, ++AC)
                     {
                         sm = 0.0;
-                        for (size_t n=0u; n<Lx-l; ++n, ++X) { sm += *X * *(X+l); }
+                        for (size_t n=Lx-l; n>0u; --n, ++X) { sm += *X * *(X+l); }
                         *AC = sm;
                     }
                     sm = 0.0;
-                    for (size_t n=0u; n<Lx-P; ++n, ++X) { sm += *X * *(X+P); }
+                    for (size_t n=Lx-P; n>0u; --n, ++X) { sm += *X * *(X+P); }
                     *AC = sm; AC -= P;
 
                     if (unbiased)
@@ -297,12 +300,12 @@ int sig2poly_d (double *Y, double *E, double *X, const size_t R, const size_t C,
                     for (size_t p=1u; p<P; ++p, AC+=p)
                     {
                         a = *AC;
-                        for (size_t q=0u; q<p; ++q, ++Y) { --AC; a += *AC * *Y; }
+                        for (size_t q=p; q>0u; --q, ++Y) { --AC; a += *AC * *Y; }
                         a /= -e;
                         *Y = a;
-                        for (size_t q=0u; q<p; ++q, ++A2) { --Y; *A2 = *Y; }
+                        for (size_t q=p; q>0u; --q, ++A2) { --Y; *A2 = *Y; }
                         Y += p;
-                        for (size_t q=0u; q<p; ++q) { --A2; --Y; *Y += a * *A2; }
+                        for (size_t q=p; q>0u; --q) { --A2; --Y; *Y += a * *A2; }
                         e *= 1.0 - a*a;
                     }
                     AC -= L;
@@ -318,15 +321,15 @@ int sig2poly_d (double *Y, double *E, double *X, const size_t R, const size_t C,
                         if (mnz)
                         {
                             double mn = 0.0;
-                            for (size_t l=0u; l<Lx; ++l, X+=K) { mn += *X; }
+                            for (size_t l=Lx; l>0u; --l, X+=K) { mn += *X; }
                             mn /= (double)Lx;
-                            for (size_t l=0u; l<Lx; ++l) { X-=K; *X -= mn; }
+                            for (size_t l=Lx; l>0u; --l) { X-=K; *X -= mn; }
                         }
 
                         for (size_t l=0u; l<L; ++l, X-=K*(Lx-l+1u), ++AC)
                         {
                             sm = 0.0;
-                            for (size_t n=0u; n<Lx-l; ++n, X+=K) { sm += *X * *(X+l*K); }
+                            for (size_t n=Lx-l; n>0u; --n, X+=K) { sm += *X * *(X+l*K); }
                             *AC = sm;
                         }
                         AC -= L;
@@ -345,12 +348,12 @@ int sig2poly_d (double *Y, double *E, double *X, const size_t R, const size_t C,
                         for (size_t p=1u; p<P; ++p, AC+=p)
                         {
                             a = *AC;
-                            for (size_t q=0u; q<p; ++q, Y+=K) { --AC; a += *AC * *Y; }
+                            for (size_t q=p; q>0u; --q, Y+=K) { --AC; a += *AC * *Y; }
                             a /= -e;
                             *Y = a;
-                            for (size_t q=0u; q<p; ++q, ++A2) { Y-=K; *A2 = *Y; }
+                            for (size_t q=p; q>0u; --q, ++A2) { Y-=K; *A2 = *Y; }
                             Y += p*K;
-                            for (size_t q=0u; q<p; ++q) { --A2; Y-=K; *Y += a * *A2; }
+                            for (size_t q=p; q>0u; --q) { --A2; Y-=K; *Y += a * *A2; }
                             e *= 1.0 - a*a;
                         }
                         AC -= L;
@@ -388,15 +391,15 @@ int sig2poly_c (float *Y, float *E, float *X, const size_t R, const size_t C, co
             if (mnz)
             {
                 float mnr = 0.0f, mni = 0.0f;
-                for (size_t l=0u; l<Lx; ++l) { mnr += *X++; mni += *X++; }
+                for (size_t l=Lx; l>0u; --l) { mnr += *X++; mni += *X++; }
                 mnr /= (float)Lx; mni /= (float)Lx;
-                for (size_t l=0u; l<Lx; ++l) { *--X -= mni; *--X -= mnr; }
+                for (size_t l=Lx; l>0u; --l) { *--X -= mni; *--X -= mnr; }
             }
 
             for (size_t l=0u; l<L; ++l, X-=2u*(Lx-l+1u))
             {
                 smr = smi = 0.0f;
-                for (size_t n=0u; n<Lx-l; ++n, X+=2)
+                for (size_t n=Lx-l; n>0u; --n, X+=2)
                 {
                     smr += *X**(X+2u*l) + *(X+1)**(X+2u*l+1u);
                     smi += *(X+1)**(X+2u*l) - *X**(X+2u*l+1u);
@@ -421,7 +424,7 @@ int sig2poly_c (float *Y, float *E, float *X, const size_t R, const size_t C, co
             for (size_t p=1u; p<P; ++p, AC+=2u*p)
             {
                 ar = *AC; ai = *(AC+1);
-                for (size_t q=0u; q<p; ++q, Y+=2)
+                for (size_t q=p; q>0u; --q, Y+=2)
                 {
                     AC -= 2;
                     ar += *AC**Y - *(AC+1)**(Y+1);
@@ -429,9 +432,9 @@ int sig2poly_c (float *Y, float *E, float *X, const size_t R, const size_t C, co
                 }
                 ar /= -e; ai /= -e;
                 *Y = ar; *(Y+1) = ai;
-                for (size_t q=0u; q<p; ++q, A2+=2) { Y-=2; *A2 = *Y; *(A2+1) = -*(Y+1); }
+                for (size_t q=p; q>0u; --q, A2+=2) { Y-=2; *A2 = *Y; *(A2+1) = -*(Y+1); }
                 Y += 2u*p;
-                for (size_t q=0u; q<p; ++q)
+                for (size_t q=p; q>0u; --q)
                 {
                     A2 -= 2; Y -= 2;
                     *Y += ar**A2 - ai**(A2+1);
@@ -455,15 +458,15 @@ int sig2poly_c (float *Y, float *E, float *X, const size_t R, const size_t C, co
                     if (mnz)
                     {
                         float mnr = 0.0f, mni = 0.0f;
-                        for (size_t l=0u; l<Lx; ++l) { mnr += *X++; mni += *X++; }
+                        for (size_t l=Lx; l>0u; --l) { mnr += *X++; mni += *X++; }
                         mnr /= (float)Lx; mni /= (float)Lx;
-                        for (size_t l=0u; l<Lx; ++l) { *--X -= mni; *--X -= mnr; }
+                        for (size_t l=Lx; l>0u; --l) { *--X -= mni; *--X -= mnr; }
                     }
 
                     for (size_t l=0u; l<P; ++l, X-=2u*(Lx-l+1u))
                     {
                         smr = smi = 0.0f;
-                        for (size_t n=0u; n<Lx-l; ++n, X+=2)
+                        for (size_t n=Lx-l; n>0u; --n, X+=2)
                         {
                             smr += *X**(X+2u*l) + *(X+1)**(X+2u*l+1u);
                             smi += *(X+1)**(X+2u*l) - *X**(X+2u*l+1u);
@@ -471,7 +474,7 @@ int sig2poly_c (float *Y, float *E, float *X, const size_t R, const size_t C, co
                         *AC++ = smr; *AC++ = smi;
                     }
                     smr = smi = 0.0f;
-                    for (size_t n=0u; n<Lx-P; ++n, X+=2)
+                    for (size_t n=Lx-P; n>0u; --n, X+=2)
                     {
                         smr += *X**(X+2u*P) + *(X+1)**(X+2u*P+1u);
                         smi += *(X+1)**(X+2u*P) - *X**(X+2u*P+1u);
@@ -494,7 +497,7 @@ int sig2poly_c (float *Y, float *E, float *X, const size_t R, const size_t C, co
                     for (size_t p=1u; p<P; ++p, AC+=2u*p)
                     {
                         ar = *AC; ai = *(AC+1);
-                        for (size_t q=0u; q<p; ++q, Y+=2)
+                        for (size_t q=p; q>0u; --q, Y+=2)
                         {
                             AC -= 2;
                             ar += *AC**Y - *(AC+1)**(Y+1);
@@ -502,9 +505,9 @@ int sig2poly_c (float *Y, float *E, float *X, const size_t R, const size_t C, co
                         }
                         ar /= -e; ai /= -e;
                         *Y = ar; *(Y+1) = ai;
-                        for (size_t q=0u; q<p; ++q, A2+=2) { Y-=2; *A2 = *Y; *(A2+1) = -*(Y+1); }
+                        for (size_t q=p; q>0u; --q, A2+=2) { Y-=2; *A2 = *Y; *(A2+1) = -*(Y+1); }
                         Y += 2u*p;
-                        for (size_t q=0u; q<p; ++q)
+                        for (size_t q=p; q>0u; --q)
                         {
                             A2 -= 2; Y -= 2;
                             *Y += ar**A2 - ai**(A2+1);
@@ -525,15 +528,15 @@ int sig2poly_c (float *Y, float *E, float *X, const size_t R, const size_t C, co
                         if (mnz)
                         {
                             float mnr = 0.0f, mni = 0.0f;
-                            for (size_t l=0u; l<Lx; ++l, X+=2u*K) { mnr += *X; mni += *(X+1); }
+                            for (size_t l=Lx; l>0u; --l, X+=2u*K) { mnr += *X; mni += *(X+1); }
                             mnr /= (float)Lx; mni /= (float)Lx;
-                            for (size_t l=0u; l<Lx; ++l) { X-=2u*K; *X -= mni; *(X+1) -= mnr; }
+                            for (size_t l=Lx; l>0u; --l) { X-=2u*K; *X -= mni; *(X+1) -= mnr; }
                         }
 
                         for (size_t l=0u; l<L; ++l, X-=2u*K*(Lx-l+1u))
                         {
                             smr = smi = 0.0f;
-                            for (size_t n=0u; n<Lx-l; ++n, X+=2u*K)
+                            for (size_t n=Lx-l; n>0u; --n, X+=2u*K)
                             {
                                 smr += *X**(X+2u*l*K) + *(X+1)**(X+2u*l*K+1u);
                                 smi += *(X+1)**(X+2u*l*K) - *X**(X+2u*l*K+1u);
@@ -558,7 +561,7 @@ int sig2poly_c (float *Y, float *E, float *X, const size_t R, const size_t C, co
                         for (size_t p=1u; p<P; ++p, AC+=2u*p)
                         {
                             ar = *AC; ai = *(AC+1);
-                            for (size_t q=0u; q<p; ++q, Y+=2u*K)
+                            for (size_t q=p; q>0u; --q, Y+=2u*K)
                             {
                                 AC -= 2;
                                 ar += *AC**Y - *(AC+1)**(Y+1);
@@ -566,9 +569,9 @@ int sig2poly_c (float *Y, float *E, float *X, const size_t R, const size_t C, co
                             }
                             ar /= -e; ai /= -e;
                             *Y = ar; *(Y+1) = ai;
-                            for (size_t q=0u; q<p; ++q, A2+=2) { Y-=2u*K; *A2 = *Y; *(A2+1) = -*(Y+1); }
+                            for (size_t q=p; q>0u; --q, A2+=2) { Y-=2u*K; *A2 = *Y; *(A2+1) = -*(Y+1); }
                             Y += 2u*p*K;
-                            for (size_t q=0u; q<p; ++q)
+                            for (size_t q=p; q>0u; --q)
                             {
                                 A2 -= 2; Y -= 2u*K;
                                 *Y += ar**A2 - ai**(A2+1);
@@ -611,15 +614,15 @@ int sig2poly_z (double *Y, double *E, double *X, const size_t R, const size_t C,
             if (mnz)
             {
                 double mnr = 0.0, mni = 0.0;
-                for (size_t l=0u; l<Lx; ++l) { mnr += *X++; mni += *X++; }
+                for (size_t l=Lx; l>0u; --l) { mnr += *X++; mni += *X++; }
                 mnr /= (double)Lx; mni /= (double)Lx;
-                for (size_t l=0u; l<Lx; ++l) { *--X -= mni; *--X -= mnr; }
+                for (size_t l=Lx; l>0u; --l) { *--X -= mni; *--X -= mnr; }
             }
 
             for (size_t l=0u; l<L; ++l, X-=2u*(Lx-l+1u))
             {
                 smr = smi = 0.0;
-                for (size_t n=0u; n<Lx-l; ++n, X+=2)
+                for (size_t n=Lx-l; n>0u; --n, X+=2)
                 {
                     smr += *X**(X+2u*l) + *(X+1)**(X+2u*l+1u);
                     smi += *(X+1)**(X+2u*l) - *X**(X+2u*l+1u);
@@ -644,7 +647,7 @@ int sig2poly_z (double *Y, double *E, double *X, const size_t R, const size_t C,
             for (size_t p=1u; p<P; ++p, AC+=2u*p)
             {
                 ar = *AC; ai = *(AC+1);
-                for (size_t q=0u; q<p; ++q, Y+=2)
+                for (size_t q=p; q>0u; --q, Y+=2)
                 {
                     AC -= 2;
                     ar += *AC**Y - *(AC+1)**(Y+1);
@@ -652,9 +655,9 @@ int sig2poly_z (double *Y, double *E, double *X, const size_t R, const size_t C,
                 }
                 ar /= -e; ai /= -e;
                 *Y = ar; *(Y+1) = ai;
-                for (size_t q=0u; q<p; ++q, A2+=2) { Y-=2; *A2 = *Y; *(A2+1) = -*(Y+1); }
+                for (size_t q=p; q>0u; --q, A2+=2) { Y-=2; *A2 = *Y; *(A2+1) = -*(Y+1); }
                 Y += 2u*p;
-                for (size_t q=0u; q<p; ++q)
+                for (size_t q=p; q>0u; --q)
                 {
                     A2 -= 2; Y -= 2;
                     *Y += ar**A2 - ai**(A2+1);
@@ -678,15 +681,15 @@ int sig2poly_z (double *Y, double *E, double *X, const size_t R, const size_t C,
                     if (mnz)
                     {
                         double mnr = 0.0, mni = 0.0;
-                        for (size_t l=0u; l<Lx; ++l) { mnr += *X++; mni += *X++; }
+                        for (size_t l=Lx; l>0u; --l) { mnr += *X++; mni += *X++; }
                         mnr /= (double)Lx; mni /= (double)Lx;
-                        for (size_t l=0u; l<Lx; ++l) { *--X -= mni; *--X -= mnr; }
+                        for (size_t l=Lx; l>0u; --l) { *--X -= mni; *--X -= mnr; }
                     }
 
                     for (size_t l=0u; l<P; ++l, X-=2u*(Lx-l+1u))
                     {
                         smr = smi = 0.0;
-                        for (size_t n=0u; n<Lx-l; ++n, X+=2)
+                        for (size_t n=Lx-l; n>0u; --n, X+=2)
                         {
                             smr += *X**(X+2u*l) + *(X+1)**(X+2u*l+1u);
                             smi += *(X+1)**(X+2u*l) - *X**(X+2u*l+1u);
@@ -694,7 +697,7 @@ int sig2poly_z (double *Y, double *E, double *X, const size_t R, const size_t C,
                         *AC++ = smr; *AC++ = smi;
                     }
                     smr = smi = 0.0;
-                    for (size_t n=0u; n<Lx-P; ++n, X+=2)
+                    for (size_t n=Lx-P; n>0u; --n, X+=2)
                     {
                         smr += *X**(X+2u*P) + *(X+1)**(X+2u*P+1u);
                         smi += *(X+1)**(X+2u*P) - *X**(X+2u*P+1u);
@@ -717,7 +720,7 @@ int sig2poly_z (double *Y, double *E, double *X, const size_t R, const size_t C,
                     for (size_t p=1u; p<P; ++p, AC+=2u*p)
                     {
                         ar = *AC; ai = *(AC+1);
-                        for (size_t q=0u; q<p; ++q, Y+=2)
+                        for (size_t q=p; q>0u; --q, Y+=2)
                         {
                             AC -= 2;
                             ar += *AC**Y - *(AC+1)**(Y+1);
@@ -725,9 +728,9 @@ int sig2poly_z (double *Y, double *E, double *X, const size_t R, const size_t C,
                         }
                         ar /= -e; ai /= -e;
                         *Y = ar; *(Y+1) = ai;
-                        for (size_t q=0u; q<p; ++q, A2+=2) { Y-=2; *A2 = *Y; *(A2+1) = -*(Y+1); }
+                        for (size_t q=p; q>0u; --q, A2+=2) { Y-=2; *A2 = *Y; *(A2+1) = -*(Y+1); }
                         Y += 2u*p;
-                        for (size_t q=0u; q<p; ++q)
+                        for (size_t q=p; q>0u; --q)
                         {
                             A2 -= 2; Y -= 2;
                             *Y += ar**A2 - ai**(A2+1);
@@ -748,15 +751,15 @@ int sig2poly_z (double *Y, double *E, double *X, const size_t R, const size_t C,
                         if (mnz)
                         {
                             double mnr = 0.0, mni = 0.0;
-                            for (size_t l=0u; l<Lx; ++l, X+=2u*K) { mnr += *X; mni += *(X+1); }
+                            for (size_t l=Lx; l>0u; --l, X+=2u*K) { mnr += *X; mni += *(X+1); }
                             mnr /= (double)Lx; mni /= (double)Lx;
-                            for (size_t l=0u; l<Lx; ++l) { X-=2u*K; *X -= mni; *(X+1) -= mnr; }
+                            for (size_t l=Lx; l>0u; --l) { X-=2u*K; *X -= mni; *(X+1) -= mnr; }
                         }
 
                         for (size_t l=0u; l<L; ++l, X-=2u*K*(Lx-l+1u))
                         {
                             smr = smi = 0.0;
-                            for (size_t n=0u; n<Lx-l; ++n, X+=2u*K)
+                            for (size_t n=Lx-l; n>0u; --n, X+=2u*K)
                             {
                                 smr += *X**(X+2u*l*K) + *(X+1)**(X+2u*l*K+1u);
                                 smi += *(X+1)**(X+2u*l*K) - *X**(X+2u*l*K+1u);
@@ -781,7 +784,7 @@ int sig2poly_z (double *Y, double *E, double *X, const size_t R, const size_t C,
                         for (size_t p=1u; p<P; ++p, AC+=2u*p)
                         {
                             ar = *AC; ai = *(AC+1);
-                            for (size_t q=0u; q<p; ++q, Y+=2u*K)
+                            for (size_t q=p; q>0u; --q, Y+=2u*K)
                             {
                                 AC -= 2;
                                 ar += *AC**Y - *(AC+1)**(Y+1);
@@ -789,9 +792,9 @@ int sig2poly_z (double *Y, double *E, double *X, const size_t R, const size_t C,
                             }
                             ar /= -e; ai /= -e;
                             *Y = ar; *(Y+1) = ai;
-                            for (size_t q=0u; q<p; ++q, A2+=2) { Y-=2u*K; *A2 = *Y; *(A2+1) = -*(Y+1); }
+                            for (size_t q=p; q>0u; --q, A2+=2) { Y-=2u*K; *A2 = *Y; *(A2+1) = -*(Y+1); }
                             Y += 2u*p*K;
-                            for (size_t q=0u; q<p; ++q)
+                            for (size_t q=p; q>0u; --q)
                             {
                                 A2 -= 2; Y -= 2u*K;
                                 *Y += ar**A2 - ai**(A2+1);

@@ -27,7 +27,7 @@ CFLAGS=$(WFLAG) $(STD) -O3 -ffast-math -march=native -mfpmath=sse $(INCLS)
 
 
 All: all
-all: Dirs Generate Transform Filter Conv Interp ZCs_LCs AR_Poly AC_LP Frame STFT Clean
+all: Dirs Generate Transform Filter Conv Interp ZCs_LCs AR_Poly Linear_Pred Frame STFT Clean
 	rm -f 7 obj/*.o
 
 Dirs:
@@ -248,7 +248,7 @@ mcr_windowed: srci/mcr_windowed.cpp c/mcr_windowed.c
 #AR_Poly: conversion between AR (autoregressive), poly (polynomial),
 #RC (reflection coeff), and PSD (power spectral density) representations
 #poly2roots uses LAPACKE, so for complex case requires -Wno-c99-extensions.
-AR_Poly: #poly2roots roots2poly poly2ar ar2poly ar2psd poly2psd #ar2rc rc2ar poly2rc rc2poly
+AR_Poly: poly2roots roots2poly poly2ar ar2poly ar2psd poly2psd #ar2rc rc2ar poly2rc rc2poly
 poly2roots: srci/poly2roots.cpp c/poly2roots.c
 	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS) -Wno-c99-extensions; $(CC) obj/$@.o -obin/$@ -largtable2 -llapacke -lm
 roots2poly: srci/roots2poly.cpp c/roots2poly.c
@@ -271,31 +271,48 @@ poly2psd: srci/poly2psd.cpp c/poly2psd.c
 #	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2
 
 
+#Linear_Pred: Linear prediction and related (autocorrelation, Levinson-Durbin, Burg, MVDR)
+Linear_Pred: AC_LP Burg MVDR
+
 #AC_LP: conversions between sig (signal), AC (autocorrelation), LP (linear prediction), and related.
 #For example, ac2rc converts from AC to RCs (reflection coeffs).
-AC_LP: #sig2ac sig2ac_fft ac2rc ac2ar ac2poly sig2rc sig2ar sig2poly #sig2ar_burg sig2poly_burg ac2cc ac2mvdr
+AC_LP: sig2ac sig2ac_fft ac2rc ac2ar ac2poly ac2psd sig2rc sig2ar sig2poly sig2psd
+sig2ac: srci/sig2ac.cpp c/sig2ac.c
+	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2
+sig2ac_fft: srci/sig2ac_fft.cpp c/sig2ac_fft.c
+	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lfftw3f -lfftw3 -lm
 ac2rc: srci/ac2rc.cpp c/ac2rc.c
 	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lm
 ac2ar: srci/ac2ar.cpp c/ac2ar.c
 	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lm
 ac2poly: srci/ac2poly.cpp c/ac2poly.c
 	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lm
-ac2mvdr: srci/ac2mvdr.cpp c/ac2mvdr.c
-	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lfftw3f -lfftw3 -lm
-sig2ac: srci/sig2ac.cpp c/sig2ac.c
-	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2
-sig2ac_fft: srci/sig2ac_fft.cpp c/sig2ac_fft.c
-	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lfftw3f -lfftw3 -lm
+ac2psd: srci/ac2psd.cpp c/ac2psd.c
+	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lm
 sig2rc: srci/sig2rc.cpp c/sig2rc.c
-	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lfftw3f -lfftw3 -lm
+	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lm
 sig2ar: srci/sig2ar.cpp c/sig2ar.c
-	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lfftw3f -lfftw3 -lm
+	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lm
 sig2poly: srci/sig2poly.cpp c/sig2poly.c
-	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lfftw3f -lfftw3 -lm
+	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lm
+sig2psd: srci/sig2psd.cpp c/sig2psd.c
+	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lm
+
+#Burg: Linear prediction by time-domain maximum-entropy method of Burg
+Burg: #sig2ar_burg sig2poly_burg sig2psd_burg
 sig2ar_burg: srci/sig2ar_burg.cpp c/sig2ar_burg.c
 	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lm
 sig2poly_burg: srci/sig2poly_burg.cpp c/sig2poly_burg.c
 	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lm
+sig2psd_burg: srci/sig2psd_burg.cpp c/sig2psd_burg.c
+	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lm
+
+#MVDR: minimum variance distortionless response
+MVDR: #ac2mvdr sig2mvdr
+ac2mvdr: srci/ac2mvdr.cpp c/ac2mvdr.c
+	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lfftw3f -lfftw3 -lm
+sig2mvdr: srci/sig2mvdr.cpp c/sig2mvdr.c
+	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lfftw3f -lfftw3 -lm
 
 
 #Frame: get frames and apply windows for univariate signal to put into matrix

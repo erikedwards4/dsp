@@ -28,7 +28,7 @@ CFLAGS=$(WFLAG) $(STD) -O3 -ffast-math -march=native -mfpmath=sse -fPIC
 
 
 All: all
-all: Dirs Generate Transform Filter Conv Interp ZCs_LCs AR_Poly AC_LP Frame STFT Wavelets Clean
+all: Dirs Generate Transform Filter Conv Interp ZCs_LCs AR_Poly Linear_Pred Frame STFT Wavelets Clean
 
 Dirs:
 	mkdir -pm 777 obj
@@ -164,8 +164,6 @@ mcr_windowed: mcr_windowed.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 
 #AR_Poly: conversion between AR (autoregressive), poly (polynomial),
 #RC (reflection coeff), and PSD (power spectral density) representations.
-#Currently, the RC-related functions are not working for the complex case,
-#which are less important (the Octave tsa functions for this also don't work).
 AR_Poly: poly2roots roots2poly poly2ar ar2poly poly2psd ar2psd poly2cc ar2cc poly2mvdr ar2mvdr #ar2rc rc2ar poly2rc rc2poly
 poly2roots: poly2roots.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 roots2poly: roots2poly.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
@@ -173,81 +171,50 @@ poly2ar: poly2ar.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 ar2poly: ar2poly.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 poly2psd: poly2psd.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 ar2psd: ar2psd.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
-
-#poly2cc: poly2cc.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
-#ar2cc: ar2cc.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
-#poly2mvdr: poly2mvdr.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
-#ar2mvdr: ar2mvdr.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
-
 #ar2rc: ar2rc.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 #rc2ar: rc2ar.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 #poly2rc: poly2rc.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 #rc2poly: rc2poly.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+#poly2cc: poly2cc.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+#ar2cc: ar2cc.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 
+
+#Linear_Pred: Linear prediction and related (autocorrelation, Levinson-Durbin, Burg, MVDR)
+Linear_Pred: AC_LP Burg MVDR
 
 #AC_LP: conversions related to AC (autocovariance) and LP (linear prediction).
-#These work from the signal (sig) or autocovariance (ac) to get
-#ac, rc (reflection coeff), poly (polynomial), ar (autoregressive),
-#or mvdr (minimum-variance distortionless-response) representations.
+#These work from the signal (sig) or autocovariance (AC) to get
+#AC, RC (reflection coeff), poly (polynomial), or AR (autoregressive) representations.
 #These use time-domain computations, except the _fft versions.
-#These use Levinson-Durbin computations, except the _burg versions.
-AC_LP: sig2ac sig2ac_fft ac2rc ac2ar ac2poly sig2rc sig2ar sig2poly #sig2ar_burg sig2poly_burg ac2cc ac2mvdr
+#The LP is done by Levinson-Durbin recursion from the AC.
+AC_LP: sig2ac sig2ac_fft ac2rc ac2ar ac2poly ac2psd sig2rc sig2ar sig2poly sig2psd
 sig2ac: sig2ac.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 sig2ac_fft: sig2ac_fft.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 ac2rc: ac2rc.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 ac2ar: ac2ar.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 ac2poly: ac2poly.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+ac2psd: ac2psd.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+ac2cc: ac2cc.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 sig2rc: sig2rc.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 sig2ar: sig2ar.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 sig2poly: sig2poly.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+sig2psd: sig2psd.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+sig2cc: sig2cc.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+
+#Burg: Linear prediction by time-domain maximum-entropy method of Burg
+Burg: #sig2ar_burg sig2poly_burg sig2psd_burg sig2cc_burg
 sig2ar_burg: sig2ar_burg.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 sig2poly_burg: sig2poly_burg.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+sig2psd_burg: sig2psd_burg.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+sig2cc_burg: sig2cc_burg.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+# sig2ar_fft_burg: sig2ar_fft_burg.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+# sig2poly_fft_burg: sig2poly_fft_burg.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+# sig2psd_fft_burg: sig2psd_fft_burg.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+
+#MVDR: minimum variance distortionless response
+MVDR: #ac2mvdr sig2mvdr
 ac2mvdr: ac2mvdr.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 sig2mvdr: sig2mvdr.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
-
-
-#AC_LP: conversions from AC (autocovariance) to LP (linear prediction) representations.
-#These get rc (reflection coeff), poly (polynomial params), ar (autoregressive),
-#cc (cepstral coeff), or mvdr (minimum-variance distortionless-response) representations.
-#These use Levinson-Durbin computations or the MVDR (no FFT or DCT used here).
-# AC_LP: ac2rc ac2ar ac2poly ac2cc ac2mvdr
-# ac2rc: ac2rc.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
-# ac2ar: ac2ar.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
-# ac2poly: ac2poly.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
-# ac2psd: ac2psd.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
-# ac2cc: ac2cc.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
-# ac2mvdr: ac2mvdr.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
-
-
-#Sig_LP: conversions from the signal (sig) to LP (linear prediction) representations.
-#These get autocovariance (ac), rc (reflection coeff), poly (polynomial params), ar (autoregressive),
-#cc (cepstral coeff), or mvdr (minimum-variance distortionless-response) representations.
-#These use time-domain computations to get the AC, unless _fft is specified.
-#These use Levinson-Durbin computations from the AC, unless _burg is specified.
-# Sig_LP: sig2ac sig2ac_fft sig2rc sig2ar sig2poly #sig2ar_burg sig2poly_burg sig2cc sig2mvdr
-# ac2rc: ac2rc.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
-# ac2ar: ac2ar.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
-# ac2poly: ac2poly.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
-# ac2psd: ac2psd.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
-# ac2cc: ac2cc.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
-# ac2mvdr: ac2mvdr.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
-# sig2ac: sig2ac.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
-# sig2ac_fft: sig2ac_fft.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
-# sig2rc: sig2rc.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
-# sig2rc_fft: sig2rc.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
-# sig2ar: sig2ar.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
-# sig2ar_fft: sig2ar.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
-# sig2poly: sig2poly.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
-# sig2poly_fft: sig2poly.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
-# sig2ar_burg: sig2ar_burg.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
-# sig2ar_fft_burg: sig2ar_burg.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
-# sig2poly_burg: sig2poly_burg.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
-# sig2poly_fft_burg: sig2poly_burg.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
-# sig2cc: sig2cc.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
-# sig2cc_fft: sig2cc.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
-# sig2cc_burg: sig2cc.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
-# sig2mvdr: sig2mvdr.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
-# sig2mvdr_fft: sig2mvdr.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 
 
 #Frame: get frames and apply windows for univariate signal to put into matrix

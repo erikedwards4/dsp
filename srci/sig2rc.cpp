@@ -1,5 +1,5 @@
 //Includes
-#include "sig2ar.c"
+#include "sig2rc.c"
 
 //Declarations
 const valarray<size_t> oktypes = {1u,2u,101u,102u};
@@ -13,8 +13,11 @@ descr += "Gets autoregressive (AR) coeffs starting from the signal (sig).\n";
 descr += "This does linear prediction (LP) for each vector in X.\n";
 descr += "\n";
 descr += "This works by Levinson-Durbin recursion of the autocovariance (AC),\n";
-descr += "and output Y holds the autoregressive (AR) coefficients.\n";
-descr += "The 2nd output, V, holds the noise variances for each row or col.\n";
+descr += "and output Y holds the autoregressive (AR) coeffs for each vector in X.\n";
+descr += "If X is a single vector, then Y is a single vector of length P.\n";
+descr += "\n";
+descr += "The 2nd output, V, holds the noise variances for each vector in X.\n";
+descr += "If X is a single vector, then V is a scalar.\n";
 descr += "\n";
 descr += "Use -p (--P) to specify the number of AR coefficients [default=1],\n";
 descr += "also called the order of the linear prediction.\n";
@@ -35,13 +38,13 @@ descr += "Include -u (--unbiased) to use unbiased calculation of AC [default is 
 descr += "This uses N-l instead of N in the denominator (it is actually just less biased).\n";
 descr += "\n";
 descr += "Examples:\n";
-descr += "$ sig2ar -p3 X -o Y -o V \n";
-descr += "$ sig2ar -d1 -p5 X -o Y -o V \n";
-descr += "$ cat X | sig2ar -z -p7 > Y \n";
+descr += "$ sig2rc -p3 X -o Y -o V \n";
+descr += "$ sig2rc -d1 -p5 X -o Y -o V \n";
+descr += "$ cat X | sig2rc -z -p7 > Y \n";
 
 //Argtable
 struct arg_file  *a_fi = arg_filen(nullptr,nullptr,"<file>",I-1,I,"input file (X)");
-struct arg_int    *a_p = arg_intn("p","P","<uint>",0,1,"number of AR coeffs [default=1]");
+struct arg_int    *a_p = arg_intn("p","P","<uint>",0,1,"number of reflection coeffs [default=1]");
 struct arg_int    *a_d = arg_intn("d","dim","<uint>",0,1,"dimension along which to operate [default=0]");
 struct arg_lit  *a_mnz = arg_litn("z","zero_mean",0,1,"subtract mean from each vec in X [default=false]");
 struct arg_lit    *a_u = arg_litn("u","unbiased",0,1,"use unbiased (N-l) denominator [default=biased]");
@@ -98,7 +101,7 @@ if (i1.T==1u)
     catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for output file 2 (V)" << endl; return 1; }
     try { ifs1.read(reinterpret_cast<char*>(X),i1.nbytes()); }
     catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file (X)" << endl; return 1; }
-    if (codee::sig2ar_s(Y,V,X,i1.R,i1.C,i1.S,i1.H,i1.iscolmajor(),dim,P,mnz,u)) { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
+    if (codee::sig2rc_s(Y,V,X,i1.R,i1.C,i1.S,i1.H,i1.iscolmajor(),dim,P,mnz,u)) { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
     if (wo1)
     {
         try { ofs1.write(reinterpret_cast<char*>(Y),o1.nbytes()); }
@@ -122,7 +125,7 @@ else if (i1.T==101u)
     catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for output file 2 (V)" << endl; return 1; }
     try { ifs1.read(reinterpret_cast<char*>(X),i1.nbytes()); }
     catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file (X)" << endl; return 1; }
-    if (codee::sig2ar_c(Y,V,X,i1.R,i1.C,i1.S,i1.H,i1.iscolmajor(),dim,P,mnz,u)) { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
+    if (codee::sig2rc_c(Y,V,X,i1.R,i1.C,i1.S,i1.H,i1.iscolmajor(),dim,P,mnz,u)) { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
     if (wo1)
     {
         try { ofs1.write(reinterpret_cast<char*>(Y),o1.nbytes()); }
