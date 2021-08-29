@@ -406,7 +406,7 @@ int ac2rc_c (float *Y, float *E, const float *X, const size_t R, const size_t C,
                         }
                         A1 -= 2u*P;
                         ar /= -e; ai /= -e;
-                        *Y++ = ar; *(Y+1) = ai;
+                        *Y = ar; *(Y+1) = ai;
                         *E = e * (1.0f-ar*ar-ai*ai);
                     }
                 }
@@ -574,7 +574,7 @@ int ac2rc_z (double *Y, double *E, const double *X, const size_t R, const size_t
                         }
                         A1 -= 2u*P;
                         ar /= -e; ai /= -e;
-                        *Y++ = ar; *(Y+1) = ai;
+                        *Y = ar; *(Y+1) = ai;
                         *E = e * (1.0-ar*ar-ai*ai);
                     }
                 }

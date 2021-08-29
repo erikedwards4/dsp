@@ -1,480 +1,353 @@
-//Gets reflection coefficients (RCs) from polynomials for each vector in X.
-
-//This currently has the same sign of Matlab output (see commented code below).
-//However, this may not match the Octave tsa toolbox in sign convention.
-//Right now, only the current sign convention allows round-trip with rc2poly.
+//Gets reflection coefficients (RCs) from polynomials for each vector X.
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <math.h>
 
 #ifdef __cplusplus
 namespace codee {
 extern "C" {
 #endif
 
-int poly2rc_s (float *Y, const float *X, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t dim);
-int poly2rc_d (double *Y, const double *X, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t dim);
-int poly2rc_c (float *Y, const float *X, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t dim);
-int poly2rc_z (double *Y, const double *X, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t dim);
+int poly2rc_s (float *Y, const float *X, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim);
+int poly2rc_d (double *Y, const double *X, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim);
+int poly2rc_c (float *Y, const float *X, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim);
+int poly2rc_z (double *Y, const double *X, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim);
 
 
-int poly2rc_s (float *Y, const float *X, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t dim)
+int poly2rc_s (float *Y, const float *X, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim)
 {
     if (dim>3u) { fprintf(stderr,"error in poly2rc_s: dim must be in [0 3]\n"); return 1; }
 
     const size_t N = R*C*S*H;
     const size_t Lx = (dim==0u) ? R : (dim==1u) ? C : (dim==2u) ? S : H;
+    if (N==0u) { fprintf(stderr,"error in poly2rc_s: polynomial input (X) empty\n"); return 1; }
+    if (Lx<1u) { fprintf(stderr,"error in poly2rc_s: Lx (length of vecs in X) must be positive\n"); return 1; }
 
-    if (N==0u || Lx<2u) {}
+    const size_t P = Lx - 1u;
+    float x0, sc, *y;
+    if (!(y=(float *)malloc(P*sizeof(float)))) { fprintf(stderr,"error in poly2rc_s: problem with malloc. "); perror("malloc"); return 1; }
+
+    if (Lx==N)
+    {
+        x0 = *X++;
+        for (size_t p=P; p>0u; --p, ++X, ++Y) { *Y = *X / x0; }
+        for (size_t p=P; p>1u; --p)
+        {
+            y += p - 1u;
+            for (size_t q=p; q>0u; --q, --y) { *y = *--Y; }
+            y += p; sc = -*y;
+            for (size_t q=p; q>1u; --q, ++Y) { --y; *Y += sc**y; *Y /= 1.0f-sc*sc; }
+        }
+    }
     else
     {
-        const size_t Ly = Lx - 1u;
-        float sc, sc2, *y;
-        if (!(y=(float *)malloc(Ly*sizeof(float)))) { fprintf(stderr,"error in poly2rc_s: problem with malloc. "); perror("malloc"); return 1; }
-        
-        if (Lx==N)
+        const size_t K = (iscolmajor) ? ((dim==0u) ? 1u : (dim==1u) ? R : (dim==2u) ? R*C : R*C*S) : ((dim==0u) ? C*S*H : (dim==1u) ? S*H : (dim==2u) ? H : 1u);
+        const size_t B = (iscolmajor && dim==0u) ? C*S*H : K;
+        const size_t V = N/Lx, G = V/B;
+
+        if (K==1u && (G==1u || B==1u))
         {
-            const float x0 = *X++;
-            for (size_t l=0u; l<Ly; ++l, ++X, ++Y) { *Y = *X / x0; }
-            Y -= Ly;
-            for (size_t l=Ly-1u; l>0u; --l)
+            for (size_t v=V; v>0u; --v, Y+=P-1u)
             {
-                for (size_t q=0u; q<=l; ++q, ++Y, ++y) { *y = *Y; }
-                sc = *--y; Y -= l + 1u;
-                for (size_t q=0u; q<l; ++q, ++Y) { --y; *Y += sc * *y; }
-                sc2 = fmaf(sc,-sc,1.0f);
-                //*Y = -*Y;  //to match other sign convention
-                for (size_t q=0u; q<l; ++q) { --Y; *Y /= sc2; }
+                x0 = *X++;
+                for (size_t p=P; p>0u; --p, ++X, ++Y) { *Y = *X / x0; }
+                for (size_t p=P; p>1u; --p)
+                {
+                    y += p - 1u;
+                    for (size_t q=p; q>0u; --q, --y) { *y = *--Y; }
+                    y += p; sc = -*y;
+                    for (size_t q=p; q>1u; --q, ++Y) { --y; *Y += sc**y; *Y /= 1.0f-sc*sc; }
+                }
             }
-            //*Y = -*Y;  //to match other sign convention
         }
         else
         {
-            const size_t K = (iscolmajor) ? ((dim==0u) ? 1u : (dim==1u) ? R : (dim==2u) ? R*C : R*C*S) : ((dim==0u) ? C*S*H : (dim==1u) ? S*H : (dim==2u) ? H : 1u);
-            const size_t B = (iscolmajor && dim==0u) ? C*S*H : K;
-            const size_t V = N/Lx, G = V/B;
-            float x0;
-
-            if (K==1u && (G==1u || B==1u))
+            for (size_t g=G; g>0u; --g, X+=B*P, Y+=B*(P-1u))
             {
-                for (size_t v=V; v>0u; --v, Y+=Ly)
+                for (size_t b=B; b>0u; --b, X-=K*Lx-1u, Y-=K-1u)
                 {
-                    x0 = *X++;
-                    for (size_t l=0u; l<Ly; ++l, ++X, ++Y) { *Y = *X / x0; }
-                    Y -= Ly;
-                    for (size_t l=Ly-1u; l>0u; --l)
+                    x0 = *X; X+=K;
+                    for (size_t p=P; p>0u; --p, X+=K, Y+=K) { *Y = *X / x0; }
+                    for (size_t p=P; p>1u; --p)
                     {
-                        for (size_t q=0u; q<=l; ++q, ++Y, ++y) { *y = *Y; }
-                        sc = *--y; Y -= l + 1u;
-                        for (size_t q=0u; q<l; ++q, ++Y) { --y; *Y += sc * *y; }
-                        sc2 = fmaf(sc,-sc,1.0f);
-                        //*Y = -*Y;  //to match other sign convention
-                        for (size_t q=0u; q<l; ++q) { --Y; *Y /= sc2; }
-                    }
-                    //*Y = -*Y;  //to match other sign convention
-                }
-            }
-            else
-            {
-                for (size_t g=G; g>0u; --g, X+=B*(Lx-1u), Y+=B*(Ly-1u))
-                {
-                    for (size_t b=B; b>0u; --b, X-=K*Lx-1u, ++Y)
-                    {
-                        x0 = *X; X += K;
-                        for (size_t l=0u; l<Ly; ++l, X+=K, Y+=K) { *Y = *X / x0; }
-                        Y -= Ly*K;
-                        for (size_t l=Ly-1u; l>0u; --l)
-                        {
-                            for (size_t q=0u; q<=l; ++q, Y+=K, ++y) { *y = *Y; }
-                            sc = *--y; Y -= K*(l+1u);
-                            for (size_t q=0u; q<l; ++q, Y+=K) { --y; *Y += sc * *y; }
-                            sc2 = fmaf(sc,-sc,1.0f);
-                            //*Y = -*Y;  //to match other sign convention
-                            for (size_t q=0u; q<l; ++q) { Y-=K; *Y /= sc2; }
-                        }
-                        //*Y = -*Y;  //to match other sign convention
+                        y += p - 1u;
+                        for (size_t q=p; q>0u; --q, --y) { Y-=K; *y = *Y; }
+                        y += p; sc = -*y;
+                        for (size_t q=p; q>1u; --q, Y+=K) { --y; *Y += sc**y; *Y /= 1.0f-sc*sc; }
                     }
                 }
             }
         }
-        free(y);
     }
 
+    //Exit
     return 0;
 }
 
 
-int poly2rc_d (double *Y, const double *X, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t dim)
+int poly2rc_d (double *Y, const double *X, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim)
 {
     if (dim>3u) { fprintf(stderr,"error in poly2rc_d: dim must be in [0 3]\n"); return 1; }
 
     const size_t N = R*C*S*H;
     const size_t Lx = (dim==0u) ? R : (dim==1u) ? C : (dim==2u) ? S : H;
+    if (N==0u) { fprintf(stderr,"error in poly2rc_d: polynomial input (X) empty\n"); return 1; }
+    if (Lx<1u) { fprintf(stderr,"error in poly2rc_d: Lx (length of vecs in X) must be positive\n"); return 1; }
 
-    if (N==0u || Lx<2u) {}
+    const size_t P = Lx - 1u;
+    double x0, sc, *y;
+    if (!(y=(double *)malloc(P*sizeof(double)))) { fprintf(stderr,"error in poly2rc_d: problem with malloc. "); perror("malloc"); return 1; }
+
+    if (Lx==N)
+    {
+        x0 = *X++;
+        for (size_t p=P; p>0u; --p, ++X, ++Y) { *Y = *X / x0; }
+        for (size_t p=P; p>1u; --p)
+        {
+            y += p - 1u;
+            for (size_t q=p; q>0u; --q, --y) { *y = *--Y; }
+            y += p; sc = -*y;
+            for (size_t q=p; q>1u; --q, ++Y) { --y; *Y += sc**y; *Y /= 1.0-sc*sc; }
+        }
+    }
     else
     {
-        const size_t Ly = Lx - 1u;
-        double sc, sc2, *y;
-        if (!(y=(double *)malloc(Ly*sizeof(double)))) { fprintf(stderr,"error in poly2rc_d: problem with malloc. "); perror("malloc"); return 1; }
-        
-        if (Lx==N)
+        const size_t K = (iscolmajor) ? ((dim==0u) ? 1u : (dim==1u) ? R : (dim==2u) ? R*C : R*C*S) : ((dim==0u) ? C*S*H : (dim==1u) ? S*H : (dim==2u) ? H : 1u);
+        const size_t B = (iscolmajor && dim==0u) ? C*S*H : K;
+        const size_t V = N/Lx, G = V/B;
+
+        if (K==1u && (G==1u || B==1u))
         {
-            const double x0 = *X++;
-            for (size_t l=0u; l<Ly; ++l, ++X, ++Y) { *Y = *X / x0; }
-            Y -= Ly;
-            for (size_t l=Ly-1u; l>0u; --l)
+            for (size_t v=V; v>0u; --v, Y+=P-1u)
             {
-                for (size_t q=0u; q<=l; ++q, ++Y, ++y) { *y = *Y; }
-                sc = *--y; Y -= l + 1u;
-                for (size_t q=0u; q<l; ++q, ++Y) { --y; *Y += sc * *y; }
-                sc2 = fma(sc,-sc,1.0);
-                //*Y = -*Y;  //to match other sign convention
-                for (size_t q=0u; q<l; ++q) { --Y; *Y /= sc2; }
+                x0 = *X++;
+                for (size_t p=P; p>0u; --p, ++X, ++Y) { *Y = *X / x0; }
+                for (size_t p=P; p>1u; --p)
+                {
+                    y += p - 1u;
+                    for (size_t q=p; q>0u; --q, --y) { *y = *--Y; }
+                    y += p; sc = -*y;
+                    for (size_t q=p; q>1u; --q, ++Y) { --y; *Y += sc**y; *Y /= 1.0-sc*sc; }
+                }
             }
-            //*Y = -*Y;  //to match other sign convention
         }
         else
         {
-            const size_t K = (iscolmajor) ? ((dim==0u) ? 1u : (dim==1u) ? R : (dim==2u) ? R*C : R*C*S) : ((dim==0u) ? C*S*H : (dim==1u) ? S*H : (dim==2u) ? H : 1u);
-            const size_t B = (iscolmajor && dim==0u) ? C*S*H : K;
-            const size_t V = N/Lx, G = V/B;
-            double x0;
-
-            if (K==1u && (G==1u || B==1u))
+            for (size_t g=G; g>0u; --g, X+=B*P, Y+=B*(P-1u))
             {
-                for (size_t v=V; v>0u; --v, Y+=Ly)
+                for (size_t b=B; b>0u; --b, X-=K*Lx-1u, Y-=K-1u)
                 {
-                    x0 = *X++;
-                    for (size_t l=0u; l<Ly; ++l, ++X, ++Y) { *Y = *X / x0; }
-                    Y -= Ly;
-                    for (size_t l=Ly-1u; l>0u; --l)
+                    x0 = *X; X+=K;
+                    for (size_t p=P; p>0u; --p, X+=K, Y+=K) { *Y = *X / x0; }
+                    for (size_t p=P; p>1u; --p)
                     {
-                        for (size_t q=0u; q<=l; ++q, ++Y, ++y) { *y = *Y; }
-                        sc = *--y; Y -= l + 1u;
-                        for (size_t q=0u; q<l; ++q, ++Y) { --y; *Y += sc * *y; }
-                        sc2 = fma(sc,-sc,1.0);
-                        //*Y = -*Y;  //to match other sign convention
-                        for (size_t q=0u; q<l; ++q) { --Y; *Y /= sc2; }
-                    }
-                    //*Y = -*Y;  //to match other sign convention
-                }
-            }
-            else
-            {
-                for (size_t g=G; g>0u; --g, X+=B*(Lx-1u), Y+=B*(Ly-1u))
-                {
-                    for (size_t b=B; b>0u; --b, X-=K*Lx-1u, ++Y)
-                    {
-                        x0 = *X; X += K;
-                        for (size_t l=0u; l<Ly; ++l, X+=K, Y+=K) { *Y = *X / x0; }
-                        Y -= Ly*K;
-                        for (size_t l=Ly-1u; l>0u; --l)
-                        {
-                            for (size_t q=0u; q<=l; ++q, Y+=K, ++y) { *y = *Y; }
-                            sc = *--y; Y -= K*(l+1u);
-                            for (size_t q=0u; q<l; ++q, Y+=K) { --y; *Y += sc * *y; }
-                            sc2 = fma(sc,-sc,1.0);
-                            //*Y = -*Y;  //to match other sign convention
-                            for (size_t q=0u; q<l; ++q) { Y-=K; *Y /= sc2; }
-                        }
-                        //*Y = -*Y;  //to match other sign convention
+                        y += p - 1u;
+                        for (size_t q=p; q>0u; --q, --y) { Y-=K; *y = *Y; }
+                        y += p; sc = -*y;
+                        for (size_t q=p; q>1u; --q, Y+=K) { --y; *Y += sc**y; *Y /= 1.0-sc*sc; }
                     }
                 }
             }
         }
-        free(y);
     }
 
+    //Exit
     return 0;
 }
 
 
-int poly2rc_c (float *Y, const float *X, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t dim)
+int poly2rc_c (float *Y, const float *X, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim)
 {
-    if (dim>3u) { fprintf(stderr,"error in poly2rc_c: dim must be in [0 3]\n"); return 1; }
-    
+    if (dim>3u) { fprintf(stderr,"error in poly2rc_s: dim must be in [0 3]\n"); return 1; }
+
     const size_t N = R*C*S*H;
     const size_t Lx = (dim==0u) ? R : (dim==1u) ? C : (dim==2u) ? S : H;
+    if (N==0u) { fprintf(stderr,"error in poly2rc_s: polynomial input (X) empty\n"); return 1; }
+    if (Lx<1u) { fprintf(stderr,"error in poly2rc_s: Lx (length of vecs in X) must be positive\n"); return 1; }
 
-    if (N==0u || Lx<2u) {}
+    const size_t P = Lx - 1u;
+    float x0r, x0i, x0a, scr, sci, sca, *y;
+    if (!(y=(float *)malloc(2u*P*sizeof(float)))) { fprintf(stderr,"error in poly2rc_s: problem with malloc. "); perror("malloc"); return 1; }
+
+    if (Lx==N)
+    {
+        x0r = *X++; x0i = *X++;
+        x0a = x0r*x0r + x0i*x0i;
+        for (size_t p=P; p>0u; --p, ++X, ++Y) { *Y = *X / x0a; *++Y = *++X / x0a; }
+        for (size_t p=P; p>1u; --p)
+        {
+            y += 2u*p - 2u;
+            for (size_t q=p; q>0u; --q, y-=2) { Y-=2; *y = *Y; *(y+1) = *(Y+1); }
+            y += 2u*p; scr = -*y; sci = -*(y+1);
+            sca = 1.0f - scr*scr - sci*sci;
+            for (size_t q=p; q>1u; --q)
+            {
+                y -= 2;
+                *Y += scr**y - sci**(y+1);
+                *Y++ /= sca;
+                *Y += scr**(y+1) + sci**y;
+                *Y++ /= sca;
+            }
+        }
+    }
     else
     {
-        const size_t Ly = Lx - 1u;
-        float scr, sci, sc2r, sc2i, sc2a, yr, yi, *y;
-        if (!(y=(float *)malloc(2u*Ly*sizeof(float)))) { fprintf(stderr,"error in poly2rc_s: problem with malloc. "); perror("malloc"); return 1; }
-        
-        if (Lx==N)
-        {
-            const float x0r = *X++, x0i = *X++;
-            const float x0a = x0r*x0r + x0i*x0i;
-            for (size_t l=0u; l<Ly; ++l, X+=2)
-            {
-                *Y++ = (*X*x0r+*(X+1)*x0i) / x0a;
-                *Y++ = (*(X+1)*x0r-*X*x0i) / x0a;
-            }
-            Y -= 2u*Ly;
+        const size_t K = (iscolmajor) ? ((dim==0u) ? 1u : (dim==1u) ? R : (dim==2u) ? R*C : R*C*S) : ((dim==0u) ? C*S*H : (dim==1u) ? S*H : (dim==2u) ? H : 1u);
+        const size_t B = (iscolmajor && dim==0u) ? C*S*H : K;
+        const size_t V = N/Lx, G = V/B;
 
-            for (size_t l=Ly-1u; l>0u; --l)
+        if (K==1u && (G==1u || B==1u))
+        {
+            for (size_t v=V; v>0u; --v, Y+=2u*P-2u)
             {
-                for (size_t q=0u; q<=l; ++q) { *y++ = *Y++; *y++ = *Y++; }
-                sci = *--y; scr = *--y;
-                Y -= 2u*l + 2u;
-                for (size_t q=0u; q<l; ++q)
+                x0r = *X++; x0i = *X++;
+                x0a = x0r*x0r + x0i*x0i;
+                for (size_t p=P; p>0u; --p, ++X, ++Y) { *Y = *X / x0a; *++Y = *++X / x0a; }
+                for (size_t p=P; p>1u; --p)
                 {
-                    y -= 2;
-                    *Y++ += scr**y - sci**(y+1);
-                    *Y++ += scr**(y+1) + sci**y;
-                }
-                sc2r = 1.0f - scr*scr + sci*sci;
-                sc2i = -2.0f*scr*sci;
-                sc2a = sc2r*sc2r + sc2i*sc2i;
-                //*Y = -*Y; *(Y+1) = -*(Y+1);  //to match other sign convention
-                for (size_t q=0u; q<l; ++q)
-                {
-                    yi = *--Y; yr = *--Y;
-                    *Y = (yr*sc2r+yi*sc2i) / sc2a;
-                    *(Y+1) = (yi*sc2r-yr*sc2i) / sc2a;
+                    y += 2u*p - 2u;
+                    for (size_t q=p; q>0u; --q, y-=2) { Y-=2; *y = *Y; *(y+1) = *(Y+1); }
+                    y += 2u*p; scr = -*y; sci = -*(y+1);
+                    sca = 1.0f - scr*scr - sci*sci;
+                    for (size_t q=p; q>1u; --q)
+                    {
+                        y -= 2;
+                        *Y += scr**y - sci**(y+1);
+                        *Y++ /= sca;
+                        *Y += scr**(y+1) + sci**y;
+                        *Y++ /= sca;
+                    }
                 }
             }
-            //*Y = -*Y; *(Y+1) = -*(Y+1);  //to match other sign convention
         }
         else
         {
-            const size_t K = (iscolmajor) ? ((dim==0u) ? 1u : (dim==1u) ? R : (dim==2u) ? R*C : R*C*S) : ((dim==0u) ? C*S*H : (dim==1u) ? S*H : (dim==2u) ? H : 1u);
-            const size_t B = (iscolmajor && dim==0u) ? C*S*H : K;
-            const size_t V = N/Lx, G = V/B;
-            float x0r, x0i, x0a;
-
-            if (K==1u && (G==1u || B==1u))
+            for (size_t g=G; g>0u; --g, X+=2u*B*P, Y+=2u*B*(P-1u))
             {
-                for (size_t v=V; v>0u; --v, Y+=2u*Ly)
+                for (size_t b=B; b>0u; --b, X-=2u*K*Lx-2u, Y-=2u*K-2u)
                 {
-                    x0r = *X++; x0i = *X++;
+                    x0r = *X; x0i = *(X+1); X += 2u*K;
                     x0a = x0r*x0r + x0i*x0i;
-                    for (size_t l=0u; l<Ly; ++l, X+=2)
+                    for (size_t p=P; p>0u; --p, X+=2u*K, Y+=2u*K) { *Y = *X / x0a; *(Y+1) = *(X+1) / x0a; }
+                    for (size_t p=P; p>1u; --p)
                     {
-                        *Y++ = (*X*x0r+*(X+1)*x0i) / x0a;
-                        *Y++ = (*(X+1)*x0r-*X*x0i) / x0a;
-                    }
-                    Y -= 2u*Ly;
-
-                    for (size_t l=Ly-1u; l>0u; --l)
-                    {
-                        for (size_t q=0u; q<=l; ++q) { *y++ = *Y++; *y++ = *Y++; }
-                        sci = *--y; scr = *--y;
-                        Y -= 2u*l + 2u;
-                        for (size_t q=0u; q<l; ++q)
+                        y += 2u*p - 2u;
+                        for (size_t q=p; q>0u; --q, y-=2) { Y-=2u*K; *y = *Y; *(y+1) = *(Y+1); }
+                        y += 2u*p; scr = -*y; sci = -*(y+1);
+                        sca = 1.0f - scr*scr - sci*sci;
+                        for (size_t q=p; q>1u; --q, Y+=2u*K)
                         {
                             y -= 2;
-                            *Y++ += scr**y - sci**(y+1);
-                            *Y++ += scr**(y+1) + sci**y;
+                            *Y += scr**y - sci**(y+1);
+                            *Y /= sca;
+                            *(Y+1) += scr**(y+1) + sci**y;
+                            *(Y+1) /= sca;
                         }
-                        sc2r = 1.0f - scr*scr + sci*sci;
-                        sc2i = -2.0f*scr*sci;
-                        sc2a = sc2r*sc2r + sc2i*sc2i;
-                        //*Y = -*Y; *(Y+1) = -*(Y+1);  //to match other sign convention
-                        for (size_t q=0u; q<l; ++q)
-                        {
-                            yi = *--Y; yr = *--Y;
-                            *Y = (yr*sc2r+yi*sc2i) / sc2a;
-                            *(Y+1) = (yi*sc2r-yr*sc2i) / sc2a;
-                        }
-                    }
-                    //*Y = -*Y; *(Y+1) = -*(Y+1);  //to match other sign convention
-                }
-            }
-            else
-            {
-                for (size_t g=G; g>0u; --g, X+=2u*B*(Lx-1u), Y+=2u*B*(Ly-1u))
-                {
-                    for (size_t b=B; b>0u; --b, X-=2u*K*Lx-2u, Y+=2u)
-                    {
-                        x0r = *X; x0i = *(X+1); X += 2u*K;
-                        x0a = x0r*x0r + x0i*x0i;
-                        for (size_t l=0u; l<Ly; ++l, X+=2u*K, Y+=2u*K)
-                        {
-                            *Y = (*X*x0r+*(X+1)*x0i) / x0a;
-                            *(Y+1) = (*(X+1)*x0r-*X*x0i) / x0a;
-                        }
-                        Y -= 2u*K*Ly;
-
-                        for (size_t l=Ly-1u; l>0u; --l)
-                        {
-                            for (size_t q=0u; q<=l; ++q, Y+=2u*K) { *y++ = *Y; *y++ = *(Y+1); }
-                            sci = *--y; scr = *--y;
-                            Y -= 2u*K*(l+1u);
-                            for (size_t q=0u; q<l; ++q, Y+=2u*K)
-                            {
-                                y -= 2;
-                                *Y += scr**y - sci**(y+1);
-                                *(Y+1) += scr**(y+1) + sci**y;
-                            }
-                            sc2r = 1.0f - scr*scr + sci*sci;
-                            sc2i = -2.0f*scr*sci;
-                            sc2a = sc2r*sc2r + sc2i*sc2i;
-                            //*Y = -*Y; *(Y+1) = -*(Y+1);  //to match other sign convention
-                            for (size_t q=0u; q<l; ++q)
-                            {
-                                Y -= 2u*K;
-                                yr = *Y; yi = *(Y+1);
-                                *Y = (yr*sc2r+yi*sc2i) / sc2a;
-                                *(Y+1) = (yi*sc2r-yr*sc2i) / sc2a;
-                            }
-                        }
-                        //*Y = -*Y; *(Y+1) = -*(Y+1);  //to match other sign convention
                     }
                 }
             }
         }
-        free(y);
     }
 
+    //Exit
     return 0;
 }
 
 
-int poly2rc_z (double *Y, const double *X, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t dim)
+int poly2rc_z (double *Y, const double *X, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim)
 {
     if (dim>3u) { fprintf(stderr,"error in poly2rc_z: dim must be in [0 3]\n"); return 1; }
-    
+
     const size_t N = R*C*S*H;
     const size_t Lx = (dim==0u) ? R : (dim==1u) ? C : (dim==2u) ? S : H;
+    if (N==0u) { fprintf(stderr,"error in poly2rc_z: polynomial input (X) empty\n"); return 1; }
+    if (Lx<1u) { fprintf(stderr,"error in poly2rc_z: Lx (length of vecs in X) must be positive\n"); return 1; }
 
-    if (N==0u || Lx<2u) {}
+    const size_t P = Lx - 1u;
+    double x0r, x0i, x0a, scr, sci, sca, *y;
+    if (!(y=(double *)malloc(2u*P*sizeof(double)))) { fprintf(stderr,"error in poly2rc_z: problem with malloc. "); perror("malloc"); return 1; }
+
+    if (Lx==N)
+    {
+        x0r = *X++; x0i = *X++;
+        x0a = x0r*x0r + x0i*x0i;
+        for (size_t p=P; p>0u; --p, ++X, ++Y) { *Y = *X / x0a; *++Y = *++X / x0a; }
+        for (size_t p=P; p>1u; --p)
+        {
+            y += 2u*p - 2u;
+            for (size_t q=p; q>0u; --q, y-=2) { Y-=2; *y = *Y; *(y+1) = *(Y+1); }
+            y += 2u*p; scr = -*y; sci = -*(y+1);
+            sca = 1.0 - scr*scr - sci*sci;
+            for (size_t q=p; q>1u; --q)
+            {
+                y -= 2;
+                *Y += scr**y - sci**(y+1);
+                *Y++ /= sca;
+                *Y += scr**(y+1) + sci**y;
+                *Y++ /= sca;
+            }
+        }
+    }
     else
     {
-        const size_t Ly = Lx - 1u;
-        double scr, sci, sc2r, sc2i, sc2a, yr, yi, *y;
-        if (!(y=(double *)malloc(2u*Ly*sizeof(double)))) { fprintf(stderr,"error in poly2rc_z: problem with malloc. "); perror("malloc"); return 1; }
-        
-        if (Lx==N)
-        {
-            const double x0r = *X++, x0i = *X++;
-            const double x0a = x0r*x0r + x0i*x0i;
-            for (size_t l=0u; l<Ly; ++l, X+=2)
-            {
-                *Y++ = (*X*x0r+*(X+1)*x0i) / x0a;
-                *Y++ = (*(X+1)*x0r-*X*x0i) / x0a;
-            }
-            Y -= 2u*Ly;
+        const size_t K = (iscolmajor) ? ((dim==0u) ? 1u : (dim==1u) ? R : (dim==2u) ? R*C : R*C*S) : ((dim==0u) ? C*S*H : (dim==1u) ? S*H : (dim==2u) ? H : 1u);
+        const size_t B = (iscolmajor && dim==0u) ? C*S*H : K;
+        const size_t V = N/Lx, G = V/B;
 
-            for (size_t l=Ly-1u; l>0u; --l)
+        if (K==1u && (G==1u || B==1u))
+        {
+            for (size_t v=V; v>0u; --v, Y+=2u*P-2u)
             {
-                for (size_t q=0u; q<=l; ++q) { *y++ = *Y++; *y++ = *Y++; }
-                sci = *--y; scr = *--y;
-                Y -= 2u*l + 2u;
-                for (size_t q=0u; q<l; ++q)
+                x0r = *X++; x0i = *X++;
+                x0a = x0r*x0r + x0i*x0i;
+                for (size_t p=P; p>0u; --p, ++X, ++Y) { *Y = *X / x0a; *++Y = *++X / x0a; }
+                for (size_t p=P; p>1u; --p)
                 {
-                    y -= 2;
-                    *Y++ += scr**y - sci**(y+1);
-                    *Y++ += scr**(y+1) + sci**y;
+                    y += 2u*p - 2u;
+                    for (size_t q=p; q>0u; --q, y-=2) { Y-=2; *y = *Y; *(y+1) = *(Y+1); }
+                    y += 2u*p; scr = -*y; sci = -*(y+1);
+                    sca = 1.0 - scr*scr - sci*sci;
+                    for (size_t q=p; q>1u; --q)
+                    {
+                        y -= 2;
+                        *Y += scr**y - sci**(y+1);
+                        *Y++ /= sca;
+                        *Y += scr**(y+1) + sci**y;
+                        *Y++ /= sca;
+                    }
                 }
-                sc2r = 1.0 - scr*scr + sci*sci;
-                sc2i = -2.0*scr*sci;
-                sc2a = sc2r*sc2r + sc2i*sc2i;
-                //*Y = -*Y; *(Y+1) = -*(Y+1);  //to match other sign convention
-                for (size_t q=0u; q<l; ++q)
-                {
-                    yi = *--Y; yr = *--Y;
-                    *Y = (yr*sc2r+yi*sc2i) / sc2a;
-                    *(Y+1) = (yi*sc2r-yr*sc2i) / sc2a;
-                }
-                //*Y = -*Y; *(Y+1) = -*(Y+1);  //to match other sign convention
             }
         }
         else
         {
-            const size_t K = (iscolmajor) ? ((dim==0u) ? 1u : (dim==1u) ? R : (dim==2u) ? R*C : R*C*S) : ((dim==0u) ? C*S*H : (dim==1u) ? S*H : (dim==2u) ? H : 1u);
-            const size_t B = (iscolmajor && dim==0u) ? C*S*H : K;
-            const size_t V = N/Lx, G = V/B;
-            double x0r, x0i, x0a;
-
-            if (K==1u && (G==1u || B==1u))
+            for (size_t g=G; g>0u; --g, X+=2u*B*P, Y+=2u*B*(P-1u))
             {
-                for (size_t v=V; v>0u; --v, Y+=2u*Ly)
+                for (size_t b=B; b>0u; --b, X-=2u*K*Lx-2u, Y-=2u*K-2u)
                 {
-                    x0r = *X++; x0i = *X++;
+                    x0r = *X; x0i = *(X+1); X += 2u*K;
                     x0a = x0r*x0r + x0i*x0i;
-                    for (size_t l=0u; l<Ly; ++l, X+=2)
+                    for (size_t p=P; p>0u; --p, X+=2u*K, Y+=2u*K) { *Y = *X / x0a; *(Y+1) = *(X+1) / x0a; }
+                    for (size_t p=P; p>1u; --p)
                     {
-                        *Y++ = (*X*x0r+*(X+1)*x0i) / x0a;
-                        *Y++ = (*(X+1)*x0r-*X*x0i) / x0a;
-                    }
-                    Y -= 2u*Ly;
-
-                    for (size_t l=Ly-1u; l>0u; --l)
-                    {
-                        for (size_t q=0u; q<=l; ++q) { *y++ = *Y++; *y++ = *Y++; }
-                        sci = *--y; scr = *--y;
-                        Y -= 2u*l + 2u;
-                        for (size_t q=0u; q<l; ++q)
+                        y += 2u*p - 2u;
+                        for (size_t q=p; q>0u; --q, y-=2) { Y-=2u*K; *y = *Y; *(y+1) = *(Y+1); }
+                        y += 2u*p; scr = -*y; sci = -*(y+1);
+                        sca = 1.0 - scr*scr - sci*sci;
+                        for (size_t q=p; q>1u; --q, Y+=2u*K)
                         {
                             y -= 2;
-                            *Y++ += scr**y - sci**(y+1);
-                            *Y++ += scr**(y+1) + sci**y;
+                            *Y += scr**y - sci**(y+1);
+                            *Y /= sca;
+                            *(Y+1) += scr**(y+1) + sci**y;
+                            *(Y+1) /= sca;
                         }
-                        sc2r = 1.0 - scr*scr + sci*sci;
-                        sc2i = -2.0*scr*sci;
-                        sc2a = sc2r*sc2r + sc2i*sc2i;
-                        //*Y = -*Y; *(Y+1) = -*(Y+1);  //to match other sign convention
-                        for (size_t q=0u; q<l; ++q)
-                        {
-                            yi = *--Y; yr = *--Y;
-                            *Y = (yr*sc2r+yi*sc2i) / sc2a;
-                            *(Y+1) = (yi*sc2r-yr*sc2i) / sc2a;
-                        }
-                    }
-                    //*Y = -*Y; *(Y+1) = -*(Y+1);  //to match other sign convention
-                }
-            }
-            else
-            {
-                for (size_t g=G; g>0u; --g, X+=2u*B*(Lx-1u), Y+=2u*B*(Ly-1u))
-                {
-                    for (size_t b=B; b>0u; --b, X-=2u*K*Lx-2u, Y+=2u)
-                    {
-                        x0r = *X; x0i = *(X+1); X += 2u*K;
-                        x0a = x0r*x0r + x0i*x0i;
-                        for (size_t l=0u; l<Ly; ++l, X+=2u*K, Y+=2u*K)
-                        {
-                            *Y = (*X*x0r+*(X+1)*x0i) / x0a;
-                            *(Y+1) = (*(X+1)*x0r-*X*x0i) / x0a;
-                        }
-                        Y -= 2u*K*Ly;
-
-                        for (size_t l=Ly-1u; l>0u; --l)
-                        {
-                            for (size_t q=0u; q<=l; ++q, Y+=2u*K) { *y++ = *Y; *y++ = *(Y+1); }
-                            sci = *--y; scr = *--y;
-                            Y -= 2u*K*(l+1u);
-                            for (size_t q=0u; q<l; ++q, Y+=2u*K)
-                            {
-                                y -= 2;
-                                *Y += scr**y - sci**(y+1);
-                                *(Y+1) += scr**(y+1) + sci**y;
-                            }
-                            sc2r = 1.0 - scr*scr + sci*sci;
-                            sc2i = -2.0*scr*sci;
-                            sc2a = sc2r*sc2r + sc2i*sc2i;
-                            //*Y = -*Y; *(Y+1) = -*(Y+1);  //to match other sign convention
-                            for (size_t q=0u; q<l; ++q)
-                            {
-                                Y -= 2u*K;
-                                yr = *Y; yi = *(Y+1);
-                                *Y = (yr*sc2r+yi*sc2i) / sc2a;
-                                *(Y+1) = (yi*sc2r-yr*sc2i) / sc2a;
-                            }
-                        }
-                        //*Y = -*Y; *(Y+1) = -*(Y+1);  //to match other sign convention
                     }
                 }
             }
         }
-        free(y);
     }
 
+    //Exit
     return 0;
 }
 

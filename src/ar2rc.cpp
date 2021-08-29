@@ -49,7 +49,7 @@ int main(int argc, char *argv[])
     descr += "Examples:\n";
     descr += "$ ar2rc X -o Y \n";
     descr += "$ ar2rc -d1 X > Y \n";
-    descr += "$ cat X | ar2rc > Y \n";
+    descr += "$ cat X | ar2rc -d1 > Y \n";
 
 
     //Argtable
@@ -100,10 +100,10 @@ int main(int argc, char *argv[])
     //Get options
 
     //Get dim
-    if (a_d->count==0) { dim = i1.isrowvec() ? 1u : 0u; }
+    if (a_d->count==0) { dim = (i1.R==1u) ? 1u : 0u; }
     else if (a_d->ival[0]<0) { cerr << progstr+": " << __LINE__ << errstr << "dim must be nonnegative" << endl; return 1; }
     else { dim = size_t(a_d->ival[0]); }
-    if (dim>3u) { cerr << progstr+": " << __LINE__ << errstr << "dim must be in {0,1,2,3}" << endl; return 1; }
+    if (dim!=0 && dim!=1) { cerr << progstr+": " << __LINE__ << errstr << "dim must be 0 or 1" << endl; return 1; }
 
 
     //Checks

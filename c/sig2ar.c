@@ -1,6 +1,6 @@
-//Gets P autoregressive (AR) params (Y), and error variance (V), for each vector in X.
+//Gets P autoregressive (AR) params (Y), and error variance (E), for each vector in X.
 //Works along dim, such that each signal (vector) in X is converted
-//to one scalar in V and one vector (of length P) in Y.
+//to one scalar in E and one vector (of length P) in Y.
 
 //By default, the means of X are NOT subtracted.
 //The mnz option allows the mean to be zeroed first for each vec in X.
@@ -11,7 +11,7 @@
 //whereas the "unbiased" version uses N-l in the denominator instead of N.
 //It is actually just "less biased", but is slower, has worse MSE, and doesn't match FFT estimate.
 
-//After getting the AC, Levinson-Durbin (levdurb) recursion is used to get the AR params (Y)
+//After getting the AC, Levinson-Durbin recursion is used to get the AR params (Y)
 //and the error variance (E).
 
 #include <stdio.h>
@@ -31,6 +31,7 @@ int sig2ar_z (double *Y, double *E, double *X, const size_t R, const size_t C, c
 int sig2ar_s (float *Y, float *E, float *X, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t dim, const size_t P, const int mnz, const int unbiased)
 {
     if (dim>3u) { fprintf(stderr,"error in sig2ar_s: dim must be in [0 3]\n"); return 1; }
+    if (P<1u) { fprintf(stderr,"error in sig2ar_s: P must be positive\n"); return 1; }
 
     const size_t N = R*C*S*H;
     const size_t Lx = (dim==0u) ? R : (dim==1u) ? C : (dim==2u) ? S : H;
@@ -40,12 +41,13 @@ int sig2ar_s (float *Y, float *E, float *X, const size_t R, const size_t C, cons
     if (N==0u) {}
     else
     {
-        float *AC, *A2, a, sm, e;
+        float *AC, *A, a, sm, e;
         if (!(AC=(float *)malloc(L*sizeof(float)))) { fprintf(stderr,"error in sig2ar_s: problem with malloc. "); perror("malloc"); return 1; }
-        if (!(A2=(float *)malloc((P-1u)*sizeof(float)))) { fprintf(stderr,"error in sig2ar_s: problem with malloc. "); perror("malloc"); return 1; }
+        if (!(A=(float *)malloc((P-1u)*sizeof(float)))) { fprintf(stderr,"error in sig2ar_s: problem with malloc. "); perror("malloc"); return 1; }
 
         if (Lx==N)
         {
+            //Subtract mean
             if (mnz)
             {
                 float mn = 0.0f;
@@ -54,20 +56,25 @@ int sig2ar_s (float *Y, float *E, float *X, const size_t R, const size_t C, cons
                 for (size_t l=Lx; l>0u; --l) { *--X -= mn; }
             }
 
+            //Get ACF
             for (size_t l=0u; l<L; ++l, X-=Lx-l+1u, ++AC)
             {
                 sm = 0.0f;
                 for (size_t n=Lx-l; n>0u; --n, ++X) { sm += *X * *(X+l); }
                 *AC = sm;
             }
-            AC -= L;
 
+            //Normalize ACF
             if (unbiased)
             {
-                for (size_t l=0u; l<L; ++l, ++AC) { *AC /= (float)(Lx-l); }
-                AC -= L;
+                for (size_t l=L; l>0u; --l) { *--AC /= (float)(Lx-l+1u); }
+            }
+            else
+            {
+                for (size_t l=L; l>0u; --l) { *--AC /= (float)Lx; }
             }
 
+            //Get AR params and error var (Lev-Durb)
             a = -*(AC+1) / *AC;
             *Y = -a;
             e = *AC++; e += a * *AC++;
@@ -75,11 +82,10 @@ int sig2ar_s (float *Y, float *E, float *X, const size_t R, const size_t C, cons
             {
                 a = *AC;
                 for (size_t q=p; q>0u; --q, ++Y) { --AC; a -= *AC * *Y; }
-                a /= -e;
-                *Y = -a;
-                for (size_t q=p; q>0u; --q, ++A2) { --Y; *A2 = *Y; }
+                a /= -e; *Y = -a;
+                for (size_t q=p; q>0u; --q, ++A) { --Y; *A = *Y; }
                 Y += p;
-                for (size_t q=p; q>0u; --q) { --A2; --Y; *Y += a * *A2; }
+                for (size_t q=p; q>0u; --q) { --A; --Y; *Y += a * *A; }
                 e *= 1.0f - a*a;
             }
             AC -= L;
@@ -93,8 +99,9 @@ int sig2ar_s (float *Y, float *E, float *X, const size_t R, const size_t C, cons
 
             if (K==1u && (G==1u || B==1u))
             {
-                for (size_t v=V; v>0u; --v, X+=P, Y+=P, ++E)
+                for (size_t v=V; v>0u; --v, X+=Lx, Y+=P, ++E)
                 {
+                    //Subtract mean
                     if (mnz)
                     {
                         float mn = 0.0f;
@@ -103,22 +110,25 @@ int sig2ar_s (float *Y, float *E, float *X, const size_t R, const size_t C, cons
                         for (size_t l=Lx; l>0u; --l) { *--X -= mn; }
                     }
 
-                    for (size_t l=0u; l<P; ++l, X-=Lx-l+1u, ++AC)
+                    //Get ACF
+                    for (size_t l=0u; l<L; ++l, X-=Lx-l+1u, ++AC)
                     {
                         sm = 0.0f;
                         for (size_t n=Lx-l; n>0u; --n, ++X) { sm += *X * *(X+l); }
                         *AC = sm;
                     }
-                    sm = 0.0f;
-                    for (size_t n=Lx-P; n>0u; --n, ++X) { sm += *X * *(X+P); }
-                    *AC = sm; AC -= P;
 
+                    //Normalize ACF
                     if (unbiased)
                     {
-                        for (size_t l=0u; l<L; ++l, ++AC) { *AC /= (float)(Lx-l); }
-                        AC -= L;
+                        for (size_t l=L; l>0u; --l) { *--AC /= (float)(Lx-l+1u); }
+                    }
+                    else
+                    {
+                        for (size_t l=L; l>0u; --l) { *--AC /= (float)Lx; }
                     }
 
+                    //Get AR params and error var (Lev-Durb)
                     a = -*(AC+1) / *AC;
                     *Y = -a;
                     e = *AC++; e += a * *AC++;
@@ -126,11 +136,10 @@ int sig2ar_s (float *Y, float *E, float *X, const size_t R, const size_t C, cons
                     {
                         a = *AC;
                         for (size_t q=p; q>0u; --q, ++Y) { --AC; a -= *AC * *Y; }
-                        a /= -e;
-                        *Y = -a;
-                        for (size_t q=p; q>0u; --q, ++A2) { --Y; *A2 = *Y; }
+                        a /= -e; *Y = -a;
+                        for (size_t q=p; q>0u; --q, ++A) { --Y; *A = *Y; }
                         Y += p;
-                        for (size_t q=p; q>0u; --q) { --A2; --Y; *Y += a * *A2; }
+                        for (size_t q=p; q>0u; --q) { --A; --Y; *Y += a * *A; }
                         e *= 1.0f - a*a;
                     }
                     AC -= L;
@@ -143,6 +152,7 @@ int sig2ar_s (float *Y, float *E, float *X, const size_t R, const size_t C, cons
                 {
                     for (size_t b=B; b>0u; --b, ++X, ++Y, ++E)
                     {
+                        //Subtract mean
                         if (mnz)
                         {
                             float mn = 0.0f;
@@ -151,33 +161,36 @@ int sig2ar_s (float *Y, float *E, float *X, const size_t R, const size_t C, cons
                             for (size_t l=Lx; l>0u; --l) { X-=K; *X -= mn; }
                         }
 
+                        //Get ACF
                         for (size_t l=0u; l<L; ++l, X-=K*(Lx-l+1u), ++AC)
                         {
                             sm = 0.0f;
                             for (size_t n=Lx-l; n>0u; --n, X+=K) { sm += *X * *(X+l*K); }
                             *AC = sm;
                         }
-                        AC -= L;
 
+                        //Normalize ACF
                         if (unbiased)
                         {
-                            for (size_t l=0u; l<L; ++l, ++AC) { *AC /= (float)(Lx-l); }
-                            AC -= L;
+                            for (size_t l=L; l>0u; --l) { *--AC /= (float)(Lx-l+1u); }
+                        }
+                        else
+                        {
+                            for (size_t l=L; l>0u; --l) { *--AC /= (float)Lx; }
                         }
 
+                        //Get AR params and error var (Lev-Durb)
                         a = -*(AC+1) / *AC;
                         *Y = -a;
-                        e = *AC; ++AC;
-                        e += a * *AC; ++AC;
+                        e = *AC++; e += a * *AC++;
                         for (size_t p=1u; p<P; ++p, AC+=p)
                         {
                             a = *AC;
                             for (size_t q=p; q>0u; --q, Y+=K) { --AC; a -= *AC * *Y; }
-                            a /= -e;
-                            *Y = -a;
-                            for (size_t q=p; q>0u; --q, ++A2) { Y-=K; *A2 = *Y; }
+                            a /= -e; *Y = -a;
+                            for (size_t q=p; q>0u; --q, ++A) { Y-=K; *A = *Y; }
                             Y += p*K;
-                            for (size_t q=p; q>0u; --q) { --A2; Y-=K; *Y += a * *A2; }
+                            for (size_t q=p; q>0u; --q) { --A; Y-=K; *Y += a * *A; }
                             e *= 1.0f - a*a;
                         }
                         AC -= L;
@@ -186,7 +199,7 @@ int sig2ar_s (float *Y, float *E, float *X, const size_t R, const size_t C, cons
                 }
             }
         }
-        free(AC); free(A2);
+        free(AC); free(A);
     }
 
     return 0;
@@ -196,6 +209,7 @@ int sig2ar_s (float *Y, float *E, float *X, const size_t R, const size_t C, cons
 int sig2ar_d (double *Y, double *E, double *X, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t dim, const size_t P, const int mnz, const int unbiased)
 {
     if (dim>3u) { fprintf(stderr,"error in sig2ar_d: dim must be in [0 3]\n"); return 1; }
+    if (P<1u) { fprintf(stderr,"error in sig2ar_d: P must be positive\n"); return 1; }
 
     const size_t N = R*C*S*H;
     const size_t Lx = (dim==0u) ? R : (dim==1u) ? C : (dim==2u) ? S : H;
@@ -205,12 +219,13 @@ int sig2ar_d (double *Y, double *E, double *X, const size_t R, const size_t C, c
     if (N==0u) {}
     else
     {
-        double *AC, *A2, a, sm, e;
+        double *AC, *A, a, sm, e;
         if (!(AC=(double *)malloc(L*sizeof(double)))) { fprintf(stderr,"error in sig2ar_d: problem with malloc. "); perror("malloc"); return 1; }
-        if (!(A2=(double *)malloc((P-1u)*sizeof(double)))) { fprintf(stderr,"error in sig2ar_d: problem with malloc. "); perror("malloc"); return 1; }
+        if (!(A=(double *)malloc((P-1u)*sizeof(double)))) { fprintf(stderr,"error in sig2ar_d: problem with malloc. "); perror("malloc"); return 1; }
 
         if (Lx==N)
         {
+            //Subtract mean
             if (mnz)
             {
                 double mn = 0.0;
@@ -219,20 +234,25 @@ int sig2ar_d (double *Y, double *E, double *X, const size_t R, const size_t C, c
                 for (size_t l=Lx; l>0u; --l) { *--X -= mn; }
             }
 
+            //Get ACF
             for (size_t l=0u; l<L; ++l, X-=Lx-l+1u, ++AC)
             {
                 sm = 0.0;
                 for (size_t n=Lx-l; n>0u; --n, ++X) { sm += *X * *(X+l); }
                 *AC = sm;
             }
-            AC -= L;
 
+            //Normalize ACF
             if (unbiased)
             {
-                for (size_t l=0u; l<L; ++l, ++AC) { *AC /= (double)(Lx-l); }
-                AC -= L;
+                for (size_t l=L; l>0u; --l) { *--AC /= (double)(Lx-l+1u); }
+            }
+            else
+            {
+                for (size_t l=L; l>0u; --l) { *--AC /= (double)Lx; }
             }
 
+            //Get AR params and error var (Lev-Durb)
             a = -*(AC+1) / *AC;
             *Y = -a;
             e = *AC++; e += a * *AC++;
@@ -240,11 +260,10 @@ int sig2ar_d (double *Y, double *E, double *X, const size_t R, const size_t C, c
             {
                 a = *AC;
                 for (size_t q=p; q>0u; --q, ++Y) { --AC; a -= *AC * *Y; }
-                a /= -e;
-                *Y = -a;
-                for (size_t q=p; q>0u; --q, ++A2) { --Y; *A2 = *Y; }
+                a /= -e; *Y = -a;
+                for (size_t q=p; q>0u; --q, ++A) { --Y; *A = *Y; }
                 Y += p;
-                for (size_t q=p; q>0u; --q) { --A2; --Y; *Y += a * *A2; }
+                for (size_t q=p; q>0u; --q) { --A; --Y; *Y += a * *A; }
                 e *= 1.0 - a*a;
             }
             AC -= L;
@@ -258,8 +277,9 @@ int sig2ar_d (double *Y, double *E, double *X, const size_t R, const size_t C, c
 
             if (K==1u && (G==1u || B==1u))
             {
-                for (size_t v=V; v>0u; --v, X+=P, Y+=P, ++E)
+                for (size_t v=V; v>0u; --v, X+=Lx, Y+=P, ++E)
                 {
+                    //Subtract mean
                     if (mnz)
                     {
                         double mn = 0.0;
@@ -268,22 +288,25 @@ int sig2ar_d (double *Y, double *E, double *X, const size_t R, const size_t C, c
                         for (size_t l=Lx; l>0u; --l) { *--X -= mn; }
                     }
 
-                    for (size_t l=0u; l<P; ++l, X-=Lx-l+1u, ++AC)
+                    //Get ACF
+                    for (size_t l=0u; l<L; ++l, X-=Lx-l+1u, ++AC)
                     {
                         sm = 0.0;
                         for (size_t n=Lx-l; n>0u; --n, ++X) { sm += *X * *(X+l); }
                         *AC = sm;
                     }
-                    sm = 0.0;
-                    for (size_t n=Lx-P; n>0u; --n, ++X) { sm += *X * *(X+P); }
-                    *AC = sm; AC -= P;
 
+                    //Normalize ACF
                     if (unbiased)
                     {
-                        for (size_t l=0u; l<L; ++l, ++AC) { *AC /= (double)(Lx-l); }
-                        AC -= L;
+                        for (size_t l=L; l>0u; --l) { *--AC /= (double)(Lx-l+1u); }
+                    }
+                    else
+                    {
+                        for (size_t l=L; l>0u; --l) { *--AC /= (double)Lx; }
                     }
 
+                    //Get AR params and error var (Lev-Durb)
                     a = -*(AC+1) / *AC;
                     *Y = -a;
                     e = *AC++; e += a * *AC++;
@@ -291,11 +314,10 @@ int sig2ar_d (double *Y, double *E, double *X, const size_t R, const size_t C, c
                     {
                         a = *AC;
                         for (size_t q=p; q>0u; --q, ++Y) { --AC; a -= *AC * *Y; }
-                        a /= -e;
-                        *Y = -a;
-                        for (size_t q=p; q>0u; --q, ++A2) { --Y; *A2 = *Y; }
+                        a /= -e; *Y = -a;
+                        for (size_t q=p; q>0u; --q, ++A) { --Y; *A = *Y; }
                         Y += p;
-                        for (size_t q=p; q>0u; --q) { --A2; --Y; *Y += a * *A2; }
+                        for (size_t q=p; q>0u; --q) { --A; --Y; *Y += a * *A; }
                         e *= 1.0 - a*a;
                     }
                     AC -= L;
@@ -308,6 +330,7 @@ int sig2ar_d (double *Y, double *E, double *X, const size_t R, const size_t C, c
                 {
                     for (size_t b=B; b>0u; --b, ++X, ++Y, ++E)
                     {
+                        //Subtract mean
                         if (mnz)
                         {
                             double mn = 0.0;
@@ -316,33 +339,36 @@ int sig2ar_d (double *Y, double *E, double *X, const size_t R, const size_t C, c
                             for (size_t l=Lx; l>0u; --l) { X-=K; *X -= mn; }
                         }
 
+                        //Get ACF
                         for (size_t l=0u; l<L; ++l, X-=K*(Lx-l+1u), ++AC)
                         {
                             sm = 0.0;
                             for (size_t n=Lx-l; n>0u; --n, X+=K) { sm += *X * *(X+l*K); }
                             *AC = sm;
                         }
-                        AC -= L;
 
+                        //Normalize ACF
                         if (unbiased)
                         {
-                            for (size_t l=0u; l<L; ++l, ++AC) { *AC /= (double)(Lx-l); }
-                            AC -= L;
+                            for (size_t l=L; l>0u; --l) { *--AC /= (double)(Lx-l+1u); }
+                        }
+                        else
+                        {
+                            for (size_t l=L; l>0u; --l) { *--AC /= (double)Lx; }
                         }
 
+                        //Get AR params and error var (Lev-Durb)
                         a = -*(AC+1) / *AC;
                         *Y = -a;
-                        e = *AC; ++AC;
-                        e += a * *AC; ++AC;
+                        e = *AC++; e += a * *AC++;
                         for (size_t p=1u; p<P; ++p, AC+=p)
                         {
                             a = *AC;
                             for (size_t q=p; q>0u; --q, Y+=K) { --AC; a -= *AC * *Y; }
-                            a /= -e;
-                            *Y = -a;
-                            for (size_t q=p; q>0u; --q, ++A2) { Y-=K; *A2 = *Y; }
+                            a /= -e; *Y = -a;
+                            for (size_t q=p; q>0u; --q, ++A) { Y-=K; *A = *Y; }
                             Y += p*K;
-                            for (size_t q=p; q>0u; --q) { --A2; Y-=K; *Y += a * *A2; }
+                            for (size_t q=p; q>0u; --q) { --A; Y-=K; *Y += a * *A; }
                             e *= 1.0 - a*a;
                         }
                         AC -= L;
@@ -351,7 +377,7 @@ int sig2ar_d (double *Y, double *E, double *X, const size_t R, const size_t C, c
                 }
             }
         }
-        free(AC); free(A2);
+        free(AC); free(A);
     }
 
     return 0;
@@ -361,6 +387,7 @@ int sig2ar_d (double *Y, double *E, double *X, const size_t R, const size_t C, c
 int sig2ar_c (float *Y, float *E, float *X, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t dim, const size_t P, const int mnz, const int unbiased)
 {
     if (dim>3u) { fprintf(stderr,"error in sig2ar_c: dim must be in [0 3]\n"); return 1; }
+    if (P<1u) { fprintf(stderr,"error in sig2ar_c: P must be positive\n"); return 1; }
 
     const size_t N = R*C*S*H;
     const size_t Lx = (dim==0u) ? R : (dim==1u) ? C : (dim==2u) ? S : H;
@@ -370,12 +397,13 @@ int sig2ar_c (float *Y, float *E, float *X, const size_t R, const size_t C, cons
     if (N==0u) {}
     else
     {
-        float *AC, *A2, ar, ai, smr, smi, den, e;
+        float *AC, *A, ar, ai, smr, smi, den, e;
         if (!(AC=(float *)malloc(2u*L*sizeof(float)))) { fprintf(stderr,"error in sig2ar_c: problem with malloc. "); perror("malloc"); return 1; }
-        if (!(A2=(float *)malloc(2u*(P-1u)*sizeof(float)))) { fprintf(stderr,"error in sig2ar_c: problem with malloc. "); perror("malloc"); return 1; }
+        if (!(A=(float *)malloc(2u*(P-1u)*sizeof(float)))) { fprintf(stderr,"error in sig2ar_c: problem with malloc. "); perror("malloc"); return 1; }
 
         if (Lx==N)
         {
+            //Subtract mean
             if (mnz)
             {
                 float mnr = 0.0f, mni = 0.0f;
@@ -384,6 +412,7 @@ int sig2ar_c (float *Y, float *E, float *X, const size_t R, const size_t C, cons
                 for (size_t l=Lx; l>0u; --l) { *--X -= mni; *--X -= mnr; }
             }
 
+            //Get ACF
             for (size_t l=0u; l<L; ++l, X-=2u*(Lx-l+1u))
             {
                 smr = smi = 0.0f;
@@ -394,14 +423,18 @@ int sig2ar_c (float *Y, float *E, float *X, const size_t R, const size_t C, cons
                 }
                 *AC++ = smr; *AC++ = smi;
             }
-            AC -= 2u*L;
-            
+
+            //Normalize ACF
             if (unbiased)
             {
-                for (size_t l=0u; l<L; ++l) { *AC++ /= (float)(Lx-l); *AC++ /= (float)(Lx-l); }
-                AC -= 2u*L;
+                for (size_t l=L; l>0u; --l) { *--AC /= (float)(Lx-l+1u); *--AC /= (float)(Lx-l+1u); }
+            }
+            else
+            {
+                for (size_t l=L; l>0u; --l) { *--AC /= (float)Lx; *--AC /= (float)Lx; }
             }
 
+            //Get AR params and error var (Lev-Durb)
             den = *AC**AC + *(AC+1)**(AC+1);
             ar = -(*(AC+2)**AC + *(AC+3)**(AC+1)) / den;
             ai = -(*(AC+3)**AC - *(AC+1)**(AC+2)) / den;
@@ -419,13 +452,13 @@ int sig2ar_c (float *Y, float *E, float *X, const size_t R, const size_t C, cons
                 }
                 ar /= -e; ai /= -e;
                 *Y = -ar; *(Y+1) = -ai;
-                for (size_t q=p; q>0u; --q, A2+=2) { Y-=2; *A2 = *Y; *(A2+1) = -*(Y+1); }
+                for (size_t q=p; q>0u; --q, A+=2) { Y-=2; *A = *Y; *(A+1) = -*(Y+1); }
                 Y += 2u*p;
                 for (size_t q=p; q>0u; --q)
                 {
-                    A2 -= 2; Y -= 2;
-                    *Y += ar**A2 - ai**(A2+1);
-                    *(Y+1) += ar**(A2+1) + ai**A2;
+                    A -= 2; Y -= 2;
+                    *Y += ar**A - ai**(A+1);
+                    *(Y+1) += ar**(A+1) + ai**A;
                 }
                 e *= 1.0f - (ar*ar + ai*ai);
             }
@@ -440,8 +473,9 @@ int sig2ar_c (float *Y, float *E, float *X, const size_t R, const size_t C, cons
 
             if (K==1u && (G==1u || B==1u))
             {
-                for (size_t v=V; v>0u; --v, X+=2u*P, Y+=2u*P, ++E)
+                for (size_t v=V; v>0u; --v, X+=2u*Lx, Y+=2u*P, ++E)
                 {
+                    //Subtract mean
                     if (mnz)
                     {
                         float mnr = 0.0f, mni = 0.0f;
@@ -450,7 +484,8 @@ int sig2ar_c (float *Y, float *E, float *X, const size_t R, const size_t C, cons
                         for (size_t l=Lx; l>0u; --l) { *--X -= mni; *--X -= mnr; }
                     }
 
-                    for (size_t l=0u; l<P; ++l, X-=2u*(Lx-l+1u))
+                    //Get ACF
+                    for (size_t l=0u; l<L; ++l, X-=2u*(Lx-l+1u))
                     {
                         smr = smi = 0.0f;
                         for (size_t n=Lx-l; n>0u; --n, X+=2)
@@ -460,20 +495,18 @@ int sig2ar_c (float *Y, float *E, float *X, const size_t R, const size_t C, cons
                         }
                         *AC++ = smr; *AC++ = smi;
                     }
-                    smr = smi = 0.0f;
-                    for (size_t n=Lx-P; n>0u; --n, X+=2)
-                    {
-                        smr += *X**(X+2u*P) + *(X+1)**(X+2u*P+1u);
-                        smi += *(X+1)**(X+2u*P) - *X**(X+2u*P+1u);
-                    }
-                    *AC = smr; *(AC+1) = smi; AC -= 2u*P;
 
+                    //Normalize ACF
                     if (unbiased)
                     {
-                        for (size_t l=0u; l<L; ++l) { *AC++ /= (float)(Lx-l); *AC++ /= (float)(Lx-l); }
-                        AC -= 2u*L;
+                        for (size_t l=L; l>0u; --l) { *--AC /= (float)(Lx-l+1u); *--AC /= (float)(Lx-l+1u); }
+                    }
+                    else
+                    {
+                        for (size_t l=L; l>0u; --l) { *--AC /= (float)Lx; *--AC /= (float)Lx; }
                     }
 
+                    //Get AR params and error var (Lev-Durb)
                     den = *AC**AC + *(AC+1)**(AC+1);
                     ar = -(*(AC+2)**AC + *(AC+3)**(AC+1)) / den;
                     ai = -(*(AC+3)**AC - *(AC+1)**(AC+2)) / den;
@@ -491,13 +524,13 @@ int sig2ar_c (float *Y, float *E, float *X, const size_t R, const size_t C, cons
                         }
                         ar /= -e; ai /= -e;
                         *Y = -ar; *(Y+1) = -ai;
-                        for (size_t q=p; q>0u; --q, A2+=2) { Y-=2; *A2 = *Y; *(A2+1) = -*(Y+1); }
+                        for (size_t q=p; q>0u; --q, A+=2) { Y-=2; *A = *Y; *(A+1) = -*(Y+1); }
                         Y += 2u*p;
                         for (size_t q=p; q>0u; --q)
                         {
-                            A2 -= 2; Y -= 2;
-                            *Y += ar**A2 - ai**(A2+1);
-                            *(Y+1) += ar**(A2+1) + ai**A2;
+                            A -= 2; Y -= 2;
+                            *Y += ar**A - ai**(A+1);
+                            *(Y+1) += ar**(A+1) + ai**A;
                         }
                         e *= 1.0f - (ar*ar + ai*ai);
                     }
@@ -509,8 +542,9 @@ int sig2ar_c (float *Y, float *E, float *X, const size_t R, const size_t C, cons
             {
                 for (size_t g=G; g>0u; --g, X+=2u*B*(Lx-1u), Y+=2u*B*(P-1u))
                 {
-                    for (size_t b=B; b>0u; --b, X+=2, Y+=2, ++E)
+                    for (size_t b=B; b>0u; --b, X+=2, Y+=2u, ++E)
                     {
+                        //Subtract mean
                         if (mnz)
                         {
                             float mnr = 0.0f, mni = 0.0f;
@@ -519,6 +553,7 @@ int sig2ar_c (float *Y, float *E, float *X, const size_t R, const size_t C, cons
                             for (size_t l=Lx; l>0u; --l) { X-=2u*K; *X -= mni; *(X+1) -= mnr; }
                         }
 
+                        //Get ACF
                         for (size_t l=0u; l<L; ++l, X-=2u*K*(Lx-l+1u))
                         {
                             smr = smi = 0.0f;
@@ -529,14 +564,18 @@ int sig2ar_c (float *Y, float *E, float *X, const size_t R, const size_t C, cons
                             }
                             *AC++ = smr; *AC++ = smi;
                         }
-                        AC -= 2u*L;
 
+                        //Normalize ACF
                         if (unbiased)
                         {
-                            for (size_t l=0u; l<L; ++l) { *AC++ /= (float)(Lx-l); *AC++ /= (float)(Lx-l); }
-                            AC -= 2u*L;
+                            for (size_t l=L; l>0u; --l) { *--AC /= (float)(Lx-l+1u); *--AC /= (float)(Lx-l+1u); }
+                        }
+                        else
+                        {
+                            for (size_t l=L; l>0u; --l) { *--AC /= (float)Lx; *--AC /= (float)Lx; }
                         }
 
+                        //Get AR params and error var (Lev-Durb)
                         den = *AC**AC + *(AC+1)**(AC+1);
                         ar = -(*(AC+2)**AC + *(AC+3)**(AC+1)) / den;
                         ai = -(*(AC+3)**AC - *(AC+1)**(AC+2)) / den;
@@ -554,13 +593,13 @@ int sig2ar_c (float *Y, float *E, float *X, const size_t R, const size_t C, cons
                             }
                             ar /= -e; ai /= -e;
                             *Y = -ar; *(Y+1) = -ai;
-                            for (size_t q=p; q>0u; --q, A2+=2) { Y-=2u*K; *A2 = *Y; *(A2+1) = -*(Y+1); }
+                            for (size_t q=p; q>0u; --q, A+=2) { Y-=2u*K; *A = *Y; *(A+1) = -*(Y+1); }
                             Y += 2u*p*K;
                             for (size_t q=p; q>0u; --q)
                             {
-                                A2 -= 2; Y -= 2u*K;
-                                *Y += ar**A2 - ai**(A2+1);
-                                *(Y+1) += ar**(A2+1) + ai**A2;
+                                A -= 2; Y -= 2u*K;
+                                *Y += ar**A - ai**(A+1);
+                                *(Y+1) += ar**(A+1) + ai**A;
                             }
                             e *= 1.0f - (ar*ar + ai*ai);
                         }
@@ -570,7 +609,7 @@ int sig2ar_c (float *Y, float *E, float *X, const size_t R, const size_t C, cons
                 }
             }
         }
-        free(AC); free(A2);
+        free(AC); free(A);
     }
 
     return 0;
@@ -580,6 +619,7 @@ int sig2ar_c (float *Y, float *E, float *X, const size_t R, const size_t C, cons
 int sig2ar_z (double *Y, double *E, double *X, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t dim, const size_t P, const int mnz, const int unbiased)
 {
     if (dim>3u) { fprintf(stderr,"error in sig2ar_z: dim must be in [0 3]\n"); return 1; }
+    if (P<1u) { fprintf(stderr,"error in sig2ar_z: P must be positive\n"); return 1; }
 
     const size_t N = R*C*S*H;
     const size_t Lx = (dim==0u) ? R : (dim==1u) ? C : (dim==2u) ? S : H;
@@ -589,12 +629,13 @@ int sig2ar_z (double *Y, double *E, double *X, const size_t R, const size_t C, c
     if (N==0u) {}
     else
     {
-        double *AC, *A2, ar, ai, smr, smi, den, e;
+        double *AC, *A, ar, ai, smr, smi, den, e;
         if (!(AC=(double *)malloc(2u*L*sizeof(double)))) { fprintf(stderr,"error in sig2ar_z: problem with malloc. "); perror("malloc"); return 1; }
-        if (!(A2=(double *)malloc(2u*(P-1u)*sizeof(double)))) { fprintf(stderr,"error in sig2ar_z: problem with malloc. "); perror("malloc"); return 1; }
+        if (!(A=(double *)malloc(2u*(P-1u)*sizeof(double)))) { fprintf(stderr,"error in sig2ar_z: problem with malloc. "); perror("malloc"); return 1; }
 
         if (Lx==N)
         {
+            //Subtract mean
             if (mnz)
             {
                 double mnr = 0.0, mni = 0.0;
@@ -603,6 +644,7 @@ int sig2ar_z (double *Y, double *E, double *X, const size_t R, const size_t C, c
                 for (size_t l=Lx; l>0u; --l) { *--X -= mni; *--X -= mnr; }
             }
 
+            //Get ACF
             for (size_t l=0u; l<L; ++l, X-=2u*(Lx-l+1u))
             {
                 smr = smi = 0.0;
@@ -613,14 +655,18 @@ int sig2ar_z (double *Y, double *E, double *X, const size_t R, const size_t C, c
                 }
                 *AC++ = smr; *AC++ = smi;
             }
-            AC -= 2u*L;
-            
+
+            //Normalize ACF
             if (unbiased)
             {
-                for (size_t l=0u; l<L; ++l) { *AC++ /= (double)(Lx-l); *AC++ /= (double)(Lx-l); }
-                AC -= 2u*L;
+                for (size_t l=L; l>0u; --l) { *--AC /= (double)(Lx-l+1u); *--AC /= (double)(Lx-l+1u); }
+            }
+            else
+            {
+                for (size_t l=L; l>0u; --l) { *--AC /= (double)Lx; *--AC /= (double)Lx; }
             }
 
+            //Get AR params and error var (Lev-Durb)
             den = *AC**AC + *(AC+1)**(AC+1);
             ar = -(*(AC+2)**AC + *(AC+3)**(AC+1)) / den;
             ai = -(*(AC+3)**AC - *(AC+1)**(AC+2)) / den;
@@ -638,13 +684,13 @@ int sig2ar_z (double *Y, double *E, double *X, const size_t R, const size_t C, c
                 }
                 ar /= -e; ai /= -e;
                 *Y = -ar; *(Y+1) = -ai;
-                for (size_t q=p; q>0u; --q, A2+=2) { Y-=2; *A2 = *Y; *(A2+1) = -*(Y+1); }
+                for (size_t q=p; q>0u; --q, A+=2) { Y-=2; *A = *Y; *(A+1) = -*(Y+1); }
                 Y += 2u*p;
                 for (size_t q=p; q>0u; --q)
                 {
-                    A2 -= 2; Y -= 2;
-                    *Y += ar**A2 - ai**(A2+1);
-                    *(Y+1) += ar**(A2+1) + ai**A2;
+                    A -= 2; Y -= 2;
+                    *Y += ar**A - ai**(A+1);
+                    *(Y+1) += ar**(A+1) + ai**A;
                 }
                 e *= 1.0 - (ar*ar + ai*ai);
             }
@@ -659,8 +705,9 @@ int sig2ar_z (double *Y, double *E, double *X, const size_t R, const size_t C, c
 
             if (K==1u && (G==1u || B==1u))
             {
-                for (size_t v=V; v>0u; --v, X+=2u*P, Y+=2u*P, ++E)
+                for (size_t v=V; v>0u; --v, X+=2u*Lx, Y+=2u*P, ++E)
                 {
+                    //Subtract mean
                     if (mnz)
                     {
                         double mnr = 0.0, mni = 0.0;
@@ -669,7 +716,8 @@ int sig2ar_z (double *Y, double *E, double *X, const size_t R, const size_t C, c
                         for (size_t l=Lx; l>0u; --l) { *--X -= mni; *--X -= mnr; }
                     }
 
-                    for (size_t l=0u; l<P; ++l, X-=2u*(Lx-l+1u))
+                    //Get ACF
+                    for (size_t l=0u; l<L; ++l, X-=2u*(Lx-l+1u))
                     {
                         smr = smi = 0.0;
                         for (size_t n=Lx-l; n>0u; --n, X+=2)
@@ -679,20 +727,18 @@ int sig2ar_z (double *Y, double *E, double *X, const size_t R, const size_t C, c
                         }
                         *AC++ = smr; *AC++ = smi;
                     }
-                    smr = smi = 0.0;
-                    for (size_t n=Lx-P; n>0u; --n, X+=2)
-                    {
-                        smr += *X**(X+2u*P) + *(X+1)**(X+2u*P+1u);
-                        smi += *(X+1)**(X+2u*P) - *X**(X+2u*P+1u);
-                    }
-                    *AC = smr; *(AC+1) = smi; AC -= 2u*P;
 
+                    //Normalize ACF
                     if (unbiased)
                     {
-                        for (size_t l=0u; l<L; ++l) { *AC++ /= (double)(Lx-l); *AC++ /= (double)(Lx-l); }
-                        AC -= 2u*L;
+                        for (size_t l=L; l>0u; --l) { *--AC /= (double)(Lx-l+1u); *--AC /= (double)(Lx-l+1u); }
+                    }
+                    else
+                    {
+                        for (size_t l=L; l>0u; --l) { *--AC /= (double)Lx; *--AC /= (double)Lx; }
                     }
 
+                    //Get AR params and error var (Lev-Durb)
                     den = *AC**AC + *(AC+1)**(AC+1);
                     ar = -(*(AC+2)**AC + *(AC+3)**(AC+1)) / den;
                     ai = -(*(AC+3)**AC - *(AC+1)**(AC+2)) / den;
@@ -710,13 +756,13 @@ int sig2ar_z (double *Y, double *E, double *X, const size_t R, const size_t C, c
                         }
                         ar /= -e; ai /= -e;
                         *Y = -ar; *(Y+1) = -ai;
-                        for (size_t q=p; q>0u; --q, A2+=2) { Y-=2; *A2 = *Y; *(A2+1) = -*(Y+1); }
+                        for (size_t q=p; q>0u; --q, A+=2) { Y-=2; *A = *Y; *(A+1) = -*(Y+1); }
                         Y += 2u*p;
                         for (size_t q=p; q>0u; --q)
                         {
-                            A2 -= 2; Y -= 2;
-                            *Y += ar**A2 - ai**(A2+1);
-                            *(Y+1) += ar**(A2+1) + ai**A2;
+                            A -= 2; Y -= 2;
+                            *Y += ar**A - ai**(A+1);
+                            *(Y+1) += ar**(A+1) + ai**A;
                         }
                         e *= 1.0 - (ar*ar + ai*ai);
                     }
@@ -728,8 +774,9 @@ int sig2ar_z (double *Y, double *E, double *X, const size_t R, const size_t C, c
             {
                 for (size_t g=G; g>0u; --g, X+=2u*B*(Lx-1u), Y+=2u*B*(P-1u))
                 {
-                    for (size_t b=B; b>0u; --b, X+=2, Y+=2, ++E)
+                    for (size_t b=B; b>0u; --b, X+=2, Y+=2u, ++E)
                     {
+                        //Subtract mean
                         if (mnz)
                         {
                             double mnr = 0.0, mni = 0.0;
@@ -738,6 +785,7 @@ int sig2ar_z (double *Y, double *E, double *X, const size_t R, const size_t C, c
                             for (size_t l=Lx; l>0u; --l) { X-=2u*K; *X -= mni; *(X+1) -= mnr; }
                         }
 
+                        //Get ACF
                         for (size_t l=0u; l<L; ++l, X-=2u*K*(Lx-l+1u))
                         {
                             smr = smi = 0.0;
@@ -748,14 +796,18 @@ int sig2ar_z (double *Y, double *E, double *X, const size_t R, const size_t C, c
                             }
                             *AC++ = smr; *AC++ = smi;
                         }
-                        AC -= 2u*L;
 
+                        //Normalize ACF
                         if (unbiased)
                         {
-                            for (size_t l=0u; l<L; ++l) { *AC++ /= (double)(Lx-l); *AC++ /= (double)(Lx-l); }
-                            AC -= 2u*L;
+                            for (size_t l=L; l>0u; --l) { *--AC /= (double)(Lx-l+1u); *--AC /= (double)(Lx-l+1u); }
+                        }
+                        else
+                        {
+                            for (size_t l=L; l>0u; --l) { *--AC /= (double)Lx; *--AC /= (double)Lx; }
                         }
 
+                        //Get AR params and error var (Lev-Durb)
                         den = *AC**AC + *(AC+1)**(AC+1);
                         ar = -(*(AC+2)**AC + *(AC+3)**(AC+1)) / den;
                         ai = -(*(AC+3)**AC - *(AC+1)**(AC+2)) / den;
@@ -773,13 +825,13 @@ int sig2ar_z (double *Y, double *E, double *X, const size_t R, const size_t C, c
                             }
                             ar /= -e; ai /= -e;
                             *Y = -ar; *(Y+1) = -ai;
-                            for (size_t q=p; q>0u; --q, A2+=2) { Y-=2u*K; *A2 = *Y; *(A2+1) = -*(Y+1); }
+                            for (size_t q=p; q>0u; --q, A+=2) { Y-=2u*K; *A = *Y; *(A+1) = -*(Y+1); }
                             Y += 2u*p*K;
                             for (size_t q=p; q>0u; --q)
                             {
-                                A2 -= 2; Y -= 2u*K;
-                                *Y += ar**A2 - ai**(A2+1);
-                                *(Y+1) += ar**(A2+1) + ai**A2;
+                                A -= 2; Y -= 2u*K;
+                                *Y += ar**A - ai**(A+1);
+                                *(Y+1) += ar**(A+1) + ai**A;
                             }
                             e *= 1.0 - (ar*ar + ai*ai);
                         }
@@ -789,7 +841,7 @@ int sig2ar_z (double *Y, double *E, double *X, const size_t R, const size_t C, c
                 }
             }
         }
-        free(AC); free(A2);
+        free(AC); free(A);
     }
 
     return 0;

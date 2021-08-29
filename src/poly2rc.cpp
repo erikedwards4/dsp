@@ -39,19 +39,18 @@ int main(int argc, char *argv[])
 
     //Description
     string descr;
-    descr += "Gets reflection coeffs (RCs) from polynomials for each vector in X.\n";
+    descr += "Gets reflection coeffs (RCs) from polynomials for each vec in X.\n";
     descr += "\n";
     descr += "Use -d (--dim) to give the dimension along which to operate.\n";
     descr += "Default is 0 (along cols), unless X is a row vector.\n";
     descr += "\n";
-    descr += "If dim==0, then Y has size (R-1) x C x S x H.\n";
-    descr += "If dim==1, then Y has size R x (C-1) x S x H.\n";
-    descr += "If dim==2, then Y has size R x C x (S-1) x H.\n";
-    descr += "If dim==3, then Y has size R x C x S x (H-1).\n";
+    descr += "If dim==0, then Y has size (R-1) x C.\n";
+    descr += "If dim==1, then Y has size R x (C-1),\n";
+    descr += "where X has size R x C.\n";
     descr += "\n";
     descr += "Examples:\n";
     descr += "$ poly2rc X -o Y \n";
-    descr += "$ poly2rc -d1 X > Y \n";
+    descr += "$ poly2rc X > Y \n";
     descr += "$ cat X | poly2rc > Y \n";
 
 
@@ -103,10 +102,10 @@ int main(int argc, char *argv[])
     //Get options
 
     //Get dim
-    if (a_d->count==0) { dim = i1.isrowvec() ? 1u : 0u; }
+    if (a_d->count==0) { dim = (i1.R==1u) ? 1u : 0u; }
     else if (a_d->ival[0]<0) { cerr << progstr+": " << __LINE__ << errstr << "dim must be nonnegative" << endl; return 1; }
     else { dim = size_t(a_d->ival[0]); }
-    if (dim>3u) { cerr << progstr+": " << __LINE__ << errstr << "dim must be in {0,1,2,3}" << endl; return 1; }
+    if (dim!=0 && dim!=1) { cerr << progstr+": " << __LINE__ << errstr << "dim must be 0 or 1" << endl; return 1; }
 
 
     //Checks
@@ -117,8 +116,7 @@ int main(int argc, char *argv[])
     o1.F = i1.F; o1.T = i1.T;
     o1.R = (dim==0u) ? i1.R-1u : i1.R;
     o1.C = (dim==1u) ? i1.C-1u : i1.C;
-    o1.S = (dim==2u) ? i1.S-1u : i1.S;
-    o1.H = (dim==3u) ? i1.H-1u : i1.H;
+    o1.S = i1.S; o1.H = i1.H;
 
 
     //Open output

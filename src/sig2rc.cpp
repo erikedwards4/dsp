@@ -44,8 +44,11 @@ int main(int argc, char *argv[])
     descr += "This does linear prediction (LP) for each vector in X.\n";
     descr += "\n";
     descr += "This works by Levinson-Durbin recursion of the autocovariance (AC),\n";
-    descr += "and output Y holds the autoregressive (AR) coefficients.\n";
-    descr += "The 2nd output, V, holds the noise variances for each row or col.\n";
+    descr += "and output Y holds the autoregressive (AR) coeffs for each vector in X.\n";
+    descr += "If X is a single vector, then Y is a single vector of length P.\n";
+    descr += "\n";
+    descr += "The 2nd output, V, holds the noise variances for each vector in X.\n";
+    descr += "If X is a single vector, then V is a scalar.\n";
     descr += "\n";
     descr += "Use -p (--P) to specify the number of AR coefficients [default=1],\n";
     descr += "also called the order of the linear prediction.\n";

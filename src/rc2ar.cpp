@@ -48,7 +48,7 @@ int main(int argc, char *argv[])
     descr += "\n";
     descr += "Examples:\n";
     descr += "$ rc2ar X -o Y \n";
-    descr += "$ rc2ar -d1 X > Y \n";
+    descr += "$ rc2ar X > Y \n";
     descr += "$ cat X | rc2ar > Y \n";
 
 

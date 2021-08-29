@@ -40,7 +40,7 @@ int main(int argc, char *argv[])
 
     //Description
     string descr;
-    descr += "Gets autoregressive (AR) coeffs starting from the signal (sig).\n";
+    descr += "Gets polynomial params starting from the signal (sig).\n";
     descr += "This does linear prediction (LP) for each vector in X.\n";
     descr += "\n";
     descr += "This works by Levinson-Durbin recursion of the autocovariance (AC),\n";

@@ -248,7 +248,7 @@ mcr_windowed: srci/mcr_windowed.cpp c/mcr_windowed.c
 #AR_Poly: conversion between AR (autoregressive), poly (polynomial),
 #RC (reflection coeff), and PSD (power spectral density) representations
 #poly2roots uses LAPACKE, so for complex case requires -Wno-c99-extensions.
-AR_Poly: poly2roots roots2poly poly2ar ar2poly ar2psd poly2psd #ar2rc rc2ar poly2rc rc2poly
+AR_Poly: poly2roots roots2poly poly2ar ar2poly rc2ar rc2poly ar2psd poly2psd ar2rc poly2rc
 poly2roots: srci/poly2roots.cpp c/poly2roots.c
 	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS) -Wno-c99-extensions; $(CC) obj/$@.o -obin/$@ -largtable2 -llapacke -lm
 roots2poly: srci/roots2poly.cpp c/roots2poly.c
@@ -257,18 +257,18 @@ poly2ar: srci/poly2ar.cpp c/poly2ar.c
 	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2
 ar2poly: srci/ar2poly.cpp c/ar2poly.c
 	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2
+rc2ar: srci/rc2ar.cpp c/rc2ar.c
+	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2
+ar2rc: srci/ar2rc.cpp c/ar2rc.c
+	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lm
+rc2poly: srci/rc2poly.cpp c/rc2poly.c
+	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2
+poly2rc: srci/poly2rc.cpp c/poly2rc.c
+	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2
 ar2psd: srci/ar2psd.cpp c/ar2psd.c
 	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lm
 poly2psd: srci/poly2psd.cpp c/poly2psd.c
 	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lm
-#ar2rc: srci/ar2rc.cpp c/ar2rc.c
-#	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lm
-#rc2ar: srci/rc2ar.cpp c/rc2ar.c
-#	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2
-#poly2rc: srci/poly2rc.cpp c/poly2rc.c
-#	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lm
-#rc2poly: srci/rc2poly.cpp c/rc2poly.c
-#	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2
 
 
 #Linear_Pred: Linear prediction and related (autocorrelation, Levinson-Durbin, Burg, MVDR)

@@ -164,19 +164,19 @@ mcr_windowed: mcr_windowed.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 
 #AR_Poly: conversion between AR (autoregressive), poly (polynomial),
 #RC (reflection coeff), and PSD (power spectral density) representations.
-AR_Poly: poly2roots roots2poly poly2ar ar2poly poly2psd ar2psd poly2cc ar2cc poly2mvdr ar2mvdr #ar2rc rc2ar poly2rc rc2poly
+AR_Poly: poly2roots roots2poly poly2ar ar2poly rc2ar poly2ar ar2psd poly2psd ar2rc rc2ar poly2rc rc2poly #ar2cc poly2cc
 poly2roots: poly2roots.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 roots2poly: roots2poly.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 poly2ar: poly2ar.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 ar2poly: ar2poly.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
-poly2psd: poly2psd.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+poly2rc: poly2rc.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+rc2poly: rc2poly.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+ar2rc: ar2rc.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+rc2ar: rc2ar.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 ar2psd: ar2psd.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
-#ar2rc: ar2rc.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
-#rc2ar: rc2ar.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
-#poly2rc: poly2rc.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
-#rc2poly: rc2poly.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
-#poly2cc: poly2cc.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+poly2psd: poly2psd.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 #ar2cc: ar2cc.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+#poly2cc: poly2cc.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 
 
 #Linear_Pred: Linear prediction and related (autocorrelation, Levinson-Durbin, Burg, MVDR)

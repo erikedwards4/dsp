@@ -4,10 +4,13 @@
 
 //Following convention of Octave signal package ar_psd.m, I double the power for real-valued X.
 //See Eq. (2.38) of Kay and Marple [1981].
+//I have confirmed that this matches Octave output for real and complex.
 
 //According to Octave:
 //This function is intended for use with [a,v,k] = arburg(x,poles,criterion);
 //which uses the Burg (1968) method to calculate a maximum-entropy AR model of X.
+//Note that, if using Hz for freqs and sample rate (Fs), Octave uses v/Fs in
+//the numerator rather than v; and in the E matrix, exp((-j*2*pi/Fs)*freqs.
 
 #include <stdio.h>
 #include <stdlib.h>
