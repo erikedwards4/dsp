@@ -91,9 +91,9 @@ int sig2psd_s (float *Y, float *X, const float *W, const size_t F, const size_t 
             }
 
             //AC-to-AR
-            a = -*(AC+1) / *AC;
-            *A1 = -a;
-            e = *AC++; e += a * *AC++;
+            e = *AC++;
+            *A1 = *X / e; a = -*A1;
+            e += a * *AC++;
             for (size_t p=1u; p<P; ++p, AC+=p)
             {
                 a = *AC;
@@ -158,9 +158,9 @@ int sig2psd_s (float *Y, float *X, const float *W, const size_t F, const size_t 
                     }
 
                     //AC-to-AR
-                    a = -*(AC+1) / *AC;
-                    *A1 = -a;
-                    e = *AC++; e += a * *AC++;
+                    e = *AC++;
+                    *A1 = *X / e; a = -*A1;
+                    e += a * *AC++;
                     for (size_t p=1u; p<P; ++p, AC+=p)
                     {
                         a = *AC;
@@ -222,9 +222,9 @@ int sig2psd_s (float *Y, float *X, const float *W, const size_t F, const size_t 
                         }
 
                         //AC-to-AR
-                        a = -*(AC+1) / *AC;
-                        *A1 = -a;
-                        e = *AC++; e += a * *AC++;
+                        e = *AC++;
+                        *A1 = *X / e; a = -*A1;
+                        e += a * *AC++;
                         for (size_t p=1u; p<P; ++p, AC+=p)
                         {
                             a = *AC;
@@ -291,8 +291,8 @@ int sig2psd_d (double *Y, double *X, const double *W, const size_t F, const size
             for (size_t p=0u; p<P; ++p, ++Er, ++Ei)
             {
                 wp = *W * (double)(p+1u);
-                *Er = -cosf(wp);
-                *Ei = sinf(wp);
+                *Er = -cos(wp);
+                *Ei = sin(wp);
             }
         }
         Er -= FP; Ei -= FP;
@@ -327,9 +327,9 @@ int sig2psd_d (double *Y, double *X, const double *W, const size_t F, const size
             }
 
             //AC-to-AR
-            a = -*(AC+1) / *AC;
-            *A1 = -a;
-            e = *AC++; e += a * *AC++;
+            e = *AC++;
+            *A1 = *X / e; a = -*A1;
+            e += a * *AC++;
             for (size_t p=1u; p<P; ++p, AC+=p)
             {
                 a = *AC;
@@ -394,9 +394,9 @@ int sig2psd_d (double *Y, double *X, const double *W, const size_t F, const size
                     }
 
                     //AC-to-AR
-                    a = -*(AC+1) / *AC;
-                    *A1 = -a;
-                    e = *AC++; e += a * *AC++;
+                    e = *AC++;
+                    *A1 = *X / e; a = -*A1;
+                    e += a * *AC++;
                     for (size_t p=1u; p<P; ++p, AC+=p)
                     {
                         a = *AC;
@@ -458,9 +458,9 @@ int sig2psd_d (double *Y, double *X, const double *W, const size_t F, const size
                         }
 
                         //AC-to-AR
-                        a = -*(AC+1) / *AC;
-                        *A1 = -a;
-                        e = *AC++; e += a * *AC++;
+                        e = *AC++;
+                        *A1 = *X / e; a = -*A1;
+                        e += a * *AC++;
                         for (size_t p=1u; p<P; ++p, AC+=p)
                         {
                             a = *AC;
@@ -814,8 +814,8 @@ int sig2psd_z (double *Y, double *X, const double *W, const size_t F, const size
             for (size_t p=0u; p<P; ++p, ++Er, ++Ei)
             {
                 wp = *W * (double)(p+1u);
-                *Er = -cosf(wp);
-                *Ei = sinf(wp);
+                *Er = -cos(wp);
+                *Ei = sin(wp);
             }
         }
         Er -= FP; Ei -= FP;

@@ -41,9 +41,9 @@ int ac2poly_s (float *Y, float *E, const float *X, const size_t R, const size_t 
         if (Lx==N)
         {
             *Y++ = 1.0f;
-            a = -*(X+1) / *X;
-            *Y = a; //*rcs++ = a;
-            e = *X++; e += a * *X++;
+            e = *X++;
+            a = -*X / e; *Y = a; //*rcs++ = a;
+            e += a * *X++;
             for (size_t p=1u; p<P; ++p, X+=p)
             {
                 a = *X;
@@ -68,9 +68,9 @@ int ac2poly_s (float *Y, float *E, const float *X, const size_t R, const size_t 
                 for (size_t v=V; v>0u; --v, Y+=P, ++E)
                 {
                     *Y++ = 1.0f;
-                    a = -*(X+1) / *X;
-                    *Y = a;
-                    e = *X++; e += a * *X++;
+                    e = *X++;
+                    a = -*X / e; *Y = a;
+                    e += a * *X++;
                     for (size_t p=1u; p<P; ++p, X+=p)
                     {
                         a = *X;
@@ -91,9 +91,8 @@ int ac2poly_s (float *Y, float *E, const float *X, const size_t R, const size_t 
                     for (size_t b=B; b>0u; --b, X-=K*Lx-1u, Y-=K-1u, ++E)
                     {
                         *Y = 1.0f; Y += K;
-                        a = -*(X+K) / *X;
-                        *Y = a;
                         e = *X; X += K;
+                        a = -*X / e; *Y = a;
                         e += a * *X; X += K;
                         for (size_t p=1u; p<P; ++p, X+=p*K)
                         {
@@ -138,9 +137,9 @@ int ac2poly_d (double *Y, double *E, const double *X, const size_t R, const size
         if (Lx==N)
         {
             *Y++ = 1.0;
-            a = -*(X+1) / *X;
-            *Y = a;
-            e = *X++; e += a * *X++;
+            e = *X++;
+            a = -*X / e; *Y = a;
+            e += a * *X++;
             for (size_t p=1u; p<P; ++p, X+=p)
             {
                 a = *X;
@@ -165,9 +164,9 @@ int ac2poly_d (double *Y, double *E, const double *X, const size_t R, const size
                 for (size_t v=V; v>0u; --v, Y+=P, ++E)
                 {
                     *Y++ = 1.0;
-                    a = -*(X+1) / *X;
-                    *Y = a;
-                    e = *X++; e += a * *X++;
+                    e = *X++;
+                    a = -*X / e; *Y = a;
+                    e += a * *X++;
                     for (size_t p=1u; p<P; ++p, X+=p)
                     {
                         a = *X;
@@ -188,9 +187,8 @@ int ac2poly_d (double *Y, double *E, const double *X, const size_t R, const size
                     for (size_t b=B; b>0u; --b, X-=K*Lx-1u, Y-=K-1u, ++E)
                     {
                         *Y = 1.0; Y += K;
-                        a = -*(X+K) / *X;
-                        *Y = a;
                         e = *X; X += K;
+                        a = -*X / e; *Y = a;
                         e += a * *X; X += K;
                         for (size_t p=1u; p<P; ++p, X+=p*K)
                         {

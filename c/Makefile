@@ -9,7 +9,7 @@
 #It is not necessary to run this when making the C++ command-line tools.
 
 SHELL=/bin/bash
-CC=clang++
+CC=clang
 
 ifeq ($(CC),$(filter $(CC),clang gcc))
 	STD=-std=c11
@@ -165,7 +165,7 @@ mcr_windowed: mcr_windowed.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 #AR_Poly: conversion between AR (autoregressive), poly (polynomial),
 #RC (reflection coeff), and PSD (power spectral density) representations.
 AR_Poly: poly2roots roots2poly poly2ar ar2poly rc2ar poly2ar ar2psd poly2psd ar2rc rc2ar poly2rc rc2poly #ar2cc poly2cc
-poly2roots: poly2roots.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+poly2roots: poly2roots.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS) -Wno-c99-extensions
 roots2poly: roots2poly.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 poly2ar: poly2ar.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 ar2poly: ar2poly.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
@@ -175,8 +175,8 @@ ar2rc: ar2rc.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 rc2ar: rc2ar.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 ar2psd: ar2psd.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 poly2psd: poly2psd.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
-#ar2cc: ar2cc.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
-#poly2cc: poly2cc.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+ar2cc: ar2cc.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+poly2cc: poly2cc.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 
 
 #Linear_Pred: Linear prediction and related (autocorrelation, Levinson-Durbin, Burg, MVDR)
@@ -187,7 +187,7 @@ Linear_Pred: AC_LP Burg MVDR
 #AC, RC (reflection coeff), poly (polynomial), or AR (autoregressive) representations.
 #These use time-domain computations, except the _fft versions.
 #The LP is done by Levinson-Durbin recursion from the AC.
-AC_LP: sig2ac sig2ac_fft ac2rc ac2ar ac2poly ac2psd sig2rc sig2ar sig2poly sig2psd
+AC_LP: sig2ac sig2ac_fft ac2rc ac2ar ac2poly ac2psd sig2rc sig2ar sig2poly sig2psd #ac2cc sig2cc
 sig2ac: sig2ac.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 sig2ac_fft: sig2ac_fft.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 ac2rc: ac2rc.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)

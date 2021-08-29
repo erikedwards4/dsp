@@ -38,9 +38,10 @@ int ac2rc_s (float *Y, float *E, const float *X, const size_t R, const size_t C,
         
         if (Lx==N)
         {
-            a = -*(X+1) / *X;
-            *A1 = a; *Y++ = a;
-            e = *X++; e += a * *X++;
+            e = *X++;
+            a = -*X / e;
+            *Y++ = *A1 = a;
+            e += a * *X++;
             for (size_t p=1u; p<P-1u; ++p, X+=p)
             {
                 a = *X;
@@ -87,9 +88,10 @@ int ac2rc_s (float *Y, float *E, const float *X, const size_t R, const size_t C,
             {
                 for (size_t v=V; v>0u; --v, X+=Lx, ++Y, ++E)
                 {
-                    a = -*(X+1) / *X;
-                    *A1 = a; *Y++ = a;
-                    e = *X++; e += a * *X++;
+                    e = *X++;
+                    a = -*X / e;
+                    *Y++ = *A1 = a;
+                    e += a * *X++;
                     for (size_t p=1u; p<P-1u; ++p, X+=p)
                     {
                         a = *X;
@@ -114,9 +116,9 @@ int ac2rc_s (float *Y, float *E, const float *X, const size_t R, const size_t C,
                 {
                     for (size_t b=B; b>0u; --b, ++X, Y-=K*P-K-1u, ++E)
                     {
-                        a = -*(X+K) / *X;
-                        *A1 = a; *Y = a; Y += K;
                         e = *X; X += K;
+                        a = -*X / e;
+                        *Y = *A1 = a; Y += K;
                         e += a * *X; X += K;
                         for (size_t p=1u; p<P-1u; ++p, X+=p*K)
                         {
@@ -163,9 +165,10 @@ int ac2rc_d (double *Y, double *E, const double *X, const size_t R, const size_t
         
         if (Lx==N)
         {
-            a = -*(X+1) / *X;
-            *A1 = a; *Y++ = a;
-            e = *X++; e += a * *X++;
+            e = *X++;
+            a = -*X / e;
+            *Y++ = *A1 = a;
+            e += a * *X++;
             for (size_t p=1u; p<P-1u; ++p, X+=p)
             {
                 a = *X;
@@ -193,9 +196,10 @@ int ac2rc_d (double *Y, double *E, const double *X, const size_t R, const size_t
             {
                 for (size_t v=V; v>0u; --v, X+=Lx, ++Y, ++E)
                 {
-                    a = -*(X+1) / *X;
-                    *A1 = a; *Y++ = a;
-                    e = *X++; e += a * *X++;
+                    e = *X++;
+                    a = -*X / e;
+                    *Y++ = *A1 = a;
+                    e += a * *X++;
                     for (size_t p=1u; p<P-1u; ++p, X+=p)
                     {
                         a = *X;
@@ -220,9 +224,9 @@ int ac2rc_d (double *Y, double *E, const double *X, const size_t R, const size_t
                 {
                     for (size_t b=B; b>0u; --b, ++X, Y-=K*P-K-1u, ++E)
                     {
-                        a = -*(X+K) / *X;
-                        *A1 = a; *Y = a; Y += K;
                         e = *X; X += K;
+                        a = -*X / e;
+                        *Y = *A1 = a; Y += K;
                         e += a * *X; X += K;
                         for (size_t p=1u; p<P-1u; ++p, X+=p*K)
                         {

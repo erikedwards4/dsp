@@ -41,7 +41,7 @@ int ac2psd_s (float *Y, const float *X, const float *W, const size_t F, const si
     }
     else
     {
-        //Initialize ac2ar
+        //Initialize AC-to-AR
         const size_t P = Lx - 1u;
         float *A1, *A2, a, e;
         if (!(A1=(float *)malloc(P*sizeof(float)))) { fprintf(stderr,"error in ac2psd_s: problem with malloc. "); perror("malloc"); return 1; }
@@ -65,10 +65,10 @@ int ac2psd_s (float *Y, const float *X, const float *W, const size_t F, const si
 
         if (Lx==N)
         {
-            //ac2ar
-            a = -*(X+1) / *X;
-            *A1 = -a;
-            e = *X++; e += a * *X++;
+            //AC-to-AR
+            e = *X++;
+            *A1 = *X / e; a = -*A1;
+            e += a * *X++;
             for (size_t p=1u; p<P; ++p, X+=p)
             {
                 a = *X;
@@ -80,7 +80,7 @@ int ac2psd_s (float *Y, const float *X, const float *W, const size_t F, const si
                 e *= 1.0f - a*a;
             }
             
-            //ar2psd
+            //AR-to-PSD
             e *= 2.0f;
             for (size_t f=F; f>0u; --f, A1-=P, ++Y)
             {
@@ -104,10 +104,10 @@ int ac2psd_s (float *Y, const float *X, const float *W, const size_t F, const si
             {
                 for (size_t v=V; v>0u; --v)
                 {
-                    //ac2ar
-                    a = -*(X+1) / *X;
-                    *A1 = -a;
-                    e = *X++; e += a * *X++;
+                    //AC-to-AR
+                    e = *X++;
+                    *A1 = *X / e; a = -*A1;
+                    e += a * *X++;
                     for (size_t p=1u; p<P; ++p, X+=p)
                     {
                         a = *X;
@@ -119,7 +119,7 @@ int ac2psd_s (float *Y, const float *X, const float *W, const size_t F, const si
                         e *= 1.0f - a*a;
                     }
                     
-                    //ar2psd
+                    //AR-to-PSD
                     e *= 2.0f;
                     for (size_t f=F; f>0u; --f, A1-=P, ++Y)
                     {
@@ -140,10 +140,9 @@ int ac2psd_s (float *Y, const float *X, const float *W, const size_t F, const si
                 {
                     for (size_t b=B; b>0u; --b, X-=K*Lx-1u, Y-=K*F-1u)
                     {
-                        //ac2ar
-                        a = -*(X+K) / *X;
-                        *A1 = -a;
+                        //AC-to-AR
                         e = *X; X += K;
+                        *A1 = *X / e; a = -*A1;
                         e += a * *X; X += K;
                         for (size_t p=1u; p<P; ++p, X+=p*K)
                         {
@@ -156,7 +155,7 @@ int ac2psd_s (float *Y, const float *X, const float *W, const size_t F, const si
                             e *= 1.0f - a*a;
                         }
 
-                        //ar2psd
+                        //AR-to-PSD
                         e *= 2.0f;
                         for (size_t f=F; f>0u; --f, A1-=P, Y+=K)
                         {
@@ -200,7 +199,7 @@ int ac2psd_d (double *Y, const double *X, const double *W, const size_t F, const
     }
     else
     {
-        //Initialize ac2ar
+        //Initialize AC-to-AR
         const size_t P = Lx - 1u;
         double *A1, *A2, a, e;
         if (!(A1=(double *)malloc(P*sizeof(double)))) { fprintf(stderr,"error in ac2psd_d: problem with malloc. "); perror("malloc"); return 1; }
@@ -216,18 +215,18 @@ int ac2psd_d (double *Y, const double *X, const double *W, const size_t F, const
             for (size_t p=0u; p<P; ++p, ++Er, ++Ei)
             {
                 wp = *W * (double)(p+1u);
-                *Er = -cosf(wp);
-                *Ei = sinf(wp);
+                *Er = -cos(wp);
+                *Ei = sin(wp);
             }
         }
         Er -= FP; Ei -= FP;
 
         if (Lx==N)
         {
-            //ac2ar
-            a = -*(X+1) / *X;
-            *A1 = -a;
-            e = *X++; e += a * *X++;
+            //AC-to-AR
+            e = *X++;
+            *A1 = *X / e; a = -*A1;
+            e += a * *X++;
             for (size_t p=1u; p<P; ++p, X+=p)
             {
                 a = *X;
@@ -239,8 +238,8 @@ int ac2psd_d (double *Y, const double *X, const double *W, const size_t F, const
                 e *= 1.0 - a*a;
             }
             
-            //ar2psd
-            e *= 2.0f;
+            //AR-to-PSD
+            e *= 2.0;
             for (size_t f=F; f>0u; --f, A1-=P, ++Y)
             {
                 yr = 1.0; yi = 0.0;
@@ -263,10 +262,10 @@ int ac2psd_d (double *Y, const double *X, const double *W, const size_t F, const
             {
                 for (size_t v=V; v>0u; --v)
                 {
-                    //ac2ar
-                    a = -*(X+1) / *X;
-                    *A1 = -a;
-                    e = *X++; e += a * *X++;
+                    //AC-to-AR
+                    e = *X++;
+                    *A1 = *X / e; a = -*A1;
+                    e += a * *X++;
                     for (size_t p=1u; p<P; ++p, X+=p)
                     {
                         a = *X;
@@ -278,7 +277,7 @@ int ac2psd_d (double *Y, const double *X, const double *W, const size_t F, const
                         e *= 1.0 - a*a;
                     }
                     
-                    //ar2psd
+                    //AR-to-PSD
                     e *= 2.0;
                     for (size_t f=F; f>0u; --f, A1-=P, ++Y)
                     {
@@ -299,10 +298,9 @@ int ac2psd_d (double *Y, const double *X, const double *W, const size_t F, const
                 {
                     for (size_t b=B; b>0u; --b, X-=K*Lx-1u, Y-=K*F-1u)
                     {
-                        //ac2ar
-                        a = -*(X+K) / *X;
-                        *A1 = -a;
+                        //AC-to-AR
                         e = *X; X += K;
+                        *A1 = *X / e; a = -*A1;
                         e += a * *X; X += K;
                         for (size_t p=1u; p<P; ++p, X+=p*K)
                         {
@@ -315,7 +313,7 @@ int ac2psd_d (double *Y, const double *X, const double *W, const size_t F, const
                             e *= 1.0 - a*a;
                         }
 
-                        //ar2psd
+                        //AR-to-PSD
                         e *= 2.0;
                         for (size_t f=F; f>0u; --f, A1-=P, Y+=K)
                         {
@@ -359,7 +357,7 @@ int ac2psd_c (float *Y, const float *X, const float *W, const size_t F, const si
     }
     else
     {
-        //Initialize ac2ar
+        //Initialize AC-to-AR
         const size_t P = Lx - 1u;
         float *A1, *A2, ar, ai, e, den;
         if (!(A1=(float *)malloc(2u*P*sizeof(float)))) { fprintf(stderr,"error in ac2psd_c: problem with malloc. "); perror("malloc"); return 1; }
@@ -383,7 +381,7 @@ int ac2psd_c (float *Y, const float *X, const float *W, const size_t F, const si
 
         if (Lx==N)
         {
-            //ac2ar
+            //AC-to-AR
             den = *X**X + *(X+1)**(X+1);
             ar = -(*(X+2)**X + *(X+3)**(X+1)) / den;
             ai = -(*(X+3)**X - *(X+1)**(X+2)) / den;
@@ -412,7 +410,7 @@ int ac2psd_c (float *Y, const float *X, const float *W, const size_t F, const si
                 e *= 1.0f - (ar*ar + ai*ai);
             }
 
-            //ar2psd
+            //AR-to-PSD
             for (size_t f=F; f>0u; --f, A1-=2u*P, ++Y)
             {
                 yr = 1.0f; yi = 0.0f;
@@ -435,7 +433,7 @@ int ac2psd_c (float *Y, const float *X, const float *W, const size_t F, const si
             {
                 for (size_t v=V; v>0u; --v)
                 {
-                    //ac2ar
+                    //AC-to-AR
                     den = *X**X + *(X+1)**(X+1);
                     ar = -(*(X+2)**X + *(X+3)**(X+1)) / den;
                     ai = -(*(X+3)**X - *(X+1)**(X+2)) / den;
@@ -464,7 +462,7 @@ int ac2psd_c (float *Y, const float *X, const float *W, const size_t F, const si
                         e *= 1.0f - (ar*ar + ai*ai);
                     }
 
-                    //ar2psd
+                    //AR-to-PSD
                     for (size_t f=F; f>0u; --f, A1-=2u*P, ++Y)
                     {
                         yr = 1.0f; yi = 0.0f;
@@ -484,7 +482,7 @@ int ac2psd_c (float *Y, const float *X, const float *W, const size_t F, const si
                 {
                     for (size_t b=B; b>0u; --b, X-=2u*K*Lx-2u, Y-=K*F-1u)
                     {
-                        //ac2ar
+                        //AC-to-AR
                         den = *X**X + *(X+1)**(X+1);
                         ar = -(*(X+2u*K)**X + *(X+2u*K+1u)**(X+1)) / den;
                         ai = -(*(X+2u*K+1u)**X - *(X+1)**(X+2u*K)) / den;
@@ -513,7 +511,7 @@ int ac2psd_c (float *Y, const float *X, const float *W, const size_t F, const si
                             e *= 1.0f - (ar*ar + ai*ai);
                         }
                         
-                        //ar2psd
+                        //AR-to-PSD
                         for (size_t f=F; f>0u; --f, A1-=2u*P, Y+=K)
                         {
                             yr = 1.0f; yi = 0.0f;
@@ -556,7 +554,7 @@ int ac2psd_z (double *Y, const double *X, const double *W, const size_t F, const
     }
     else
     {
-        //Initialize ac2ar
+        //Initialize AC-to-AR
         const size_t P = Lx - 1u;
         double *A1, *A2, ar, ai, e, den;
         if (!(A1=(double *)malloc(2u*P*sizeof(double)))) { fprintf(stderr,"error in ac2psd_z: problem with malloc. "); perror("malloc"); return 1; }
@@ -580,7 +578,7 @@ int ac2psd_z (double *Y, const double *X, const double *W, const size_t F, const
 
         if (Lx==N)
         {
-            //ac2ar
+            //AC-to-AR
             den = *X**X + *(X+1)**(X+1);
             ar = -(*(X+2)**X + *(X+3)**(X+1)) / den;
             ai = -(*(X+3)**X - *(X+1)**(X+2)) / den;
@@ -609,7 +607,7 @@ int ac2psd_z (double *Y, const double *X, const double *W, const size_t F, const
                 e *= 1.0 - (ar*ar + ai*ai);
             }
 
-            //ar2psd
+            //AR-to-PSD
             for (size_t f=F; f>0u; --f, A1-=2u*P, ++Y)
             {
                 yr = 1.0; yi = 0.0;
@@ -632,7 +630,7 @@ int ac2psd_z (double *Y, const double *X, const double *W, const size_t F, const
             {
                 for (size_t v=V; v>0u; --v)
                 {
-                    //ac2ar
+                    //AC-to-AR
                     den = *X**X + *(X+1)**(X+1);
                     ar = -(*(X+2)**X + *(X+3)**(X+1)) / den;
                     ai = -(*(X+3)**X - *(X+1)**(X+2)) / den;
@@ -661,7 +659,7 @@ int ac2psd_z (double *Y, const double *X, const double *W, const size_t F, const
                         e *= 1.0 - (ar*ar + ai*ai);
                     }
 
-                    //ar2psd
+                    //AR-to-PSD
                     for (size_t f=F; f>0u; --f, A1-=2u*P, ++Y)
                     {
                         yr = 1.0; yi = 0.0;
@@ -681,7 +679,7 @@ int ac2psd_z (double *Y, const double *X, const double *W, const size_t F, const
                 {
                     for (size_t b=B; b>0u; --b, X-=2u*K*Lx-2u, Y-=K*F-1u)
                     {
-                        //ac2ar
+                        //AC-to-AR
                         den = *X**X + *(X+1)**(X+1);
                         ar = -(*(X+2u*K)**X + *(X+2u*K+1u)**(X+1)) / den;
                         ai = -(*(X+2u*K+1u)**X - *(X+1)**(X+2u*K)) / den;
@@ -710,7 +708,7 @@ int ac2psd_z (double *Y, const double *X, const double *W, const size_t F, const
                             e *= 1.0 - (ar*ar + ai*ai);
                         }
                         
-                        //ar2psd
+                        //AR-to-PSD
                         for (size_t f=F; f>0u; --f, A1-=2u*P, Y+=K)
                         {
                             yr = 1.0; yi = 0.0;

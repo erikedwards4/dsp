@@ -75,9 +75,9 @@ int sig2ar_s (float *Y, float *E, float *X, const size_t R, const size_t C, cons
             }
 
             //Get AR params and error var (Lev-Durb)
-            a = -*(AC+1) / *AC;
-            *Y = -a;
-            e = *AC++; e += a * *AC++;
+            e = *AC++;
+            *Y = *X / e; a = -*Y;
+            e += a * *AC++;
             for (size_t p=1u; p<P; ++p, AC+=p)
             {
                 a = *AC;
@@ -129,9 +129,9 @@ int sig2ar_s (float *Y, float *E, float *X, const size_t R, const size_t C, cons
                     }
 
                     //Get AR params and error var (Lev-Durb)
-                    a = -*(AC+1) / *AC;
-                    *Y = -a;
-                    e = *AC++; e += a * *AC++;
+                    e = *AC++;
+                    *Y = *X / e; a = -*Y;
+                    e += a * *AC++;
                     for (size_t p=1u; p<P; ++p, AC+=p)
                     {
                         a = *AC;
@@ -180,9 +180,9 @@ int sig2ar_s (float *Y, float *E, float *X, const size_t R, const size_t C, cons
                         }
 
                         //Get AR params and error var (Lev-Durb)
-                        a = -*(AC+1) / *AC;
-                        *Y = -a;
-                        e = *AC++; e += a * *AC++;
+                        e = *AC++;
+                        *Y = *X / e; a = -*Y;
+                        e += a * *AC++;
                         for (size_t p=1u; p<P; ++p, AC+=p)
                         {
                             a = *AC;
@@ -253,9 +253,9 @@ int sig2ar_d (double *Y, double *E, double *X, const size_t R, const size_t C, c
             }
 
             //Get AR params and error var (Lev-Durb)
-            a = -*(AC+1) / *AC;
-            *Y = -a;
-            e = *AC++; e += a * *AC++;
+            e = *AC++;
+            *Y = *X / e; a = -*Y;
+            e += a * *AC++;
             for (size_t p=1u; p<P; ++p, AC+=p)
             {
                 a = *AC;
@@ -307,9 +307,9 @@ int sig2ar_d (double *Y, double *E, double *X, const size_t R, const size_t C, c
                     }
 
                     //Get AR params and error var (Lev-Durb)
-                    a = -*(AC+1) / *AC;
-                    *Y = -a;
-                    e = *AC++; e += a * *AC++;
+                    e = *AC++;
+                    *Y = *X / e; a = -*Y;
+                    e += a * *AC++;
                     for (size_t p=1u; p<P; ++p, AC+=p)
                     {
                         a = *AC;
@@ -358,9 +358,9 @@ int sig2ar_d (double *Y, double *E, double *X, const size_t R, const size_t C, c
                         }
 
                         //Get AR params and error var (Lev-Durb)
-                        a = -*(AC+1) / *AC;
-                        *Y = -a;
-                        e = *AC++; e += a * *AC++;
+                        e = *AC++;
+                        *Y = *X / e; a = -*Y;
+                        e += a * *AC++;
                         for (size_t p=1u; p<P; ++p, AC+=p)
                         {
                             a = *AC;

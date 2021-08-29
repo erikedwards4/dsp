@@ -76,9 +76,10 @@ int sig2rc_s (float *Y, float *E, float *X, const size_t R, const size_t C, cons
             }
 
             //Get RCs and error var (Lev-Durb)
-            a = -*(AC+1) / *AC;
-            *A1 = a; *Y++ = a;
-            e = *AC++; e += a * *AC++;
+            e = *AC++;
+            a = -*AC / e;
+            *Y++ = *A1 = a;
+            e += a * *AC++;
             for (size_t p=1u; p<P-1u; ++p, AC+=p)
             {
                 a = *AC;
@@ -189,10 +190,10 @@ int sig2rc_s (float *Y, float *E, float *X, const size_t R, const size_t C, cons
                         }
 
                         //Get RCs and error var (Lev-Durb)
-                        a = -*(AC+1) / *AC;
-                        *A1 = a;
-                        *Y = a; Y += K;
-                        e = *AC++; e += a * *AC++;
+                        e = *AC++;
+                        a = -*AC / e;
+                        *Y = *A1 = a; Y += K;
+                        e += a * *AC++;
                         for (size_t p=1u; p<P-1u; ++p, AC+=p)
                         {
                             a = *AC;
@@ -267,9 +268,10 @@ int sig2rc_d (double *Y, double *E, double *X, const size_t R, const size_t C, c
             }
 
             //Get RCs and error var (Lev-Durb)
-            a = -*(AC+1) / *AC;
-            *A1 = a; *Y++ = a;
-            e = *AC++; e += a * *AC++;
+            e = *AC++;
+            a = -*AC / e;
+            *Y++ = *A1 = a;
+            e += a * *AC++;
             for (size_t p=1u; p<P-1u; ++p, AC+=p)
             {
                 a = *AC;
@@ -325,9 +327,10 @@ int sig2rc_d (double *Y, double *E, double *X, const size_t R, const size_t C, c
                     }
 
                     //Get RCs and error var (Lev-Durb)
-                    a = -*(AC+1) / *AC;
-                    *A1 = a; *Y++ = a;
-                    e = *AC++; e += a * *AC++;
+                    e = *AC++;
+                    a = -*AC / e;
+                    *Y++ = *A1 = a;
+                    e += a * *AC++;
                     for (size_t p=1u; p<P-1u; ++p, AC+=p)
                     {
                         a = *AC;
@@ -380,10 +383,10 @@ int sig2rc_d (double *Y, double *E, double *X, const size_t R, const size_t C, c
                         }
 
                         //Get RCs and error var (Lev-Durb)
-                        a = -*(AC+1) / *AC;
-                        *A1 = a;
-                        *Y = a; Y += K;
-                        e = *AC++; e += a * *AC++;
+                        e = *AC++;
+                        a = -*AC / e;
+                        *Y = *A1 = a; Y += K;
+                        e += a * *AC++;
                         for (size_t p=1u; p<P-1u; ++p, AC+=p)
                         {
                             a = *AC;

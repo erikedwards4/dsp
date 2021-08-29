@@ -37,15 +37,14 @@ int ac2ar_s (float *Y, float *E, const float *X, const size_t R, const size_t C,
         
         if (Lx==N)
         {
-            a = -*(X+1) / *X;
-            *Y = -a; //*rcs++ = a;
-            e = *X++; e += a * *X++;
+            e = *X++;
+            *Y = *X / e; a = -*Y;
+            e += a * *X++;
             for (size_t p=1u; p<P; ++p, X+=p)
             {
                 a = *X;
                 for (size_t q=p; q>0u; --q, ++Y) { --X; a -= *X * *Y; }
-                a /= -e;
-                *Y = -a; //*rcs++ = a;
+                a /= -e; *Y = -a;
                 for (size_t q=p; q>0u; --q, ++A) { --Y; *A = *Y; }
                 Y += p;
                 for (size_t q=p; q>0u; --q) { --A; --Y; *Y += a * *A; }
@@ -63,9 +62,9 @@ int ac2ar_s (float *Y, float *E, const float *X, const size_t R, const size_t C,
             {
                 for (size_t v=V; v>0u; --v, Y+=P, ++E)
                 {
-                    a = -*(X+1) / *X;
-                    *Y = -a;
-                    e = *X++; e += a * *X++;
+                    e = *X++;
+                    *Y = *X / e; a = -*Y;
+                    e += a * *X++;
                     for (size_t p=1u; p<P; ++p, X+=p)
                     {
                         a = *X;
@@ -86,9 +85,8 @@ int ac2ar_s (float *Y, float *E, const float *X, const size_t R, const size_t C,
                 {
                     for (size_t b=B; b>0u; --b, X-=K*Lx-1u, ++Y, ++E)
                     {
-                        a = -*(X+K) / *X;
-                        *Y = -a;
                         e = *X; X += K;
+                        *Y = *X / e; a = -*Y;
                         e += a * *X; X += K;
                         for (size_t p=1u; p<P; ++p, X+=p*K)
                         {
@@ -130,9 +128,9 @@ int ac2ar_d (double *Y, double *E, const double *X, const size_t R, const size_t
         
         if (Lx==N)
         {
-            a = -*(X+1) / *X;
-            *Y = -a;
-            e = *X++; e += a * *X++;
+            e = *X++;
+            *Y = *X / e; a = -*Y;
+            e += a * *X++;
             for (size_t p=1u; p<P; ++p, X+=p)
             {
                 a = *X;
@@ -156,9 +154,9 @@ int ac2ar_d (double *Y, double *E, const double *X, const size_t R, const size_t
             {
                 for (size_t v=V; v>0u; --v, Y+=P, ++E)
                 {
-                    a = -*(X+1) / *X;
-                    *Y = -a;
-                    e = *X++; e += a * *X++;
+                    e = *X++;
+                    *Y = *X / e; a = -*Y;
+                    e += a * *X++;
                     for (size_t p=1u; p<P; ++p, X+=p)
                     {
                         a = *X;
@@ -179,9 +177,8 @@ int ac2ar_d (double *Y, double *E, const double *X, const size_t R, const size_t
                 {
                     for (size_t b=B; b>0u; --b, X-=K*Lx-1u, ++Y, ++E)
                     {
-                        a = -*(X+K) / *X;
-                        *Y = -a;
                         e = *X; X += K;
+                        *Y = *X / e; a = -*Y;
                         e += a * *X; X += K;
                         for (size_t p=1u; p<P; ++p, X+=p*K)
                         {

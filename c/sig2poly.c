@@ -140,9 +140,9 @@ int sig2poly_s (float *Y, float *E, float *X, const size_t R, const size_t C, co
 
             //Get poly params and error var (Lev-Durb)
             *Y++ = 1.0f;
-            a = -*(AC+1) / *AC;
-            *Y = a;
-            e = *AC++; e += a * *AC++;
+            e = *AC++;
+            a = -*AC / e; *Y = a;
+            e += a * *AC++;
             for (size_t p=1u; p<P; ++p, AC+=p)
             {
                 a = *AC;
@@ -195,9 +195,9 @@ int sig2poly_s (float *Y, float *E, float *X, const size_t R, const size_t C, co
 
                     //Get poly params and error var (Lev-Durb)
                     *Y++ = 1.0f;
-                    a = -*(AC+1) / *AC;
-                    *Y = a;
-                    e = *AC++; e += a * *AC++;
+                    e = *AC++;
+                    a = -*AC / e; *Y = a;
+                    e += a * *AC++;
                     for (size_t p=1u; p<P; ++p, AC+=p)
                     {
                         a = *AC;
@@ -247,9 +247,9 @@ int sig2poly_s (float *Y, float *E, float *X, const size_t R, const size_t C, co
 
                         //Get poly params and error var (Lev-Durb)
                         *Y = 1.0f; Y += K;
-                        a = -*(AC+1) / *AC;
-                        *Y = a;
-                        e = *AC++; e += a * *AC++;
+                        e = *AC++;
+                        a = -*AC / e; *Y = a;
+                        e += a * *AC++;
                         for (size_t p=1u; p<P; ++p, AC+=p)
                         {
                             a = *AC;
@@ -382,9 +382,9 @@ int sig2poly_d (double *Y, double *E, double *X, const size_t R, const size_t C,
 
             //Get poly params and error var (Lev-Durb)
             *Y++ = 1.0;
-            a = -*(AC+1) / *AC;
-            *Y = a;
-            e = *AC++; e += a * *AC++;
+            e = *AC++;
+            a = -*AC / e; *Y = a;
+            e += a * *AC++;
             for (size_t p=1u; p<P; ++p, AC+=p)
             {
                 a = *AC;
@@ -437,9 +437,9 @@ int sig2poly_d (double *Y, double *E, double *X, const size_t R, const size_t C,
 
                     //Get poly params and error var (Lev-Durb)
                     *Y++ = 1.0;
-                    a = -*(AC+1) / *AC;
-                    *Y = a;
-                    e = *AC++; e += a * *AC++;
+                    e = *AC++;
+                    a = -*AC / e; *Y = a;
+                    e += a * *AC++;
                     for (size_t p=1u; p<P; ++p, AC+=p)
                     {
                         a = *AC;
@@ -489,9 +489,9 @@ int sig2poly_d (double *Y, double *E, double *X, const size_t R, const size_t C,
 
                         //Get poly params and error var (Lev-Durb)
                         *Y = 1.0; Y += K;
-                        a = -*(AC+1) / *AC;
-                        *Y = a;
-                        e = *AC++; e += a * *AC++;
+                        e = *AC++;
+                        a = -*AC / e; *Y = a;
+                        e += a * *AC++;
                         for (size_t p=1u; p<P; ++p, AC+=p)
                         {
                             a = *AC;
