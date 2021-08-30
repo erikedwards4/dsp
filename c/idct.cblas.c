@@ -2,6 +2,7 @@
 //This uses a CBLAS matrix multiplication by the DCT-III matrix.
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <math.h>
 #include <cblas.h>
 

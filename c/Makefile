@@ -28,14 +28,14 @@ CFLAGS=$(WFLAG) $(STD) -O3 -ffast-math -march=native -mfpmath=sse -fPIC
 
 
 All: all
-all: Dirs Generate Transform Filter Conv Interp ZCs_LCs AR_Poly Linear_Pred Frame STFT Wavelets Clean
+all: Dirs Generate Transform Filter Conv Interp ZCs_LCs AR_Poly Linear_Pred Frame STFT Wavelets Nonlinear Clean
 
 Dirs:
 	mkdir -pm 777 obj
 
 
 #Generate: generate noise, pulses, waveforms, windows
-Generate: Noise Pulses Waves Wins
+Generate: Noise Pulses Waves Wins Filts
 
 #Noise: generate colored noise
 Noise: white pink red brown blue violet
@@ -76,9 +76,13 @@ gauss: gauss.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 tukey: tukey.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 planck: planck.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 
+#Filts: generate some common/useful filter coefficients (vectors A and/or B to use with iir, fir, filter, etc.)
+Filts: spencer #rc butter smooth_diff smooth_diffdiff
+spencer: spencer.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+
 
 #Transform: common 1-D signal transforms
-Transform: FFT DCT DST Hilbert
+Transform: FFT DFT DCT DST Hilbert
 
 #FFT: fast Fourier transforms
 FFT: fft.rad2 ifft.rad2 fft.fftw ifft.fftw fft.fftw.r2hc fft.ffts ifft.ffts fft.kiss ifft.kiss
@@ -91,6 +95,13 @@ fft.ffts: fft.ffts.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 ifft.ffts: ifft.ffts.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 fft.kiss: fft.kiss.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 ifft.kiss: ifft.kiss.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+
+#DFT: discrete Fourier transforms (same output as FFT, but uses matrix multiplies)
+DFT: dft idft dft.cblas idft.cblas
+dft: dft.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+idft: idft.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+dft.cblas: dft.cblas.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+idft.cblas: idft.cblas.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 
 #DCT: discrete cosine transforms
 DCT: dct idct dct.cblas idct.cblas dct.fftw idct.fftw dct.ffts #idct.ffts
@@ -175,8 +186,6 @@ ar2rc: ar2rc.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 rc2ar: rc2ar.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 ar2psd: ar2psd.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 poly2psd: poly2psd.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
-ar2cc: ar2cc.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
-poly2cc: poly2cc.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 
 
 #Linear_Pred: Linear prediction and related (autocorrelation, Levinson-Durbin, Burg, MVDR)
@@ -187,26 +196,23 @@ Linear_Pred: AC_LP Burg MVDR
 #AC, RC (reflection coeff), poly (polynomial), or AR (autoregressive) representations.
 #These use time-domain computations, except the _fft versions.
 #The LP is done by Levinson-Durbin recursion from the AC.
-AC_LP: sig2ac sig2ac_fft ac2rc ac2ar ac2poly ac2psd sig2rc sig2ar sig2poly sig2psd #ac2cc sig2cc
+AC_LP: sig2ac sig2ac_fft ac2rc ac2ar ac2poly ac2psd sig2rc sig2ar sig2poly sig2psd
 sig2ac: sig2ac.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 sig2ac_fft: sig2ac_fft.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 ac2rc: ac2rc.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 ac2ar: ac2ar.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 ac2poly: ac2poly.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 ac2psd: ac2psd.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
-ac2cc: ac2cc.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 sig2rc: sig2rc.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 sig2ar: sig2ar.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 sig2poly: sig2poly.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 sig2psd: sig2psd.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
-sig2cc: sig2cc.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 
 #Burg: Linear prediction by time-domain maximum-entropy method of Burg
 Burg: #sig2ar_burg sig2poly_burg sig2psd_burg sig2cc_burg
 sig2ar_burg: sig2ar_burg.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 sig2poly_burg: sig2poly_burg.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 sig2psd_burg: sig2psd_burg.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
-sig2cc_burg: sig2cc_burg.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 # sig2ar_fft_burg: sig2ar_fft_burg.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 # sig2poly_fft_burg: sig2poly_fft_burg.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 # sig2psd_fft_burg: sig2psd_fft_burg.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
@@ -244,6 +250,12 @@ pow_compress: pow_compress.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 Wavelets: #gabor analytic
 gabor: gabor.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 analytic: analytic.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+
+
+#Nonlinear: various nonlinear DSP methods
+Nonlinear: tkeo #medfilt
+tkeo: tkeo.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+medfilt: medfilt.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 
 
 #If want to make a library archive for C++ use, this works with clang++

@@ -27,7 +27,7 @@ CFLAGS=$(WFLAG) $(STD) -O3 -ffast-math -march=native -mfpmath=sse $(INCLS)
 
 
 All: all
-all: Dirs Generate Transform Filter Conv Interp ZCs_LCs AR_Poly Linear_Pred Frame STFT Clean
+all: Dirs Generate Transform Filter Conv Interp ZCs_LCs AR_Poly Linear_Pred Frame STFT Wavelets Nonlinear Clean
 	rm -f 7 obj/*.o
 
 Dirs:
@@ -35,7 +35,7 @@ Dirs:
 
 
 #Generate: generate noise, simple waveforms, windows
-Generate: Noise Pulses Waves Wins
+Generate: Noise Pulses Waves Wins Filts
 
 #Noise: generate colored noise
 Noise: white pink red brown blue violet
@@ -103,9 +103,14 @@ tukey: srci/tukey.cpp c/tukey.c
 planck: srci/planck.cpp c/planck.c
 	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lm
 
+#Filts: generate some common/useful filter coefficients (vectors A and/or B to use with iir, fir, filter, etc.)
+Filts: spencer #rc butter smooth_diff smooth_diffdiff
+spencer: srci/spencer.cpp c/spencer.c
+	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2
+
 
 #Transform: common 1-D signal transforms
-Transform: FFT DCT DST Hilbert
+Transform: FFT DFT DCT DST Hilbert
 
 #FFT: fast Fourier transforms
 FFT: fft ifft fft.rad2 ifft.rad2 fft.fftw ifft.fftw fft.fftw.r2hc fft.ffts ifft.ffts fft.kiss ifft.kiss
@@ -130,6 +135,17 @@ ifft.ffts: srci/ifft.ffts.cpp c/ifft.ffts.c
 fft.kiss: srci/fft.kiss.cpp c/fft.kiss.c
 	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lm
 ifft.kiss: srci/ifft.kiss.cpp c/ifft.kiss.c
+	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lm
+
+#DFT: discrete Fourier transforms (same output as FFT, but uses matrix multiplies)
+DFT: dft idft dft.cblas idft.cblas
+dft: srci/dft.cpp c/dft.c
+	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lm
+idft: srci/idft.cpp c/idft.c
+	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lm
+dft.cblas: srci/dft.cblas.cpp c/dft.cblas.c
+	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lm
+idft.cblas: srci/idft.cblas.cpp c/idft.cblas.c
 	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lm
 
 #DCT: discrete cosine transforms
@@ -276,7 +292,7 @@ Linear_Pred: AC_LP Burg MVDR
 
 #AC_LP: conversions between sig (signal), AC (autocorrelation), LP (linear prediction), and related.
 #For example, ac2rc converts from AC to RCs (reflection coeffs).
-AC_LP: sig2ac sig2ac_fft ac2rc ac2ar ac2poly ac2psd sig2rc sig2ar sig2poly sig2psd ac2cc
+AC_LP: sig2ac sig2ac_fft ac2rc ac2ar ac2poly ac2psd sig2rc sig2ar sig2poly sig2psd
 sig2ac: srci/sig2ac.cpp c/sig2ac.c
 	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2
 sig2ac_fft: srci/sig2ac_fft.cpp c/sig2ac_fft.c
@@ -296,8 +312,6 @@ sig2ar: srci/sig2ar.cpp c/sig2ar.c
 sig2poly: srci/sig2poly.cpp c/sig2poly.c
 	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lm
 sig2psd: srci/sig2psd.cpp c/sig2psd.c
-	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lm
-ac2cc: srci/ac2cc.cpp c/ac2cc.c
 	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lm
 
 #Burg: Linear prediction by time-domain maximum-entropy method of Burg
@@ -358,6 +372,13 @@ gabor: srci/gabor.cpp c/gabor.c
 analytic: srci/analytic.cpp c/analytic.c
 	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lfftw3f -lfftw3 -lm
 
+
+#Nonlinear: various nonlinear DSP methods
+Nonlinear: tkeo #medfilt
+tkeo: srci/tkeo.cpp c/tkeo.c
+	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2
+medfilt: srci/medfilt.cpp c/medfilt.c
+	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lm
 
 
 #make clean
