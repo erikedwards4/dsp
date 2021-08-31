@@ -76,7 +76,7 @@ gauss: gauss.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 tukey: tukey.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 planck: planck.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 
-#Filts: generate some common/useful filter coefficients (vectors A and/or B to use with iir, fir, filter, etc.)
+#Filts: generate some useful filter coefficients (vectors A and B to use with iir, fir, filter, etc.)
 Filts: spencer #rc butter smooth_diff smooth_diffdiff
 spencer: spencer.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 

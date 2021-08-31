@@ -3,7 +3,6 @@
 //@license BSD 3-clause
 
 
-#include <ctime>
 #include <iostream>
 #include <fstream>
 #include <unistd.h>
@@ -13,7 +12,7 @@
 #include <unordered_map>
 #include <argtable2.h>
 #include "../util/cmli.hpp"
-#include "ifft.fftw.c"
+#include "dft.c"
 
 #ifdef I
 #undef I
@@ -23,7 +22,6 @@
 int main(int argc, char *argv[])
 {
     using namespace std;
-    timespec tic, toc;
 
 
     //Declarations
@@ -36,55 +34,46 @@ int main(int argc, char *argv[])
     ifstream ifs1; ofstream ofs1;
     int8_t stdi1, stdo1, wo1;
     ioinfo i1, o1;
-    size_t dim, nfft, Lx;
-    int sc, rl;
+    size_t dim, Lx, ndft, F;
+    int sc;
 
 
     //Description
     string descr;
-    descr += "1D IFFT (inverse fast Fourier transform) of each vector (1D signal) in X.\n";
-    descr += "This uses the FFTW (Fastest FFT in the West) library.\n";
-    descr += "\n";
-    descr += "This is meant for inverting fft (the 1D FFT in this namespace).\n";
-    descr += "Thus, X must be complex-valued and have appropriate length.\n";
+    descr += "1D DFT (discrete Fourier transform) of each vector (1D signal) in X.\n";
+    descr += "This version uses a direct matrix multiplication by the DFT matrix.\n";
     descr += "\n";
     descr += "Use -d (--dim) to give the dimension along which to transform.\n";
     descr += "Use -d0 to operate along cols, -d1 to operate along rows, etc.\n";
     descr += "The default is 0 (along cols), unless X is a row vector.\n";
     descr += "\n";
-    descr += "The transform nfft is automatically set to the length of X along dim.\n";
-    descr += "Again, this is mean for inverting fft (the 1D FFT in this namespace).\n";
-    descr += "Instead, use or don't use the -r option to control output length.\n";
+    descr += "Use -n (--ndft) to specify transform length [default=L].\n";
+    descr += "X is zero-padded as necessary to match ndft.\n";
+    descr += "The default (L) is the length of X along dim.\n";
     descr += "\n";
-    descr += "The output (Y) is complex-valued with length nfft along dim,\n";
-    descr += "unless using the -r (--real) option.\n";
+    descr += "Use -f (--F) to specify the number of output freq bins to keep.\n";
+    descr += "The default is ndft/2+1 for real X and ndft for complex X.\n";
+    descr += "This must be in [1 ndft], and can be used to compute fewer outputs.\n";
     descr += "\n";
-    descr += "Use -r (--real) if X represents n/2+1 nonnegative freqs.\n";
-    descr += "In this case (and only this case), the output Y is real-valued.\n";
-    descr += "Note that this assumes that the FFT nfft was even.\n";
-    descr += "To allow for odd-length FFT, use the -n (--nfft) option.\n";
-    descr += "The output Y always has length nfft (but may be real or complex).\n";
-    descr += "\n";
-    descr += "Include -s (--scale) to scale, to invert with scaled fft.\n";
-    descr += "Otherwise, Y will be scaled by 1/nfft, to invert with unscaled fft.\n";
+    descr += "The output (Y) is complex-valued with length F along dim. \n";
     descr += "\n";
     descr += "Examples:\n";
-    descr += "$ ifft.fftw X -o Y \n";
-    descr += "$ ifft.fftw -d1 -r X > Y \n";
-    descr += "$ cat X | ifft.fftw -n9 -r > Y \n";
+    descr += "$ dft -n16 X -o Y \n";
+    descr += "$ dft -d1 -n16 -f4 X > Y \n";
+    descr += "$ cat X | dft -d1 -n40 -f15 > Y \n";
 
 
     //Argtable
     int nerrs;
     struct arg_file  *a_fi = arg_filen(nullptr,nullptr,"<file>",I-1,I,"input file (X)");
     struct arg_int    *a_d = arg_intn("d","dim","<uint>",0,1,"dimension along which to transform [default=0]");
-    struct arg_int    *a_n = arg_intn("n","nfft","<uint>",0,1,"transform length [default=L]");
-    struct arg_lit   *a_rl = arg_litn("r","real",0,1,"return real Y (i.e., X is only nonnegative freqs)");
-    struct arg_lit   *a_sc = arg_litn("s","scale",0,1,"include to scale by sqrt(2) [default is 1/nfft]");
+    struct arg_int    *a_n = arg_intn("n","ndft","<uint>",0,1,"transform length [default=L]");
+    struct arg_int    *a_f = arg_intn("f","F","<uint>",0,1,"num freq bins to output [default=ndft/2+1 or ndft]");
+    struct arg_lit   *a_sc = arg_litn("s","scale",0,1,"include to scale by sqrt(0.5/n) [default=no scale]");
     struct arg_file  *a_fo = arg_filen("o","ofile","<file>",0,O,"output file (Y)");
     struct arg_lit *a_help = arg_litn("h","help",0,1,"display this help and exit");
     struct arg_end  *a_end = arg_end(5);
-    void *argtable[] = {a_fi, a_d, a_n, a_rl, a_sc, a_fo, a_help, a_end};
+    void *argtable[] = {a_fi, a_d, a_n, a_f, a_sc, a_fo, a_help, a_end};
     if (arg_nullcheck(argtable)!=0) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating argtable" << endl; return 1; }
     nerrs = arg_parse(argc, argv, argtable);
     if (a_help->count>0)
@@ -130,36 +119,34 @@ int main(int argc, char *argv[])
     else { dim = size_t(a_d->ival[0]); }
     if (dim>3u) { cerr << progstr+": " << __LINE__ << errstr << "dim must be in {0,1,2,3}" << endl; return 1; }
 
-    //Get rl
-    rl = (a_rl->count>0);
+    //Get ndft
+    Lx = (dim==0u) ? i1.R : (dim==1u) ? i1.C : (dim==2u) ? i1.S : i1.H;
+    if (a_n->count==0) { ndft = Lx; }
+    else if (a_n->ival[0]<1) { cerr << progstr+": " << __LINE__ << errstr << "ndft must be positive" << endl; return 1; }
+    else { ndft = size_t(a_n->ival[0]); }
+    if (ndft<Lx) { cerr << progstr+": " << __LINE__ << errstr << "ndft must be >= Lx (length of vecs in X)" << endl; return 1; }
+
+    //Get F
+    if (a_f->count==0) { F = i1.isreal() ? ndft/2u+1u : ndft; }
+    else if (a_f->ival[0]<1) { cerr << progstr+": " << __LINE__ << errstr << "F must be positive" << endl; return 1; }
+    else { F = size_t(a_f->ival[0]); }
+    if (F>ndft) { cerr << progstr+": " << __LINE__ << errstr << "F must be <= ndft" << endl; return 1; }
 
     //Get sc
     sc = (a_sc->count>0);
 
-    //Get nfft
-    Lx = (dim==0u) ? i1.R : (dim==1u) ? i1.C : (dim==2u) ? i1.S : i1.H;
-    if (a_n->count==0)
-    {
-        nfft = Lx;
-        if (rl) { nfft = 2u*(nfft-1u); }
-    }
-    else if (a_n->ival[0]<1) { cerr << progstr+": " << __LINE__ << errstr << "nfft must be positive" << endl; return 1; }
-    else { nfft = size_t(a_n->ival[0]); }
-    if (nfft<Lx) { cerr << progstr+": " << __LINE__ << errstr << "nfft must be >= Lx (length of vecs in X)" << endl; return 1; }
-
 
     //Checks
     if (i1.isempty()) { cerr << progstr+": " << __LINE__ << errstr << "input (X) found to be empty" << endl; return 1; }
-    if (i1.isreal()) { cerr << progstr+": " << __LINE__ << errstr << "input (X) must be complex" << endl; return 1; }
 
 
     //Set output header info
     o1.F = i1.F;
-    o1.T = (rl) ? i1.T-100u : i1.T;
-    o1.R = (dim==0u) ? nfft : i1.R;
-    o1.C = (dim==1u) ? nfft : i1.C;
-    o1.S = (dim==2u) ? nfft : i1.S;
-    o1.H = (dim==3u) ? nfft : i1.H;
+    o1.T = i1.isreal() ? i1.T+100u : i1.T;
+    o1.R = (dim==0u) ? F : i1.R;
+    o1.C = (dim==1u) ? F : i1.C;
+    o1.S = (dim==2u) ? F : i1.S;
+    o1.H = (dim==3u) ? F : i1.H;
 
 
     //Open output
@@ -178,17 +165,16 @@ int main(int argc, char *argv[])
 
 
     //Process
-    clock_gettime(CLOCK_REALTIME,&tic);
-    if (o1.T==1u)
+    if (i1.T==1u)
     {
         float *X, *Y;
-        try { X = new float[2u*i1.N()]; }
+        try { X = new float[i1.N()]; }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for input file (X)" << endl; return 1; }
-        try { Y = new float[o1.N()]; }
+        try { Y = new float[2u*o1.N()]; }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for output file (Y)" << endl; return 1; }
         try { ifs1.read(reinterpret_cast<char*>(X),i1.nbytes()); }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file (X)" << endl; return 1; }
-        if (codee::ifft_fftw_s(Y,X,i1.R,i1.C,i1.S,i1.H,i1.iscolmajor(),dim,nfft,sc))
+        if (codee::dft_s(Y,X,i1.R,i1.C,i1.S,i1.H,i1.iscolmajor(),dim,ndft,F,sc))
         { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
         if (wo1)
         {
@@ -197,16 +183,16 @@ int main(int argc, char *argv[])
         }
         delete[] X; delete[] Y;
     }
-    else if (o1.T==2u)
+    else if (i1.T==2u)
     {
         double *X, *Y;
-        try { X = new double[2u*i1.N()]; }
+        try { X = new double[i1.N()]; }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for input file (X)" << endl; return 1; }
-        try { Y = new double[o1.N()]; }
+        try { Y = new double[2u*o1.N()]; }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for output file (Y)" << endl; return 1; }
         try { ifs1.read(reinterpret_cast<char*>(X),i1.nbytes()); }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file (X)" << endl; return 1; }
-        if (codee::ifft_fftw_d(Y,X,i1.R,i1.C,i1.S,i1.H,i1.iscolmajor(),dim,nfft,sc))
+        if (codee::dft_d(Y,X,i1.R,i1.C,i1.S,i1.H,i1.iscolmajor(),dim,ndft,F,sc))
         { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
         if (wo1)
         {
@@ -215,7 +201,7 @@ int main(int argc, char *argv[])
         }
         delete[] X; delete[] Y;
     }
-    else if (o1.T==101u)
+    else if (i1.T==101u)
     {
         float *X, *Y;
         try { X = new float[2u*i1.N()]; }
@@ -224,7 +210,8 @@ int main(int argc, char *argv[])
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for output file (Y)" << endl; return 1; }
         try { ifs1.read(reinterpret_cast<char*>(X),i1.nbytes()); }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file (X)" << endl; return 1; }
-        if (codee::ifft_fftw_c(Y,X,i1.R,i1.C,i1.S,i1.H,i1.iscolmajor(),dim,nfft,sc)) { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
+        if (codee::dft_c(Y,X,i1.R,i1.C,i1.S,i1.H,i1.iscolmajor(),dim,ndft,F,sc))
+        { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
         if (wo1)
         {
             try { ofs1.write(reinterpret_cast<char*>(Y),o1.nbytes()); }
@@ -232,7 +219,7 @@ int main(int argc, char *argv[])
         }
         delete[] X; delete[] Y;
     }
-    else if (o1.T==102u)
+    else if (i1.T==102u)
     {
         double *X, *Y;
         try { X = new double[2u*i1.N()]; }
@@ -241,7 +228,8 @@ int main(int argc, char *argv[])
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for output file (Y)" << endl; return 1; }
         try { ifs1.read(reinterpret_cast<char*>(X),i1.nbytes()); }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file (X)" << endl; return 1; }
-        if (codee::ifft_fftw_z(Y,X,i1.R,i1.C,i1.S,i1.H,i1.iscolmajor(),dim,nfft,sc)) { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
+        if (codee::dft_z(Y,X,i1.R,i1.C,i1.S,i1.H,i1.iscolmajor(),dim,ndft,F,sc))
+        { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
         if (wo1)
         {
             try { ofs1.write(reinterpret_cast<char*>(Y),o1.nbytes()); }
@@ -253,8 +241,6 @@ int main(int argc, char *argv[])
     {
         cerr << progstr+": " << __LINE__ << errstr << "data type not supported" << endl; return 1;
     }
-    clock_gettime(CLOCK_REALTIME,&toc);
-    cerr << "elapsed time = " << double(toc.tv_sec-tic.tv_sec)*1e3 + double(toc.tv_nsec-tic.tv_nsec)/1e6 << " ms" << endl;
     
 
     //Exit

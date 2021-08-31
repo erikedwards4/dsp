@@ -245,9 +245,9 @@ int fft_fftw_c (float *Y, const float *X, const size_t R, const size_t C, const 
             {
                 for (size_t g=G; g>0u; --g, X+=2u*B*(Lx-1u), Y+=2u*B*(nfft-1))
                 {
-                    for (size_t b=B; b>0u; --b, X-=2u*K*Lx-1u, Y1-=2u*nfft, Y-=2u*K*nfft-2u)
+                    for (size_t b=B; b>0u; --b, X-=2u*K*Lx-2u, Y1-=2u*nfft, Y-=2u*K*nfft-2u)
                     {
-                        for (size_t l=Lx; l>0u; --l, X+=2u*K-1u, ++X1) { *X1 = *X; *++X1 = *++X; }
+                        for (size_t l=Lx; l>0u; --l, X+=2u*K, ++X1) { *X1 = *X; *++X1 = *(X+1); }
                         X1 -= 2u*Lx;
                         fftwf_execute(fplan);
                         for (size_t n=nfft; n>0u; --n, ++Y1, Y+=2u*K) { *Y = *Y1; *(Y+1) = *++Y1; }
@@ -325,9 +325,9 @@ int fft_fftw_z (double *Y, const double *X, const size_t R, const size_t C, cons
             {
                 for (size_t g=G; g>0u; --g, X+=2u*B*(Lx-1u), Y+=2u*B*(nfft-1))
                 {
-                    for (size_t b=B; b>0u; --b, X-=2u*K*Lx-1u, Y1-=2u*nfft, Y-=2u*K*nfft-2u)
+                    for (size_t b=B; b>0u; --b, X-=2u*K*Lx-2u, Y1-=2u*nfft, Y-=2u*K*nfft-2u)
                     {
-                        for (size_t l=Lx; l>0u; --l, X+=2u*K-1u, ++X1) { *X1 = *X; *++X1 = *++X; }
+                        for (size_t l=Lx; l>0u; --l, X+=2u*K, ++X1) { *X1 = *X; *++X1 = *(X+1); }
                         X1 -= 2u*Lx;
                         fftw_execute(fplan);
                         for (size_t n=nfft; n>0u; --n, ++Y1, Y+=2u*K) { *Y = *Y1; *(Y+1) = *++Y1; }

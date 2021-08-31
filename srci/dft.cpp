@@ -1,5 +1,5 @@
 //Includes
-#include "dft.cblas.c"
+#include "dft.c"
 
 //Declarations
 const valarray<size_t> oktypes = {1u,2u,101u,102u};
@@ -10,7 +10,7 @@ int sc;
 //Description
 string descr;
 descr += "1D DFT (discrete Fourier transform) of each vector (1D signal) in X.\n";
-descr += "This version uses a CBLAS matrix multiplication by the DFT matrix.\n";
+descr += "This version uses a direct matrix multiplication by the DFT matrix.\n";
 descr += "\n";
 descr += "Use -d (--dim) to give the dimension along which to transform.\n";
 descr += "Use -d0 to operate along cols, -d1 to operate along rows, etc.\n";
@@ -27,9 +27,9 @@ descr += "\n";
 descr += "The output (Y) is complex-valued with length F along dim. \n";
 descr += "\n";
 descr += "Examples:\n";
-descr += "$ dft.cblas -n16 X -o Y \n";
-descr += "$ dft.cblas -d1 -n16 -f4 X > Y \n";
-descr += "$ cat X | dft.cblas -d1 -n40 -f15 > Y \n";
+descr += "$ dft -n16 X -o Y \n";
+descr += "$ dft -d1 -n16 -f4 X > Y \n";
+descr += "$ cat X | dft -d1 -n40 -f15 > Y \n";
 
 //Argtable
 struct arg_file  *a_fi = arg_filen(nullptr,nullptr,"<file>",I-1,I,"input file (X)");
@@ -86,7 +86,7 @@ if (i1.T==1u)
     catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for output file (Y)" << endl; return 1; }
     try { ifs1.read(reinterpret_cast<char*>(X),i1.nbytes()); }
     catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file (X)" << endl; return 1; }
-    if (codee::dft_cblas_s(Y,X,i1.R,i1.C,i1.S,i1.H,i1.iscolmajor(),dim,ndft,F,sc))
+    if (codee::dft_s(Y,X,i1.R,i1.C,i1.S,i1.H,i1.iscolmajor(),dim,ndft,F,sc))
     { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
     if (wo1)
     {
@@ -104,7 +104,7 @@ else if (i1.T==101u)
     catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for output file (Y)" << endl; return 1; }
     try { ifs1.read(reinterpret_cast<char*>(X),i1.nbytes()); }
     catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file (X)" << endl; return 1; }
-    if (codee::dft_cblas_c(Y,X,i1.R,i1.C,i1.S,i1.H,i1.iscolmajor(),dim,ndft,F,sc))
+    if (codee::dft_c(Y,X,i1.R,i1.C,i1.S,i1.H,i1.iscolmajor(),dim,ndft,F,sc))
     { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
     if (wo1)
     {

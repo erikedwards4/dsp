@@ -3,6 +3,7 @@
 //@license BSD 3-clause
 
 
+#include <ctime>
 #include <iostream>
 #include <fstream>
 #include <unistd.h>
@@ -11,7 +12,7 @@
 #include <valarray>
 #include <unordered_map>
 #include <argtable2.h>
-#include "cmli.hpp"
+#include "../util/cmli.hpp"
 #include "ifft.rad2.c"
 
 #ifdef I
@@ -22,6 +23,7 @@
 int main(int argc, char *argv[])
 {
     using namespace std;
+    timespec tic, toc;
 
 
     //Declarations
@@ -95,12 +97,12 @@ int main(int argc, char *argv[])
 
 
     //Check stdin
-    stdi1 = (a_fi->count==0 || strlen(a_fi->filename[0])==0 || strcmp(a_fi->filename[0],"-")==0);
+    stdi1 = (a_fi->count==0 || strlen(a_fi->filename[0])==0u || strcmp(a_fi->filename[0],"-")==0);
     if (stdi1>0 && isatty(fileno(stdin))) { cerr << progstr+": " << __LINE__ << errstr << "no stdin detected" << endl; return 1; }
 
 
     //Check stdout
-    if (a_fo->count>0) { stdo1 = (strlen(a_fo->filename[0])==0 || strcmp(a_fo->filename[0],"-")==0); }
+    if (a_fo->count>0) { stdo1 = (strlen(a_fo->filename[0])==0u || strcmp(a_fo->filename[0],"-")==0); }
     else { stdo1 = (!isatty(fileno(stdout))); }
     wo1 = (stdo1 || a_fo->count>0);
 
@@ -176,6 +178,7 @@ int main(int argc, char *argv[])
 
 
     //Process
+    clock_gettime(CLOCK_REALTIME,&tic);
     if (o1.T==1u)
     {
         float *X, *Y;
@@ -194,7 +197,7 @@ int main(int argc, char *argv[])
         }
         delete[] X; delete[] Y;
     }
-    else if (o1.T==2)
+    else if (o1.T==2u)
     {
         double *X, *Y;
         try { X = new double[2u*i1.N()]; }
@@ -250,9 +253,10 @@ int main(int argc, char *argv[])
     {
         cerr << progstr+": " << __LINE__ << errstr << "data type not supported" << endl; return 1;
     }
+    clock_gettime(CLOCK_REALTIME,&toc);
+    cerr << "elapsed time = " << double(toc.tv_sec-tic.tv_sec)*1e3 + double(toc.tv_nsec-tic.tv_nsec)/1e6 << " ms" << endl;
     
 
     //Exit
     return ret;
 }
-
