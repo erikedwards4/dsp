@@ -17,13 +17,13 @@ namespace codee {
 extern "C" {
 #endif
 
-int xcorr1d_s (float *Y, const float *X1, const float *X2, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t L2, const size_t pad, const size_t str, const size_t dil, const size_t dim);
-int xcorr1d_d (double *Y, const double *X1, const double *X2, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t L2, const size_t pad, const size_t str, const size_t dil, const size_t dim);
-int xcorr1d_c (float *Y, const float *X1, const float *X2, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t L2, const size_t pad, const size_t str, const size_t dil, const size_t dim);
-int xcorr1d_z (double *Y, const double *X1, const double *X2, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t L2, const size_t pad, const size_t str, const size_t dil, const size_t dim);
+int xcorr1d_s (float *Y, const float *X1, const float *X2, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t L2, const int pad, const size_t str, const size_t dil, const size_t dim);
+int xcorr1d_d (double *Y, const double *X1, const double *X2, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t L2, const int pad, const size_t str, const size_t dil, const size_t dim);
+int xcorr1d_c (float *Y, const float *X1, const float *X2, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t L2, const int pad, const size_t str, const size_t dil, const size_t dim);
+int xcorr1d_z (double *Y, const double *X1, const double *X2, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t L2, const int pad, const size_t str, const size_t dil, const size_t dim);
 
 
-int xcorr1d_s (float *Y, const float *X1, const float *X2, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t L2, const size_t pad, const size_t str, const size_t dil, const size_t dim)
+int xcorr1d_s (float *Y, const float *X1, const float *X2, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t L2, const int pad, const size_t str, const size_t dil, const size_t dim)
 {
     if (dim>3u) { fprintf(stderr,"error in xcorr1d_s: dim must be in [0 3]\n"); return 1; }
     if (str<1u) { fprintf(stderr,"error in xcorr1d_s: str (stride) must be positive\n"); return 1; }
@@ -34,9 +34,9 @@ int xcorr1d_s (float *Y, const float *X1, const float *X2, const size_t R, const
     const size_t L1 = (dim==0u) ? R : (dim==1u) ? C : (dim==2u) ? S : H;
     if (N<1u) { fprintf(stderr,"error in xcorr1d_s: N (total length of X1) must be positive\n"); return 1; }
     if (L1<1u) { fprintf(stderr,"error in xcorr1d_s: L1 (length of vecs in X1) must be positive\n"); return 1; }
-    if (L1+2u*pad<=dil*(L2-1u)) { fprintf(stderr,"error in xcorr1d_s: L1+2*pad must be > dil*(L2-1)\n"); return 1; }
+    if ((int)L1+2*pad<=(int)(dil*(L2-1u))) { fprintf(stderr,"error in xcorr1d_s: L1+2*pad must be > dil*(L2-1)\n"); return 1; }
 
-    const int N1 = (int)(L1+2u*pad);            //full length of vecs in X1 including padding
+    const int N1 = (int)L1 + 2*pad;             //full length of vecs in X1 including padding
     const int N2 = (int)(dil*(L2-1u)) + 1;      //full length of vec in X2 including dilation
     const int inc = (int)str - (int)(dil*L2);   //fixed increment for X1 below
     size_t w=0u, W;                             //current frame and total frames
@@ -55,7 +55,7 @@ int xcorr1d_s (float *Y, const float *X1, const float *X2, const size_t R, const
         //struct timespec tic, toc; clock_gettime(CLOCK_REALTIME,&tic);
 
         //Init ss, es
-        ss = -(int)pad; es = ss + N2 - 1;
+        ss = -pad; es = ss + N2 - 1;
 
         //X2 before first samp of X1
         while (es<0 && w<W) { *Y++ = 0.0f; es+=str; ++w; }
@@ -71,7 +71,7 @@ int xcorr1d_s (float *Y, const float *X1, const float *X2, const size_t R, const
             X2 += 1 + es/(int)dil;
             ss+=str; es+=str; ++w;
         }
-        X2 -= L2 - 1u;
+        X1 += ss; X2 -= L2 - 1u;
 
         if (N2>(int)L1) //X1 fully within X2
         {
@@ -130,7 +130,7 @@ int xcorr1d_s (float *Y, const float *X1, const float *X2, const size_t R, const
             for (size_t b=B; b>0u; --b, ++X1, Y-=K*W-1u)
             {
                 //Init ss, es, w
-                ss = -(int)pad; es = ss + N2 - 1; w = 0u;
+                ss = -pad; es = ss + N2 - 1; w = 0u;
 
                 //X2 before first samp of X1
                 while (es<0 && w<W) { *Y = 0.0f; Y+=K; es+=str; ++w; }
@@ -146,7 +146,7 @@ int xcorr1d_s (float *Y, const float *X1, const float *X2, const size_t R, const
                     X2 += 1 + es/(int)dil;
                     ss+=str; es+=str; ++w;
                 }
-                X2 -= L2 - 1u;
+                X1 += ss*(int)K; X2 -= L2 - 1u;
 
                 if (N2>(int)L1) //X1 fully within X2
                 {
@@ -200,7 +200,7 @@ int xcorr1d_s (float *Y, const float *X1, const float *X2, const size_t R, const
 }
 
 
-int xcorr1d_d (double *Y, const double *X1, const double *X2, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t L2, const size_t pad, const size_t str, const size_t dil, const size_t dim)
+int xcorr1d_d (double *Y, const double *X1, const double *X2, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t L2, const int pad, const size_t str, const size_t dil, const size_t dim)
 {
     if (dim>3u) { fprintf(stderr,"error in xcorr1d_d: dim must be in [0 3]\n"); return 1; }
     if (str<1u) { fprintf(stderr,"error in xcorr1d_d: str (stride) must be positive\n"); return 1; }
@@ -211,9 +211,9 @@ int xcorr1d_d (double *Y, const double *X1, const double *X2, const size_t R, co
     const size_t L1 = (dim==0u) ? R : (dim==1u) ? C : (dim==2u) ? S : H;
     if (N<1u) { fprintf(stderr,"error in xcorr1d_d: N (total length of X1) must be positive\n"); return 1; }
     if (L1<1u) { fprintf(stderr,"error in xcorr1d_d: L1 (length of vecs in X1) must be positive\n"); return 1; }
-    if (L1+2u*pad<=dil*(L2-1u)) { fprintf(stderr,"error in xcorr1d_d: L1+2*pad must be > dil*(L2-1)\n"); return 1; }
+    if ((int)L1+2*pad<=(int)(dil*(L2-1u))) { fprintf(stderr,"error in xcorr1d_d: L1+2*pad must be > dil*(L2-1)\n"); return 1; }
 
-    const int N1 = (int)(L1+2u*pad);            //full length of vecs in X1 including padding
+    const int N1 = (int)L1 + 2*pad;             //full length of vecs in X1 including padding
     const int N2 = (int)(dil*(L2-1u)) + 1;      //full length of vec in X2 including dilation
     const int inc = (int)str - (int)(dil*L2);   //fixed increment for X1 below
     size_t w=0u, W;                             //current frame and total frames
@@ -230,7 +230,7 @@ int xcorr1d_d (double *Y, const double *X1, const double *X2, const size_t R, co
     else if (L1==N)
     {
         //Init ss, es
-        ss = -(int)pad; es = ss + N2 - 1;
+        ss = -pad; es = ss + N2 - 1;
 
         //X2 before first samp of X1
         while (es<0 && w<W) { *Y++ = 0.0; es+=str; ++w; }
@@ -246,7 +246,7 @@ int xcorr1d_d (double *Y, const double *X1, const double *X2, const size_t R, co
             X2 += 1 + es/(int)dil;
             ss+=str; es+=str; ++w;
         }
-        X2 -= L2 - 1u;
+        X1 += ss; X2 -= L2 - 1u;
 
         if (N2>(int)L1) //X1 fully within X2
         {
@@ -300,7 +300,7 @@ int xcorr1d_d (double *Y, const double *X1, const double *X2, const size_t R, co
             for (size_t b=B; b>0u; --b, ++X1, Y-=K*W-1u)
             {
                 //Init ss, es, w
-                ss = -(int)pad; es = ss + N2 - 1; w = 0u;
+                ss = -pad; es = ss + N2 - 1; w = 0u;
 
                 //X2 before first samp of X1
                 while (es<0 && w<W) { *Y = 0.0; Y+=K; es+=str; ++w; }
@@ -316,7 +316,7 @@ int xcorr1d_d (double *Y, const double *X1, const double *X2, const size_t R, co
                     X2 += 1 + es/(int)dil;
                     ss+=str; es+=str; ++w;
                 }
-                X2 -= L2 - 1u;
+                X1 += ss*(int)K; X2 -= L2 - 1u;
 
                 if (N2>(int)L1) //X1 fully within X2
                 {
@@ -370,7 +370,7 @@ int xcorr1d_d (double *Y, const double *X1, const double *X2, const size_t R, co
 }
 
 
-int xcorr1d_c (float *Y, const float *X1, const float *X2, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t L2, const size_t pad, const size_t str, const size_t dil, const size_t dim)
+int xcorr1d_c (float *Y, const float *X1, const float *X2, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t L2, const int pad, const size_t str, const size_t dil, const size_t dim)
 {
     if (dim>3u) { fprintf(stderr,"error in xcorr1d_c: dim must be in [0 3]\n"); return 1; }
     if (str<1u) { fprintf(stderr,"error in xcorr1d_c: str (stride) must be positive\n"); return 1; }
@@ -381,9 +381,9 @@ int xcorr1d_c (float *Y, const float *X1, const float *X2, const size_t R, const
     const size_t L1 = (dim==0u) ? R : (dim==1u) ? C : (dim==2u) ? S : H;
     if (N<1u) { fprintf(stderr,"error in xcorr1d_c: N (total length of X1) must be positive\n"); return 1; }
     if (L1<1u) { fprintf(stderr,"error in xcorr1d_c: L1 (length of vecs in X1) must be positive\n"); return 1; }
-    if (L1+2u*pad<=dil*(L2-1u)) { fprintf(stderr,"error in xcorr1d_c: L1+2*pad must be > dil*(L2-1)\n"); return 1; }
+    if ((int)L1+2*pad<=(int)(dil*(L2-1u))) { fprintf(stderr,"error in xcorr1d_c: L1+2*pad must be > dil*(L2-1)\n"); return 1; }
 
-    const int N1 = (int)(L1+2u*pad);            //full length of vecs in X1 including padding
+    const int N1 = (int)L1 + 2*pad;             //full length of vecs in X1 including padding
     const int N2 = (int)(dil*(L2-1u)) + 1;      //full length of vec in X2 including dilation
     const int inc = (int)str - (int)(dil*L2);   //fixed increment for X1 below
     size_t w=0u, W;                             //current frame and total frames
@@ -394,13 +394,13 @@ int xcorr1d_c (float *Y, const float *X1, const float *X2, const size_t R, const
     W = 1u + (size_t)(N1-N2)/str;
 
     //Don't flip X2
-    X2 += 2u*L2 - 2u;
+    X2 += 2u*(L2-1u);
 
     if (W==0u) {}
     else if (L1==N)
     {
         //Init ss, es
-        ss = -(int)pad; es = ss + N2 - 1;
+        ss = -pad; es = ss + N2 - 1;
 
         //X2 before first samp of X1
         while (es<0 && w<W) { *Y++ = 0.0f; *Y++ = 0.0f; es+=str; ++w; }
@@ -420,7 +420,7 @@ int xcorr1d_c (float *Y, const float *X1, const float *X2, const size_t R, const
             X2 += 2*(1 + es/(int)dil);
             ss+=str; es+=str; ++w;
         }
-        X2 -= 2u*L2 - 2u;
+        X1 += 2*ss; X2 -= 2u*(L2-1u);
 
         if (N2>(int)L1) //X1 fully within X2
         {
@@ -465,7 +465,8 @@ int xcorr1d_c (float *Y, const float *X1, const float *X2, const size_t R, const
                 smi += *X1**(X2+1) + *(X1+1)**X2;
             }
             *Y++ = smr; *Y++ = smi;
-            X1 += 2*((int)str-(int)(dil*l)); X2 -= 2u*l;
+            X1 += 2*((int)str-(int)(dil*l));
+            X2 -= 2u*l;
             ss+=str; es+=str; ++w;
         }
 
@@ -483,7 +484,7 @@ int xcorr1d_c (float *Y, const float *X1, const float *X2, const size_t R, const
             for (size_t b=B; b>0u; --b, X1+=2, Y-=2u*K*W-2u)
             {
                 //Init ss, es, w
-                ss = -(int)pad; es = ss + N2 - 1; w = 0u;
+                ss = -pad; es = ss + N2 - 1; w = 0u;
 
                 //X2 before first samp of X1
                 while (es<0 && w<W) { *Y = *(Y+1) = 0.0f; Y+=2u*K; es+=str; ++w; }
@@ -503,7 +504,7 @@ int xcorr1d_c (float *Y, const float *X1, const float *X2, const size_t R, const
                     X2 += 2*(1+es/(int)dil);
                     ss+=str; es+=str; ++w;
                 }
-                X2 -= 2u*L2 - 2u;
+                X1 += 2*ss*(int)K; X2 -= 2u*(L2-1u);;
 
                 if (N2>(int)L1) //X1 fully within X2
                 {
@@ -557,7 +558,7 @@ int xcorr1d_c (float *Y, const float *X1, const float *X2, const size_t R, const
                 while (w<W) { *Y = *(Y+1) = 0.0f; Y += 2u*K; ++w; }
 
                 //Reset X1, X2
-                X1 -= 2*(int)K*ss; X2 += 2u*L2 - 2u;
+                X1 -= 2*(int)K*ss; X2 += 2u*(L2-1u);
             }
         }
     }
@@ -566,7 +567,7 @@ int xcorr1d_c (float *Y, const float *X1, const float *X2, const size_t R, const
 }
 
 
-int xcorr1d_z (double *Y, const double *X1, const double *X2, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t L2, const size_t pad, const size_t str, const size_t dil, const size_t dim)
+int xcorr1d_z (double *Y, const double *X1, const double *X2, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t L2, const int pad, const size_t str, const size_t dil, const size_t dim)
 {
     if (dim>3u) { fprintf(stderr,"error in xcorr1d_z: dim must be in [0 3]\n"); return 1; }
     if (str<1u) { fprintf(stderr,"error in xcorr1d_z: str (stride) must be positive\n"); return 1; }
@@ -577,9 +578,9 @@ int xcorr1d_z (double *Y, const double *X1, const double *X2, const size_t R, co
     const size_t L1 = (dim==0u) ? R : (dim==1u) ? C : (dim==2u) ? S : H;
     if (N<1u) { fprintf(stderr,"error in xcorr1d_z: N (total length of X1) must be positive\n"); return 1; }
     if (L1<1u) { fprintf(stderr,"error in xcorr1d_z: L1 (length of vecs in X1) must be positive\n"); return 1; }
-    if (L1+2u*pad<=dil*(L2-1u)) { fprintf(stderr,"error in xcorr1d_z: L1+2*pad must be > dil*(L2-1)\n"); return 1; }
+    if ((int)L1+2*pad<=(int)(dil*(L2-1u))) { fprintf(stderr,"error in xcorr1d_z: L1+2*pad must be > dil*(L2-1)\n"); return 1; }
 
-    const int N1 = (int)(L1+2u*pad);            //full length of vecs in X1 including padding
+    const int N1 = (int)L1 + 2*pad;             //full length of vecs in X1 including padding
     const int N2 = (int)(dil*(L2-1u)) + 1;      //full length of vec in X2 including dilation
     const int inc = (int)str - (int)(dil*L2);   //fixed increment for X1 below
     size_t w=0u, W;                             //current frame and total frames
@@ -590,13 +591,13 @@ int xcorr1d_z (double *Y, const double *X1, const double *X2, const size_t R, co
     W = 1u + (size_t)(N1-N2)/str;
 
     //Don't flip X2
-    X2 += 2u*L2 - 2u;
+    X2 += 2u*(L2-1u);
 
     if (W==0u) {}
     else if (L1==N)
     {
         //Init ss, es
-        ss = -(int)pad; es = ss + N2 - 1;
+        ss = -pad; es = ss + N2 - 1;
 
         //X2 before first samp of X1
         while (es<0 && w<W) { *Y++ = 0.0; *Y++ = 0.0; es+=str; ++w; }
@@ -616,7 +617,7 @@ int xcorr1d_z (double *Y, const double *X1, const double *X2, const size_t R, co
             X2 += 2*(1 + es/(int)dil);
             ss+=str; es+=str; ++w;
         }
-        X2 -= 2u*L2 - 2u;
+        X1 += 2*ss; X2 -= 2u*(L2-1u);
 
         if (N2>(int)L1) //X1 fully within X2
         {
@@ -661,7 +662,8 @@ int xcorr1d_z (double *Y, const double *X1, const double *X2, const size_t R, co
                 smi += *X1**(X2+1) + *(X1+1)**X2;
             }
             *Y++ = smr; *Y++ = smi;
-            X1 += 2*((int)str-(int)(dil*l)); X2 -= 2u*l;
+            X1 += 2*((int)str-(int)(dil*l));
+            X2 -= 2u*l;
             ss+=str; es+=str; ++w;
         }
 
@@ -679,7 +681,7 @@ int xcorr1d_z (double *Y, const double *X1, const double *X2, const size_t R, co
             for (size_t b=B; b>0u; --b, X1+=2, Y-=2u*K*W-2u)
             {
                 //Init ss, es, w
-                ss = -(int)pad; es = ss + N2 - 1; w = 0u;
+                ss = -pad; es = ss + N2 - 1; w = 0u;
 
                 //X2 before first samp of X1
                 while (es<0 && w<W) { *Y = *(Y+1) = 0.0; Y+=2u*K; es+=str; ++w; }
@@ -699,7 +701,7 @@ int xcorr1d_z (double *Y, const double *X1, const double *X2, const size_t R, co
                     X2 += 2*(1+es/(int)dil);
                     ss+=str; es+=str; ++w;
                 }
-                X2 -= 2u*L2 - 2u;
+                X1 += 2*ss*(int)K; X2 -= 2u*(L2-1u);
 
                 if (N2>(int)L1) //X1 fully within X2
                 {
@@ -753,7 +755,7 @@ int xcorr1d_z (double *Y, const double *X1, const double *X2, const size_t R, co
                 while (w<W) { *Y = *(Y+1) = 0.0; Y += 2u*K; ++w; }
 
                 //Reset X1, X2
-                X1 -= 2*(int)K*ss; X2 += 2u*L2 - 2u;
+                X1 -= 2*(int)K*ss; X2 += 2u*(L2-1u);
             }
         }
     }

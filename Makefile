@@ -27,7 +27,7 @@ CFLAGS=$(WFLAG) $(STD) -O3 -ffast-math -march=native -mfpmath=sse $(INCLS)
 
 
 All: all
-all: Dirs Generate Transform Filter Conv Interp ZCs_LCs AR_Poly Linear_Pred Frame STFT Wavelets Nonlinear Clean
+all: Dirs Generate Transform Filter Conv Xcorr Interp ZCs_LCs AR_Poly Linear_Pred Frame STFT Wavelets Nonlinear Clean
 	rm -f 7 obj/*.o
 
 Dirs:
@@ -104,8 +104,12 @@ planck: srci/planck.cpp c/planck.c
 	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lm
 
 #Filts: generate some common/useful filter coefficients (vectors A and/or B to use with iir, fir, filter, etc.)
-Filts: spencer #rc butter smooth_diff smooth_diffdiff
+Filts: spencer smooth_diff smooth_diffdiff #rc butter
 spencer: srci/spencer.cpp c/spencer.c
+	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2
+smooth_diff: srci/smooth_diff.cpp c/smooth_diff.c
+	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2
+smooth_diffdiff: srci/smooth_diffdiff.cpp c/smooth_diffdiff.c
 	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2
 
 
@@ -211,21 +215,29 @@ filtfilt: srci/filtfilt.cpp c/filtfilt.c
 	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lopenblas -lm
 
 
-#Conv: 1-D convolution and cross-correlation
-Conv: conv xcorr conv1d xcorr1d conv_fft xcorr_fft conv1d_fft xcorr1d_fft
+#Conv: 1-D convolution
+Conv: conv conv1 conv1d conv_fft conv1d_fft
 conv: srci/conv.cpp c/conv.c
 	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2
-xcorr: srci/xcorr.cpp c/xcorr.c
+conv1: srci/conv1.cpp c/conv1.c
 	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2
 conv1d: srci/conv1d.cpp c/conv1d.c
 	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2
-xcorr1d: srci/xcorr1d.cpp c/xcorr1d.c
-	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2
 conv_fft: srci/conv_fft.cpp c/conv_fft.c
 	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lfftw3f -lfftw3 -lm
-xcorr_fft: srci/xcorr_fft.cpp c/xcorr_fft.c
-	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lfftw3f -lfftw3 -lm
 conv1d_fft: srci/conv1d_fft.cpp c/conv1d_fft.c
+	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lfftw3f -lfftw3 -lm
+
+
+#Xcorr: 1-D cross-correlation
+Xcorr: xcorr xcorr1 xcorr1d xcorr_fft xcorr1d_fft
+xcorr: srci/xcorr.cpp c/xcorr.c
+	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2
+xcorr1: srci/xcorr1.cpp c/xcorr1.c
+	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2
+xcorr1d: srci/xcorr1d.cpp c/xcorr1d.c
+	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2
+xcorr_fft: srci/xcorr_fft.cpp c/xcorr_fft.c
 	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lfftw3f -lfftw3 -lm
 xcorr1d_fft: srci/xcorr1d_fft.cpp c/xcorr1d_fft.c
 	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lfftw3f -lfftw3 -lm
@@ -374,8 +386,10 @@ analytic: srci/analytic.cpp c/analytic.c
 
 
 #Nonlinear: various nonlinear DSP methods
-Nonlinear: tkeo #medfilt
+Nonlinear: tkeo tkeo_smooth #medfilt
 tkeo: srci/tkeo.cpp c/tkeo.c
+	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2
+tkeo_smooth: srci/tkeo_smooth.cpp c/tkeo_smooth.c
 	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2
 medfilt: srci/medfilt.cpp c/medfilt.c
 	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lm

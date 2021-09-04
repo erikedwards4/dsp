@@ -2,6 +2,8 @@
 //Each vector in X1 has length L1. X2 has length L2.
 
 //FIR filtering is similar, except FIR is causal and conv is non-causal.
+//The overlap is controlled here by a shape param 'full', 'same', 'valid'.
+
 //Note that some "convolution" functions actually do cross-correlation.
 //For actual cross-correlation (no flip of X2), see xcorr.
 

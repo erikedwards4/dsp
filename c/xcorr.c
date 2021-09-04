@@ -359,7 +359,7 @@ int xcorr_c (float *Y, const float *X1, const float *X2, const size_t R, const s
     }
 
     //Don't flip X2
-    X2 += 2u*L2 - 2u;
+    X2 += 2u*(L2-1u);
 
     if (W==0u) {}
     else if (L1==N)
@@ -391,7 +391,7 @@ int xcorr_c (float *Y, const float *X1, const float *X2, const size_t R, const s
                     smi += *X1**(X2+1) + *(X1+1)**X2;
                 }
                 *Y++ = smr; *Y++ = smi;
-                X1 -= 2u*L1; X2 -= 2u*L1+2u;
+                X1 -= 2u*L1; X2 -= 2u*(L1+1u);
                 ++ss; ++w;
             }
             es = ss + (int)L2 - 1;
@@ -465,7 +465,7 @@ int xcorr_c (float *Y, const float *X1, const float *X2, const size_t R, const s
                             smi += *X1**(X2+1) + *(X1+1)**X2;
                         }
                         *Y = smr; *(Y+1) = smi; Y += 2u*K;
-                        X1 -= 2u*K*L1; X2 -= 2u*L1 + 2u;
+                        X1 -= 2u*K*L1; X2 -= 2u*(L1+1u);
                         ++ss; ++w;
                     }
                     es = ss + (int)L2 - 1;
@@ -501,7 +501,7 @@ int xcorr_c (float *Y, const float *X1, const float *X2, const size_t R, const s
                     X2 -= 2*((int)L1-ss);
                     ++ss; ++w;
                 }
-                X1 -= 2*(int)K*ss; X2 += 2u*L2 - 2u;
+                X1 -= 2*(int)K*ss; X2 += 2u*(L2-1u);
                 ss -= (int)W; es = ss + (int)L2 - 1; w = 0u;
             }
         }
@@ -547,7 +547,7 @@ int xcorr_z (double *Y, const double *X1, const double *X2, const size_t R, cons
     }
 
     //Don't flip X2
-    X2 += 2u*L2 - 2u;
+    X2 += 2u*(L2-1u);
 
     if (W==0u) {}
     else if (L1==N)
@@ -579,7 +579,7 @@ int xcorr_z (double *Y, const double *X1, const double *X2, const size_t R, cons
                     smi += *X1**(X2+1) + *(X1+1)**X2;
                 }
                 *Y++ = smr; *Y++ = smi;
-                X1 -= 2u*L1; X2 -= 2u*L1+2u;
+                X1 -= 2u*L1; X2 -= 2u*(L1+1u);
                 ++ss; ++w;
             }
             es = ss + (int)L2 - 1;
@@ -653,7 +653,7 @@ int xcorr_z (double *Y, const double *X1, const double *X2, const size_t R, cons
                             smi += *X1**(X2+1) + *(X1+1)**X2;
                         }
                         *Y = smr; *(Y+1) = smi; Y += 2u*K;
-                        X1 -= 2u*K*L1; X2 -= 2u*L1 + 2u;
+                        X1 -= 2u*K*L1; X2 -= 2u*(L1+1u);
                         ++ss; ++w;
                     }
                     es = ss + (int)L2 - 1;
@@ -689,7 +689,7 @@ int xcorr_z (double *Y, const double *X1, const double *X2, const size_t R, cons
                     X2 -= 2*((int)L1-ss);
                     ++ss; ++w;
                 }
-                X1 -= 2*(int)K*ss; X2 += 2u*L2 - 2u;
+                X1 -= 2*(int)K*ss; X2 += 2u*(L2-1u);
                 ss -= (int)W; es = ss + (int)L2 - 1; w = 0u;
             }
         }

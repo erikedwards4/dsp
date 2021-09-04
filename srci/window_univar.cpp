@@ -23,7 +23,7 @@ descr += "The window (X2) must be real-valued.\n";
 descr += "\n";
 descr += "Other than the window input (X2), this is identical to frame_univar.\n";
 descr += "\n";
-descr += "Use -s (--step) to give the step-size (frame-shift) in samples [default=160].\n";
+descr += "Use -s (--step) to give the step-size (frame-shift) in samples [default=1].\n";
 descr += "\n";
 descr += "Use -e (--snip-edges) to set snip-edges to true [default=false].\n";
 descr += "This is a setting from HTK, Kaldi, Librosa, etc., which controls\n";
@@ -56,14 +56,14 @@ descr += "$ window_univar -s160 X1 <(hamming -l401) > Y \n";
 
 //Argtable
 struct arg_file  *a_fi = arg_filen(nullptr,nullptr,"<file>",I-1,I,"input files (X1,X2)");
-struct arg_int  *a_stp = arg_intn("s","step","<uint>",0,1,"step in samps between each frame [default=160]");
+struct arg_int  *a_stp = arg_intn("s","step","<uint>",0,1,"step in samps between each frame [default=1]");
 struct arg_lit  *a_sne = arg_litn("e","snip-edges",0,1,"include to snip edges [default=false]");
 struct arg_file  *a_fo = arg_filen("o","ofile","<file>",0,O,"output file (Y)");
 
 //Get options
 
 //Get stp
-if (a_stp->count==0) { stp = 160u; }
+if (a_stp->count==0) { stp = 1u; }
 else if (a_stp->ival[0]<1) { cerr << progstr+": " << __LINE__ << errstr << "stp must be positive" << endl; return 1; }
 else { stp = size_t(a_stp->ival[0]); }
 

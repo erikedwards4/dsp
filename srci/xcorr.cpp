@@ -12,6 +12,7 @@ string descr;
 descr += "1D cross-correlation of each vector in X1 by X2.\n";
 descr += "This is not identical to the xcorr function of Octave.\n";
 descr += "Rather, it is identical to conv, but without flipping X2.\n";
+descr += "For more options (stride, dilation), see xcorr1 and xcorr1d.\n";
 descr += "\n";
 descr += "X2 is a vector that is NOT in flipped order.\n";
 descr += "Note that some \"convolution\" functions actually do cross-corr.\n";
@@ -34,7 +35,7 @@ descr += "$ cat X2 | xcorr -d1 -s'valid' X1 - > Y \n";
 //Argtable
 struct arg_file  *a_fi = arg_filen(nullptr,nullptr,"<file>",I-1,I,"input files (X1,X2)");
 struct arg_str   *a_sh = arg_strn("s","shape","<str>",0,1,"shape [default='full']");
-struct arg_int    *a_d = arg_intn("d","dim","<uint>",0,1,"dimension along which to filter [default=0]");
+struct arg_int    *a_d = arg_intn("d","dim","<uint>",0,1,"dimension along which to operate [default=0]");
 struct arg_file  *a_fo = arg_filen("o","ofile","<file>",0,O,"output file (Y)");
 
 //Get options

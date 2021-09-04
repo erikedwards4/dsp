@@ -28,7 +28,7 @@ CFLAGS=$(WFLAG) $(STD) -O3 -ffast-math -march=native -mfpmath=sse -fPIC
 
 
 All: all
-all: Dirs Generate Transform Filter Conv Interp ZCs_LCs AR_Poly Linear_Pred Frame STFT Wavelets Nonlinear Clean
+all: Dirs Generate Transform Filter Conv Xcorr Interp ZCs_LCs AR_Poly Linear_Pred Frame STFT Wavelets Nonlinear Clean
 
 Dirs:
 	mkdir -pm 777 obj
@@ -77,8 +77,10 @@ tukey: tukey.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 planck: planck.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 
 #Filts: generate some useful filter coefficients (vectors A and B to use with iir, fir, filter, etc.)
-Filts: spencer #rc butter smooth_diff smooth_diffdiff
+Filts: spencer smooth_diff smooth_diffdiff #rc butter
 spencer: spencer.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+smooth_diff: smooth_diff.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+smooth_diffdiff: smooth_diffdiff.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 
 
 #Transform: common 1-D signal transforms
@@ -143,14 +145,20 @@ filtfilt: filtfilt.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 
 
 #Conv: convolution
-Conv: conv xcorr conv1d xcorr1d conv_fft xcorr_fft conv1d_fft xcorr1d_fft
+Conv: conv conv1 conv1d conv_fft conv1d_fft
 conv: conv.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
-xcorr: xcorr.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+conv1: conv1.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 conv1d: conv1d.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
-xcorr1d: xcorr1d.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 conv_fft: conv_fft.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
-xcorr_fft: xcorr_fft.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 conv1d_fft: conv1d_fft.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+
+
+#Xcorr: cross-correlation
+Conv: xcorr xcorr1 xcorr1d xcorr_fft  xcorr1d_fft
+xcorr: xcorr.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+xcorr1: xcorr1.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+xcorr1d: xcorr1d.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+xcorr_fft: xcorr_fft.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 xcorr1d_fft: xcorr1d_fft.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 
 
@@ -253,8 +261,9 @@ analytic: analytic.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 
 
 #Nonlinear: various nonlinear DSP methods
-Nonlinear: tkeo #medfilt
+Nonlinear: tkeo tkeo_smooth #medfilt
 tkeo: tkeo.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+tkeo_smooth: tkeo_smooth.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 medfilt: medfilt.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 
 

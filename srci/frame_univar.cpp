@@ -14,9 +14,9 @@ descr += "Takes univariate X and produces a series of (overlapping) frames.\n";
 descr += "The output Y has size LxW or WxL, where L is the length of each frame, \n";
 descr += "and W is the number of frames (a.k.a. windows).\n";
 descr += "\n";
-descr += "Use -l (--winlength) to give L, the length of each frame [default=401].\n";
+descr += "Use -l (--winlength) to give L, the length of each frame [default=1].\n";
 descr += "\n";
-descr += "Use -s (--step) to give the step-size (frame-shift) in samples [default=160].\n";
+descr += "Use -s (--step) to give the step-size (frame-shift) in samples [default=1].\n";
 descr += "\n";
 descr += "Use -e (--snip-edges) to set snip-edges to true [default=false].\n";
 descr += "This is a setting from HTK, Kaldi, Librosa, etc., which controls\n";
@@ -47,20 +47,20 @@ descr += "$ cat X | frame_univar -l127 -e > Y \n";
 
 //Argtable
 struct arg_file  *a_fi = arg_filen(nullptr,nullptr,"<file>",I-1,I,"input file (X)");
-struct arg_int   *a_wl = arg_intn("l","winlength","<uint>",0,1,"length in samps of each frame [default=401]");
-struct arg_int  *a_stp = arg_intn("s","step","<uint>",0,1,"step in samps between each frame [default=160]");
+struct arg_int   *a_wl = arg_intn("l","winlength","<uint>",0,1,"length in samps of each frame [default=1]");
+struct arg_int  *a_stp = arg_intn("s","step","<uint>",0,1,"step in samps between each frame [default=1]");
 struct arg_lit  *a_sne = arg_litn("e","snip-edges",0,1,"include to snip edges [default=false]");
 struct arg_file  *a_fo = arg_filen("o","ofile","<file>",0,O,"output file (Y)");
 
 //Get options
 
 //Get L
-if (a_wl->count==0) { L = 401u; }
+if (a_wl->count==0) { L = 1u; }
 else if (a_wl->ival[0]<1) { cerr << progstr+": " << __LINE__ << errstr << "L must be positive" << endl; return 1; }
 else { L = size_t(a_wl->ival[0]); }
 
 //Get stp
-if (a_stp->count==0) { stp = 160u; }
+if (a_stp->count==0) { stp = 1u; }
 else if (a_stp->ival[0]<1) { cerr << progstr+": " << __LINE__ << errstr << "stp must be positive" << endl; return 1; }
 else { stp = size_t(a_stp->ival[0]); }
 
