@@ -70,7 +70,7 @@ int conv1d_s (float *Y, const float *X1, const float *X2, const size_t R, const 
             X2 -= 1 + es/(int)dil;
             ss+=str; es+=str; ++w;
         }
-        X1 += 2*ss; X2 += L2 - 1u;
+        X1 += ss; X2 += L2 - 1u;
 
         if (N2>(int)L1) //X1 fully within X2
         {
@@ -140,7 +140,7 @@ int conv1d_s (float *Y, const float *X1, const float *X2, const size_t R, const 
                     X2 -= 1 + es/(int)dil;
                     ss+=str; es+=str; ++w;
                 }
-                X1 += 2*ss*(int)K; X2 += L2 - 1u;
+                X1 += ss*(int)K; X2 += L2 - 1u;
 
                 if (N2>(int)L1) //X1 fully within X2
                 {
@@ -237,7 +237,7 @@ int conv1d_d (double *Y, const double *X1, const double *X2, const size_t R, con
             X2 -= 1 + es/(int)dil;
             ss+=str; es+=str; ++w;
         }
-        X1 += 2*ss; X2 += L2 - 1u;
+        X1 += ss; X2 += L2 - 1u;
 
         if (N2>(int)L1) //X1 fully within X2
         {
@@ -307,7 +307,7 @@ int conv1d_d (double *Y, const double *X1, const double *X2, const size_t R, con
                     X2 -= 1 + es/(int)dil;
                     ss+=str; es+=str; ++w;
                 }
-                X1 += 2*ss*(int)K; X2 += L2 - 1u;
+                X1 += ss*(int)K; X2 += L2 - 1u;
 
                 if (N2>(int)L1) //X1 fully within X2
                 {
