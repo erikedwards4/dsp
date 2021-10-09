@@ -11,7 +11,7 @@
 #include <valarray>
 #include <unordered_map>
 #include <argtable2.h>
-#include "cmli.hpp"
+#include "../util/cmli.hpp"
 #include <cfloat>
 #include "window_univar.c"
 
@@ -54,7 +54,7 @@ int main(int argc, char *argv[])
     descr += "\n";
     descr += "Other than the window input (X2), this is identical to frame_univar.\n";
     descr += "\n";
-    descr += "Use -s (--step) to give the step-size (frame-shift) in samples [default=160].\n";
+    descr += "Use -s (--step) to give the step-size (frame-shift) in samples [default=1].\n";
     descr += "\n";
     descr += "Use -e (--snip-edges) to set snip-edges to true [default=false].\n";
     descr += "This is a setting from HTK, Kaldi, Librosa, etc., which controls\n";
@@ -89,7 +89,7 @@ int main(int argc, char *argv[])
     //Argtable
     int nerrs;
     struct arg_file  *a_fi = arg_filen(nullptr,nullptr,"<file>",I-1,I,"input files (X1,X2)");
-    struct arg_int  *a_stp = arg_intn("s","step","<uint>",0,1,"step in samps between each frame [default=160]");
+    struct arg_int  *a_stp = arg_intn("s","step","<uint>",0,1,"step in samps between each frame [default=1]");
     struct arg_lit  *a_sne = arg_litn("e","snip-edges",0,1,"include to snip edges [default=false]");
     struct arg_file  *a_fo = arg_filen("o","ofile","<file>",0,O,"output file (Y)");
     struct arg_lit *a_help = arg_litn("h","help",0,1,"display this help and exit");
@@ -107,14 +107,14 @@ int main(int argc, char *argv[])
 
 
     //Check stdin
-    stdi1 = (a_fi->count==0 || strlen(a_fi->filename[0])==0 || strcmp(a_fi->filename[0],"-")==0);
-    stdi2 = (a_fi->count<=1 || strlen(a_fi->filename[1])==0 || strcmp(a_fi->filename[1],"-")==0);
+    stdi1 = (a_fi->count==0 || strlen(a_fi->filename[0])==0u || strcmp(a_fi->filename[0],"-")==0);
+    stdi2 = (a_fi->count<=1 || strlen(a_fi->filename[1])==0u || strcmp(a_fi->filename[1],"-")==0);
     if (stdi1+stdi2>1) { cerr << progstr+": " << __LINE__ << errstr << "can only use stdin for one input" << endl; return 1; }
     if (stdi1+stdi2>0 && isatty(fileno(stdin))) { cerr << progstr+": " << __LINE__ << errstr << "no stdin detected" << endl; return 1; }
 
 
     //Check stdout
-    if (a_fo->count>0) { stdo1 = (strlen(a_fo->filename[0])==0 || strcmp(a_fo->filename[0],"-")==0); }
+    if (a_fo->count>0) { stdo1 = (strlen(a_fo->filename[0])==0u || strcmp(a_fo->filename[0],"-")==0); }
     else { stdo1 = (!isatty(fileno(stdout))); }
     wo1 = (stdo1 || a_fo->count>0);
 
@@ -140,7 +140,7 @@ int main(int argc, char *argv[])
     //Get options
 
     //Get stp
-    if (a_stp->count==0) { stp = 160u; }
+    if (a_stp->count==0) { stp = 1u; }
     else if (a_stp->ival[0]<1) { cerr << progstr+": " << __LINE__ << errstr << "stp must be positive" << endl; return 1; }
     else { stp = size_t(a_stp->ival[0]); }
 
@@ -204,7 +204,7 @@ int main(int argc, char *argv[])
         }
         delete[] X1; delete[] X2; delete[] Y;
     }
-    else if (o1.T==2)
+    else if (o1.T==2u)
     {
         double *X1, *X2, *Y;
         try { X1 = new double[i1.N()]; }
@@ -275,8 +275,11 @@ int main(int argc, char *argv[])
         cerr << progstr+": " << __LINE__ << errstr << "data type not supported" << endl; return 1;
     }
     
+    //Close fstreams
+    ifs1.close(); ifs2.close();
+
+    ofs1.close();
 
     //Exit
     return ret;
 }
-

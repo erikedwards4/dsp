@@ -43,6 +43,9 @@ int main(int argc, char *argv[])
     descr += "This is a generating function (no inputs except opts and params).\n";
     descr += "The resulting coeffs (B) can be used with fir.\n";
     descr += "\n";
+    descr += "This is a symmetric filter that is designed to allow all\n";
+    descr += "linear, quadratic and cubic functions to pass through unaltered.\n";
+    descr += "\n";
     descr += "Use -d (--dim) to give the nonsingleton dim of the output vec.\n";
     descr += "If d=0, then Y is a column vector [default].\n";
     descr += "If d=1, then Y is a row vector.\n";
@@ -165,6 +168,8 @@ int main(int argc, char *argv[])
         cerr << progstr+": " << __LINE__ << errstr << "data type not supported" << endl; return 1;
     }
     
+    //Close fstreams
+    ofs1.close();
 
     //Exit
     return ret;
