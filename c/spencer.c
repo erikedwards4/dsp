@@ -6,14 +6,12 @@
 //linear, quadratic and cubic functions to pass through unaltered.
 
 #include <stdio.h>
+#include "codee_dsp.h"
 
 #ifdef __cplusplus
 namespace codee {
 extern "C" {
 #endif
-
-int spencer_s (float *Y);
-int spencer_d (double *Y);
 
 
 int spencer_s (float *Y)

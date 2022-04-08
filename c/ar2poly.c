@@ -4,6 +4,7 @@
 //Thus, the output is just: Y = [1 -X] (i.e., negative of input with leading 1).
 
 #include <stdio.h>
+#include "codee_dsp.h"
 
 #ifdef __cplusplus
 namespace codee {

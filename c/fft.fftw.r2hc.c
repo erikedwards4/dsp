@@ -10,6 +10,7 @@
 #include <stdio.h>
 #include <math.h>
 #include <fftw3.h>
+#include "codee_dsp.h"
 //#include <time.h>
 
 #ifdef __cplusplus

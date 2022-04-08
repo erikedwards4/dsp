@@ -7,16 +7,12 @@
 //Otherwise, X and Xi must be monotonically increasing.
 
 #include <stdio.h>
+#include "codee_dsp.h"
 
 #ifdef __cplusplus
 namespace codee {
 extern "C" {
 #endif
-
-int interp1q_s (float *Yi, const float *X, const float *Y, const float *Xi, const size_t N, const size_t Ni, const int decreasing);
-int interp1q_d (double *Yi, const double *X, const double *Y, const double *Xi, const size_t N, const size_t Ni, const int decreasing);
-int interp1q_c (float *Yi, const float *X, const float *Y, const float *Xi, const size_t N, const size_t Ni, const int decreasing);
-int interp1q_z (double *Yi, const double *X, const double *Y, const double *Xi, const size_t N, const size_t Ni, const int decreasing);
 
 
 int interp1q_s (float *Yi, const float *X, const float *Y, const float *Xi, const size_t N, const size_t Ni, const int decreasing)

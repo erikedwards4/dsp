@@ -9,21 +9,12 @@
 #include <stdio.h>
 #include <math.h>
 #include <time.h>
+#include "codee_dsp.h"
 
 #ifdef __cplusplus
 namespace codee {
 extern "C" {
 #endif
-
-int iir_s (float *Y, const float *X, float *A, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t P, const size_t dim);
-int iir_d (double *Y, const double *X, double *A, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t P, const size_t dim);
-int iir_c (float *Y, const float *X, float *A, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t P, const size_t dim);
-int iir_z (double *Y, const double *X, double *A, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t P, const size_t dim);
-
-int iir_inplace_s (float *X, float *A, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t P, const size_t dim);
-int iir_inplace_d (double *X, double *A, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t P, const size_t dim);
-int iir_inplace_c (float *X, float *A, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t P, const size_t dim);
-int iir_inplace_z (double *X, double *A, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t P, const size_t dim);
 
 
 int iir_s (float *Y, const float *X, float *A, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t P, const size_t dim)
@@ -437,7 +428,7 @@ int iir_inplace_s (float *X, float *A, const size_t R, const size_t C, const siz
     const size_t N = R*C*S*H;
     const size_t L = (dim==0u) ? R : (dim==1u) ? C : (dim==2u) ? S : H;
 
-    struct timespec tic, toc; clock_gettime(CLOCK_REALTIME,&tic);
+    //struct timespec tic, toc; clock_gettime(CLOCK_REALTIME,&tic);
 
     //Deal with a0 (usually a0==1)
     const float a0 = *A++;
@@ -504,7 +495,8 @@ int iir_inplace_s (float *X, float *A, const size_t R, const size_t C, const siz
         }
     }
     
-    clock_gettime(CLOCK_REALTIME,&toc); fprintf(stderr,"elapsed time = %.6f ms\n",(double)(toc.tv_sec-tic.tv_sec)*1e3+(double)(toc.tv_nsec-tic.tv_nsec)/1e6);
+    //clock_gettime(CLOCK_REALTIME,&toc);
+    //fprintf(stderr,"elapsed time = %.6f ms\n",(double)(toc.tv_sec-tic.tv_sec)*1e3+(double)(toc.tv_nsec-tic.tv_nsec)/1e6);
 
     return 0;
 }

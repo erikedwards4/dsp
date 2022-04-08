@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <math.h>
 #include <fftw3.h>
+#include "codee_dsp.h"
 
 #ifndef M_SQRT1_2
     #define M_SQRT1_2 0.707106781186547524401
@@ -13,11 +14,6 @@
 namespace codee {
 extern "C" {
 #endif
-
-int idct_fftw_s (float *Y, const float *X, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t dim, const size_t ndct, const int sc);
-int idct_fftw_d (double *Y, const double *X, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t dim, const size_t ndct, const int sc);
-int idct_fftw_c (float *Y, const float *X, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t dim, const size_t ndct, const int sc);
-int idct_fftw_z (double *Y, const double *X, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t dim, const size_t ndct, const int sc);
 
 
 int idct_fftw_s (float *Y, const float *X, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t dim, const size_t ndct, const int sc)

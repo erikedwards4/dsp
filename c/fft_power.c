@@ -3,15 +3,13 @@
 // Y = |X|.^2 = Xr.*Xr + Xi.*Xi.
 
 #include <stdio.h>
+#include "codee_dsp.h"
 //#include <time.h>
 
 #ifdef __cplusplus
 namespace codee {
 extern "C" {
 #endif
-
-int fft_power_c (float *Y, const float *X, const size_t N);
-int fft_power_z (double *Y, const double *X, const size_t N);
 
 
 int fft_power_c (float *Y, const float *X, const size_t N)

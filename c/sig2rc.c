@@ -16,6 +16,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include "codee_dsp.h"
 
 #ifdef __cplusplus
 namespace codee {

@@ -12,6 +12,7 @@
 #include <float.h>
 #include <math.h>
 #include <time.h>
+#include "codee_dsp.h"
 
 #ifndef M_PI
     #define M_PI 3.14159265358979323846
@@ -21,11 +22,6 @@
 namespace codee {
 extern "C" {
 #endif
-
-int white_s (float *Y, const size_t N, const float std, const int uni, const int zmn);
-int white_d (double *Y, const size_t N, const double std, const int uni, const int zmn);
-int white_c (float *Y, const size_t N, const float std, const int uni, const int zmn);
-int white_z (double *Y, const size_t N, const double std, const int uni, const int zmn);
 
 
 int white_s (float *Y, const size_t N, const float std, const int uni, const int zmn)

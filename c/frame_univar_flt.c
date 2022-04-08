@@ -14,6 +14,7 @@
 #include <stdio.h>
 #include <float.h>
 #include <math.h>
+#include "codee_dsp.h"
 
 #ifdef __cplusplus
 namespace codee {

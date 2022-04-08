@@ -2,16 +2,12 @@
 
 #include <stdio.h>
 #include <math.h>
+#include "codee_dsp.h"
 
 #ifdef __cplusplus
 namespace codee {
 extern "C" {
 #endif
-
-int gauss_s (float *Y, const size_t L, const float r, const size_t norm);
-int gauss_d (double *Y, const size_t L, const double r, const size_t norm);
-int gauss_c (float *Y, const size_t L, const float r, const size_t norm);
-int gauss_z (double *Y, const size_t L, const double r, const size_t norm);
 
 
 int gauss_s (float *Y, const size_t L, const float a, const size_t norm)

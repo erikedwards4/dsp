@@ -7,14 +7,12 @@
 #include <stdio.h>
 #include <math.h>
 #include <fftw3.h>
+#include "codee_dsp.h"
 
 #ifdef __cplusplus
 namespace codee {
 extern "C" {
 #endif
-
-int inst_freq_s (float *Y, const float *X, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t dim, const size_t nfft);
-int inst_freq_d (double *Y, const double *X, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t dim, const size_t nfft);
 
 
 int inst_freq_s (float *Y, const float *X, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t dim, const size_t nfft)

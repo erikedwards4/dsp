@@ -3,16 +3,12 @@
 
 #include <stdio.h>
 #include <math.h>
+#include "codee_dsp.h"
 
 #ifdef __cplusplus
 namespace codee {
 extern "C" {
 #endif
-
-int triangular_s (float *Y, const size_t L, const size_t norm);
-int triangular_d (double *Y, const size_t L, const size_t norm);
-int triangular_c (float *Y, const size_t L, const size_t norm);
-int triangular_z (double *Y, const size_t L, const size_t norm);
 
 
 int triangular_s (float *Y, const size_t L, const size_t norm)

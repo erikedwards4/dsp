@@ -26,16 +26,12 @@
 //For more flexibility, see also window_univar_float.c.
 
 #include <stdio.h>
+#include "codee_dsp.h"
 
 #ifdef __cplusplus
 namespace codee {
 extern "C" {
 #endif
-
-int window_univar_s (float *Y, const float *X1, const float *X2, const size_t N, const size_t L, const size_t stp, const int snip_edges);
-int window_univar_d (double *Y, const double *X1, const double *X2, const size_t N, const size_t L, const size_t stp, const int snip_edges);
-int window_univar_c (float *Y, const float *X1, const float *X2, const size_t N, const size_t L, const size_t stp, const int snip_edges);
-int window_univar_z (double *Y, const double *X1, const double *X2, const size_t N, const size_t L, const size_t stp, const int snip_edges);
 
 
 int window_univar_s (float *Y, const float *X1, const float *X2, const size_t N, const size_t L, const size_t stp, const int snip_edges)

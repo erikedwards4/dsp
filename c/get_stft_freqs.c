@@ -4,6 +4,7 @@
 //If F>nfft/2+1, then the negative frequencies are included.
 
 #include <stdio.h>
+#include "codee_dsp.h"
 
 #ifdef __cplusplus
 namespace codee {

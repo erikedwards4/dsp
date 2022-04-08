@@ -12,6 +12,7 @@
 #include <stdio.h>
 #include <float.h>
 #include <math.h>
+#include "codee_dsp.h"
 
 #ifndef M_PI
     #define M_PI 3.14159265358979323846
@@ -25,11 +26,6 @@
 namespace codee {
 extern "C" {
 #endif
-
-int pulsewave_s (float *Y, const size_t N, const float amp, const float frq, const float phs, const float dty);
-int pulsewave_d (double *Y, const size_t N, const double amp, const double frq, const double phs, const double dty);
-int pulsewave_c (float *Y, const size_t N, const float amp, const float frq, const float phs, const float dty);
-int pulsewave_z (double *Y, const size_t N, const double amp, const double frq, const double phs, const double dty);
 
 
 int pulsewave_s (float *Y, const size_t N, const float amp, const float frq, const float phs, const float dty)

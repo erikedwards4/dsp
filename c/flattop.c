@@ -4,6 +4,7 @@
 
 #include <stdio.h>
 #include <math.h>
+#include "codee_dsp.h"
 
 #ifndef M_PI
    #define M_PI 3.141592653589793238462643383279502884
@@ -13,11 +14,6 @@
 namespace codee {
 extern "C" {
 #endif
-
-int flattop_s (float *Y, const size_t L, const size_t norm);
-int flattop_d (double *Y, const size_t L, const size_t norm);
-int flattop_c (float *Y, const size_t L, const size_t norm);
-int flattop_z (double *Y, const size_t L, const size_t norm);
 
 
 int flattop_s (float *Y, const size_t L, const size_t norm)

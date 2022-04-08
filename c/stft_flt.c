@@ -19,15 +19,13 @@
 #include <float.h>
 #include <math.h>
 #include <fftw3.h>
+#include "codee_dsp.h"
 //#include <time.h>
 
 #ifdef __cplusplus
 namespace codee {
 extern "C" {
 #endif
-
-int stft_flt_s (float *Y, const float *X1, const float *X2, const size_t N, const size_t L, const size_t W, const size_t nfft, const float c0, const float stp, const int mn0, const int amp, const int lg);
-int stft_flt_d (double *Y, const double *X1, const double *X2, const size_t N, const size_t L, const size_t W, const size_t nfft, const double c0, const double stp, const int mn0, const int amp, const int lg);
 
 
 int stft_flt_s (float *Y, const float *X1, const float *X2, const size_t N, const size_t L, const size_t W, const size_t nfft, const float c0, const float stp, const int mn0, const int amp, const int lg)

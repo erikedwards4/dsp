@@ -28,7 +28,7 @@ CFLAGS=$(WFLAG) $(STD) -O3 -ffast-math -march=native -mfpmath=sse -fPIC
 
 
 All: all
-all: Dirs Generate Transform Filter Conv Xcorr Interp ZCs_LCs AR_Poly Linear_Pred Frame STFT Wavelets Nonlinear Clean
+all: Dirs Generate Transform Filter Conv Xcorr Interp ZCs_LCs AR_Poly Linear_Pred Frame STFT Wavelets Nonlinear Lib Clean
 
 Dirs:
 	mkdir -pm 777 obj
@@ -154,7 +154,7 @@ conv1d_fft: conv1d_fft.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 
 
 #Xcorr: cross-correlation
-Conv: xcorr xcorr1 xcorr1d xcorr_fft  xcorr1d_fft
+Xcorr: xcorr xcorr1 xcorr1d xcorr_fft  xcorr1d_fft
 xcorr: xcorr.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 xcorr1: xcorr1.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 xcorr1d: xcorr1d.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
@@ -268,11 +268,14 @@ medfilt: medfilt.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 
 
 #If want to make a library archive for C++ use, this works with clang++
-#ar crs ../lib/libdsp.a obj/*.o
+Lib: lib
+lib:
+	ar crs ../lib/libdsp.a obj/*.o
+	gcc -shared -o ../lib/libdsp.so ../lib/libdsp.a
 
 
 #make clean
+#find ./obj -type f -name *.o | xargs rm -f
 Clean: clean
 clean:
-	find ./obj -type f -name *.o | xargs rm -f
 	rm -f *.s tmp.*

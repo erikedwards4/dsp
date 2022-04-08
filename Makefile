@@ -184,7 +184,6 @@ dst.fftw: srci/dst.fftw.cpp c/dst.fftw.c
 idst.fftw: srci/idst.fftw.cpp c/idst.fftw.c
 	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lfftw3f -lfftw3 -lm
 
-
 #Hilbert: Hilbert transform and related
 Hilbert: hilbert analytic_sig analytic_amp analytic_pow inst_phase inst_freq
 hilbert: srci/hilbert.cpp c/hilbert.c

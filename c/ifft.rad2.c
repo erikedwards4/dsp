@@ -13,6 +13,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include "codee_dsp.h"
 
 #ifndef M_PI
     #define M_PI 3.14159265358979323846
@@ -34,11 +35,6 @@ static void ifft_1d_s (float *Y, const size_t nfft, const size_t *bittbl, const 
 static void ifft_1d_d (double *Y, const size_t nfft, const size_t *bittbl, const double *cstbl);
 static void ifft_1d_c (float *Y, const size_t nfft, const size_t *bittbl, const float *cstbl);
 static void ifft_1d_z (double *Y, const size_t nfft, const size_t *bittbl, const double *cstbl);
-
-int ifft_rad2_s (float *Y, const float *X, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t dim, const size_t nfft, const int sc);
-int ifft_rad2_d (double *Y, const double *X, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t dim, const size_t nfft, const int sc);
-int ifft_rad2_c (float *Y, const float *X, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t dim, const size_t nfft, const int sc);
-int ifft_rad2_z (double *Y, const double *X, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t dim, const size_t nfft, const int sc);
 
 
 static void get_bittbl(size_t* bittbl, const size_t nfft)

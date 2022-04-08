@@ -14,16 +14,12 @@
 #include <stdio.h>
 #include <float.h>
 #include <math.h>
+#include "codee_dsp.h"
 
 #ifdef __cplusplus
 namespace codee {
 extern "C" {
 #endif
-
-int window_univar_flt_s (float *Y, const float *X1, const float *X2, const size_t N, const size_t L, const size_t W, const float c0, const float stp);
-int window_univar_flt_d (double *Y, const double *X1, const double *X2, const size_t N, const size_t L, const size_t W, const double c0, const double stp);
-int window_univar_flt_c (float *Y, const float *X1, const float *X2, const size_t N, const size_t L, const size_t W, const float c0, const float stp);
-int window_univar_flt_z (double *Y, const double *X1, const double *X2, const size_t N, const size_t L, const size_t W, const double c0, const double stp);
 
 
 int window_univar_flt_s (float *Y, const float *X1, const float *X2, const size_t N, const size_t L, const size_t W, const float c0, const float stp)

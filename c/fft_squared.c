@@ -8,14 +8,12 @@
 #include <stdio.h>
 #include <cblas.h>
 #include <fftw3.h>
+#include "codee_dsp.h"
 
 #ifdef __cplusplus
 namespace ov {
 extern "C" {
 #endif
-
-int fft_squared_s (float *Y, const float *X, const int iscolmajor, const int R, const int C, const int dim, const int nfft);
-int fft_squared_d (double *Y, const double *X, const int iscolmajor, const int R, const int C, const int dim, const int nfft);
 
 
 int fft_squared_s (float *Y, const float *X, const int iscolmajor, const int R, const int C, const int dim, const int nfft)

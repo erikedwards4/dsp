@@ -9,6 +9,7 @@
 //and the imaginary part is left at 0.
 
 #include <stdio.h>
+#include "codee_dsp.h"
 
 #ifdef __cplusplus
 namespace codee {

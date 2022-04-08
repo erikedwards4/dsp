@@ -8,16 +8,12 @@
 #include <stdio.h>
 #include <float.h>
 #include <math.h>
+#include "codee_dsp.h"
 
 #ifdef __cplusplus
 namespace codee {
 extern "C" {
 #endif
-
-int pow_compress_s (float *Y, const float *X, const size_t N, const float p, const float preg);
-int pow_compress_d (double *Y, const double *X, const size_t N, const double p, const double preg);
-int pow_compress_inplace_s (float *X, const size_t N, const float p, const float preg);
-int pow_compress_inplace_d (double*X, const size_t N, const double p, const double preg);
 
 
 int pow_compress_s (float *Y, const float *X, const size_t N, const float p, const float preg)

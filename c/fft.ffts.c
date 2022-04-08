@@ -48,17 +48,13 @@
 #include <stdlib.h>
 #include <math.h>
 #include "/usr/local/include/ffts/ffts.h"
+#include "codee_dsp.h"
 //#include <time.h>
 
 #ifdef __cplusplus
 namespace codee {
 extern "C" {
 #endif
-
-int fft_ffts_s (float *Y, const float *X, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t dim, const size_t nfft, const int sc);
-int fft_ffts_d (double *Y, const double *X, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t dim, const size_t nfft, const int sc);
-int fft_ffts_c (float *Y, const float *X, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t dim, const size_t nfft, const int sc);
-int fft_ffts_z (double *Y, const double *X, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t dim, const size_t nfft, const int sc);
 
 
 int fft_ffts_s (float *Y, const float *X, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t dim, const size_t nfft, const int sc)

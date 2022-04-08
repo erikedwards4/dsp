@@ -15,16 +15,12 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include "codee_dsp.h"
 
 #ifdef __cplusplus
 namespace codee {
 extern "C" {
 #endif
-
-int sig2ac_s (float *Y, float *X, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t dim, const size_t Ly, const int mnz, const int unbiased, const int corr);
-int sig2ac_d (double *Y, double *X, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t dim, const size_t Ly, const int mnz, const int unbiased, const int corr);
-int sig2ac_c (float *Y, float *X, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t dim, const size_t Ly, const int mnz, const int unbiased, const int corr);
-int sig2ac_z (double *Y, double *X, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t dim, const size_t Ly, const int mnz, const int unbiased, const int corr);
 
 
 int sig2ac_s (float *Y, float *X, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t dim, const size_t Ly, const int mnz, const int unbiased, const int corr)

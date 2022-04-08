@@ -2,16 +2,12 @@
 
 #include <stdio.h>
 #include <math.h>
+#include "codee_dsp.h"
 
 #ifdef __cplusplus
 namespace codee {
 extern "C" {
 #endif
-
-int planck_s (float *Y, const size_t L, const float epsilon, const size_t norm);
-int planck_d (double *Y, const size_t L, const double epsilon, const size_t norm);
-int planck_c (float *Y, const size_t L, const float epsilon, const size_t norm);
-int planck_z (double *Y, const size_t L, const double epsilon, const size_t norm);
 
 
 int planck_s (float *Y, const size_t L, const float epsilon, const size_t norm)

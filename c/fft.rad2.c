@@ -8,13 +8,14 @@
 
 //If sc, then scales Y by sqrt(0.5/n) so that invertible with ifft.
 
-//This uses the algorithm from Ch. 20 of Introduction to Algorithms [Cormen et al.].
+//This uses the algorithm from Ch. 20 of Introduction to Algorithms [Cormen et al. 2009].
 //This can be programmed from Ch. 12.2 of Numerical Recipes in C, 2nd Ed. [Press et al. 1992].
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
 #include <time.h>
+#include "codee_dsp.h"
 
 #ifndef M_PI
     #define M_PI 3.14159265358979323846
@@ -37,11 +38,6 @@ static void fft_1d_s (float *Y, const size_t nfft, const size_t *bittbl, const f
 static void fft_1d_d (double *Y, const size_t nfft, const size_t *bittbl, const double *cstbl);
 static void fft_1d_c (float *Y, const size_t nfft, const size_t *bittbl, const float *cstbl);
 static void fft_1d_z (double *Y, const size_t nfft, const size_t *bittbl, const double *cstbl);
-
-int fft_rad2_s (float *Y, const float *X, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t dim, const size_t nfft, const int sc);
-int fft_rad2_d (double *Y, const double *X, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t dim, const size_t nfft, const int sc);
-int fft_rad2_c (float *Y, const float *X, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t dim, const size_t nfft, const int sc);
-int fft_rad2_z (double *Y, const double *X, const size_t R, const size_t C, const size_t S, const size_t H, const int iscolmajor, const size_t dim, const size_t nfft, const int sc);
 
 
 static void get_bittbl (size_t* bittbl, const size_t nfft)
@@ -373,7 +369,7 @@ int fft_rad2_s (float *Y, const float *X, const size_t R, const size_t C, const 
     }
     else
     {
-        struct timespec tic, toc; clock_gettime(CLOCK_REALTIME,&tic);
+        //struct timespec tic, toc; clock_gettime(CLOCK_REALTIME,&tic);
 
         //Initialize FFT
         size_t *bittbl; float *cstbl, *Y1;
@@ -433,8 +429,8 @@ int fft_rad2_s (float *Y, const float *X, const size_t R, const size_t C, const 
         //Free
         free(bittbl); free(cstbl); free(Y1);
 
-        clock_gettime(CLOCK_REALTIME,&toc);
-        fprintf(stderr,"elapsed time = %.6f ms\n",(double)(toc.tv_sec-tic.tv_sec)*1e3+(double)(toc.tv_nsec-tic.tv_nsec)/1e6);
+        //clock_gettime(CLOCK_REALTIME,&toc);
+        //fprintf(stderr,"elapsed time = %.6f ms\n",(double)(toc.tv_sec-tic.tv_sec)*1e3+(double)(toc.tv_nsec-tic.tv_nsec)/1e6);
     }
 
     //Scale

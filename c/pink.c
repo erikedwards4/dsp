@@ -13,6 +13,7 @@
 #include <math.h>
 #include <fftw3.h>
 #include <time.h>
+#include "codee_dsp.h"
 
 #ifndef M_PI
     #define M_PI 3.14159265358979323846

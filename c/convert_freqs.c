@@ -4,14 +4,12 @@
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
+#include "codee_dsp.h"
 
 #ifdef __cplusplus
 namespace codee {
 extern "C" {
 #endif
-
-int convert_freqs_s (float *frqs, const size_t F, const char in_scale[], const char out_scale[]);
-int convert_freqs_d (double *frqs, const size_t F, const char in_scale[], const char out_scale[]);
 
 
 int convert_freqs_s (float *frqs, const size_t F, const char in_scale[], const char out_scale[])

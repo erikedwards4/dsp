@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <float.h>
 #include <math.h>
+#include "codee_dsp.h"
 
 #ifndef M_PI
     #define M_PI 3.14159265358979323846
@@ -35,11 +36,6 @@
 namespace codee {
 extern "C" {
 #endif
-
-int sawwave_s (float *Y, const size_t N, const float amp, const float frq, const float phs);
-int sawwave_d (double *Y, const size_t N, const double amp, const double frq, const double phs);
-int sawwave_c (float *Y, const size_t N, const float amp, const float frq, const float phs);
-int sawwave_z (double *Y, const size_t N, const double amp, const double frq, const double phs);
 
 
 int sawwave_s (float *Y, const size_t N, const float amp, const float frq, const float phs)

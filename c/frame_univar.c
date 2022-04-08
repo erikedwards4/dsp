@@ -26,16 +26,12 @@
 //For more flexibility, see also frame_univar_flt.c.
 
 #include <stdio.h>
+#include "codee_dsp.h"
 
 #ifdef __cplusplus
 namespace codee {
 extern "C" {
 #endif
-
-int frame_univar_s (float *Y, const float *X, const size_t N, const size_t L, const size_t stp, const int snip_edges);
-int frame_univar_d (double *Y, const double *X, const size_t N, const size_t L, const size_t stp, const int snip_edges);
-int frame_univar_c (float *Y, const float *X, const size_t N, const size_t L, const size_t stp, const int snip_edges);
-int frame_univar_z (double *Y, const double *X, const size_t N, const size_t L, const size_t stp, const int snip_edges);
 
 
 int frame_univar_s (float *Y, const float *X, const size_t N, const size_t L, const size_t stp, const int snip_edges)

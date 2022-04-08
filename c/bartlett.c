@@ -3,16 +3,12 @@
 
 #include <stdio.h>
 #include <math.h>
+#include "codee_dsp.h"
 
 #ifdef __cplusplus
 namespace codee {
 extern "C" {
 #endif
-
-int bartlett_s (float *Y, const size_t L, const size_t norm);
-int bartlett_d (double *Y, const size_t L, const size_t norm);
-int bartlett_c (float *Y, const size_t L, const size_t norm);
-int bartlett_z (double *Y, const size_t L, const size_t norm);
 
 
 int bartlett_s (float *Y, const size_t L, const size_t norm)

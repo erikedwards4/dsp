@@ -17,14 +17,12 @@
 //N is the (odd) filter-length, and n is the degree of the monomial (1+x+x^2+...+x^n).
 
 #include <stdio.h>
+#include "codee_dsp.h"
 
 #ifdef __cplusplus
 namespace codee {
 extern "C" {
 #endif
-
-int smooth_diff_s (float *Y, const size_t N, const size_t n);
-int smooth_diff_d (double *Y, const size_t N, const size_t n);
 
 
 int smooth_diff_s (float *Y, const size_t N, const size_t n)

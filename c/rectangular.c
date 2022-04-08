@@ -2,16 +2,12 @@
 
 #include <stdio.h>
 #include <math.h>
+#include "codee_dsp.h"
 
 #ifdef __cplusplus
 namespace codee {
 extern "C" {
 #endif
-
-int rectangular_s (float *Y, const size_t L, const size_t norm);
-int rectangular_d (double *Y, const size_t L, const size_t norm);
-int rectangular_c (float *Y, const size_t L, const size_t norm);
-int rectangular_z (double *Y, const size_t L, const size_t norm);
 
 
 int rectangular_s (float *Y, const size_t L, const size_t norm)

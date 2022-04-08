@@ -20,6 +20,7 @@
 #include <stdio.h>
 #include <math.h>
 #include <fftw3.h>
+#include "codee_dsp.h"
 
 #ifdef __cplusplus
 namespace codee {
